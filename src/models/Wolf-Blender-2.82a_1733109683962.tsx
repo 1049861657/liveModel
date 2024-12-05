@@ -36,8 +36,8 @@ type GLTFResult = GLTF & {
   animations: GLTFAction[]
 }
 
-export function Wolf-Blender-2.82a_1733109683962(props: JSX.IntrinsicElements['group']) {
-  const group = React.useRef<THREE.Group>()
+export function Model_1733109683962(props: JSX.IntrinsicElements['group']) {
+  const group = React.useRef<THREE.Group>(null)
   const { scene, animations } = useGLTF('/uploads/models/glb/Wolf-Blender-2.82a_1733109683962.glb')
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene])
   const { nodes, materials } = useGraph(clone) as GLTFResult

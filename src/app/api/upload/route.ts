@@ -178,6 +178,15 @@ export async function POST(request: Request) {
         await execAsync(command)
 
         let content = await readFile(outputPath, 'utf8')
+        
+        // 检查是否包含 ActionName 类型定义（判断是否有动画）
+        const hasAnimations = content.includes('type ActionName =')
+        
+        // 如果没有动画，移除动画相关的类型定义
+        if (!hasAnimations) {
+          content = content.replace(/\s+animations: GLTFAction\[\]/, '')
+        } 
+
         content = content
           .replace(
             `useGLTF('/${filename}')`,
@@ -193,7 +202,11 @@ export async function POST(request: Request) {
           )
           .replace(
             'export function Model',
-            `export function ${componentName}`
+            `export function Model_${timestamp}`
+          )
+          .replace(
+            `React.useRef<THREE.Group>()`,
+            `React.useRef<THREE.Group>(null)`
           )
         
         await writeFile(outputPath, content)

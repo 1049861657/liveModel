@@ -24,8 +24,8 @@ type GLTFResult = GLTF & {
   animations: GLTFAction[]
 }
 
-export function PPTer吧-3D动态矮人族GLB模型_1732614668978(props: JSX.IntrinsicElements['group']) {
-  const group = React.useRef<THREE.Group>()
+export function Model_1732614668978(props: JSX.IntrinsicElements['group']) {
+  const group = React.useRef<THREE.Group>(null)
   const { scene, animations } = useGLTF('/uploads/models/glb/PPTer吧-3D动态矮人族GLB模型_1732614668978.glb')
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene])
   const { nodes, materials } = useGraph(clone) as GLTFResult

@@ -9,7 +9,7 @@ title: Shiba
 import * as THREE from 'three'
 import React, { useRef } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -23,7 +23,7 @@ type GLTFResult = GLTF & {
 }
 
 export default function Model(props: JSX.IntrinsicElements['group']) {
-  const group = useRef<THREE.Group>()
+  const group = useRef<THREE.Group>(null)
   const { nodes, materials } = useGLTF('example/models/glb/shiba.glb') as GLTFResult
   return (
     <group ref={group} {...props} dispose={null}>

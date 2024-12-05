@@ -12,7 +12,7 @@ const nextConfig = {
       'scheduler/tracing': 'scheduler/tracing-profiling',
     }
     return config
-  },
+  }
 }
 
 module.exports = nextConfig 
