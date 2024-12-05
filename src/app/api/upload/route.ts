@@ -1,13 +1,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir, readFile } from 'fs/promises'
 import path from 'path'
 import { prisma } from '@/lib/db'
-import { exec } from 'child_process'
-import { promisify } from 'util'
-
-const execAsync = promisify(exec)
+import { ossClient } from '@/lib/oss'
 
 // 添加类型定义
 interface TextureInfo {
@@ -18,14 +14,11 @@ interface TextureInfo {
 
 // 添加处理 DAE 文件的函数
 async function updateDaeTextureReferences(
-  daeFilePath: string, 
+  daeContent: string,
   textures: TextureInfo[], 
   componentName: string
-): Promise<void> {
+): Promise<string> {
   try {
-    // 读取 DAE 文件内容
-    let content = await readFile(daeFilePath, 'utf8')
-    
     // 为每个贴图创建映射关系
     const textureMap = new Map<string, string>()
     textures.forEach(texture => {
@@ -38,7 +31,7 @@ async function updateDaeTextureReferences(
     })
 
     // 替换所有贴图引用
-    content = content.replace(
+    return daeContent.replace(
       /<init_from>\.(\/)?([^<]+)<\/init_from>/g,
       (match, slash, fileName) => {
         // 获取原始文件名
@@ -51,9 +44,6 @@ async function updateDaeTextureReferences(
         return match // 如果没找到对应的贴图，保持原样
       }
     )
-
-    // 写回文件
-    await writeFile(daeFilePath, content)
   } catch (error) {
     console.error('更新 DAE 贴图引用失败:', error)
     throw error
@@ -115,8 +105,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const bytes = await modelFile.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const modelBuffer = Buffer.from(await modelFile.arrayBuffer())
     
     // 生成基于文件名和时间戳的组件名
     const timestamp = Date.now()
@@ -125,35 +114,27 @@ export async function POST(request: Request) {
     const componentName = `${componentBaseName}_${timestamp}`
     const filename = `${componentName}${fileExt}`
     
-    // 根据文件类型选择保存路径
-    const baseUploadDir = path.join(process.cwd(), 'public', 'uploads', 'models')
-    const uploadDir = fileExt === '.dae' 
-      ? path.join(baseUploadDir, 'dae')
-      : path.join(baseUploadDir, 'glb')
-    
-    // 创建目录
-    await mkdir(uploadDir, { recursive: true })
-    const filepath = path.join(uploadDir, filename)
-    await writeFile(filepath, buffer)
+    // 上传模型文件到OSS
+    const modelOssPath = `models/${fileExt === '.dae' ? 'dae' : 'glb'}/${filename}`
+    const modelResult = await ossClient.put(modelOssPath, modelBuffer)
 
-    // 如果有贴图，创建贴图目录并保存贴图
+    // 处理贴图文件
     const texturePromises: Promise<TextureInfo>[] = []
     if (textureFiles.length > 0) {
-      const textureDir = path.join(uploadDir, componentName, 'textures')
-      await mkdir(textureDir, { recursive: true })
-
       for (const textureFile of textureFiles) {
         if (textureFile instanceof Blob) {
           const texturePromise = (async () => {
             const textureBuffer = Buffer.from(await textureFile.arrayBuffer())
             const textureName = 'name' in textureFile ? textureFile.name : `texture_${Date.now()}`
             const textureFilename = `${Date.now()}_${textureName}`
-            const texturePath = path.join(textureDir, textureFilename)
-            await writeFile(texturePath, textureBuffer)
+            const textureOssPath = `models/${fileExt === '.dae' ? 'dae' : 'glb'}/${componentName}/textures/${textureFilename}`
+            
+            // 上传贴图到OSS
+            const textureResult = await ossClient.put(textureOssPath, textureBuffer)
             
             return {
               name: textureName,
-              filePath: `/uploads/models/${fileExt === '.dae' ? 'dae' : 'glb'}/${componentName}/textures/${textureFilename}`,
+              filePath: textureResult.url,
               fileSize: textureFile.size
             }
           })()
@@ -162,57 +143,17 @@ export async function POST(request: Request) {
       }
     }
 
-    // 等待所有贴图保存完成
+    // 等待所有贴图上传完成
     const textures = await Promise.all(texturePromises)
 
     // 如果是 DAE 文件且有贴图，更新贴图引用
+    let finalModelBuffer = modelBuffer
     if (fileExt === '.dae' && textures.length > 0) {
-      await updateDaeTextureReferences(filepath, textures, componentName)
-    }
-
-    // 只为 GLB 文件生成组件
-    if (fileExt === '.glb') {
-      try {
-        const outputPath = path.join(process.cwd(), 'src', 'models', `${componentName}.tsx`)
-        const command = `npx gltfjsx "${filepath}" -t -o "${outputPath}"`
-        await execAsync(command)
-
-        let content = await readFile(outputPath, 'utf8')
-        
-        // 检查是否包含 ActionName 类型定义（判断是否有动画）
-        const hasAnimations = content.includes('type ActionName =')
-        
-        // 如果没有动画，移除动画相关的类型定义
-        if (!hasAnimations) {
-          content = content.replace(/\s+animations: GLTFAction\[\]/, '')
-        } 
-
-        content = content
-          .replace(
-            `useGLTF('/${filename}')`,
-            `useGLTF('/uploads/models/glb/${filename}')`
-          )
-          .replace(
-            `useGLTF.preload('/${filename}')`,
-            `useGLTF.preload('/uploads/models/glb/${filename}')`
-          )
-          .replace(
-            '/${filename}',
-            `'/uploads/models/glb/${filename}'`
-          )
-          .replace(
-            'export function Model',
-            `export function Model_${timestamp}`
-          )
-          .replace(
-            `React.useRef<THREE.Group>()`,
-            `React.useRef<THREE.Group>(null)`
-          )
-        
-        await writeFile(outputPath, content)
-      } catch (error) {
-        console.error('转换模型失败:', error)
-      }
+      const daeContent = modelBuffer.toString('utf8')
+      const updatedContent = await updateDaeTextureReferences(daeContent, textures, componentName)
+      finalModelBuffer = Buffer.from(updatedContent)
+      // 重新上传更新后的DAE文件
+      await ossClient.put(modelOssPath, finalModelBuffer)
     }
     
     // 使用事务保存模型和贴图信息
@@ -222,9 +163,7 @@ export async function POST(request: Request) {
         data: {
           name,
           description: description || null,
-          filePath: fileExt === '.dae'
-            ? `/uploads/models/dae/${filename}`
-            : `/uploads/models/glb/${filename}`,
+          filePath: modelResult.url,
           fileSize: modelFile.size,
           format: fileExt.replace('.', ''),
           userId: session.user.id,

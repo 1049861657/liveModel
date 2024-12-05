@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import ModelPreviewWrapper from '@/components/home/ModelPreviewWrapper'
 import { prisma } from '@/lib/db'
 
 // 在服务器端获取数据
@@ -50,13 +49,6 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">示例模型</h2>
-          <ModelPreviewWrapper initialModels={demoModels} />
         </div>
       </section>
 

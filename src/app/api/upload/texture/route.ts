@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir, readFile } from 'fs/promises'
 import path from 'path'
 import { prisma } from '@/lib/db'
+import { ossClient } from '@/lib/oss'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -63,33 +63,27 @@ export async function POST(request: Request) {
       )
     }
 
-    // 创建贴图保存目录
-    const baseUploadDir = path.join(process.cwd(), 'public', 'uploads', 'models')
-    const modelFormat = model.format // 'dae' 或 'glb'
-    const modelDir = path.join(baseUploadDir, modelFormat, model.componentName)
-    const textureDir = path.join(modelDir, 'textures')
-    await mkdir(textureDir, { recursive: true })
-
     // 保存贴图文件并记录信息
     const texturePromises = textureFiles.map(async (textureFile) => {
       if (textureFile instanceof Blob) {
         const textureBuffer = Buffer.from(await textureFile.arrayBuffer())
         const textureName = 'name' in textureFile ? textureFile.name : `texture_${Date.now()}`
         const textureFilename = `${Date.now()}_${textureName}`
-        const texturePath = path.join(textureDir, textureFilename)
+        const textureOssPath = `models/${model.format}/${model.componentName}/textures/${textureFilename}`
         
-        await writeFile(texturePath, textureBuffer)
+        // 上传贴图到OSS
+        const textureResult = await ossClient.put(textureOssPath, textureBuffer)
 
         return {
           name: textureName,
-          filePath: `/uploads/models/${modelFormat}/${model.componentName}/textures/${textureFilename}`,
+          filePath: textureResult.url,
           fileSize: textureFile.size,
           modelId: model.id
         }
       }
     })
 
-    // 等待所有贴图保存完成
+    // 等待所有贴图上传完成
     const textureInfos = await Promise.all(texturePromises)
 
     // 保存贴图记录到数据库
@@ -99,8 +93,23 @@ export async function POST(request: Request) {
 
     // 如果是DAE文件，需要更新贴图引用
     if (model.format === 'dae') {
-      const modelFilePath = path.join(process.cwd(), 'public', model.filePath)
-      await updateDaeTextureReferences(modelFilePath, textureInfos.filter(Boolean) as any[], model.componentName)
+      try {
+        // 从URL中提取OSS对象键
+        const ossKey = `models/${model.format}/${model.componentName}${path.extname(model.filePath)}`
+        
+        // 从OSS获取DAE文件内容
+        const modelResult = await ossClient.get(ossKey)
+        const daeContent = modelResult.content.toString('utf8')
+        
+        // 更新贴图引用
+        const updatedContent = await updateDaeTextureReferences(daeContent, textureInfos.filter(Boolean) as any[], model.componentName)
+        
+        // 将更新后的内容重新上传到OSS
+        await ossClient.put(ossKey, Buffer.from(updatedContent))
+      } catch (error) {
+        console.error('处理DAE文件失败:', error)
+        throw error
+      }
     }
 
     return NextResponse.json({ 
@@ -126,14 +135,11 @@ interface TextureInfo {
 
 // 更新DAE文件中的贴图引用
 async function updateDaeTextureReferences(
-  daeFilePath: string, 
+  daeContent: string, 
   textures: TextureInfo[], 
   componentName: string
-): Promise<void> {
+): Promise<string> {
   try {
-    // 读取DAE文件内容
-    let content = await readFile(daeFilePath, 'utf8')
-    
     // 为每个贴图创建映射关系
     const textureMap = new Map<string, string>()
     textures.forEach(texture => {
@@ -146,7 +152,7 @@ async function updateDaeTextureReferences(
     })
 
     // 替换所有贴图引用
-    content = content.replace(
+    return daeContent.replace(
       /<init_from>\.(\/)?([^<]+)<\/init_from>/g,
       (match: string, slash: string | undefined, fileName: string) => {
         // 获取原始文件名
@@ -159,9 +165,6 @@ async function updateDaeTextureReferences(
         return match // 如果没找到对应的贴图，保持原样
       }
     )
-
-    // 写回文件
-    await writeFile(daeFilePath, content)
   } catch (error) {
     console.error('更新DAE贴图引用失败:', error)
     throw error

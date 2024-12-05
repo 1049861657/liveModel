@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { unlink } from 'fs/promises'
 import path from 'path'
+import { ossClient } from '@/lib/oss'
 
 export async function DELETE(
   request: Request,
@@ -10,7 +10,10 @@ export async function DELETE(
   try {
     // 1. 获取动画信息
     const animation = await prisma.animation.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
+      include: {
+        model: true // 需要获取模型信息以构造正确的OSS路径
+      }
     })
 
     if (!animation) {
@@ -20,12 +23,12 @@ export async function DELETE(
       )
     }
 
-    // 2. 删除文件
-    const filePath = path.join(process.cwd(), 'public', animation.filePath)
+    // 2. 删除OSS文件
     try {
-      await unlink(filePath)
+      const animationOssKey = `models/${animation.model.format}/${animation.model.componentName}/animations/${path.basename(animation.filePath)}`
+      await ossClient.delete(animationOssKey)
     } catch (error) {
-      console.error('删除文件失败:', error)
+      console.error('删除OSS文件失败:', error)
       // 继续执行数据库删除操作
     }
 

@@ -8,19 +8,19 @@ export async function GET(request: Request) {
     return new NextResponse('Missing model path', { status: 400 })
   }
 
-  try {
-    modelPath = decodeURIComponent(decodeURIComponent(modelPath))
-  } catch (e) {
-    try {
-      modelPath = decodeURIComponent(modelPath)
-    } catch (e) {
-      return new NextResponse('Invalid URL encoding', { status: 400 })
-    }
-  }
+  // try {
+  //   modelPath = decodeURIComponent(decodeURIComponent(modelPath))
+  // } catch (e) {
+  //   try {
+  //     modelPath = decodeURIComponent(modelPath)
+  //   } catch (e) {
+  //     return new NextResponse('Invalid URL encoding', { status: 400 })
+  //   }
+  // }
 
-  if (!modelPath.startsWith('/uploads/')) {
-    return new NextResponse('Invalid model path', { status: 400 })
-  }
+  // if (!modelPath.startsWith('/uploads/')) {
+  //   return new NextResponse('Invalid model path', { status: 400 })
+  // }
 
   const html = `
     <!DOCTYPE html>

@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
-import { unlink, rm } from 'fs/promises'
 import path from 'path'
 import { prisma } from '@/lib/db'
+import { ossClient } from '@/lib/oss'
 
 export async function GET(
   request: Request,
@@ -119,73 +119,36 @@ export async function DELETE(
       )
     }
 
-    // 删除模型文件
-    const modelPath = path.join(
-      process.cwd(),
-      'public',
-      model.filePath
-    )
-
-    // 如果是 GLB 文件，删除生成的组件文件
-    const componentPath = model.format === 'glb' ? path.join(
-      process.cwd(),
-      'src',
-      'models',
-      `${model.componentName}.tsx`
-    ) : null
-
-    // 获取模型所在目录（用于删除贴图目录）
-    const modelDir = path.dirname(modelPath)
-    const texturesDir = path.join(modelDir, model.componentName, 'textures')
-    
-    // 获取动画所在目录（如果是 DAE 模型）
-    const animationsDir = model.format === 'dae' 
-      ? path.join(modelDir, 'smd')
-      : null
-
     try {
       // 1. 删除模型文件
-      await unlink(modelPath)
+      const modelOssKey = `models/${model.format}/${model.componentName}${path.extname(model.filePath)}`
+      await ossClient.delete(modelOssKey)
 
-      // 2. 删除组件文件（如果存在）
-      if (componentPath) {
-        try {
-          await unlink(componentPath)
-        } catch (error) {
-          console.error('删除组件文件失败:', error)
-        }
-      }
-
-      // 3. 删除贴图目录（如果存在）
+      // 2. 删除贴图文件
       if (model.textures.length > 0) {
-        try {
-          await rm(texturesDir, { recursive: true, force: true })
-          // 如果贴图目录的父目录为空，也删除它
-          const parentDir = path.dirname(texturesDir)
-          await rm(parentDir, { recursive: true, force: true }).catch(() => {})
-        } catch (error) {
-          console.error('删除贴图目录失败:', error)
-        }
+        const texturePromises = model.textures.map(texture => {
+          const textureOssKey = `models/${model.format}/${model.componentName}/textures/${path.basename(texture.filePath)}`
+          return ossClient.delete(textureOssKey).catch(err => {
+            console.error('删除贴图失败:', err)
+          })
+        })
+        await Promise.all(texturePromises)
       }
 
-      // 4. 删除动画文件（如果存在）
-      if (model.animations.length > 0 && animationsDir) {
-        for (const animation of model.animations) {
-          try {
-            const animationPath = path.join(
-              process.cwd(),
-              'public',
-              animation.filePath
-            )
-            await unlink(animationPath).catch(() => {})
-          } catch (error) {
-            console.error('删除动画文件失败:', error)
-          }
-        }
+      // 3. 删除动画文件
+      if (model.animations.length > 0) {
+        const animationPromises = model.animations.map(animation => {
+          const animationOssKey = `models/${model.format}/${model.componentName}/animations/${path.basename(animation.filePath)}`
+          return ossClient.delete(animationOssKey).catch(err => {
+            console.error('删除动画失败:', err)
+          })
+        })
+        await Promise.all(animationPromises)
       }
 
     } catch (error) {
-      console.error('删除文件失败:', error)
+      console.error('删除OSS文件失败:', error)
+      // 继续执行数据库删除操作
     }
 
     // 使用事务删除数据库记录

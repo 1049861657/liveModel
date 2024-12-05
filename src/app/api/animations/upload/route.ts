@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { prisma } from '@/lib/db'
+import { ossClient } from '@/lib/oss'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -63,24 +63,21 @@ export async function POST(request: Request) {
       )
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const buffer = Buffer.from(await file.arrayBuffer())
 
-    // 生成文件名
+    // 生成文件名和OSS路径
     const timestamp = Date.now()
     const filename = `${name}_${timestamp}.smd`
+    const ossPath = `models/${model.format}/${model.componentName}/animations/${filename}`
     
-    // 保存文件
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'models', 'dae', 'smd')
-    await mkdir(uploadDir, { recursive: true })
-    const filepath = path.join(uploadDir, filename)
-    await writeFile(filepath, buffer)
+    // 上传到OSS
+    const result = await ossClient.put(ossPath, buffer)
 
     // 保存到数据库
     const animation = await prisma.animation.create({
       data: {
         name,
-        filePath: `/uploads/models/dae/smd/${filename}`,
+        filePath: result.url,
         fileSize: file.size,
         modelId: model.id
       }

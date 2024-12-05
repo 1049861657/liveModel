@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
   webpack: (config) => {
