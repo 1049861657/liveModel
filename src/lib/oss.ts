@@ -6,4 +6,5 @@ export const ossClient = new OSS({
   accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
   accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
   bucket: process.env.OSS_BUCKET!,
+  secure: true, // 使用 HTTPS
 }) 
