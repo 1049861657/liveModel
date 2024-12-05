@@ -30,22 +30,22 @@
     "react-hot-toast": "^2.4.1",
     "three": "^0.159.0",
     "three-mesh-bvh": "^0.8.3",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/next-auth": "^3.15.0",
-    "@types/node": "^22.9.3",
+    "zod": "^3.23.8",
+    "@types/three": "^0.159.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "@types/three": "^0.159.0",
+    "@types/node": "^22.9.3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/next-auth": "^3.15.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
     "autoprefixer": "^10.4.16",
     "jsdom": "^25.0.1",
     "jsdom-global": "^3.0.2",
     "postcss": "^8.4.32",
     "prisma": "^5.7.0",
     "tailwindcss": "^3.3.6",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "ts-node": "^10.9.2"
   }
 }
