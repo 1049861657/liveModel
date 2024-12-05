@@ -55,9 +55,16 @@ export default async function PreviewPage({ params }: { params: { id: string } }
     notFound()
   }
 
+  // 检查文件类型
+  const isDAE = model.filePath.toLowerCase().endsWith('.dae')
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <PreviewDaeScene initialModel={model} />
+      {isDAE ? (
+        <PreviewDaeScene initialModel={model} />
+      ) : (
+        <PreviewScene initialModel={model} />
+      )}
     </div>
   )
 } 

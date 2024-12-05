@@ -12,7 +12,27 @@ declare module '@react-three/fiber' {
   export { useGraph } from '@react-three/fiber/dist/declarations/src/core/useGraph'
 }
 
-// 添加 GLTFLoader 类型声明
+// 添加 drei 的类型声明
+declare module '@react-three/drei' {
+  export function useAnimations<T = any>(
+    clips: THREE.AnimationClip[],
+    target?: React.RefObject<THREE.Object3D>
+  ): {
+    actions: { [key: string]: THREE.AnimationAction }
+    names: string[]
+    clips: THREE.AnimationClip[]
+  }
+
+  // 添加 useGLTF 的类型声明
+  export function useGLTF<T = any>(
+    path: string,
+    useDraco?: boolean | string,
+    useMeshOpt?: boolean,
+    extendLoader?: (loader: any) => void
+  ): T
+}
+
+// GLTFLoader 类型声明
 declare module 'three/examples/jsm/loaders/GLTFLoader' {
   import { Object3D, AnimationClip } from 'three'
   
