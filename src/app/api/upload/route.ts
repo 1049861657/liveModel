@@ -60,6 +60,9 @@ async function updateDaeTextureReferences(
   }
 }
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -245,11 +248,3 @@ export async function POST(request: Request) {
     )
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb'
-    }
-  }
-} 

@@ -5,6 +5,9 @@ import { writeFile, mkdir, readFile } from 'fs/promises'
 import path from 'path'
 import { prisma } from '@/lib/db'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -164,11 +167,3 @@ async function updateDaeTextureReferences(
     throw error
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb'
-    }
-  }
-} 

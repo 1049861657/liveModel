@@ -5,6 +5,9 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { prisma } from '@/lib/db'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -93,13 +96,5 @@ export async function POST(request: Request) {
       { error: '上传失败' },
       { status: 500 }
     )
-  }
-}
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb'
-    }
   }
 } 
