@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String
+  models    Model[]
+  favorites Favorite[]
+  points        Int       @default(0)     // 用户积分
+  checkIns      CheckIn[]                 // 关联签到记录
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  reviews     Review[]      // 用户发表的评价
+  replies     Reply[]       // 用户的回复
+  reviewLikes ReviewLike[]  // 用户点赞的评价
+}
+
+model Model {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  filePath      String
+  fileSize      Int
+  format        String
+  componentName String
+  isPublic      Boolean   @default(true)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  favorites     Favorite[]
+  reviews     Review[]      // 模型的评价
+  avgRating   Float?       // 平均评分
+  totalReviews Int         @default(0)  // 总评价数
+  textures    Texture[]
+  animations  Animation[]
+
+  @@index([userId])
+}
+
+model DemoModel {
+  id          String   @id @default(uuid())
+  name        String   // 模型名称
+  description String?  @db.Text  // 模型描述
+  isEnabled   Boolean  @default(true)  // 是否启用
+  order       Int      @default(0)  // 添加 order 字段
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  modelId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  model     Model    @relation(fields: [modelId], references: [id])
+
+  @@unique([userId, modelId])
+  @@index([userId])
+  @@index([modelId])
+} 
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  points    Int      // 本次签到获得的积分
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  // 确保用户每天只能签到一次
+  @@unique([userId, createdAt])
+}
+
+// 评价表
+model Review {
+  id        String   @id @default(cuid())
+  content   String   // 评价内容
+  rating    Int      // 评分 1-5
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联用户
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 关联模型
+  modelId   String
+  model     Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  // 点赞数
+  likes     Int      @default(0)
+  
+  // 评价的回复
+  replies   Reply[]
+
+  // 点赞记录
+  likedBy   ReviewLike[]
+
+  @@index([userId])
+  @@index([modelId])
+}
+
+// 评价回复表
+model Reply {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联用户
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 关联评价
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([reviewId])
+}
+
+// 评价点赞记录表
+model ReviewLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 关联用户
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 关联评价
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+  @@index([userId])
+  @@index([reviewId])
+}
+
+// 添加动画模型
+model Animation {
+  id        String   @id @default(cuid())
+  name      String
+  filePath  String
+  fileSize  Int
+  modelId   String
+  model     Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([modelId])
+}
+
+// 添加贴图模型
+model Texture {
+  id        String   @id @default(cuid())
+  name      String
+  filePath  String
+  fileSize  Int
+  modelId   String
+  model     Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([modelId])
+}
