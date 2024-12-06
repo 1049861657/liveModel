@@ -9,6 +9,7 @@
     "lint": "next lint",
     "ws": "tsx src/server/websocket.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run ws\"",
+    "prod:build": "npx prisma generate && next build",
     "prod:all": "concurrently \"npm run start\" \"npm run ws\""
   },
   "dependencies": {
