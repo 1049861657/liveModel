@@ -1,26 +1,6 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/db'
-
-// 在服务器端获取数据
-async function getDemoModels() {
-  const demoModels = await prisma.demoModel.findMany({
-    where: {
-      isEnabled: true
-    },
-    orderBy: {
-      order: 'asc'
-    },
-    select: {
-      id: true,
-      name: true
-    }
-  })
-  return demoModels
-}
 
 export default async function Home() {
-  // 在服务器端预加载数据
-  const demoModels = await getDemoModels()
 
   return (
     <div className="min-h-screen bg-gray-50">

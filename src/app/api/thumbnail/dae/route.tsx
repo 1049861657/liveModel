@@ -96,16 +96,17 @@ export async function GET(request: Request) {
 
         <canvas id="canvas"></canvas>
 
-        <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+        <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
         <script type="importmap">
         {
           "imports": {
-            "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
-            "three/examples/jsm/loaders/ColladaLoader": "https://unpkg.com/three@0.159.0/examples/jsm/loaders/ColladaLoader.js",
-            "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.159.0/examples/jsm/controls/OrbitControls.js"
+            "three": "https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.module.js",
+            "three/examples/jsm/loaders/ColladaLoader": "https://cdn.jsdelivr.net/npm/three@0.159.0/examples/jsm/loaders/ColladaLoader.js",
+            "three/examples/jsm/controls/OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.159.0/examples/jsm/controls/OrbitControls.js"
           }
         }
         </script>
+        <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.module.js">
 
         <script type="module">
           import * as THREE from 'three';

@@ -21,41 +21,30 @@ model User {
   reviews     Review[]      // 用户发表的评价
   replies     Reply[]       // 用户的回复
   reviewLikes ReviewLike[]  // 用户点赞的评价
+  chatMessages  ChatMessage[]  // 保留聊天消息关系
 }
 
 model Model {
   id            String    @id @default(cuid())
   name          String
-  description   String?
+  description   String?   @db.Text
   filePath      String
   fileSize      Int
   format        String
-  componentName String
+  componentName String?
   isPublic      Boolean   @default(true)
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  reviews       Review[]
+  animations    Animation[]
+  textures      Texture[]
   favorites     Favorite[]
-  reviews     Review[]      // 模型的评价
-  avgRating   Float?       // 平均评分
-  totalReviews Int         @default(0)  // 总评价数
-  textures    Texture[]
-  animations  Animation[]
+  totalReviews  Int       @default(0)
+  avgRating     Float?    
 
   @@index([userId])
-}
-
-model DemoModel {
-  id          String   @id @default(uuid())
-  name        String   // 模型名称
-  description String?  @db.Text  // 模型描述
-  isEnabled   Boolean  @default(true)  // 是否启用
-  order       Int      @default(0)  // 添加 order 字段
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([order])
 }
 
 model Favorite {
@@ -175,4 +164,17 @@ model Texture {
   updatedAt DateTime @updatedAt
 
   @@index([modelId])
+}
+
+// 聊天消息表
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String   @db.Text  // 消息内容，使用 Text 类型支持长文本
+  type      String   @default("text") // 消息类型：text/image
+  userId    String   // 发送者ID
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
 }

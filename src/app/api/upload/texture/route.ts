@@ -94,6 +94,10 @@ export async function POST(request: Request) {
     // 如果是DAE文件，需要更新贴图引用
     if (model.format === 'dae') {
       try {
+        if (!model.componentName) {
+          throw new Error('Component name is required for DAE files')
+        }
+        
         // 从URL中提取OSS对象键
         const ossKey = `models/${model.format}/${model.componentName}${path.extname(model.filePath)}`
         

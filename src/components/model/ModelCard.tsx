@@ -868,11 +868,6 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                 <div className="sticky top-0 z-10 flex items-center justify-between px-8 py-5 bg-white border-b">
                   <div>
                     <h3 className="text-xl font-medium">评价</h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {model._count?.reviews 
-                        ? `共 ${model._count.reviews} 条评价` 
-                        : '暂无评价'}
-                    </p>
                   </div>
                   <button
                     onClick={() => setShowReviews(false)}
