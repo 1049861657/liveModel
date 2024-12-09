@@ -81,7 +81,7 @@ export default function ChatPage() {
     return groups;
   }, [messages]);
 
-  // 检查是否需要自动滚���
+  // 检查是否需要自动滚动
   const checkShouldAutoScroll = () => {
     const container = messageContainerRef.current
     if (!container) return
@@ -169,8 +169,11 @@ export default function ChatPage() {
     const initialDelay = 500
 
     const connectWebSocket = () => {
+      // 根据环境使用不同的 WebSocket URL
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 
-        `ws://${window.location.hostname}:3001`
+        (process.env.NODE_ENV === 'production'
+          ? `wss://${window.location.host}`  // 使用相同的域名
+          : 'ws://localhost:3001')
       
       console.log('正在连接到WebSocket服务器:', wsUrl)
       
@@ -226,7 +229,7 @@ export default function ChatPage() {
                 return [...filtered, message]
               })
 
-              // 如果是自己发的消息，��定滚动
+              // 如果是自己发的消息，固定滚动
               if (message.user?.id === session?.user?.id) {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
               } else {

@@ -17,12 +17,6 @@ interface AuthMessage {
   };
 }
 
-const server = createServer()
-const wss = new WebSocketServer({ server })
-
-// 存储所有连接的客户端
-const clients = new Map<string, WebSocketClient>()
-
 // 广播在线用户数
 function broadcastOnlineUsers() {
   const onlineCount = clients.size
@@ -73,6 +67,13 @@ async function authenticateUser(userData: AuthMessage['user']): Promise<boolean>
     return false
   }
 }
+
+// 存储所有连接的客户端
+const clients = new Map<string, WebSocketClient>()
+
+// 开发环境继续使用普通的 ws
+const server = createServer()
+const wss = new WebSocketServer({ server })
 
 wss.on('connection', async (ws: WebSocketClient) => {
   console.log('新的WebSocket连接请求')
@@ -183,7 +184,7 @@ wss.on('connection', async (ws: WebSocketClient) => {
 })
 
 // 启动服务器
-const PORT = process.env.WS_PORT || 3001
+const PORT = process.env.PORT || 3001  // Render 会提供 PORT 环境变量
 server.listen(PORT, () => {
   console.log(`WebSocket 服务器运行在端口 ${PORT}`)
 })
