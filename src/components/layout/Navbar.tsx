@@ -4,12 +4,14 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
   const { data: session } = useSession()
   const [showDropdown, setShowDropdown] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { scrollY } = useScroll()
+  const pathname = usePathname()
 
   // 监听滚动
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -160,7 +162,7 @@ export default function Navbar() {
               ) : (
                 <div className="flex items-center space-x-3">
                   <Link
-                    href="/login"
+                    href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}
                     className={`px-4 py-2 rounded-lg transition-colors ${
                       isScrolled ? 'text-gray-600 hover:text-gray-900' : 'text-white/90 hover:text-white'
                     }`}

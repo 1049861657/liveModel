@@ -43,7 +43,11 @@ export async function POST(
         })
       ])
 
-      return NextResponse.json({ message: '已取消点赞' })
+      return NextResponse.json({ 
+        message: '取消点赞',
+        isLiked: false,
+        action: 'unlike'
+      })
     } else {
       // 添加点赞
       await prisma.$transaction([
@@ -59,7 +63,11 @@ export async function POST(
         })
       ])
 
-      return NextResponse.json({ message: '点赞成功' })
+      return NextResponse.json({ 
+        message: '点赞成功',
+        isLiked: true,
+        action: 'like'
+      })
     }
   } catch (error) {
     console.error('点赞操作失败:', error)

@@ -121,7 +121,7 @@ export default function ChatPage() {
     };
   }, [session?.user]);
 
-  // 加载消息
+  // 加载���息
   const fetchMessages = async () => {
     try {
       const data = await chatService.fetchMessages();
@@ -353,7 +353,7 @@ export default function ChatPage() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <a
-                    href="/login"
+                    href={`/login?callbackUrl=chat`}
                     className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 transition-all duration-200"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

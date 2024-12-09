@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef, Suspense } from 'react'
+import { useState, useRef, Suspense, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import AuthForm from '@/components/ui/AuthForm'
 import { motion } from 'framer-motion'
@@ -151,7 +151,11 @@ function LoginScene() {
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
+
+  // 获取回调URL，如果没有则默认为首页
+  const callbackUrl = searchParams.get('callbackUrl') || '/'
 
   async function onSubmit(data: { email: string; password: string }) {
     setLoading(true)
@@ -170,7 +174,7 @@ export default function LoginPage() {
         }
       } else {
         toast.success('登录成功')
-        router.push('/models')
+        router.push(callbackUrl)
         router.refresh()
       }
     } catch (error) {
