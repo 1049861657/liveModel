@@ -172,7 +172,7 @@ export default function ChatPage() {
       // 根据环境使用不同的 WebSocket URL
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 
         (process.env.NODE_ENV === 'production'
-          ? `wss://${window.location.host}`  // 使用相同的域名
+          ? `wss://${window.location.hostname}:3001`  // 使用路径来区分
           : 'ws://localhost:3001')
       
       console.log('正在连接到WebSocket服务器:', wsUrl)

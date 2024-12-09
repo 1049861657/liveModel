@@ -184,7 +184,7 @@ wss.on('connection', async (ws: WebSocketClient) => {
 })
 
 // 启动服务器
-const PORT = process.env.PORT || 3001  // Render 会提供 PORT 环境变量
+const PORT = process.env.WS_PORT || 3001  // 使用不同的环境变量和默认端口
 server.listen(PORT, () => {
   console.log(`WebSocket 服务器运行在端口 ${PORT}`)
 })
