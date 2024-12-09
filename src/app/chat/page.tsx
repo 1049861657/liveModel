@@ -5,19 +5,7 @@ import { useSession } from 'next-auth/react'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
-
-interface ChatMessage {
-  id: string
-  content: string
-  type: 'text' | 'image'
-  createdAt: Date
-  user: {
-    id: string
-    name: string | null
-    email: string
-  }
-  isLoading?: boolean
-}
+import chatService, { ChatMessage } from '@/services/ChatService'
 
 interface GroupedMessage {
   id: string;
@@ -34,7 +22,6 @@ export default function ChatPage() {
   const [showWelcome, setShowWelcome] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messageContainerRef = useRef<HTMLDivElement>(null)
-  const ws = useRef<WebSocket | null>(null)
   const [onlineUsers, setOnlineUsers] = useState(0)
 
   // 检查是否可以发送消息
@@ -49,9 +36,8 @@ export default function ChatPage() {
 
     messages.forEach((message, index) => {
       const messageTime = new Date(message.createdAt);
-      const timeDiff = (messageTime.getTime() - lastTime.getTime()) / (1000 * 60); // 转换为分钟
+      const timeDiff = (messageTime.getTime() - lastTime.getTime()) / (1000 * 60);
 
-      // 如果是新用户或者时间间隔超过5分钟，创建新组
       if (message.user.id !== lastUserId || timeDiff > 5) {
         if (currentGroup.length > 0) {
           groups.push({
@@ -65,12 +51,11 @@ export default function ChatPage() {
         currentGroup.push(message);
       }
 
-      // 处理最后一条消息
       if (index === messages.length - 1) {
         groups.push({
           id: currentGroup[0].id,
           messages: currentGroup,
-          showTime: index === 0 || timeDiff > 5 // 确保第一组消息显示时间
+          showTime: index === 0 || timeDiff > 5
         });
       }
 
@@ -95,201 +80,90 @@ export default function ChatPage() {
 
   // 滚动到底部
   const scrollToBottom = () => {
-    if (!autoScroll) {
-      return
-    }
+    if (!autoScroll) return
     messagesEndRef.current?.scrollIntoView({ 
       behavior: 'smooth',
       block: 'end'
     })
   }
 
+  // 连接聊天服务
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    chatService.connect({
+      id: session.user.id,
+      name: session.user.name ?? null,
+      email: session.user.email ?? ''
+    });
+
+    const unsubscribeMessage = chatService.onMessage((newMsg) => {
+      setMessages(prev => {
+        const filtered = prev.filter(m => !m.isLoading);
+        const exists = filtered.some(m => m.id === newMsg.id);
+        if (exists) return filtered;
+        return [...filtered, newMsg];
+      });
+
+      if (newMsg.user.id === session.user.id || autoScroll) {
+        setTimeout(scrollToBottom, 50);
+      }
+    });
+
+    const unsubscribeOnline = chatService.onOnlineCount((count) => {
+      setOnlineUsers(count);
+    });
+
+    return () => {
+      unsubscribeMessage();
+      unsubscribeOnline();
+      chatService.disconnect();
+    };
+  }, [session?.user]);
+
   // 加载消息
   const fetchMessages = async () => {
     try {
-      const response = await fetch('/api/chat/messages')
-      if (!response.ok) throw new Error('获取消息失败')
-      const data = await response.json()
-      setMessages(data.messages)
-      setTimeout(scrollToBottom, 100) // 等待DOM更新后滚动
+      const data = await chatService.fetchMessages();
+      setMessages(data);
+      setTimeout(scrollToBottom, 100);
     } catch (error) {
-      console.error('获取消息失败:', error)
-      toast.error('获取消息失败')
+      console.error('获取消息失败:', error);
+      toast.error('获取消息失败');
     }
-  }
+  };
 
   // 发送消息
   const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!session) {
-      toast.error('请登录')
-      return
-    }
-    if (!newMessage.trim()) return
-    setLoading(true)
+    e.preventDefault();
+    if (!session?.user?.id || !canSendMessage) return;
+    
+    const tempMessage: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      content: newMessage.trim(),
+      type: 'text',
+      createdAt: new Date(),
+      user: {
+        id: session.user.id,
+        name: session.user.name ?? null,
+        email: session.user.email ?? ''
+      },
+      isLoading: true
+    };
+
+    setMessages(prev => [...prev, tempMessage]);
+    setNewMessage('');
+    setAutoScroll(true);
+    setTimeout(scrollToBottom, 50);
 
     try {
-      // 创建一个临时的加载状态消息
-      const tempMessage: ChatMessage = {
-        id: `temp-${Date.now()}`,
-        content: newMessage.trim(),
-        type: 'text',
-        createdAt: new Date(),
-        user: {
-          id: session.user.id,
-          name: session.user.name ?? null,
-          email: session.user.email!
-        },
-        isLoading: true
-      }
-
-      // 添加临时消息到消息列表
-      setMessages(prev => [...prev, tempMessage])
-      setNewMessage('')
-      setAutoScroll(true)
-      setTimeout(scrollToBottom, 50)
-
-      // 发送消息
-      ws.current?.send(JSON.stringify({
-        type: 'text',
-        content: tempMessage.content
-      }))
+      await chatService.sendMessage(tempMessage.content);
+      setMessages(prev => prev.filter(msg => msg.id !== tempMessage.id));
     } catch (error) {
-      toast.error('发送失败')
-    } finally {
-      setLoading(false)
+      toast.error('发送失败');
+      setMessages(prev => prev.filter(msg => !msg.isLoading));
     }
-  }
-
-  // WebSocket 连接
-  useEffect(() => {
-    let retryCount = 0
-    const maxRetries = 3
-    const retryDelay = 1000
-    const initialDelay = 500
-
-    const connectWebSocket = () => {
-      // 根据环境使用不同的 WebSocket URL
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 
-        (process.env.NODE_ENV === 'production'
-          ? `wss://${window.location.hostname}:3001`  // 使用路径来区分
-          : 'ws://localhost:3001')
-      
-      console.log('正在连接到WebSocket服务器:', wsUrl)
-      
-      const checkServerAndConnect = () => {
-        try {
-          const socket = new WebSocket(wsUrl)
-          ws.current = socket
-
-          socket.onopen = () => {
-            console.log('WebSocket 连接成功，发送认证消息')
-            
-            if (!session?.user?.email) {
-              console.error('未找到用户信息')
-              toast.error('会话已过期，请重新登录')
-              socket.close()
-              return
-            }
-
-            const authMessage = {
-              type: 'auth',
-              user: {
-                id: session.user.id,
-                email: session.user.email,
-                name: session.user.name
-              }
-            }
-            socket.send(JSON.stringify(authMessage))
-          }
-
-          socket.onmessage = (event) => {
-            try {
-              const message = JSON.parse(event.data)
-              if (message.type === 'auth_result') {
-                if (message.success) {
-                  retryCount = 0
-                  if (message.onlineUsers) {
-                    setOnlineUsers(message.onlineUsers)
-                  }
-                } else {
-                  toast.error('聊天室连接失败，请重新登录')
-                  socket.close()
-                }
-                return
-              }
-              if (message.type === 'online_users') {
-                setOnlineUsers(message.count)
-                return
-              }
-
-              // 立即移除所有加载状态的消息并添加新消息
-              setMessages(prev => {
-                const filtered = prev.filter(m => !m.isLoading)
-                return [...filtered, message]
-              })
-
-              // 如果是自己发的消息，固定滚动
-              if (message.user?.id === session?.user?.id) {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
-              } else {
-                // 如果是别人的消息，检查滚动条是否在底部
-                const container = messageContainerRef.current
-                if (container) {
-                  const { scrollTop, scrollHeight, clientHeight } = container
-                  const isAtBottom = (scrollHeight - clientHeight - scrollTop) <= 50
-                  if (isAtBottom) {
-                    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
-                  }
-                }
-              }
-            } catch (error) {
-              console.error('解析消息失败:', error)
-            }
-          }
-
-          socket.onerror = (error) => {
-            console.error('WebSocket 错误:', error)
-            if (retryCount < maxRetries) {
-              retryCount++
-              setTimeout(connectWebSocket, retryDelay)
-            } else {
-              toast.error('连接失败，请检查网络后刷新重试')
-            }
-          }
-
-          socket.onclose = (event) => {
-            if (retryCount < maxRetries && event.code !== 1000) {
-              retryCount++
-              setTimeout(connectWebSocket, retryDelay)
-            }
-          }
-        } catch (error) {
-          console.error('创建 WebSocket 连接失败:', error)
-          toast.error('创建连接失败，请检查网络设置')
-        }
-      }
-
-      if (retryCount === 0) {
-        setTimeout(checkServerAndConnect, initialDelay)
-      } else {
-        checkServerAndConnect()
-      }
-    }
-
-    if (session?.user) {
-      console.log('用户已登录，开始连接 WebSocket')
-      connectWebSocket()
-    } else {
-      console.log('用户未登录，不连接 WebSocket')
-    }
-
-    return () => {
-      if (ws.current) {
-        ws.current.close()
-      }
-    }
-  }, [session])
+  };
 
   // 初始加载消息
   useEffect(() => {
@@ -298,6 +172,7 @@ export default function ChatPage() {
     }
   }, [session])
 
+  // 组件UI部分保持不变
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
       {/* 背景装饰 */}
@@ -310,7 +185,7 @@ export default function ChatPage() {
         {/* 装饰图案 */}
         <div className="absolute inset-0 opacity-[0.015]" 
           style={{ 
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
             backgroundSize: '60px 60px'
           }}>
         </div>
@@ -342,7 +217,7 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              {/* 聊天介绍 - 添加关闭功能 */}
+              {/* 聊天介绍 */}
               {showWelcome && (
                 <div className="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-3 text-sm text-gray-600 border-b border-purple-100/20 relative">
                   <div className="flex items-center pr-8">
@@ -391,10 +266,10 @@ export default function ChatPage() {
                         group.messages[0].user.id === session?.user?.id ? 'flex-row-reverse space-x-reverse' : ''
                       }`}>
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-sm">
-                          {group.messages[0].user.name?.[0] || group.messages[0].user.email[0]}
+                          {group.messages[0].user.name?.[0] || group.messages[0].user.email?.[0] || '?'}
                         </div>
                         <span className="text-sm font-medium text-gray-700">
-                          {group.messages[0].user.name || '用户'}
+                          {group.messages[0].user.name ?? '用户'}
                         </span>
                       </div>
 

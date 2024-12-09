@@ -6,11 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "ws": "tsx src/server/websocket.ts",
-    "dev:all": "concurrently \"npm run dev\" \"npm run ws\"",
-    "prod:build": "npx prisma generate && next build",
-    "prod:all": "concurrently \"npm run start\" \"npm run ws\""
+    "lint": "next lint"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -27,13 +23,13 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/three": "^0.159.0",
-    "@types/ws": "^8.5.13",
     "ali-oss": "^6.22.0",
     "bcryptjs": "^2.4.3",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "framer-motion": "^11.12.0",
     "gltfjsx": "^6.5.3",
+    "goeasy": "^2.13.8",
     "next": "14.2",
     "puppeteer": "^23.9.0",
     "react": "^18.2.0",
@@ -44,8 +40,9 @@
     "three": "^0.159.0",
     "three-mesh-bvh": "^0.8.3",
     "typescript": "^5.3.3",
-    "ws": "^8.18.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "prisma": "^6.0.1"
+
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
@@ -54,7 +51,6 @@
     "jsdom": "^25.0.1",
     "jsdom-global": "^3.0.2",
     "postcss": "^8.4.32",
-    "prisma": "^5.7.0",
     "tailwindcss": "^3.3.6",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2"
