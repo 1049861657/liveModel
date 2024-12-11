@@ -3,8 +3,12 @@ import { type Model as PrismaModel } from '@prisma/client'
 export interface ExtendedModel extends PrismaModel {
   isFavorited?: boolean
   user?: {
+    id: string
     name: string | null
     email: string
+    avatar?: {
+      url: string
+    } | null
   }
   _count?: {
     favorites: number

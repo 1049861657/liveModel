@@ -5,6 +5,9 @@ export interface ChatUser {
   id: string;
   name: string | null | undefined;
   email: string | null | undefined;
+  avatar?: {
+    url: string;
+  } | null;
 }
 
 export interface ChatMessage {

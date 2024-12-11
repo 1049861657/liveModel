@@ -22,6 +22,11 @@ model User {
   replies     Reply[]       // 用户的回复
   reviewLikes ReviewLike[]  // 用户点赞的评价
   chatMessages  ChatMessage[]  // 保留聊天消息关系
+  avatarId  String?  @unique  // 头像图片ID
+  avatar    Image?   @relation("UserAvatar", fields: [avatarId], references: [id])
+  images    Image[]  @relation("UserImages")
+
+  @@index([avatarId])
 }
 
 model Model {
@@ -68,7 +73,7 @@ model CheckIn {
   createdAt DateTime @default(now())
 
   @@index([userId])
-  // 确保用户每天只能签到一次
+  // 确保用户每天只签到一次
   @@unique([userId, createdAt])
 }
 
@@ -169,12 +174,40 @@ model Texture {
 // 聊天消息表
 model ChatMessage {
   id        String   @id @default(cuid())
-  content   String   @db.Text  // 消息内容，使用 Text 类型支持长文本
+  content   String   @db.Text  // 消息内容
   type      String   @default("text") // 消息类型：text/image
   userId    String   // 发送者ID
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+  
+  // 图片关联
+  image     Image?   @relation("MessageImage")
 
   @@index([createdAt])
   @@index([userId])
+}
+
+// 添加图片表
+model Image {
+  id        String   @id @default(cuid())
+  name      String   // 原始文件名
+  url       String   // OSS URL
+  size      Int     // 文件大小(字节)
+  type      String  // 图片类型: avatar/chat/other
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 关联上传者
+  userId    String   // 上传者ID
+  user      User     @relation("UserImages", fields: [userId], references: [id])
+  
+  // 头像关联(可选)
+  avatarUser User?   @relation("UserAvatar")
+  
+  // 聊天消息关联(可选)
+  chatMessageId String? @unique
+  chatMessage   ChatMessage? @relation("MessageImage", fields: [chatMessageId], references: [id])
+
+  @@index([userId])
+  @@index([type])
 }

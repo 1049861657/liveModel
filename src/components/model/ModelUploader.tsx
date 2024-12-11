@@ -69,7 +69,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
         formData.append(`texture_${index}`, texture)
       })
 
-      const uploadResponse = await fetch('/api/upload', {
+      const uploadResponse = await fetch('/api/upload/model', {
         method: 'POST',
         body: formData,
       })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, memo, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -9,6 +9,7 @@ import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { useRouter } from 'next/navigation'
+import Avatar from '@/components/ui/Avatar'
 
 interface Review {
   id: string
@@ -485,9 +486,7 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
       {/* 评价头部 */}
       <div className="flex justify-between items-start">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium">
-            {review.user.name?.[0] || review.user.email[0]}
-          </div>
+          <Avatar user={review.user} size="md" />
           <div>
             <p className="font-medium text-gray-900">{review.user.name || '用户'}</p>
             <p className="text-sm text-gray-500">
@@ -775,7 +774,7 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
         title={deleteTarget?.type === 'review' ? '删除评价' : '删除回复'}
         message={deleteTarget?.type === 'review' 
           ? '确定要删除这条评价吗？此操作无法撤销。'
-          : '确定要删除这条回复吗？此操作无法撤销。'
+          : '确定要删除这条回复吗？此���作无法撤销。'
         }
         confirmText="确认删除"
         type="danger"

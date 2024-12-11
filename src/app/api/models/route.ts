@@ -49,6 +49,11 @@ export async function GET(request: Request) {
           select: {
             name: true,
             email: true,
+            avatar: {
+              select: {
+                url: true
+              }
+            }
           }
         },
         _count: {

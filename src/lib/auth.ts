@@ -20,6 +20,9 @@ export const authOptions: NextAuthOptions = {
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email
+            },
+            include: {
+              avatar: true
             }
           })
 
@@ -39,7 +42,8 @@ export const authOptions: NextAuthOptions = {
           return {
             id: user.id,
             email: user.email,
-            name: user.name
+            name: user.name,
+            avatar: user.avatar
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -56,19 +60,25 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger, session }) {
       if (trigger === "update" && session?.user) {
         token.name = session.user.name
+        token.avatar = session.user.avatar
       }
       if (user) {
         token.id = user.id
         token.email = user.email
         token.name = user.name
+        token.avatar = user.avatar
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
+        const fullUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          include: { avatar: true }
+        })
+
         session.user.id = token.id as string
-        session.user.email = token.email as string
-        session.user.name = token.name as string
+        session.user.avatar = fullUser?.avatar || null
       }
       return session
     }

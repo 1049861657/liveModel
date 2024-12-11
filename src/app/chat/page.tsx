@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import chatService, { ChatMessage } from '@/services/ChatService'
+import Avatar from '@/components/ui/Avatar'
 
 interface GroupedMessage {
   id: string;
@@ -94,7 +95,8 @@ export default function ChatPage() {
     chatService.connect({
       id: session.user.id,
       name: session.user.name ?? null,
-      email: session.user.email ?? ''
+      email: session.user.email ?? '',
+      avatar: session.user.avatar
     });
 
     const unsubscribeMessage = chatService.onMessage((newMsg) => {
@@ -121,7 +123,7 @@ export default function ChatPage() {
     };
   }, [session?.user]);
 
-  // 加载���息
+  // 加载消息
   const fetchMessages = async () => {
     try {
       const data = await chatService.fetchMessages();
@@ -146,7 +148,8 @@ export default function ChatPage() {
       user: {
         id: session.user.id,
         name: session.user.name ?? null,
-        email: session.user.email ?? ''
+        email: session.user.email ?? '',
+        avatar: session.user.avatar
       },
       isLoading: true
     };
@@ -265,9 +268,7 @@ export default function ChatPage() {
                       <div className={`flex items-center space-x-2 mb-1 ${
                         group.messages[0].user.id === session?.user?.id ? 'flex-row-reverse space-x-reverse' : ''
                       }`}>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-sm">
-                          {group.messages[0].user.name?.[0] || group.messages[0].user.email?.[0] || '?'}
-                        </div>
+                        <Avatar user={group.messages[0].user} size="sm" />
                         <span className="text-sm font-medium text-gray-700">
                           {group.messages[0].user.name ?? '用户'}
                         </span>
@@ -346,7 +347,7 @@ export default function ChatPage() {
                   欢迎来到世界聊天室
                 </h3>
                 <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-                  登录后即可与其他创作者交流，分享你的想法和作品
+                  登录后即可与其他作者交流，分享你的想法和作品
                 </p>
                 <motion.div
                   whileHover={{ scale: 1.02 }}

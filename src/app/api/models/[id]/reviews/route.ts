@@ -37,7 +37,8 @@ export async function GET(
             select: {
               id: true,
               name: true,
-              email: true
+              email: true,
+              avatar: true
             }
           },
           replies: {
@@ -46,7 +47,8 @@ export async function GET(
                 select: {
                   id: true,
                   name: true,
-                  email: true
+                  email: true,
+                  avatar: true
                 }
               }
             },
@@ -152,7 +154,8 @@ export async function POST(
             select: {
               id: true,
               name: true,
-              email: true
+              email: true,
+              avatar: true
             }
           },
           replies: true,

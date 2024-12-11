@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 interface ProfileData {
   name: string
@@ -25,6 +26,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false)
   const [isEditingPassword, setIsEditingPassword] = useState(false)
   const router = useRouter()
+  const [avatarLoading, setAvatarLoading] = useState(false)
 
   // 如果没有 session，显示加载状态或重定向
   if (!session?.user) {
@@ -93,6 +95,48 @@ export default function ProfilePage() {
     }
   }
 
+  // 添加头像上传处理函数
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      setAvatarLoading(true)
+      const formData = new FormData()
+      formData.append('avatar', file)
+
+      const response = await fetch('/api/upload/avatar', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || '上传失败')
+      }
+
+      const { avatar } = await response.json()
+      
+      // 更新session中的头像
+      await updateSession({
+        ...session,
+        user: {
+          ...session?.user,
+          avatar: avatar
+        }
+      })
+
+      // 强制刷新页面以更新显示
+      router.refresh()
+
+      toast.success('头像更新成功')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '上传失败')
+    } finally {
+      setAvatarLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -106,6 +150,47 @@ export default function ProfilePage() {
           {/* 表单区域 */}
           <form onSubmit={onSubmit} className="p-8">
             <div className="space-y-8">
+              {/* 头像上传部分 */}
+              <div className="flex flex-col items-center">
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-full overflow-hidden">
+                    {user.avatar?.url ? (
+                      <Image
+                        src={user.avatar.url}
+                        alt="头像"
+                        width={96}
+                        height={96}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      // 使用和导航栏一样的默认头像样式
+                      <div className="w-full h-full flex items-center justify-center bg-[#6366f1] text-white text-3xl">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <label 
+                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 
+                             text-white opacity-0 group-hover:opacity-100 cursor-pointer rounded-full
+                             transition-opacity duration-200"
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                      disabled={avatarLoading}
+                    />
+                    <span className="text-sm">
+                      {avatarLoading ? '上传中...' : '更换头像'}
+                    </span>
+                  </label>
+                </div>
+                <p className="mt-2 text-sm text-gray-500">
+                  点击更换头像图片
+                </p>
+              </div>
+
               {/* 基本信息部分 */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">基本信息</h3>

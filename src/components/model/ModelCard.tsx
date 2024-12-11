@@ -10,6 +10,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import ReviewSection from '@/components/reviews/ReviewSection'
 import { type ExtendedModel } from '@/types/model'
 import clsx from 'clsx'
+import Avatar from '@/components/ui/Avatar'
 
 interface ModelCardProps {
   model: ExtendedModel
@@ -536,7 +537,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
             size === 'medium' && 'p-3 pb-4',
             size === 'large' && 'p-4 pb-5'
           )}>
-            {/* 标题和描述 */}
+            {/* ���题和描述 */}
             <div className="space-y-1">
               <h3 className={clsx(
                 'font-medium text-gray-900 dark:text-white truncate',
@@ -673,7 +674,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             <button
                               onClick={handleUpdateModel}
                               disabled={isSaving}
-                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                               {isSaving ? (
                                 <>
@@ -759,17 +760,13 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                       <div className="flex items-center gap-6">
                         {/* 上传者信息 */}
                         <div className="flex items-center gap-2">
-                          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </div>
+                          <Avatar user={modelData.user} size="md" />
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {model.user?.name || '未知用户'}
+                              {modelData.user?.name || '未知用户'}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {timeAgo || formatTimeDistance(model.createdAt)}
+                              {timeAgo || formatTimeDistance(modelData.createdAt)}
                             </div>
                           </div>
                         </div>

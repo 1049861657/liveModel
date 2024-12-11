@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
 import { usePathname } from 'next/navigation'
+import Avatar from '@/components/ui/Avatar'
 
 export default function Navbar() {
   const { data: session } = useSession()
@@ -108,12 +109,7 @@ export default function Navbar() {
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     >
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 animate-gradient-slow opacity-80" />
-                      <div className="absolute inset-[2px] rounded-full bg-white flex items-center justify-center">
-                        <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 to-purple-600 font-medium">
-                          {session.user?.name?.[0] || session.user?.email?.[0] || '?'}
-                        </span>
-                      </div>
+                      <Avatar user={session.user} size="sm" />
                     </motion.div>
                     <span className={isScrolled ? 'text-gray-700' : 'text-white'}>
                       {session.user?.name || '用户'}
