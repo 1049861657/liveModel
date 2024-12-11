@@ -10,8 +10,14 @@ async function getModelData(id: string) {
       include: {
         user: {
           select: {
+            id: true,
             name: true,
             email: true,
+            avatar: {
+              select: {
+                url: true
+              }
+            }
           }
         }
       }
@@ -36,8 +42,14 @@ export default async function PreviewPage({ params }: { params: { id: string } }
     include: {
       user: {
         select: {
+          id: true,
           name: true,
-          email: true
+          email: true,
+          avatar: {
+            select: {
+              url: true
+            }
+          }
         }
       },
       animations: {

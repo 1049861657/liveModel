@@ -23,8 +23,12 @@ interface Model {
   createdAt: Date
   updatedAt: Date
   user?: {
+    id: string
     name: string | null
     email: string
+    avatar?: {
+      url: string
+    } | null
   }
 }
 
@@ -216,7 +220,7 @@ export default function UploadPage() {
               上传贴图
             </button>
 
-            {/* 上传动画按钮 */}
+            {/* ���传动画按钮 */}
             <button
               onClick={() => setShowAnimationModal(true)}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
