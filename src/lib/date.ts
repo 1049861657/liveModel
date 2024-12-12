@@ -33,4 +33,35 @@ export function getTodayStart(): Date {
     0, 0, 0, 0
   )
   return toUTCStorage(todayStart)
+}
+
+/**
+ * 格式化聊天消息时间
+ * @param date 消息时间
+ * @returns 格式化后的时间字符串
+ */
+export function formatMessageTime(date: Date): string {
+  const now = new Date()
+  const messageDate = new Date(date)
+  const diffDays = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24))
+  
+  if (diffDays === 0) {
+    // 今天的消息只显示时间
+    return messageDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  } else if (diffDays === 1) {
+    // 昨天的消息
+    return `昨天 ${messageDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+  } else if (diffDays === 2) {
+    // 前天的消息
+    return `前天 ${messageDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+  } else {
+    // 更早的消息显示完整日期
+    return messageDate.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
 } 

@@ -4,7 +4,14 @@ const path = require('path');
 const nextConfig = {
   transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
   images: {
-    domains: ['livemodel.oss-cn-shenzhen.aliyuncs.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'livemodel.oss-cn-shenzhen.aliyuncs.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
   webpack: (config) => {
     config.externals.push({

@@ -6,11 +6,20 @@ import { prisma } from '@/lib/db'
 // 获取聊天消息
 export async function GET() {
   try {
+    // 获取7天前的时间
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
     const messages = await prisma.chatMessage.findMany({
-      take: 50, // 限制返回最近50条消息
-      orderBy: {
-        createdAt: 'asc'
+      where: {
+        createdAt: {
+          gte: sevenDaysAgo
+        }
       },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 50,
       include: {
         user: {
           select: {
@@ -23,7 +32,8 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(messages)
+    // 直接返回消息，保持最早的消息在前
+    return NextResponse.json(messages.reverse())
   } catch (error) {
     console.error('获取聊天消息失败:', error)
     return NextResponse.json(
@@ -46,7 +56,7 @@ export async function POST(request: Request) {
 
     const { content, type = 'text' } = await request.json()
 
-    if (!content) {
+    if (!content?.trim()) {
       return NextResponse.json(
         { error: '消息内容不能为空' },
         { status: 400 }
@@ -55,7 +65,7 @@ export async function POST(request: Request) {
 
     const message = await prisma.chatMessage.create({
       data: {
-        content,
+        content: content.trim(),
         type,
         userId: session.user.id
       },

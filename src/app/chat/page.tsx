@@ -7,11 +7,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import chatService, { ChatMessage } from '@/services/ChatService'
 import Avatar from '@/components/ui/Avatar'
+import { formatMessageTime } from '@/lib/date'
 
-interface GroupedMessage {
+interface TimeGroup {
   id: string;
+  time: Date;
   messages: ChatMessage[];
-  showTime: boolean;
 }
 
 export default function ChatPage() {
@@ -28,41 +29,34 @@ export default function ChatPage() {
   // 检查是否可以发送消息
   const canSendMessage = newMessage.trim().length > 0 && !loading;
 
-  // 对消息进行分组和时间显示处理
-  const groupedMessages = useMemo(() => {
-    const groups: GroupedMessage[] = [];
-    let currentGroup: ChatMessage[] = [];
-    let lastTime = new Date(0);
-    let lastUserId = '';
+  // 对消息进行时间分组
+  const timeGroups = useMemo(() => {
+    if (!messages.length) return [];
+    
+    const groups: TimeGroup[] = [];
+    let currentGroup: TimeGroup | null = null;
+    
+    // 按时间升序排列消息
+    const sortedMessages = [...messages].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
 
-    messages.forEach((message, index) => {
+    for (const message of sortedMessages) {
       const messageTime = new Date(message.createdAt);
-      const timeDiff = (messageTime.getTime() - lastTime.getTime()) / (1000 * 60);
 
-      if (message.user.id !== lastUserId || timeDiff > 5) {
-        if (currentGroup.length > 0) {
-          groups.push({
-            id: currentGroup[0].id,
-            messages: currentGroup,
-            showTime: timeDiff > 5
-          });
-        }
-        currentGroup = [message];
-      } else {
-        currentGroup.push(message);
+      // 如果是第一条消息或者与上一组时间差超过5分钟，创建新组
+      if (!currentGroup || 
+          (messageTime.getTime() - currentGroup.time.getTime()) > 5 * 60 * 1000) {
+        currentGroup = {
+          id: message.id,
+          time: messageTime,
+          messages: []
+        };
+        groups.push(currentGroup);
       }
 
-      if (index === messages.length - 1) {
-        groups.push({
-          id: currentGroup[0].id,
-          messages: currentGroup,
-          showTime: index === 0 || timeDiff > 5
-        });
-      }
-
-      lastTime = messageTime;
-      lastUserId = message.user.id;
-    });
+      currentGroup.messages.push(message);
+    }
 
     return groups;
   }, [messages]);
@@ -247,54 +241,57 @@ export default function ChatPage() {
                 onScroll={checkShouldAutoScroll}
               >
                 <AnimatePresence initial={false}>
-                  {groupedMessages.map((group, groupIndex) => (
+                  {timeGroups.map((group) => (
                     <motion.div
                       key={group.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="space-y-2"
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-4"
                     >
-                      {/* 时间显示 */}
-                      {(groupIndex === 0 || group.showTime) && (
-                        <div className="flex justify-center">
-                          <span className="text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
-                            {format(new Date(group.messages[0].createdAt), 'HH:mm')}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* 用户信息 */}
-                      <div className={`flex items-center space-x-2 mb-1 ${
-                        group.messages[0].user.id === session?.user?.id ? 'flex-row-reverse space-x-reverse' : ''
-                      }`}>
-                        <Avatar user={group.messages[0].user} size="sm" />
-                        <span className="text-sm font-medium text-gray-700">
-                          {group.messages[0].user.name ?? '用户'}
+                      {/* 时间戳 */}
+                      <div className="flex justify-center">
+                        <span className="px-3 py-1 text-xs text-gray-500 bg-gray-100/80 rounded-full">
+                          {formatMessageTime(group.time)}
                         </span>
                       </div>
 
-                      {/* 消息组 */}
-                      <div className={`space-y-1 ${
-                        group.messages[0].user.id === session?.user?.id ? 'flex flex-col items-end' : 'flex flex-col items-start pl-10'
-                      }`}>
+                      {/* 消息列表 */}
+                      <div className="space-y-4">
                         {group.messages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`max-w-[70%] ${
+                          <div key={message.id} className="space-y-2">
+                            {/* 用户信息 */}
+                            <div className={`flex items-center space-x-2 ${
+                              message.user.id === session?.user?.id ? 'flex-row-reverse space-x-reverse' : ''
+                            }`}>
+                              <Avatar user={message.user} size="sm" />
+                              <span className="text-sm font-medium text-gray-700">
+                                {message.user.name ?? '用户'}
+                              </span>
+                            </div>
+
+                            {/* 消息内容 */}
+                            <div className={`${
                               message.user.id === session?.user?.id 
-                                ? 'bg-gradient-to-br from-indigo-400 to-purple-400 text-white' 
-                                : 'bg-gray-100 text-gray-800'
-                            } rounded-2xl px-4 py-2 shadow-sm relative`}
-                          >
-                            <p className="text-sm whitespace-pre-wrap break-words">
-                              {message.content}
-                            </p>
-                            {message.isLoading && (
-                              <div className="absolute right-0 top-0 -mr-6 mt-2">
-                                <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                                ? 'flex flex-col items-end' 
+                                : 'flex flex-col items-start pl-10'
+                            }`}>
+                              <div className={`max-w-[70%] ${
+                                message.user.id === session?.user?.id 
+                                  ? 'bg-gradient-to-br from-indigo-400 to-purple-400 text-white' 
+                                  : 'bg-gray-100 text-gray-800'
+                              } rounded-2xl px-4 py-2 shadow-sm relative`}>
+                                <p className="text-sm whitespace-pre-wrap break-words">
+                                  {message.content}
+                                </p>
+                                {message.isLoading && (
+                                  <div className="absolute right-0 top-0 -mr-6 mt-2">
+                                    <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            </div>
                           </div>
                         ))}
                       </div>
