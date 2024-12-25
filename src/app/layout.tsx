@@ -8,7 +8,7 @@ import { Toaster } from 'react-hot-toast'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import AuthProvider from '@/components/providers/AuthProvider'
-import GoogleAnalytics from '@/components/providers/GoogleAnalytics'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,7 +27,6 @@ export default async function RootLayout({
   return (
     <html lang="zh">
       <body className={inter.className}>
-        <GoogleAnalytics />
         <AuthProvider session={session}>
           <div className="min-h-screen flex flex-col">
             <Navbar />
@@ -38,6 +37,7 @@ export default async function RootLayout({
           </div>
           <Toaster />
         </AuthProvider>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       </body>
     </html>
   )
