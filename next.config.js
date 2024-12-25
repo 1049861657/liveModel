@@ -23,6 +23,9 @@ const nextConfig = {
       'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',
     }
+    config.ignoreWarnings = [
+      { message: /Can't resolve 'coffee-script'/ }
+    ]
     return config
   }
 }

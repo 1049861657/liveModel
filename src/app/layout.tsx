@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import AuthProvider from '@/components/providers/AuthProvider'
+import GoogleAnalytics from '@/components/providers/GoogleAnalytics'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,12 +22,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // 在服务器端获取 session
   const session = await getServerSession(authOptions)
 
   return (
     <html lang="zh">
       <body className={inter.className}>
+        <GoogleAnalytics />
         <AuthProvider session={session}>
           <div className="min-h-screen flex flex-col">
             <Navbar />
