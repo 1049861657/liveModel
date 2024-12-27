@@ -1,8 +1,34 @@
+<div align="center">
+  <img src="public/readme/logo.png" alt="LiveModel Logo" width="200"/>
+</div>
+
 # 3D模型预览平台
 
 一个基于 Next.js 开发的3D模型在线预览和分享平台。
 
 > **⚡ 特别说明：** 全部代码由 Cursor 生成，本人只是产品。
+
+## 🎯 项目预览
+
+### 模型库展示
+![模型库展示](public/readme/models.png)
+*支持模型分类浏览、搜索和筛选功能*
+
+### 模型详情
+![模型详情](public/readme/modelinfo.png)
+*提供模型信息、3D预览、评论和收藏等功能*
+
+### 在线预览
+![在线预览](public/readme/preview.png)
+*支持模型旋转、缩放、平移，播放动画等操作*
+
+### 快捷上传
+![快捷上传](public/readme/upload.png)
+*简单便捷的模型上传流程，支持拖拽上传*
+
+### 实时聊天
+![实时聊天](public/readme/chat.png)
+*用户之间可以进行实时交流和模型分享*
 
 ## ✨ 主要功能
 
@@ -28,20 +54,12 @@
 
 ### 后端
 - Next.js API Routes
-- Prisma ORM
-- NextAuth.js
 
 ### 存储
 - OSS 对象存储
-- prisma数据库
+- prisma数据库(mysql/mariadb)
 
 ## 🚀 快速开始
-
-### 前置要求
-
-- Node.js 18+
-- PostgreSQL
-- OSS 存储账号
 
 ### 安装步骤
 
