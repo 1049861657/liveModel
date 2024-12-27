@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/readme/logo.png" alt="LiveModel Logo" width="200"/>
+  <img src="/public/readme/logo.png" alt="LiveModel Logo" width="200"/>
 </div>
 
 # 3D模型预览平台
@@ -11,23 +11,23 @@
 ## 🎯 项目预览
 
 ### 模型库展示
-![模型库展示](public/readme/models.png)
+![模型库展示](/public/readme/models.png)
 *支持模型分类浏览、搜索和筛选功能*
 
 ### 模型详情
-![模型详情](public/readme/modelinfo.png)
+![模型详情](/public/readme/modelinfo.png)
 *提供模型信息、3D预览、评论和收藏等功能*
 
 ### 在线预览
-![在线预览](public/readme/preview.png)
-*支持模型旋转、缩放、平移，播放动画等操作*
+![在线预览](/public/readme/preview.png)
+*支持模型旋转、缩放、平移等交互操作*
 
 ### 快捷上传
-![快捷上传](public/readme/upload.png)
+![快捷上传](/public/readme/upload.png)
 *简单便捷的模型上传流程，支持拖拽上传*
 
 ### 实时聊天
-![实时聊天](public/readme/chat.png)
+![实时聊天](/public/readme/chat.png)
 *用户之间可以进行实时交流和模型分享*
 
 ## ✨ 主要功能
@@ -67,13 +67,13 @@
 
 ```bash
 git clone https://github.com/1049861657/liveModel.git
-cd [repository-name]
+cd liveModel
 ```
 
-2. 安装依赖
+2. 安装依赖(也可以用npm)
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. 环境配置
@@ -82,14 +82,14 @@ npm install
 4. 数据库初始化
 
 ```bash
-npx prisma generate
-npx prisma db push
+pnpm dlx prisma generate
+pnpm dlx prisma db push
 ```
 
 5. 启动开发服务器
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 访问 http://localhost:3000 查看应用。
