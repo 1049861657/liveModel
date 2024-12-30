@@ -218,7 +218,7 @@ export default function LoginPage() {
               <h1 className="text-2xl font-bold text-white">
                 欢迎回来
               </h1>
-              <p className="text-sm text-gray-300 mt-1">登录以继续访问3D模型预览平台</p>
+              <p className="text-sm text-gray-300 mt-1">登录以继续访问魔抖</p>
             </motion.div>
 
             <AuthForm

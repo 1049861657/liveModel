@@ -79,7 +79,7 @@ export default function RegisterPage() {
               <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
                 创建账号
               </h1>
-              <p className="text-sm text-gray-500 mt-1">加入3D模型预览平台，开启创作之旅</p>
+              <p className="text-sm text-gray-500 mt-1">加入魔抖，开启创作之旅</p>
             </motion.div>
 
             <AuthForm

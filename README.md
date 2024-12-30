@@ -2,11 +2,12 @@
   <img src="/public/readme/logo.png" alt="LiveModel Logo" width="200"/>
 </div>
 
-# 3D模型预览平台
+# 魔抖
 
 一个基于 Next.js 开发的3D模型在线预览和分享平台。
-
+[在线演示](https://livemodel.xyz/)
 > **⚡ 特别说明：** 全部代码由 Cursor 生成，本人只是产品。
+
 
 ## 🎯 项目预览
 
