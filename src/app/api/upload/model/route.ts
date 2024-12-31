@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import path from 'path'
 import { prisma } from '@/lib/db'
-import { ossClient } from '@/lib/oss'
+import { storageClient } from '@/lib/oss'
 
 // 添加类型定义
 interface TextureInfo {
@@ -114,9 +114,9 @@ export async function POST(request: Request) {
     const componentName = `${componentBaseName}_${timestamp}`
     const filename = `${componentName}${fileExt}`
     
-    // 上传模型文件到OSS
+    // 上传模型文件到存储服务
     const modelOssPath = `models/${fileExt === '.dae' ? 'dae' : 'glb'}/${filename}`
-    const modelResult = await ossClient.put(modelOssPath, modelBuffer)
+    const modelResult = await storageClient.put(modelOssPath, modelBuffer)
 
     // 处理贴图文件
     const texturePromises: Promise<TextureInfo>[] = []
@@ -129,8 +129,8 @@ export async function POST(request: Request) {
             const textureFilename = `${Date.now()}_${textureName}`
             const textureOssPath = `models/${fileExt === '.dae' ? 'dae' : 'glb'}/${componentName}/textures/${textureFilename}`
             
-            // 上传贴图到OSS
-            const textureResult = await ossClient.put(textureOssPath, textureBuffer)
+            // 上传贴图到存储服务
+            const textureResult = await storageClient.put(textureOssPath, textureBuffer)
             
             return {
               name: textureName,
@@ -152,8 +152,8 @@ export async function POST(request: Request) {
       const daeContent = modelBuffer.toString('utf8')
       const updatedContent = await updateDaeTextureReferences(daeContent, textures, componentName)
       finalModelBuffer = Buffer.from(updatedContent)
-      // 重新上传更新后的DAE文件
-      await ossClient.put(modelOssPath, finalModelBuffer)
+      // 重新上传更新后的文件到存储服务
+      await storageClient.put(modelOssPath, finalModelBuffer)
     }
     
     // 使用事务保存模型和贴图信息

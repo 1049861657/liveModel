@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import path from 'path'
 import { prisma } from '@/lib/db'
-import { ossClient } from '@/lib/oss'
+import { storageClient } from '@/lib/oss'
 
 export async function GET(
   request: Request,
@@ -128,13 +128,13 @@ export async function DELETE(
     try {
       // 1. 删除模型文件
       const modelOssKey = `models/${model.format}/${model.componentName}${path.extname(model.filePath)}`
-      await ossClient.delete(modelOssKey)
+      await storageClient.delete(modelOssKey)
 
       // 2. 删除贴图文件
       if (model.textures.length > 0) {
         const texturePromises = model.textures.map(texture => {
           const textureOssKey = `models/${model.format}/${model.componentName}/textures/${path.basename(texture.filePath)}`
-          return ossClient.delete(textureOssKey).catch(err => {
+          return storageClient.delete(textureOssKey).catch(err => {
             console.error('删除贴图失败:', err)
           })
         })
@@ -145,7 +145,7 @@ export async function DELETE(
       if (model.animations.length > 0) {
         const animationPromises = model.animations.map(animation => {
           const animationOssKey = `models/${model.format}/${model.componentName}/animations/${path.basename(animation.filePath)}`
-          return ossClient.delete(animationOssKey).catch(err => {
+          return storageClient.delete(animationOssKey).catch(err => {
             console.error('删除动画失败:', err)
           })
         })

@@ -48,10 +48,8 @@
 ### 前端
 - Next.js 14 (App Router)
 - React 18
-- TypeScript
 - Tailwind CSS
-- Three.js / React Three Fiber
-- Shadcn UI
+- Three.js
 
 ### 后端
 - Next.js API Routes

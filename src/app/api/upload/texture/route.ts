@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import path from 'path'
 import { prisma } from '@/lib/db'
-import { ossClient } from '@/lib/oss'
+import { storageClient } from '@/lib/oss'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
         const textureFilename = `${Date.now()}_${textureName}`
         const textureOssPath = `models/${model.format}/${model.componentName}/textures/${textureFilename}`
         
-        // 上传贴图到OSS
-        const textureResult = await ossClient.put(textureOssPath, textureBuffer)
+        // 上传贴图到存储服务
+        const textureResult = await storageClient.put(textureOssPath, textureBuffer)
 
         return {
           name: textureName,
@@ -101,15 +101,15 @@ export async function POST(request: Request) {
         // 从URL中提取OSS对象键
         const ossKey = `models/${model.format}/${model.componentName}${path.extname(model.filePath)}`
         
-        // 从OSS获取DAE文件内容
-        const modelResult = await ossClient.get(ossKey)
+        // 从存储服务获取DAE文件内容
+        const modelResult = await storageClient.get(ossKey)
         const daeContent = modelResult.content.toString('utf8')
         
         // 更新贴图引用
         const updatedContent = await updateDaeTextureReferences(daeContent, textureInfos.filter(Boolean) as any[], model.componentName)
         
-        // 将更新后的内容重新上传到OSS
-        await ossClient.put(ossKey, Buffer.from(updatedContent))
+        // 将更新后的内容重新上传到存储服务
+        await storageClient.put(ossKey, Buffer.from(updatedContent))
       } catch (error) {
         console.error('处理DAE文件失败:', error)
         throw error

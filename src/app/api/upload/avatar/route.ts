@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { ossClient } from '@/lib/oss'
+import { storageClient } from '@/lib/oss'
 
 export async function POST(request: Request) {
   try {
@@ -48,8 +48,8 @@ export async function POST(request: Request) {
     const ext = file.name.split('.').pop()
     const ossPath = `images/avatars/${session.user.id}/${timestamp}.${ext}`
 
-    // 上传到OSS
-    const result = await ossClient.put(ossPath, buffer)
+    // 上传到存储服务
+    const result = await storageClient.put(ossPath, buffer)
 
     // 使用事务处理数据库操作
     const [oldImage, newImage] = await prisma.$transaction(async (tx) => {
@@ -94,12 +94,12 @@ export async function POST(request: Request) {
       return [oldImage, newImage]
     })
 
-    // 如果存在旧头像，从OSS中删除
+    // 如果存在旧头像，从存储服务中删除
     if (oldImage) {
       try {
         // 从URL中提取OSS路径
         const oldPath = new URL(oldImage.url).pathname.slice(1)
-        await ossClient.delete(oldPath)
+        await storageClient.delete(oldPath)
       } catch (error) {
         console.error('删除旧头像失败:', error)
       }

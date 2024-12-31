@@ -22,6 +22,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^11.15.0",
     "goeasy": "^2.13.8",
+    "minio": "^8.0.3",
     "next": "14.2",
     "next-auth": "^4.24.11",
     "react": "^18.3.1",

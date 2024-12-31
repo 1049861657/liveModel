@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import path from 'path'
 import { prisma } from '@/lib/db'
-import { ossClient } from '@/lib/oss'
+import { storageClient } from '@/lib/oss'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -70,8 +70,8 @@ export async function POST(request: Request) {
     const filename = `${name}_${timestamp}.smd`
     const ossPath = `models/${model.format}/${model.componentName}/animations/${filename}`
     
-    // 上传到OSS
-    const result = await ossClient.put(ossPath, buffer)
+    // 上传到存储服务
+    const result = await storageClient.put(ossPath, buffer)
 
     // 保存到数据库
     const animation = await prisma.animation.create({

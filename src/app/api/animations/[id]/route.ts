@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import path from 'path'
-import { ossClient } from '@/lib/oss'
+import { storageClient } from '@/lib/oss'
 
 export async function DELETE(
   request: Request,
@@ -26,7 +26,7 @@ export async function DELETE(
     // 2. 删除OSS文件
     try {
       const animationOssKey = `models/${animation.model.format}/${animation.model.componentName}/animations/${path.basename(animation.filePath)}`
-      await ossClient.delete(animationOssKey)
+      await storageClient.delete(animationOssKey)
     } catch (error) {
       console.error('删除OSS文件失败:', error)
       // 继续执行数据库删除操作
