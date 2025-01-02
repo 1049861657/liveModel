@@ -50,14 +50,6 @@
 - React 18
 - Tailwind CSS
 - Three.js
-- Rollup (用于打包优化)
-
-### 构建工具
-- Rollup：用于打包第三方库
-  - model-viewer (GLB预览)
-  - three.js (DAE预览)
-  - 优化加载性能
-  - 支持离线访问
 
 ### 后端
 - Next.js API 
