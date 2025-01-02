@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { ColladaLoader,Collada } from 'three/examples/jsm/loaders/ColladaLoader.js'
-import { type Model as PrismaModel } from '@prisma/client'
 import smdParser, {AnimationInfo, BoneData, Frame } from '@/utils/smdParser'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { toast } from 'react-hot-toast'
@@ -1078,6 +1077,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                 maxDistance={100}
                 target={[0, 0, 0]}
               />
+              <Environment files="/hdr/meadow_2_4k.hdr" />
             </>
           )}
         </Canvas>

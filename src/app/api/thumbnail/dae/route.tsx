@@ -8,26 +8,13 @@ export async function GET(request: Request) {
     return new NextResponse('Missing model path', { status: 400 })
   }
 
-  // try {
-  //   modelPath = decodeURIComponent(decodeURIComponent(modelPath))
-  // } catch (e) {
-  //   try {
-  //     modelPath = decodeURIComponent(modelPath)
-  //   } catch (e) {
-  //     return new NextResponse('Invalid URL encoding', { status: 400 })
-  //   }
-  // }
-
-  // if (!modelPath.startsWith('/uploads/')) {
-  //   return new NextResponse('Invalid model path', { status: 400 })
-  // }
-
   const html = `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script type="module" src="/vendor/three-bundle.js"></script>
         <style>
           body { 
             margin: 0; 
@@ -96,22 +83,8 @@ export async function GET(request: Request) {
 
         <canvas id="canvas"></canvas>
 
-        <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
-        <script type="importmap">
-        {
-          "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.module.js",
-            "three/examples/jsm/loaders/ColladaLoader": "https://cdn.jsdelivr.net/npm/three@0.159.0/examples/jsm/loaders/ColladaLoader.js",
-            "three/examples/jsm/controls/OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.159.0/examples/jsm/controls/OrbitControls.js"
-          }
-        }
-        </script>
-        <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.module.js">
-
         <script type="module">
-          import * as THREE from 'three';
-          import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader';
-          import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+          import { THREE, ColladaLoader, OrbitControls } from '/vendor/three-bundle.js';
 
           try {
             const canvas = document.getElementById('canvas');

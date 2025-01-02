@@ -269,7 +269,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
             enableZoom={true}
             enableRotate={true}
           />
-          <Environment preset="city" />
+          <Environment files="/hdr/meadow_2_4k.hdr" />
         </Suspense>
       </Canvas>
     </div>

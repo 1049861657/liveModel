@@ -39,7 +39,7 @@ function ModelPreview({ model }: { model: ExtendedModel }) {
             if (!iframe.src) {
               iframe.src = model.format === 'dae'
                 ? `/api/thumbnail/dae?model=${encodeURIComponent(model.filePath)}`
-                : `/api/thumbnail?model=${encodeURIComponent(model.filePath)}`
+                : `/api/thumbnail/glb?model=${encodeURIComponent(model.filePath)}`
             }
           }
         })
@@ -744,7 +744,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                   <iframe
                     src={model.format === 'dae' 
                       ? `/api/thumbnail/dae?model=${model.filePath}`
-                      : `/api/thumbnail?model=${model.filePath}`
+                      : `/api/thumbnail/glb?model=${model.filePath}`
                     }
                     className="w-full h-full border-none"
                     title={model.name}
