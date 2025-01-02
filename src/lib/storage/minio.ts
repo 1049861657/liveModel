@@ -16,6 +16,7 @@ export class MinioStorage implements StorageProvider {
   private endPoint: string;
   private secure: boolean;
   private port?: number;
+  private isDomain: boolean;
 
   constructor(config: MinioConfig) {
     this.bucket = config.bucket;
@@ -23,9 +24,12 @@ export class MinioStorage implements StorageProvider {
     this.secure = config.secure;
     this.port = config.port;
 
+    // 检查是否为域名（是否包含点号且不是IP地址）
+    this.isDomain = this.endPoint.includes('.') && !/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(this.endPoint);
+    
     this.client = new MinioClient({
       endPoint: config.endPoint,
-      port: config.port || 9000,
+      port: this.isDomain ? undefined : (config.port || 9000),
       useSSL: config.secure,
       accessKey: config.accessKeyId,
       secretKey: config.accessKeySecret
@@ -126,7 +130,7 @@ export class MinioStorage implements StorageProvider {
 
   private getPublicUrl(path: string): string {
     const protocol = this.secure ? 'https' : 'http';
-    const portStr = this.port ? `:${this.port}` : '';
+    const portStr = this.isDomain ? '' : (this.port ? `:${this.port}` : '');
     return `${protocol}://${this.endPoint}${portStr}/${this.bucket}/${path}`;
   }
 } 
