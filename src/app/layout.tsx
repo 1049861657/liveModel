@@ -15,6 +15,11 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: '魔抖',
   description: '在线预览和分享3D模型',
+  icons: {
+    icon: '/metadata/favicon.ico',
+    shortcut: '/metadata/favicon.ico',
+    apple: '/metadata/apple-icon.png',
+  },
 }
 
 export default async function RootLayout({

@@ -102,11 +102,22 @@ export async function POST() {
     // 计算当月总天数
     const daysInMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth() + 1, 0).getDate()
     
-    // 计算周期奖励
-    if (checkInDays >= 7) monthlyBonus += 30  // 满1周
-    if (checkInDays >= 14) monthlyBonus += 60 // 满2周
-    if (checkInDays >= 21) monthlyBonus += 90 // 满3周
-    if (checkInDays >= daysInMonth) monthlyBonus += 120 // 月度全勤
+    // 检查历史签到记录中的最高积分，用于判断是否已经发放过月度奖励
+    const maxPointsInMonth = Math.max(0, ...monthlyCheckIns.map(c => c.points))
+    
+    // 只在达到新的里程碑时发放奖励
+    if (maxPointsInMonth < 30 && checkInDays >= 7) {
+      monthlyBonus += 30  // 满1周
+    }
+    if (maxPointsInMonth < 90 && checkInDays >= 14) {
+      monthlyBonus += 60  // 满2周
+    }
+    if (maxPointsInMonth < 180 && checkInDays >= 21) {
+      monthlyBonus += 90  // 满3周
+    }
+    if (maxPointsInMonth < 300 && checkInDays >= daysInMonth) {
+      monthlyBonus += 120 // 月度全勤
+    }
 
     const totalPoints = basePoints + monthlyBonus
 

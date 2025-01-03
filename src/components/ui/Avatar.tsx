@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { cn } from '@/utils'
+import { useState, useEffect } from 'react'
 
 interface AvatarProps {
   user: {
@@ -19,18 +20,45 @@ const sizeMap = {
   lg: 'w-16 h-16 text-xl'
 }
 
-export default function Avatar({ user, size = 'md', className }: AvatarProps) {
+function Avatar({ user, size = 'md', className }: AvatarProps) {
   const sizeClass = sizeMap[size]
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const avatarUrl = user?.avatar?.url
+
+  useEffect(() => {
+    if (avatarUrl) {
+      const img = document.createElement('img')
+      img.src = avatarUrl
+      img.onload = () => setImageLoaded(true)
+      return () => {
+        setImageLoaded(false)
+      }
+    }
+  }, [avatarUrl])
   
-  if (user?.avatar?.url) {
+  if (avatarUrl) {
     return (
       <div className={cn("relative rounded-full overflow-hidden", sizeClass, className)}>
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 flex items-center justify-center",
+          imageLoaded ? 'opacity-0' : 'opacity-100',
+          "transition-opacity duration-300"
+        )}>
+          <span className="text-white font-medium">
+            {user?.name?.[0] || user?.email?.[0] || '?'}
+          </span>
+        </div>
         <Image
-          src={user.avatar.url}
+          src={avatarUrl}
           alt={user?.name || '用户头像'}
           width={64}
           height={64}
-          className="w-full h-full object-cover"
+          className={cn(
+            "w-full h-full object-cover",
+            imageLoaded ? 'opacity-100' : 'opacity-0',
+            "transition-opacity duration-300"
+          )}
+          onLoadingComplete={() => setImageLoaded(true)}
         />
       </div>
     )
@@ -44,3 +72,5 @@ export default function Avatar({ user, size = 'md', className }: AvatarProps) {
     </div>
   )
 } 
+
+export default Avatar 
