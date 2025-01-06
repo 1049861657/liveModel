@@ -125,33 +125,20 @@ export async function POST() {
     const now = new Date()
     const utcNow = toUTCStorage(now)
 
-    // 使用事务同时创建签到记录和更新用户积分
-    const [checkIn, user] = await prisma.$transaction([
-      // 创建签到记录
-      prisma.checkIn.create({
-        data: {
-          userId: session.user.id,
-          points: totalPoints,
-          createdAt: utcNow
-        }
-      }),
-      // 更新用户积分
-      prisma.user.update({
-        where: { id: session.user.id },
-        data: {
-          points: {
-            increment: totalPoints
-          }
-        }
-      })
-    ])
+    // 只创建签到记录，不更新用户积分
+    const checkIn = await prisma.checkIn.create({
+      data: {
+        userId: session.user.id,
+        points: totalPoints,
+        createdAt: utcNow
+      }
+    })
 
     return NextResponse.json({
       points: totalPoints,
       basePoints,
       monthlyBonus,
       consecutiveDays,
-      totalPoints: user.points,
       message: `签到成功！获得 ${basePoints} 基础积分${monthlyBonus > 0 ? ` + ${monthlyBonus} 奖励积分` : ''}`
     })
   } catch (error) {
@@ -177,26 +164,29 @@ export async function GET() {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const [checkIn, user] = await prisma.$transaction([
-      // 获取今日签到状态
-      prisma.checkIn.findFirst({
-        where: {
-          userId: session.user.id,
-          createdAt: {
-            gte: today
-          }
+    // 获取今日签到状态
+    const checkIn = await prisma.checkIn.findFirst({
+      where: {
+        userId: session.user.id,
+        createdAt: {
+          gte: today
         }
-      }),
-      // 获取用户积分
-      prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { points: true }
-      })
-    ])
+      }
+    })
+
+    // 获取用户总积分
+    const userPoints = await prisma.checkIn.aggregate({
+      where: {
+        userId: session.user.id
+      },
+      _sum: {
+        points: true
+      }
+    })
 
     return NextResponse.json({
       hasCheckedIn: !!checkIn,
-      points: user?.points || 0
+      points: userPoints._sum.points || 0
     })
   } catch (error) {
     console.error('获取签到状态失败:', error)

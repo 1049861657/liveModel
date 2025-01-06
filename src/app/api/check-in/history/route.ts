@@ -49,6 +49,10 @@ export async function GET(request: Request) {
       },
       orderBy: {
         createdAt: 'asc'
+      },
+      select: {
+        createdAt: true,
+        points: true
       }
     })
 
@@ -114,11 +118,8 @@ export async function GET(request: Request) {
       }
     }
 
-    // 获取用户总积分
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { points: true }
-    })
+    // 计算总积分
+    const totalPoints = allCheckIns.reduce((sum, checkIn) => sum + checkIn.points, 0)
 
     return NextResponse.json({
       dates: localCheckIns.map(c => c.createdAt),
@@ -126,7 +127,7 @@ export async function GET(request: Request) {
         totalDays: allCheckIns.length,
         currentStreak,
         maxStreak,
-        totalPoints: user?.points || 0
+        totalPoints
       }
     })
   } catch (error) {

@@ -8,7 +8,6 @@ import { Toaster } from 'react-hot-toast'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import AuthProvider from '@/components/providers/AuthProvider'
-import { GoogleAnalytics } from '@next/third-parties/google'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -42,7 +41,6 @@ export default async function RootLayout({
           </div>
           <Toaster />
         </AuthProvider>
-        {/* <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} /> */}
       </body>
     </html>
   )

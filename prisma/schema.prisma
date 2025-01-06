@@ -14,7 +14,6 @@ model User {
   password  String
   models    Model[]
   favorites Favorite[]
-  points        Int       @default(0)     // 用户积分
   checkIns      CheckIn[]                 // 关联签到记录
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

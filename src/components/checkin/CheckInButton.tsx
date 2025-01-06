@@ -87,52 +87,57 @@ export default function CheckInButton({ onCheckIn }: CheckInButtonProps) {
 
   return (
     <>
-      <div className="flex items-center gap-4">
+      <div className="relative">
+        {/* 签到按钮 */}
         <button
           onClick={handleCheckIn}
-          disabled={loading || hasCheckedIn || initialLoading}  // 添加 initialLoading 条件
+          disabled={loading || hasCheckedIn || initialLoading}
           className={`
-            relative px-6 py-2 rounded-lg font-medium text-white
+            relative w-full h-[52px] rounded-xl font-medium transition-all
             ${hasCheckedIn 
-              ? 'bg-gray-400 cursor-not-allowed' 
+              ? 'bg-gray-50 hover:bg-gray-100' 
               : initialLoading
-                ? 'bg-gray-300 cursor-wait'  // 添加加载状态样式
-                : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'}
-            disabled:opacity-50 transition-colors
+                ? 'bg-gray-50'
+                : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'}
+            disabled:opacity-60
           `}
         >
-          {initialLoading ? (
+          <div className="absolute inset-0 flex items-center justify-between px-4">
             <div className="flex items-center gap-2">
-              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              加载中...
+              {initialLoading ? (
+                <div className="flex items-center gap-2 text-gray-400">
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>加载中</span>
+                </div>
+              ) : loading ? (
+                <div className="flex items-center gap-2 text-white">
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>签到中</span>
+                </div>
+              ) : hasCheckedIn ? (
+                <div className="flex items-center gap-2 text-gray-500">
+                  <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>已签到</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-white">
+                  <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+                  </svg>
+                  <span>立即签到</span>
+                </div>
+              )}
             </div>
-          ) : loading ? (
-            <div className="flex items-center gap-2">
-              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              签到中...
-            </div>
-          ) : hasCheckedIn ? '已签到' : '签到'}
+          </div>
         </button>
-
-        <div className="flex items-center gap-1 text-gray-600">
-          <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-          {initialLoading ? (
-            <span className="animate-pulse">...</span>
-          ) : (
-            <>
-              <span className="font-medium">{points}</span>
-              <span className="text-sm">积分</span>
-            </>
-          )}
-        </div>
       </div>
 
       {showAnimation && (
