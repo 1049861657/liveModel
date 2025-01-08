@@ -3,13 +3,13 @@
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const i$2=(i,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e,finisher(n){n.createProperty(e.key,i);}}:{kind:"field",key:Symbol(),placement:"own",descriptor:{},originalKey:e.key,initializer(){"function"==typeof e.initializer&&(this[e.key]=e.initializer.call(this));},finisher(n){n.createProperty(e.key,i);}},e$3=(i,e,n)=>{e.constructor.createProperty(n,i);};function n$6(n){return (t,o)=>void 0!==o?e$3(n,t,o):i$2(n,t)}
+const i$2=(i,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e,finisher(n){n.createProperty(e.key,i);}}:{kind:"field",key:Symbol(),placement:"own",descriptor:{},originalKey:e.key,initializer(){"function"==typeof e.initializer&&(this[e.key]=e.initializer.call(this));},finisher(n){n.createProperty(e.key,i);}},e$3=(i,e,n)=>{e.constructor.createProperty(n,i);};function n$6(n){return (t,o)=>undefined!==o?e$3(n,t,o):i$2(n,t)}
 
 /**
  * @license
  * Copyright 2021 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var n$5;null!=(null===(n$5=window.HTMLSlotElement)||void 0===n$5?void 0:n$5.prototype.assignedElements)?(o,n)=>o.assignedElements(n):(o,n)=>o.assignedNodes(n).filter((o=>o.nodeType===Node.ELEMENT_NODE));
+ */var n$5;null!=(null===(n$5=window.HTMLSlotElement)||undefined===n$5?undefined:n$5.prototype.assignedElements)?(o,n)=>o.assignedElements(n):(o,n)=>o.assignedNodes(n).filter((o=>o.nodeType===Node.ELEMENT_NODE));
 
 /**
  * @license
@@ -214,7 +214,7 @@ class EventDispatcher {
 
 		}
 
-		if ( listeners[ type ].indexOf( listener ) === - 1 ) {
+		if ( listeners[ type ].indexOf( listener ) === -1 ) {
 
 			listeners[ type ].push( listener );
 
@@ -228,7 +228,7 @@ class EventDispatcher {
 
 		const listeners = this._listeners;
 
-		return listeners[ type ] !== undefined && listeners[ type ].indexOf( listener ) !== - 1;
+		return listeners[ type ] !== undefined && listeners[ type ].indexOf( listener ) !== -1;
 
 	}
 
@@ -243,7 +243,7 @@ class EventDispatcher {
 
 			const index = listenerArray.indexOf( listener );
 
-			if ( index !== - 1 ) {
+			if ( index !== -1 ) {
 
 				listenerArray.splice( index, 1 );
 
@@ -532,15 +532,15 @@ function denormalize( value, array ) {
 
 		case Int32Array:
 
-			return Math.max( value / 2147483647.0, - 1.0 );
+			return Math.max( value / 2147483647.0, -1 );
 
 		case Int16Array:
 
-			return Math.max( value / 32767.0, - 1.0 );
+			return Math.max( value / 32767.0, -1 );
 
 		case Int8Array:
 
-			return Math.max( value / 127.0, - 1.0 );
+			return Math.max( value / 127.0, -1 );
 
 		default:
 
@@ -982,7 +982,7 @@ class Vector2 {
 
 		// clamp, to handle numerical problems
 
-		return Math.acos( clamp$1( theta, - 1, 1 ) );
+		return Math.acos( clamp$1( theta, -1, 1 ) );
 
 	}
 
@@ -1565,7 +1565,7 @@ function toNormalizedProjectionMatrix( projectionMatrix ) {
 function toReversedProjectionMatrix( projectionMatrix ) {
 
 	const m = projectionMatrix.elements;
-	const isPerspectiveMatrix = m[ 11 ] === - 1;
+	const isPerspectiveMatrix = m[ 11 ] === -1;
 
 	// Reverse [0, 1] projection matrix
 	if ( isPerspectiveMatrix ) {
@@ -1601,9 +1601,9 @@ const LINEAR_SRGB_TO_LINEAR_DISPLAY_P3 = /*@__PURE__*/ new Matrix3().set(
 );
 
 const LINEAR_DISPLAY_P3_TO_LINEAR_SRGB = /*@__PURE__*/ new Matrix3().set(
-	1.2249401, - 0.2249404, 0.0,
-	- 0.0420569, 1.0420571, 0.0,
-	- 0.0196376, - 0.0786361, 1.0982735
+	1.2249401, -0.2249404, 0.0,
+	-0.0420569, 1.0420571, 0.0,
+	-0.0196376, -0.0786361, 1.0982735
 );
 
 /**
@@ -3222,7 +3222,7 @@ class Quaternion {
 
 			let s = 1 - t;
 			const cos = x0 * x1 + y0 * y1 + z0 * z1 + w0 * w1,
-				dir = ( cos >= 0 ? 1 : - 1 ),
+				dir = ( cos >= 0 ? 1 : -1 ),
 				sqrSin = 1 - cos * cos;
 
 			// Skip the Slerp for tiny steps to avoid numeric problems:
@@ -3565,7 +3565,7 @@ class Quaternion {
 
 	angleTo( q ) {
 
-		return 2 * Math.acos( Math.abs( clamp$1( this.dot( q ), - 1, 1 ) ) );
+		return 2 * Math.acos( Math.abs( clamp$1( this.dot( q ), -1, 1 ) ) );
 
 	}
 
@@ -3599,9 +3599,9 @@ class Quaternion {
 
 	conjugate() {
 
-		this._x *= - 1;
-		this._y *= - 1;
-		this._z *= - 1;
+		this._x *= -1;
+		this._y *= -1;
+		this._z *= -1;
 
 		this._onChangeCallback();
 
@@ -4383,7 +4383,7 @@ class Vector3 {
 
 		// clamp, to handle numerical problems
 
-		return Math.acos( clamp$1( theta, - 1, 1 ) );
+		return Math.acos( clamp$1( theta, -1, 1 ) );
 
 	}
 
@@ -5111,7 +5111,7 @@ const _v2$3 = /*@__PURE__*/ new Vector3();
 
 class Sphere {
 
-	constructor( center = new Vector3(), radius = - 1 ) {
+	constructor( center = new Vector3(), radius = -1 ) {
 
 		this.isSphere = true;
 
@@ -5175,7 +5175,7 @@ class Sphere {
 	makeEmpty() {
 
 		this.center.set( 0, 0, 0 );
-		this.radius = - 1;
+		this.radius = -1;
 
 		return this;
 
@@ -5357,7 +5357,7 @@ const _normal$1 = /*@__PURE__*/ new Vector3();
 
 class Ray {
 
-	constructor( origin = new Vector3(), direction = new Vector3( 0, 0, - 1 ) ) {
+	constructor( origin = new Vector3(), direction = new Vector3( 0, 0, -1 ) ) {
 
 		this.origin = origin;
 		this.direction = direction;
@@ -5763,7 +5763,7 @@ class Ray {
 
 		} else if ( DdN < 0 ) {
 
-			sign = - 1;
+			sign = -1;
 			DdN = - DdN;
 
 		} else {
@@ -6623,7 +6623,7 @@ class Matrix4 {
 		if ( coordinateSystem === WebGLCoordinateSystem ) {
 
 			c = - ( far + near ) / ( far - near );
-			d = ( - 2 * far * near ) / ( far - near );
+			d = ( -2 * far * near ) / ( far - near );
 
 		} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
 
@@ -6639,7 +6639,7 @@ class Matrix4 {
 		te[ 0 ] = x;	te[ 4 ] = 0;	te[ 8 ] = a; 	te[ 12 ] = 0;
 		te[ 1 ] = 0;	te[ 5 ] = y;	te[ 9 ] = b; 	te[ 13 ] = 0;
 		te[ 2 ] = 0;	te[ 6 ] = 0;	te[ 10 ] = c; 	te[ 14 ] = d;
-		te[ 3 ] = 0;	te[ 7 ] = 0;	te[ 11 ] = - 1;	te[ 15 ] = 0;
+		te[ 3 ] = 0;	te[ 7 ] = 0;	te[ 11 ] = -1;	te[ 15 ] = 0;
 
 		return this;
 
@@ -6660,12 +6660,12 @@ class Matrix4 {
 		if ( coordinateSystem === WebGLCoordinateSystem ) {
 
 			z = ( far + near ) * p;
-			zInv = - 2 * p;
+			zInv = -2 * p;
 
 		} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
 
 			z = near * p;
-			zInv = - 1 * p;
+			zInv = -1 * p;
 
 		} else {
 
@@ -6860,7 +6860,7 @@ class Euler {
 
 			case 'XYZ':
 
-				this._y = Math.asin( clamp$1( m13, - 1, 1 ) );
+				this._y = Math.asin( clamp$1( m13, -1, 1 ) );
 
 				if ( Math.abs( m13 ) < 0.9999999 ) {
 
@@ -6878,7 +6878,7 @@ class Euler {
 
 			case 'YXZ':
 
-				this._x = Math.asin( - clamp$1( m23, - 1, 1 ) );
+				this._x = Math.asin( - clamp$1( m23, -1, 1 ) );
 
 				if ( Math.abs( m23 ) < 0.9999999 ) {
 
@@ -6896,7 +6896,7 @@ class Euler {
 
 			case 'ZXY':
 
-				this._x = Math.asin( clamp$1( m32, - 1, 1 ) );
+				this._x = Math.asin( clamp$1( m32, -1, 1 ) );
 
 				if ( Math.abs( m32 ) < 0.9999999 ) {
 
@@ -6914,7 +6914,7 @@ class Euler {
 
 			case 'ZYX':
 
-				this._y = Math.asin( - clamp$1( m31, - 1, 1 ) );
+				this._y = Math.asin( - clamp$1( m31, -1, 1 ) );
 
 				if ( Math.abs( m31 ) < 0.9999999 ) {
 
@@ -6932,7 +6932,7 @@ class Euler {
 
 			case 'YZX':
 
-				this._z = Math.asin( clamp$1( m21, - 1, 1 ) );
+				this._z = Math.asin( clamp$1( m21, -1, 1 ) );
 
 				if ( Math.abs( m21 ) < 0.9999999 ) {
 
@@ -6950,7 +6950,7 @@ class Euler {
 
 			case 'XZY':
 
-				this._z = Math.asin( - clamp$1( m12, - 1, 1 ) );
+				this._z = Math.asin( - clamp$1( m12, -1, 1 ) );
 
 				if ( Math.abs( m12 ) < 0.9999999 ) {
 
@@ -7477,7 +7477,7 @@ class Object3D extends EventDispatcher {
 
 		const index = this.children.indexOf( object );
 
-		if ( index !== - 1 ) {
+		if ( index !== -1 ) {
 
 			object.parent = null;
 			this.children.splice( index, 1 );
@@ -8818,7 +8818,7 @@ class Color {
 
 	getHexString( colorSpace = SRGBColorSpace ) {
 
-		return ( '000000' + this.getHex( colorSpace ).toString( 16 ) ).slice( - 6 );
+		return ( '000000' + this.getHex( colorSpace ).toString( 16 ) ).slice( -6 );
 
 	}
 
@@ -9702,7 +9702,7 @@ function _generateTables() {
 
 		// very small number (0, -0)
 
-		if ( e < - 27 ) {
+		if ( e < -27 ) {
 
 			baseTable[ i ] = 0x0000;
 			baseTable[ i | 0x100 ] = 0x8000;
@@ -9711,7 +9711,7 @@ function _generateTables() {
 
 			// small number (denorm)
 
-		} else if ( e < - 14 ) {
+		} else if ( e < -14 ) {
 
 			baseTable[ i ] = 0x0400 >> ( - e - 14 );
 			baseTable[ i | 0x100 ] = ( 0x0400 >> ( - e - 14 ) ) | 0x8000;
@@ -9768,7 +9768,7 @@ function _generateTables() {
 
 		}
 
-		m &= ~ 0x00800000; // clear leading 1 bit
+		m &= -8388609; // clear leading 1 bit
 		e += 0x38800000; // adjust bias
 
 		mantissaTable[ i ] = m | e;
@@ -9826,7 +9826,7 @@ function toHalfFloat( val ) {
 
 	if ( Math.abs( val ) > 65504 ) console.warn( 'THREE.DataUtils.toHalfFloat(): Value out of range.' );
 
-	val = clamp$1( val, - 65504, 65504 );
+	val = clamp$1( val, -65504, 65504 );
 
 	_tables.floatView[ 0 ] = val;
 	const f = _tables.uint32View[ 0 ];
@@ -10849,7 +10849,7 @@ class BufferGeometry extends EventDispatcher {
 
 			tmp2.crossVectors( n2, t );
 			const test = tmp2.dot( tan2[ v ] );
-			const w = ( test < 0.0 ) ? - 1.0 : 1.0;
+			const w = ( test < 0.0 ) ? -1 : 1.0;
 
 			tangentAttribute.setXYZW( v, tmp.x, tmp.y, tmp.z, w );
 
@@ -11691,7 +11691,7 @@ function checkGeometryIntersection( object, material, raycaster, ray, uv, uv1, n
 
 			if ( intersection.normal.dot( ray.direction ) > 0 ) {
 
-				intersection.normal.multiplyScalar( - 1 );
+				intersection.normal.multiplyScalar( -1 );
 
 			}
 
@@ -11755,12 +11755,12 @@ class BoxGeometry extends BufferGeometry {
 
 		// build each side of the box geometry
 
-		buildPlane( 'z', 'y', 'x', - 1, - 1, depth, height, width, depthSegments, heightSegments, 0 ); // px
-		buildPlane( 'z', 'y', 'x', 1, - 1, depth, height, - width, depthSegments, heightSegments, 1 ); // nx
+		buildPlane( 'z', 'y', 'x', -1, -1, depth, height, width, depthSegments, heightSegments, 0 ); // px
+		buildPlane( 'z', 'y', 'x', 1, -1, depth, height, - width, depthSegments, heightSegments, 1 ); // nx
 		buildPlane( 'x', 'z', 'y', 1, 1, width, depth, height, widthSegments, depthSegments, 2 ); // py
-		buildPlane( 'x', 'z', 'y', 1, - 1, width, depth, - height, widthSegments, depthSegments, 3 ); // ny
-		buildPlane( 'x', 'y', 'z', 1, - 1, width, height, depth, widthSegments, heightSegments, 4 ); // pz
-		buildPlane( 'x', 'y', 'z', - 1, - 1, width, height, - depth, widthSegments, heightSegments, 5 ); // nz
+		buildPlane( 'x', 'z', 'y', 1, -1, width, depth, - height, widthSegments, depthSegments, 3 ); // ny
+		buildPlane( 'x', 'y', 'z', 1, -1, width, height, depth, widthSegments, heightSegments, 4 ); // pz
+		buildPlane( 'x', 'y', 'z', -1, -1, width, height, - depth, widthSegments, heightSegments, 5 ); // nz
 
 		// build geometry
 
@@ -11810,7 +11810,7 @@ class BoxGeometry extends BufferGeometry {
 
 					vector[ u ] = 0;
 					vector[ v ] = 0;
-					vector[ w ] = depth > 0 ? 1 : - 1;
+					vector[ w ] = depth > 0 ? 1 : -1;
 
 					// now apply vector to normal buffer
 
@@ -12356,7 +12356,7 @@ class PerspectiveCamera extends Camera {
 	 */
 	getViewBounds( distance, minTarget, maxTarget ) {
 
-		_v3$1.set( - 1, - 1, 0.5 ).applyMatrix4( this.projectionMatrixInverse );
+		_v3$1.set( -1, -1, 0.5 ).applyMatrix4( this.projectionMatrixInverse );
 
 		minTarget.set( _v3$1.x, _v3$1.y ).multiplyScalar( - distance / _v3$1.z );
 
@@ -12461,7 +12461,7 @@ class PerspectiveCamera extends Camera {
 		let top = near * Math.tan( DEG2RAD * 0.5 * this.fov ) / this.zoom;
 		let height = 2 * top;
 		let width = this.aspect * height;
-		let left = - 0.5 * width;
+		let left = -0.5 * width;
 		const view = this.view;
 
 		if ( this.view !== null && this.view.enabled ) {
@@ -12509,7 +12509,7 @@ class PerspectiveCamera extends Camera {
 
 }
 
-const fov = - 90; // negative fov is not an error
+const fov = -90; // negative fov is not an error
 const aspect = 1;
 
 class CubeCamera extends Object3D {
@@ -12566,39 +12566,39 @@ class CubeCamera extends Object3D {
 			cameraPX.lookAt( 1, 0, 0 );
 
 			cameraNX.up.set( 0, 1, 0 );
-			cameraNX.lookAt( - 1, 0, 0 );
+			cameraNX.lookAt( -1, 0, 0 );
 
-			cameraPY.up.set( 0, 0, - 1 );
+			cameraPY.up.set( 0, 0, -1 );
 			cameraPY.lookAt( 0, 1, 0 );
 
 			cameraNY.up.set( 0, 0, 1 );
-			cameraNY.lookAt( 0, - 1, 0 );
+			cameraNY.lookAt( 0, -1, 0 );
 
 			cameraPZ.up.set( 0, 1, 0 );
 			cameraPZ.lookAt( 0, 0, 1 );
 
 			cameraNZ.up.set( 0, 1, 0 );
-			cameraNZ.lookAt( 0, 0, - 1 );
+			cameraNZ.lookAt( 0, 0, -1 );
 
 		} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
 
-			cameraPX.up.set( 0, - 1, 0 );
-			cameraPX.lookAt( - 1, 0, 0 );
+			cameraPX.up.set( 0, -1, 0 );
+			cameraPX.lookAt( -1, 0, 0 );
 
-			cameraNX.up.set( 0, - 1, 0 );
+			cameraNX.up.set( 0, -1, 0 );
 			cameraNX.lookAt( 1, 0, 0 );
 
 			cameraPY.up.set( 0, 0, 1 );
 			cameraPY.lookAt( 0, 1, 0 );
 
-			cameraNY.up.set( 0, 0, - 1 );
-			cameraNY.lookAt( 0, - 1, 0 );
+			cameraNY.up.set( 0, 0, -1 );
+			cameraNY.lookAt( 0, -1, 0 );
 
-			cameraPZ.up.set( 0, - 1, 0 );
+			cameraPZ.up.set( 0, -1, 0 );
 			cameraPZ.lookAt( 0, 0, 1 );
 
-			cameraNZ.up.set( 0, - 1, 0 );
-			cameraNZ.lookAt( 0, 0, - 1 );
+			cameraNZ.up.set( 0, -1, 0 );
+			cameraNZ.lookAt( 0, 0, -1 );
 
 		} else {
 
@@ -12921,7 +12921,7 @@ class Plane {
 
 	negate() {
 
-		this.constant *= - 1;
+		this.constant *= -1;
 		this.normal.negate();
 
 		return this;
@@ -14058,7 +14058,7 @@ const UniformsLib = {
 
 		envMap: { value: null },
 		envMapRotation: { value: /*@__PURE__*/ new Matrix3() },
-		flipEnvMap: { value: - 1 },
+		flipEnvMap: { value: -1 },
 		reflectivity: { value: 1.0 }, // basic, lambert, phong
 		ior: { value: 1.5 }, // physical
 		refractionRatio: { value: 0.98 }, // basic, lambert, phong
@@ -14479,7 +14479,7 @@ const ShaderLib = {
 
 		uniforms: {
 			envMap: { value: null },
-			flipEnvMap: { value: - 1 },
+			flipEnvMap: { value: -1 },
 			backgroundBlurriness: { value: 0 },
 			backgroundIntensity: { value: 1 },
 			backgroundRotation: { value: /*@__PURE__*/ new Matrix3() }
@@ -14494,7 +14494,7 @@ const ShaderLib = {
 
 		uniforms: {
 			tCube: { value: null },
-			tFlip: { value: - 1 },
+			tFlip: { value: -1 },
 			opacity: { value: 1.0 }
 		},
 
@@ -14728,18 +14728,18 @@ function WebGLBackground( renderer, cubemaps, cubeuvmaps, state, objects, alpha,
 			_e1$1.copy( scene.backgroundRotation );
 
 			// accommodate left-handed frame
-			_e1$1.x *= - 1; _e1$1.y *= - 1; _e1$1.z *= - 1;
+			_e1$1.x *= -1; _e1$1.y *= -1; _e1$1.z *= -1;
 
 			if ( background.isCubeTexture && background.isRenderTargetTexture === false ) {
 
 				// environment maps which are not cube render targets or PMREMs follow a different convention
-				_e1$1.y *= - 1;
-				_e1$1.z *= - 1;
+				_e1$1.y *= -1;
+				_e1$1.z *= -1;
 
 			}
 
 			boxMesh.material.uniforms.envMap.value = background;
-			boxMesh.material.uniforms.flipEnvMap.value = ( background.isCubeTexture && background.isRenderTargetTexture === false ) ? - 1 : 1;
+			boxMesh.material.uniforms.flipEnvMap.value = ( background.isCubeTexture && background.isRenderTargetTexture === false ) ? -1 : 1;
 			boxMesh.material.uniforms.backgroundBlurriness.value = scene.backgroundBlurriness;
 			boxMesh.material.uniforms.backgroundIntensity.value = scene.backgroundIntensity;
 			boxMesh.material.uniforms.backgroundRotation.value.setFromMatrix4( _m1$1.makeRotationFromEuler( _e1$1 ) );
@@ -15961,7 +15961,7 @@ function WebGLCubeMaps( renderer ) {
 
 class OrthographicCamera extends Camera {
 
-	constructor( left = - 1, right = 1, top = 1, bottom = - 1, near = 0.1, far = 2000 ) {
+	constructor( left = -1, right = 1, top = 1, bottom = -1, near = 0.1, far = 2000 ) {
 
 		super();
 
@@ -16124,9 +16124,9 @@ const _axisDirections = [
 	/*@__PURE__*/ new Vector3( INV_PHI, 0, PHI ),
 	/*@__PURE__*/ new Vector3( 0, PHI, - INV_PHI ),
 	/*@__PURE__*/ new Vector3( 0, PHI, INV_PHI ),
-	/*@__PURE__*/ new Vector3( - 1, 1, - 1 ),
-	/*@__PURE__*/ new Vector3( 1, 1, - 1 ),
-	/*@__PURE__*/ new Vector3( - 1, 1, 1 ),
+	/*@__PURE__*/ new Vector3( -1, 1, -1 ),
+	/*@__PURE__*/ new Vector3( 1, 1, -1 ),
+	/*@__PURE__*/ new Vector3( -1, 1, 1 ),
 	/*@__PURE__*/ new Vector3( 1, 1, 1 ) ];
 
 /**
@@ -16380,8 +16380,8 @@ class PMREMGenerator {
 		const fov = 90;
 		const aspect = 1;
 		const cubeCamera = new PerspectiveCamera( fov, aspect, near, far );
-		const upSign = [ 1, - 1, 1, 1, 1, 1 ];
-		const forwardSign = [ 1, 1, 1, - 1, - 1, - 1 ];
+		const upSign = [ 1, -1, 1, 1, 1, 1 ];
+		const forwardSign = [ 1, 1, 1, -1, -1, -1 ];
 		const renderer = this._renderer;
 
 		const originalAutoClear = renderer.autoClear;
@@ -16480,7 +16480,7 @@ class PMREMGenerator {
 
 			}
 
-			this._cubemapMaterial.uniforms.flipEnvMap.value = ( texture.isRenderTargetTexture === false ) ? - 1 : 1;
+			this._cubemapMaterial.uniforms.flipEnvMap.value = ( texture.isRenderTargetTexture === false ) ? -1 : 1;
 
 		} else {
 
@@ -16693,7 +16693,7 @@ function _createPlanes( lodMax ) {
 		for ( let face = 0; face < cubeFaces; face ++ ) {
 
 			const x = ( face % 3 ) * 2 / 3 - 1;
-			const y = face > 2 ? 0 : - 1;
+			const y = face > 2 ? 0 : -1;
 			const coordinates = [
 				x, y, 0,
 				x + 2 / 3, y, 0,
@@ -16892,7 +16892,7 @@ function _getCubemapMaterial() {
 
 		uniforms: {
 			'envMap': { value: null },
-			'flipEnvMap': { value: - 1 }
+			'flipEnvMap': { value: -1 }
 		},
 
 		vertexShader: _getCommonVertexShader(),
@@ -21348,18 +21348,18 @@ function WebGLLights( extensions ) {
 		version: 0,
 
 		hash: {
-			directionalLength: - 1,
-			pointLength: - 1,
-			spotLength: - 1,
-			rectAreaLength: - 1,
-			hemiLength: - 1,
+			directionalLength: -1,
+			pointLength: -1,
+			spotLength: -1,
+			rectAreaLength: -1,
+			hemiLength: -1,
 
-			numDirectionalShadows: - 1,
-			numPointShadows: - 1,
-			numSpotShadows: - 1,
-			numSpotMaps: - 1,
+			numDirectionalShadows: -1,
+			numPointShadows: -1,
+			numSpotShadows: -1,
+			numSpotMaps: -1,
 
-			numLightProbes: - 1
+			numLightProbes: -1
 		},
 
 		ambient: [ 0, 0, 0 ],
@@ -21990,7 +21990,7 @@ function WebGLShadowMap( renderer, objects, capabilities ) {
 	fullScreenTri.setAttribute(
 		'position',
 		new BufferAttribute(
-			new Float32Array( [ - 1, - 1, 0.5, 3, - 1, 0.5, - 1, 3, 0.5 ] ),
+			new Float32Array( [ -1, -1, 0.5, 3, -1, 0.5, -1, 3, 0.5 ] ),
 			3
 		)
 	);
@@ -22423,7 +22423,7 @@ function WebGLState( gl ) {
 				locked = false;
 
 				currentColorMask = null;
-				currentColorClear.set( - 1, 0, 0, 0 ); // set to invalid state
+				currentColorClear.set( -1, 0, 0, 0 ); // set to invalid state
 
 			}
 
@@ -22719,12 +22719,12 @@ function WebGLState( gl ) {
 	let version = 0;
 	const glVersion = gl.getParameter( gl.VERSION );
 
-	if ( glVersion.indexOf( 'WebGL' ) !== - 1 ) {
+	if ( glVersion.indexOf( 'WebGL' ) !== -1 ) {
 
 		version = parseFloat( /^WebGL (\d)/.exec( glVersion )[ 1 ] );
 		lineWidthAvailable = ( version >= 1.0 );
 
-	} else if ( glVersion.indexOf( 'OpenGL ES' ) !== - 1 ) {
+	} else if ( glVersion.indexOf( 'OpenGL ES' ) !== -1 ) {
 
 		version = parseFloat( /^OpenGL ES (\d)/.exec( glVersion )[ 1 ] );
 		lineWidthAvailable = ( version >= 2.0 );
@@ -26737,7 +26737,7 @@ class WebXRManager extends EventDispatcher {
 
 			const controllerIndex = controllerInputSources.indexOf( event.inputSource );
 
-			if ( controllerIndex === - 1 ) {
+			if ( controllerIndex === -1 ) {
 
 				return;
 
@@ -27023,7 +27023,7 @@ class WebXRManager extends EventDispatcher {
 
 				let controllerIndex = controllerInputSources.indexOf( inputSource );
 
-				if ( controllerIndex === - 1 ) {
+				if ( controllerIndex === -1 ) {
 
 					// Assign input source a controller that currently has no input source
 
@@ -27047,7 +27047,7 @@ class WebXRManager extends EventDispatcher {
 
 					// If all controllers do currently receive input we ignore new ones
 
-					if ( controllerIndex === - 1 ) break;
+					if ( controllerIndex === -1 ) break;
 
 				}
 
@@ -27110,7 +27110,7 @@ class WebXRManager extends EventDispatcher {
 			camera.matrixWorldInverse.copy( camera.matrixWorld ).invert();
 
 			// Check if the projection uses an infinite far plane.
-			if ( projL[ 10 ] === - 1.0 ) {
+			if ( projL[ 10 ] === -1 ) {
 
 				// Use the projection matrix from the left eye.
 				// The camera offset is sufficient to include the view volumes
@@ -27604,7 +27604,7 @@ function WebGLMaterials( renderer, properties ) {
 
 			if ( material.side === BackSide ) {
 
-				uniforms.bumpScale.value *= - 1;
+				uniforms.bumpScale.value *= -1;
 
 			}
 
@@ -27671,19 +27671,19 @@ function WebGLMaterials( renderer, properties ) {
 			_e1.copy( envMapRotation );
 
 			// accommodate left-handed frame
-			_e1.x *= - 1; _e1.y *= - 1; _e1.z *= - 1;
+			_e1.x *= -1; _e1.y *= -1; _e1.z *= -1;
 
 			if ( envMap.isCubeTexture && envMap.isRenderTargetTexture === false ) {
 
 				// environment maps which are not cube render targets or PMREMs follow a different convention
-				_e1.y *= - 1;
-				_e1.z *= - 1;
+				_e1.y *= -1;
+				_e1.z *= -1;
 
 			}
 
 			uniforms.envMapRotation.value.setFromMatrix4( _m1.makeRotationFromEuler( _e1 ) );
 
-			uniforms.flipEnvMap.value = ( envMap.isCubeTexture && envMap.isRenderTargetTexture === false ) ? - 1 : 1;
+			uniforms.flipEnvMap.value = ( envMap.isCubeTexture && envMap.isRenderTargetTexture === false ) ? -1 : 1;
 
 			uniforms.reflectivity.value = material.reflectivity;
 			uniforms.ior.value = material.ior;
@@ -28106,7 +28106,7 @@ function WebGLUniformsGroups( gl, info, capabilities, state ) {
 
 		for ( let i = 0; i < maxBindingPoints; i ++ ) {
 
-			if ( allocatedBindingPoints.indexOf( i ) === - 1 ) {
+			if ( allocatedBindingPoints.indexOf( i ) === -1 ) {
 
 				allocatedBindingPoints.push( i );
 				return i;
@@ -28527,7 +28527,7 @@ class WebGLRenderer {
 		let _currentActiveCubeFace = 0;
 		let _currentActiveMipmapLevel = 0;
 		let _currentRenderTarget = null;
-		let _currentMaterialId = - 1;
+		let _currentMaterialId = -1;
 
 		let _currentCamera = null;
 
@@ -29651,7 +29651,7 @@ class WebGLRenderer {
 			// _gl.finish();
 
 			bindingStates.resetDefaultState();
-			_currentMaterialId = - 1;
+			_currentMaterialId = -1;
 			_currentCamera = null;
 
 			renderStateStack.pop();
@@ -30465,7 +30465,7 @@ class WebGLRenderer {
 
 				m_uniforms.envMap.value = envMap;
 
-				m_uniforms.flipEnvMap.value = ( envMap.isCubeTexture && envMap.isRenderTargetTexture === false ) ? - 1 : 1;
+				m_uniforms.flipEnvMap.value = ( envMap.isCubeTexture && envMap.isRenderTargetTexture === false ) ? -1 : 1;
 
 			}
 
@@ -30758,7 +30758,7 @@ class WebGLRenderer {
 
 			}
 
-			_currentMaterialId = - 1; // reset current material to ensure correct uniform bindings
+			_currentMaterialId = -1; // reset current material to ensure correct uniform bindings
 
 		};
 
@@ -33382,7 +33382,7 @@ class SphereGeometry extends BufferGeometry {
 
 			} else if ( iy === heightSegments && thetaEnd === Math.PI ) {
 
-				uOffset = - 0.5 / widthSegments;
+				uOffset = -0.5 / widthSegments;
 
 			}
 
@@ -34211,10 +34211,10 @@ class CubicInterpolant extends Interpolant {
 
 		super( parameterPositions, sampleValues, sampleSize, resultBuffer );
 
-		this._weightPrev = - 0;
-		this._offsetPrev = - 0;
-		this._weightNext = - 0;
-		this._offsetNext = - 0;
+		this._weightPrev = -0;
+		this._offsetPrev = -0;
+		this._weightNext = -0;
+		this._offsetNext = -0;
 
 		this.DefaultSettings_ = {
 
@@ -34321,8 +34321,8 @@ class CubicInterpolant extends Interpolant {
 		// evaluate polynomials
 
 		const sP = - wP * ppp + 2 * wP * pp - wP * p;
-		const s0 = ( 1 + wP ) * ppp + ( - 1.5 - 2 * wP ) * pp + ( - 0.5 + wP ) * p + 1;
-		const s1 = ( - 1 - wN ) * ppp + ( 1.5 + wN ) * pp + 0.5 * p;
+		const s0 = ( 1 + wP ) * ppp + ( -1.5 - 2 * wP ) * pp + ( -0.5 + wP ) * p + 1;
+		const s1 = ( -1 - wN ) * ppp + ( 1.5 + wN ) * pp + 0.5 * p;
 		const sN = wN * ppp - wN * pp;
 
 		// combine data linearly
@@ -34611,7 +34611,7 @@ class KeyframeTrack {
 
 		}
 
-		while ( to !== - 1 && times[ to ] > endTime ) {
+		while ( to !== -1 && times[ to ] > endTime ) {
 
 			-- to;
 
@@ -34965,7 +34965,7 @@ VectorKeyframeTrack.prototype.ValueTypeName = 'vector';
 
 class AnimationClip {
 
-	constructor( name = '', duration = - 1, tracks = [], blendMode = NormalAnimationBlendMode ) {
+	constructor( name = '', duration = -1, tracks = [], blendMode = NormalAnimationBlendMode ) {
 
 		this.name = name;
 		this.tracks = tracks;
@@ -35066,7 +35066,7 @@ class AnimationClip {
 
 		}
 
-		return new this( name, - 1, tracks );
+		return new this( name, -1, tracks );
 
 	}
 
@@ -35178,7 +35178,7 @@ class AnimationClip {
 		const blendMode = animation.blendMode;
 
 		// automatic length determination in AnimationClip.
-		let duration = animation.length || - 1;
+		let duration = animation.length || -1;
 
 		const hierarchyTracks = animation.hierarchy || [];
 
@@ -35203,7 +35203,7 @@ class AnimationClip {
 
 						for ( let m = 0; m < animationKeys[ k ].morphTargets.length; m ++ ) {
 
-							morphTargetNames[ animationKeys[ k ].morphTargets[ m ] ] = - 1;
+							morphTargetNames[ animationKeys[ k ].morphTargets[ m ] ] = -1;
 
 						}
 
@@ -35568,7 +35568,7 @@ class LoadingManager {
 
 			const index = handlers.indexOf( regex );
 
-			if ( index !== - 1 ) {
+			if ( index !== -1 ) {
 
 				handlers.splice( index, 2 );
 
@@ -36557,13 +36557,13 @@ class PointLightShadow extends LightShadow {
 		];
 
 		this._cubeDirections = [
-			new Vector3( 1, 0, 0 ), new Vector3( - 1, 0, 0 ), new Vector3( 0, 0, 1 ),
-			new Vector3( 0, 0, - 1 ), new Vector3( 0, 1, 0 ), new Vector3( 0, - 1, 0 )
+			new Vector3( 1, 0, 0 ), new Vector3( -1, 0, 0 ), new Vector3( 0, 0, 1 ),
+			new Vector3( 0, 0, -1 ), new Vector3( 0, 1, 0 ), new Vector3( 0, -1, 0 )
 		];
 
 		this._cubeUps = [
 			new Vector3( 0, 1, 0 ), new Vector3( 0, 1, 0 ), new Vector3( 0, 1, 0 ),
-			new Vector3( 0, 1, 0 ), new Vector3( 0, 0, 1 ),	new Vector3( 0, 0, - 1 )
+			new Vector3( 0, 1, 0 ), new Vector3( 0, 0, 1 ),	new Vector3( 0, 0, -1 )
 		];
 
 	}
@@ -36657,7 +36657,7 @@ class DirectionalLightShadow extends LightShadow {
 
 	constructor() {
 
-		super( new OrthographicCamera( - 5, 5, 5, - 5, 0.5, 500 ) );
+		super( new OrthographicCamera( -5, 5, 5, -5, 0.5, 500 ) );
 
 		this.isDirectionalLightShadow = true;
 
@@ -37028,7 +37028,7 @@ class LoaderUtils {
 
 		const index = url.lastIndexOf( '/' );
 
-		if ( index === - 1 ) return './';
+		if ( index === -1 ) return './';
 
 		return url.slice( 0, index + 1 );
 
@@ -37663,7 +37663,7 @@ class PropertyBinding {
 
 		const lastDot = results.nodeName && results.nodeName.lastIndexOf( '.' );
 
-		if ( lastDot !== undefined && lastDot !== - 1 ) {
+		if ( lastDot !== undefined && lastDot !== -1 ) {
 
 			const objectName = results.nodeName.substring( lastDot + 1 );
 
@@ -37671,7 +37671,7 @@ class PropertyBinding {
 			// is no way to parse 'foo.bar.baz': 'baz' must be a property, but
 			// 'bar' could be the objectName, or part of a nodeName (which can
 			// include '.' characters).
-			if ( _supportedObjectNames.indexOf( objectName ) !== - 1 ) {
+			if ( _supportedObjectNames.indexOf( objectName ) !== -1 ) {
 
 				results.nodeName = results.nodeName.substring( 0, lastDot );
 				results.objectName = objectName;
@@ -37692,7 +37692,7 @@ class PropertyBinding {
 
 	static findNode( root, nodeName ) {
 
-		if ( nodeName === undefined || nodeName === '' || nodeName === '.' || nodeName === - 1 || nodeName === root.name || nodeName === root.uuid ) {
+		if ( nodeName === undefined || nodeName === '' || nodeName === '.' || nodeName === -1 || nodeName === root.name || nodeName === root.uuid ) {
 
 			return root;
 
@@ -38252,7 +38252,7 @@ class AnimationAction {
 		this._weightInterpolant = null;
 
 		this.loop = LoopRepeat;
-		this._loopCount = - 1;
+		this._loopCount = -1;
 
 		// global mixer time when the action is to be started
 		// it's set back to 'null' upon start of the action
@@ -38304,7 +38304,7 @@ class AnimationAction {
 		this.enabled = true;
 
 		this.time = 0; // restart clip
-		this._loopCount = - 1;// forget previous loops
+		this._loopCount = -1;// forget previous loops
 		this._startTime = null;// forget scheduling
 
 		return this.stopFading().stopWarping();
@@ -38699,7 +38699,7 @@ class AnimationAction {
 
 		if ( deltaTime === 0 ) {
 
-			if ( loopCount === - 1 ) return time;
+			if ( loopCount === -1 ) return time;
 
 			return ( pingPong && ( loopCount & 1 ) === 1 ) ? duration - time : time;
 
@@ -38707,7 +38707,7 @@ class AnimationAction {
 
 		if ( loop === LoopOnce ) {
 
-			if ( loopCount === - 1 ) {
+			if ( loopCount === -1 ) {
 
 				// just started
 
@@ -38741,14 +38741,14 @@ class AnimationAction {
 
 				this._mixer.dispatchEvent( {
 					type: 'finished', action: this,
-					direction: deltaTime < 0 ? - 1 : 1
+					direction: deltaTime < 0 ? -1 : 1
 				} );
 
 			}
 
 		} else { // repetitive Repeat or PingPong
 
-			if ( loopCount === - 1 ) {
+			if ( loopCount === -1 ) {
 
 				// just started
 
@@ -38794,7 +38794,7 @@ class AnimationAction {
 
 					this._mixer.dispatchEvent( {
 						type: 'finished', action: this,
-						direction: deltaTime > 0 ? 1 : - 1
+						direction: deltaTime > 0 ? 1 : -1
 					} );
 
 				} else {
@@ -39726,7 +39726,7 @@ class Raycaster {
 		} else if ( camera.isOrthographicCamera ) {
 
 			this.ray.origin.set( coords.x, coords.y, ( camera.near + camera.far ) / ( camera.near - camera.far ) ).unproject( camera ); // set origin in plane of camera
-			this.ray.direction.set( 0, 0, - 1 ).transformDirection( camera.matrixWorld );
+			this.ray.direction.set( 0, 0, -1 ).transformDirection( camera.matrixWorld );
 			this.camera = camera;
 
 		} else {
@@ -39742,7 +39742,7 @@ class Raycaster {
 		_matrix.identity().extractRotation( controller.matrixWorld );
 
 		this.ray.origin.setFromMatrixPosition( controller.matrixWorld );
-		this.ray.direction.set( 0, 0, - 1 ).applyMatrix4( _matrix );
+		this.ray.direction.set( 0, 0, -1 ).applyMatrix4( _matrix );
 
 		return this;
 
@@ -39872,7 +39872,7 @@ class Spherical {
 		} else {
 
 			this.theta = Math.atan2( x, z );
-			this.phi = Math.acos( clamp$1( y / this.radius, - 1, 1 ) );
+			this.phi = Math.acos( clamp$1( y / this.radius, -1, 1 ) );
 
 		}
 
@@ -39915,26 +39915,26 @@ if ( typeof window !== 'undefined' ) {
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const t$2=window,e$2=t$2.ShadowRoot&&(void 0===t$2.ShadyCSS||t$2.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$3=Symbol(),n$4=new WeakMap;let o$3 = class o{constructor(t,e,n){if(this._$cssResult$=!0,n!==s$3)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$2&&void 0===t){const e=void 0!==s&&1===s.length;e&&(t=n$4.get(s)),void 0===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&n$4.set(s,t));}return t}toString(){return this.cssText}};const r$2=t=>new o$3("string"==typeof t?t:t+"",void 0,s$3),S$1=(s,n)=>{e$2?s.adoptedStyleSheets=n.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet)):n.forEach((e=>{const n=document.createElement("style"),o=t$2.litNonce;void 0!==o&&n.setAttribute("nonce",o),n.textContent=e.cssText,s.appendChild(n);}));},c$2=e$2?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$2(e)})(t):t;
+const t$2=window,e$2=t$2.ShadowRoot&&(undefined===t$2.ShadyCSS||t$2.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,s$3=Symbol(),n$4=new WeakMap;let o$3 = class o{constructor(t,e,n){if(this._$cssResult$=true,n!==s$3)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e;}get styleSheet(){let t=this.o;const s=this.t;if(e$2&&undefined===t){const e=undefined!==s&&1===s.length;e&&(t=n$4.get(s)),undefined===t&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),e&&n$4.set(s,t));}return t}toString(){return this.cssText}};const r$2=t=>new o$3("string"==typeof t?t:t+"",undefined,s$3),S$1=(s,n)=>{e$2?s.adoptedStyleSheets=n.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet)):n.forEach((e=>{const n=document.createElement("style"),o=t$2.litNonce;undefined!==o&&n.setAttribute("nonce",o),n.textContent=e.cssText,s.appendChild(n);}));},c$2=e$2?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const s of t.cssRules)e+=s.cssText;return r$2(e)})(t):t;
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var s$2;const e$1=window,r$1=e$1.trustedTypes,h$1=r$1?r$1.emptyScript:"",o$2=e$1.reactiveElementPolyfillSupport,n$3={toAttribute(t,i){switch(i){case Boolean:t=t?h$1:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,i){let s=t;switch(i){case Boolean:s=null!==t;break;case Number:s=null===t?null:Number(t);break;case Object:case Array:try{s=JSON.parse(t);}catch(t){s=null;}}return s}},a$2=(t,i)=>i!==t&&(i==i||t==t),l$2={attribute:!0,type:String,converter:n$3,reflect:!1,hasChanged:a$2},d$1="finalized";let u$2 = class u extends HTMLElement{constructor(){super(),this._$Ei=new Map,this.isUpdatePending=!1,this.hasUpdated=!1,this._$El=null,this._$Eu();}static addInitializer(t){var i;this.finalize(),(null!==(i=this.h)&&void 0!==i?i:this.h=[]).push(t);}static get observedAttributes(){this.finalize();const t=[];return this.elementProperties.forEach(((i,s)=>{const e=this._$Ep(s,i);void 0!==e&&(this._$Ev.set(e,s),t.push(e));})),t}static createProperty(t,i=l$2){if(i.state&&(i.attribute=!1),this.finalize(),this.elementProperties.set(t,i),!i.noAccessor&&!this.prototype.hasOwnProperty(t)){const s="symbol"==typeof t?Symbol():"__"+t,e=this.getPropertyDescriptor(t,s,i);void 0!==e&&Object.defineProperty(this.prototype,t,e);}}static getPropertyDescriptor(t,i,s){return {get(){return this[i]},set(e){const r=this[t];this[i]=e,this.requestUpdate(t,r,s);},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)||l$2}static finalize(){if(this.hasOwnProperty(d$1))return !1;this[d$1]=!0;const t=Object.getPrototypeOf(this);if(t.finalize(),void 0!==t.h&&(this.h=[...t.h]),this.elementProperties=new Map(t.elementProperties),this._$Ev=new Map,this.hasOwnProperty("properties")){const t=this.properties,i=[...Object.getOwnPropertyNames(t),...Object.getOwnPropertySymbols(t)];for(const s of i)this.createProperty(s,t[s]);}return this.elementStyles=this.finalizeStyles(this.styles),!0}static finalizeStyles(i){const s=[];if(Array.isArray(i)){const e=new Set(i.flat(1/0).reverse());for(const i of e)s.unshift(c$2(i));}else void 0!==i&&s.push(c$2(i));return s}static _$Ep(t,i){const s=i.attribute;return !1===s?void 0:"string"==typeof s?s:"string"==typeof t?t.toLowerCase():void 0}_$Eu(){var t;this._$E_=new Promise((t=>this.enableUpdating=t)),this._$AL=new Map,this._$Eg(),this.requestUpdate(),null===(t=this.constructor.h)||void 0===t||t.forEach((t=>t(this)));}addController(t){var i,s;(null!==(i=this._$ES)&&void 0!==i?i:this._$ES=[]).push(t),void 0!==this.renderRoot&&this.isConnected&&(null===(s=t.hostConnected)||void 0===s||s.call(t));}removeController(t){var i;null===(i=this._$ES)||void 0===i||i.splice(this._$ES.indexOf(t)>>>0,1);}_$Eg(){this.constructor.elementProperties.forEach(((t,i)=>{this.hasOwnProperty(i)&&(this._$Ei.set(i,this[i]),delete this[i]);}));}createRenderRoot(){var t;const s=null!==(t=this.shadowRoot)&&void 0!==t?t:this.attachShadow(this.constructor.shadowRootOptions);return S$1(s,this.constructor.elementStyles),s}connectedCallback(){var t;void 0===this.renderRoot&&(this.renderRoot=this.createRenderRoot()),this.enableUpdating(!0),null===(t=this._$ES)||void 0===t||t.forEach((t=>{var i;return null===(i=t.hostConnected)||void 0===i?void 0:i.call(t)}));}enableUpdating(t){}disconnectedCallback(){var t;null===(t=this._$ES)||void 0===t||t.forEach((t=>{var i;return null===(i=t.hostDisconnected)||void 0===i?void 0:i.call(t)}));}attributeChangedCallback(t,i,s){this._$AK(t,s);}_$EO(t,i,s=l$2){var e;const r=this.constructor._$Ep(t,s);if(void 0!==r&&!0===s.reflect){const h=(void 0!==(null===(e=s.converter)||void 0===e?void 0:e.toAttribute)?s.converter:n$3).toAttribute(i,s.type);this._$El=t,null==h?this.removeAttribute(r):this.setAttribute(r,h),this._$El=null;}}_$AK(t,i){var s;const e=this.constructor,r=e._$Ev.get(t);if(void 0!==r&&this._$El!==r){const t=e.getPropertyOptions(r),h="function"==typeof t.converter?{fromAttribute:t.converter}:void 0!==(null===(s=t.converter)||void 0===s?void 0:s.fromAttribute)?t.converter:n$3;this._$El=r,this[r]=h.fromAttribute(i,t.type),this._$El=null;}}requestUpdate(t,i,s){let e=!0;void 0!==t&&(((s=s||this.constructor.getPropertyOptions(t)).hasChanged||a$2)(this[t],i)?(this._$AL.has(t)||this._$AL.set(t,i),!0===s.reflect&&this._$El!==t&&(void 0===this._$EC&&(this._$EC=new Map),this._$EC.set(t,s))):e=!1),!this.isUpdatePending&&e&&(this._$E_=this._$Ej());}async _$Ej(){this.isUpdatePending=!0;try{await this._$E_;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){var t;if(!this.isUpdatePending)return;this.hasUpdated,this._$Ei&&(this._$Ei.forEach(((t,i)=>this[i]=t)),this._$Ei=void 0);let i=!1;const s=this._$AL;try{i=this.shouldUpdate(s),i?(this.willUpdate(s),null===(t=this._$ES)||void 0===t||t.forEach((t=>{var i;return null===(i=t.hostUpdate)||void 0===i?void 0:i.call(t)})),this.update(s)):this._$Ek();}catch(t){throw i=!1,this._$Ek(),t}i&&this._$AE(s);}willUpdate(t){}_$AE(t){var i;null===(i=this._$ES)||void 0===i||i.forEach((t=>{var i;return null===(i=t.hostUpdated)||void 0===i?void 0:i.call(t)})),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t);}_$Ek(){this._$AL=new Map,this.isUpdatePending=!1;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$E_}shouldUpdate(t){return !0}update(t){void 0!==this._$EC&&(this._$EC.forEach(((t,i)=>this._$EO(i,this[i],t))),this._$EC=void 0),this._$Ek();}updated(t){}firstUpdated(t){}};u$2[d$1]=!0,u$2.elementProperties=new Map,u$2.elementStyles=[],u$2.shadowRootOptions={mode:"open"},null==o$2||o$2({ReactiveElement:u$2}),(null!==(s$2=e$1.reactiveElementVersions)&&void 0!==s$2?s$2:e$1.reactiveElementVersions=[]).push("1.6.3");
+ */var s$2;const e$1=window,r$1=e$1.trustedTypes,h$1=r$1?r$1.emptyScript:"",o$2=e$1.reactiveElementPolyfillSupport,n$3={toAttribute(t,i){switch(i){case Boolean:t=t?h$1:null;break;case Object:case Array:t=null==t?t:JSON.stringify(t);}return t},fromAttribute(t,i){let s=t;switch(i){case Boolean:s=null!==t;break;case Number:s=null===t?null:Number(t);break;case Object:case Array:try{s=JSON.parse(t);}catch(t){s=null;}}return s}},a$2=(t,i)=>i!==t&&(i==i||t==t),l$2={attribute:true,type:String,converter:n$3,reflect:false,hasChanged:a$2},d$1="finalized";let u$2 = class u extends HTMLElement{constructor(){super(),this._$Ei=new Map,this.isUpdatePending=false,this.hasUpdated=false,this._$El=null,this._$Eu();}static addInitializer(t){var i;this.finalize(),(null!==(i=this.h)&&undefined!==i?i:this.h=[]).push(t);}static get observedAttributes(){this.finalize();const t=[];return this.elementProperties.forEach(((i,s)=>{const e=this._$Ep(s,i);undefined!==e&&(this._$Ev.set(e,s),t.push(e));})),t}static createProperty(t,i=l$2){if(i.state&&(i.attribute=false),this.finalize(),this.elementProperties.set(t,i),!i.noAccessor&&!this.prototype.hasOwnProperty(t)){const s="symbol"==typeof t?Symbol():"__"+t,e=this.getPropertyDescriptor(t,s,i);undefined!==e&&Object.defineProperty(this.prototype,t,e);}}static getPropertyDescriptor(t,i,s){return {get(){return this[i]},set(e){const r=this[t];this[i]=e,this.requestUpdate(t,r,s);},configurable:true,enumerable:true}}static getPropertyOptions(t){return this.elementProperties.get(t)||l$2}static finalize(){if(this.hasOwnProperty(d$1))return false;this[d$1]=true;const t=Object.getPrototypeOf(this);if(t.finalize(),undefined!==t.h&&(this.h=[...t.h]),this.elementProperties=new Map(t.elementProperties),this._$Ev=new Map,this.hasOwnProperty("properties")){const t=this.properties,i=[...Object.getOwnPropertyNames(t),...Object.getOwnPropertySymbols(t)];for(const s of i)this.createProperty(s,t[s]);}return this.elementStyles=this.finalizeStyles(this.styles),true}static finalizeStyles(i){const s=[];if(Array.isArray(i)){const e=new Set(i.flat(1/0).reverse());for(const i of e)s.unshift(c$2(i));}else undefined!==i&&s.push(c$2(i));return s}static _$Ep(t,i){const s=i.attribute;return false===s?undefined:"string"==typeof s?s:"string"==typeof t?t.toLowerCase():undefined}_$Eu(){var t;this._$E_=new Promise((t=>this.enableUpdating=t)),this._$AL=new Map,this._$Eg(),this.requestUpdate(),null===(t=this.constructor.h)||undefined===t||t.forEach((t=>t(this)));}addController(t){var i,s;(null!==(i=this._$ES)&&undefined!==i?i:this._$ES=[]).push(t),undefined!==this.renderRoot&&this.isConnected&&(null===(s=t.hostConnected)||undefined===s||s.call(t));}removeController(t){var i;null===(i=this._$ES)||undefined===i||i.splice(this._$ES.indexOf(t)>>>0,1);}_$Eg(){this.constructor.elementProperties.forEach(((t,i)=>{this.hasOwnProperty(i)&&(this._$Ei.set(i,this[i]),delete this[i]);}));}createRenderRoot(){var t;const s=null!==(t=this.shadowRoot)&&undefined!==t?t:this.attachShadow(this.constructor.shadowRootOptions);return S$1(s,this.constructor.elementStyles),s}connectedCallback(){var t;undefined===this.renderRoot&&(this.renderRoot=this.createRenderRoot()),this.enableUpdating(true),null===(t=this._$ES)||undefined===t||t.forEach((t=>{var i;return null===(i=t.hostConnected)||undefined===i?undefined:i.call(t)}));}enableUpdating(t){}disconnectedCallback(){var t;null===(t=this._$ES)||undefined===t||t.forEach((t=>{var i;return null===(i=t.hostDisconnected)||undefined===i?undefined:i.call(t)}));}attributeChangedCallback(t,i,s){this._$AK(t,s);}_$EO(t,i,s=l$2){var e;const r=this.constructor._$Ep(t,s);if(undefined!==r&&true===s.reflect){const h=(undefined!==(null===(e=s.converter)||undefined===e?undefined:e.toAttribute)?s.converter:n$3).toAttribute(i,s.type);this._$El=t,null==h?this.removeAttribute(r):this.setAttribute(r,h),this._$El=null;}}_$AK(t,i){var s;const e=this.constructor,r=e._$Ev.get(t);if(undefined!==r&&this._$El!==r){const t=e.getPropertyOptions(r),h="function"==typeof t.converter?{fromAttribute:t.converter}:undefined!==(null===(s=t.converter)||undefined===s?undefined:s.fromAttribute)?t.converter:n$3;this._$El=r,this[r]=h.fromAttribute(i,t.type),this._$El=null;}}requestUpdate(t,i,s){let e=true;undefined!==t&&(((s=s||this.constructor.getPropertyOptions(t)).hasChanged||a$2)(this[t],i)?(this._$AL.has(t)||this._$AL.set(t,i),true===s.reflect&&this._$El!==t&&(undefined===this._$EC&&(this._$EC=new Map),this._$EC.set(t,s))):e=false),!this.isUpdatePending&&e&&(this._$E_=this._$Ej());}async _$Ej(){this.isUpdatePending=true;try{await this._$E_;}catch(t){Promise.reject(t);}const t=this.scheduleUpdate();return null!=t&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){var t;if(!this.isUpdatePending)return;this.hasUpdated,this._$Ei&&(this._$Ei.forEach(((t,i)=>this[i]=t)),this._$Ei=undefined);let i=false;const s=this._$AL;try{i=this.shouldUpdate(s),i?(this.willUpdate(s),null===(t=this._$ES)||void 0===t||t.forEach((t=>{var i;return null===(i=t.hostUpdate)||void 0===i?void 0:i.call(t)})),this.update(s)):this._$Ek();}catch(t){throw i=false,this._$Ek(),t}i&&this._$AE(s);}willUpdate(t){}_$AE(t){var i;null===(i=this._$ES)||undefined===i||i.forEach((t=>{var i;return null===(i=t.hostUpdated)||undefined===i?undefined:i.call(t)})),this.hasUpdated||(this.hasUpdated=true,this.firstUpdated(t)),this.updated(t);}_$Ek(){this._$AL=new Map,this.isUpdatePending=false;}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$E_}shouldUpdate(t){return true}update(t){undefined!==this._$EC&&(this._$EC.forEach(((t,i)=>this._$EO(i,this[i],t))),this._$EC=undefined),this._$Ek();}updated(t){}firstUpdated(t){}};u$2[d$1]=true,u$2.elementProperties=new Map,u$2.elementStyles=[],u$2.shadowRootOptions={mode:"open"},null==o$2||o$2({ReactiveElement:u$2}),(null!==(s$2=e$1.reactiveElementVersions)&&undefined!==s$2?s$2:e$1.reactiveElementVersions=[]).push("1.6.3");
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-var t$1;const i$1=window,s$1=i$1.trustedTypes,e=s$1?s$1.createPolicy("lit-html",{createHTML:t=>t}):void 0,o$1="$lit$",n$2=`lit$${(Math.random()+"").slice(9)}$`,l$1="?"+n$2,h=`<${l$1}>`,r=document,u$1=()=>r.createComment(""),d=t=>null===t||"object"!=typeof t&&"function"!=typeof t,c$1=Array.isArray,v=t=>c$1(t)||"function"==typeof(null==t?void 0:t[Symbol.iterator]),a$1="[ \t\n\f\r]",f=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,_=/-->/g,m=/>/g,p=RegExp(`>|${a$1}(?:([^\\s"'>=/]+)(${a$1}*=${a$1}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),g$2=/'/g,$=/"/g,y=/^(?:script|style|textarea|title)$/i,w=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),x$1=w(1),T$1=Symbol.for("lit-noChange"),A$1=Symbol.for("lit-nothing"),E=new WeakMap,C$2=r.createTreeWalker(r,129,null,!1);function P(t,i){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return void 0!==e?e.createHTML(i):i}const V=(t,i)=>{const s=t.length-1,e=[];let l,r=2===i?"<svg>":"",u=f;for(let i=0;i<s;i++){const s=t[i];let d,c,v=-1,a=0;for(;a<s.length&&(u.lastIndex=a,c=u.exec(s),null!==c);)a=u.lastIndex,u===f?"!--"===c[1]?u=_:void 0!==c[1]?u=m:void 0!==c[2]?(y.test(c[2])&&(l=RegExp("</"+c[2],"g")),u=p):void 0!==c[3]&&(u=p):u===p?">"===c[0]?(u=null!=l?l:f,v=-1):void 0===c[1]?v=-2:(v=u.lastIndex-c[2].length,d=c[1],u=void 0===c[3]?p:'"'===c[3]?$:g$2):u===$||u===g$2?u=p:u===_||u===m?u=f:(u=p,l=void 0);const w=u===p&&t[i+1].startsWith("/>")?" ":"";r+=u===f?s+h:v>=0?(e.push(d),s.slice(0,v)+o$1+s.slice(v)+n$2+w):s+n$2+(-2===v?(e.push(void 0),i):w);}return [P(t,r+(t[s]||"<?>")+(2===i?"</svg>":"")),e]};class N{constructor({strings:t,_$litType$:i},e){let h;this.parts=[];let r=0,d=0;const c=t.length-1,v=this.parts,[a,f]=V(t,i);if(this.el=N.createElement(a,e),C$2.currentNode=this.el.content,2===i){const t=this.el.content,i=t.firstChild;i.remove(),t.append(...i.childNodes);}for(;null!==(h=C$2.nextNode())&&v.length<c;){if(1===h.nodeType){if(h.hasAttributes()){const t=[];for(const i of h.getAttributeNames())if(i.endsWith(o$1)||i.startsWith(n$2)){const s=f[d++];if(t.push(i),void 0!==s){const t=h.getAttribute(s.toLowerCase()+o$1).split(n$2),i=/([.?@])?(.*)/.exec(s);v.push({type:1,index:r,name:i[2],strings:t,ctor:"."===i[1]?H:"?"===i[1]?L:"@"===i[1]?z:k});}else v.push({type:6,index:r});}for(const i of t)h.removeAttribute(i);}if(y.test(h.tagName)){const t=h.textContent.split(n$2),i=t.length-1;if(i>0){h.textContent=s$1?s$1.emptyScript:"";for(let s=0;s<i;s++)h.append(t[s],u$1()),C$2.nextNode(),v.push({type:2,index:++r});h.append(t[i],u$1());}}}else if(8===h.nodeType)if(h.data===l$1)v.push({type:2,index:r});else {let t=-1;for(;-1!==(t=h.data.indexOf(n$2,t+1));)v.push({type:7,index:r}),t+=n$2.length-1;}r++;}}static createElement(t,i){const s=r.createElement("template");return s.innerHTML=t,s}}function S(t,i,s=t,e){var o,n,l,h;if(i===T$1)return i;let r=void 0!==e?null===(o=s._$Co)||void 0===o?void 0:o[e]:s._$Cl;const u=d(i)?void 0:i._$litDirective$;return (null==r?void 0:r.constructor)!==u&&(null===(n=null==r?void 0:r._$AO)||void 0===n||n.call(r,!1),void 0===u?r=void 0:(r=new u(t),r._$AT(t,s,e)),void 0!==e?(null!==(l=(h=s)._$Co)&&void 0!==l?l:h._$Co=[])[e]=r:s._$Cl=r),void 0!==r&&(i=S(t,r._$AS(t,i.values),r,e)),i}class M{constructor(t,i){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){var i;const{el:{content:s},parts:e}=this._$AD,o=(null!==(i=null==t?void 0:t.creationScope)&&void 0!==i?i:r).importNode(s,!0);C$2.currentNode=o;let n=C$2.nextNode(),l=0,h=0,u=e[0];for(;void 0!==u;){if(l===u.index){let i;2===u.type?i=new R$1(n,n.nextSibling,this,t):1===u.type?i=new u.ctor(n,u.name,u.strings,this,t):6===u.type&&(i=new Z(n,this,t)),this._$AV.push(i),u=e[++h];}l!==(null==u?void 0:u.index)&&(n=C$2.nextNode(),l++);}return C$2.currentNode=r,o}v(t){let i=0;for(const s of this._$AV)void 0!==s&&(void 0!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}let R$1 = class R{constructor(t,i,s,e){var o;this.type=2,this._$AH=A$1,this._$AN=void 0,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cp=null===(o=null==e?void 0:e.isConnected)||void 0===o||o;}get _$AU(){var t,i;return null!==(i=null===(t=this._$AM)||void 0===t?void 0:t._$AU)&&void 0!==i?i:this._$Cp}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return void 0!==i&&11===(null==t?void 0:t.nodeType)&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=S(this,t,i),d(t)?t===A$1||null==t||""===t?(this._$AH!==A$1&&this._$AR(),this._$AH=A$1):t!==this._$AH&&t!==T$1&&this._(t):void 0!==t._$litType$?this.g(t):void 0!==t.nodeType?this.$(t):v(t)?this.T(t):this._(t);}k(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}$(t){this._$AH!==t&&(this._$AR(),this._$AH=this.k(t));}_(t){this._$AH!==A$1&&d(this._$AH)?this._$AA.nextSibling.data=t:this.$(r.createTextNode(t)),this._$AH=t;}g(t){var i;const{values:s,_$litType$:e}=t,o="number"==typeof e?this._$AC(t):(void 0===e.el&&(e.el=N.createElement(P(e.h,e.h[0]),this.options)),e);if((null===(i=this._$AH)||void 0===i?void 0:i._$AD)===o)this._$AH.v(s);else {const t=new M(o,this),i=t.u(this.options);t.v(s),this.$(i),this._$AH=t;}}_$AC(t){let i=E.get(t.strings);return void 0===i&&E.set(t.strings,i=new N(t)),i}T(t){c$1(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const o of t)e===i.length?i.push(s=new R(this.k(u$1()),this.k(u$1()),this,this.options)):s=i[e],s._$AI(o),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,i){var s;for(null===(s=this._$AP)||void 0===s||s.call(this,!1,!0,i);t&&t!==this._$AB;){const i=t.nextSibling;t.remove(),t=i;}}setConnected(t){var i;void 0===this._$AM&&(this._$Cp=t,null===(i=this._$AP)||void 0===i||i.call(this,t));}};class k{constructor(t,i,s,e,o){this.type=1,this._$AH=A$1,this._$AN=void 0,this.element=t,this.name=i,this._$AM=e,this.options=o,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=A$1;}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(t,i=this,s,e){const o=this.strings;let n=!1;if(void 0===o)t=S(this,t,i,0),n=!d(t)||t!==this._$AH&&t!==T$1,n&&(this._$AH=t);else {const e=t;let l,h;for(t=o[0],l=0;l<o.length-1;l++)h=S(this,e[s+l],i,l),h===T$1&&(h=this._$AH[l]),n||(n=!d(h)||h!==this._$AH[l]),h===A$1?t=A$1:t!==A$1&&(t+=(null!=h?h:"")+o[l+1]),this._$AH[l]=h;}n&&!e&&this.j(t);}j(t){t===A$1?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=t?t:"");}}class H extends k{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===A$1?void 0:t;}}const I$1=s$1?s$1.emptyScript:"";class L extends k{constructor(){super(...arguments),this.type=4;}j(t){t&&t!==A$1?this.element.setAttribute(this.name,I$1):this.element.removeAttribute(this.name);}}class z extends k{constructor(t,i,s,e,o){super(t,i,s,e,o),this.type=5;}_$AI(t,i=this){var s;if((t=null!==(s=S(this,t,i,0))&&void 0!==s?s:A$1)===T$1)return;const e=this._$AH,o=t===A$1&&e!==A$1||t.capture!==e.capture||t.once!==e.once||t.passive!==e.passive,n=t!==A$1&&(e===A$1||o);o&&this.element.removeEventListener(this.name,this,e),n&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){var i,s;"function"==typeof this._$AH?this._$AH.call(null!==(s=null===(i=this.options)||void 0===i?void 0:i.host)&&void 0!==s?s:this.element,t):this._$AH.handleEvent(t);}}class Z{constructor(t,i,s){this.element=t,this.type=6,this._$AN=void 0,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){S(this,t);}}const B$1=i$1.litHtmlPolyfillSupport;null==B$1||B$1(N,R$1),(null!==(t$1=i$1.litHtmlVersions)&&void 0!==t$1?t$1:i$1.litHtmlVersions=[]).push("2.8.0");const D=(t,i,s)=>{var e,o;const n=null!==(e=null==s?void 0:s.renderBefore)&&void 0!==e?e:i;let l=n._$litPart$;if(void 0===l){const t=null!==(o=null==s?void 0:s.renderBefore)&&void 0!==o?o:null;n._$litPart$=l=new R$1(i.insertBefore(u$1(),t),t,void 0,null!=s?s:{});}return l._$AI(t),l};
+var t$1;const i$1=window,s$1=i$1.trustedTypes,e=s$1?s$1.createPolicy("lit-html",{createHTML:t=>t}):undefined,o$1="$lit$",n$2=`lit$${(Math.random()+"").slice(9)}$`,l$1="?"+n$2,h=`<${l$1}>`,r=document,u$1=()=>r.createComment(""),d=t=>null===t||"object"!=typeof t&&"function"!=typeof t,c$1=Array.isArray,v=t=>c$1(t)||"function"==typeof(null==t?undefined:t[Symbol.iterator]),a$1="[ \t\n\f\r]",f=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,_=/-->/g,m=/>/g,p=RegExp(`>|${a$1}(?:([^\\s"'>=/]+)(${a$1}*=${a$1}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`,"g"),g$2=/'/g,$=/"/g,y=/^(?:script|style|textarea|title)$/i,w=t=>(i,...s)=>({_$litType$:t,strings:i,values:s}),x$1=w(1),T$1=Symbol.for("lit-noChange"),A$1=Symbol.for("lit-nothing"),E=new WeakMap,C$2=r.createTreeWalker(r,129,null,false);function P(t,i){if(!Array.isArray(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return undefined!==e?e.createHTML(i):i}const V=(t,i)=>{const s=t.length-1,e=[];let l,r=2===i?"<svg>":"",u=f;for(let i=0;i<s;i++){const s=t[i];let d,c,v=-1,a=0;for(;a<s.length&&(u.lastIndex=a,c=u.exec(s),null!==c);)a=u.lastIndex,u===f?"!--"===c[1]?u=_:undefined!==c[1]?u=m:undefined!==c[2]?(y.test(c[2])&&(l=RegExp("</"+c[2],"g")),u=p):undefined!==c[3]&&(u=p):u===p?">"===c[0]?(u=null!=l?l:f,v=-1):undefined===c[1]?v=-2:(v=u.lastIndex-c[2].length,d=c[1],u=undefined===c[3]?p:'"'===c[3]?$:g$2):u===$||u===g$2?u=p:u===_||u===m?u=f:(u=p,l=undefined);const w=u===p&&t[i+1].startsWith("/>")?" ":"";r+=u===f?s+h:v>=0?(e.push(d),s.slice(0,v)+o$1+s.slice(v)+n$2+w):s+n$2+(-2===v?(e.push(undefined),i):w);}return [P(t,r+(t[s]||"<?>")+(2===i?"</svg>":"")),e]};class N{constructor({strings:t,_$litType$:i},e){let h;this.parts=[];let r=0,d=0;const c=t.length-1,v=this.parts,[a,f]=V(t,i);if(this.el=N.createElement(a,e),C$2.currentNode=this.el.content,2===i){const t=this.el.content,i=t.firstChild;i.remove(),t.append(...i.childNodes);}for(;null!==(h=C$2.nextNode())&&v.length<c;){if(1===h.nodeType){if(h.hasAttributes()){const t=[];for(const i of h.getAttributeNames())if(i.endsWith(o$1)||i.startsWith(n$2)){const s=f[d++];if(t.push(i),undefined!==s){const t=h.getAttribute(s.toLowerCase()+o$1).split(n$2),i=/([.?@])?(.*)/.exec(s);v.push({type:1,index:r,name:i[2],strings:t,ctor:"."===i[1]?H:"?"===i[1]?L:"@"===i[1]?z:k});}else v.push({type:6,index:r});}for(const i of t)h.removeAttribute(i);}if(y.test(h.tagName)){const t=h.textContent.split(n$2),i=t.length-1;if(i>0){h.textContent=s$1?s$1.emptyScript:"";for(let s=0;s<i;s++)h.append(t[s],u$1()),C$2.nextNode(),v.push({type:2,index:++r});h.append(t[i],u$1());}}}else if(8===h.nodeType)if(h.data===l$1)v.push({type:2,index:r});else {let t=-1;for(;-1!==(t=h.data.indexOf(n$2,t+1));)v.push({type:7,index:r}),t+=n$2.length-1;}r++;}}static createElement(t,i){const s=r.createElement("template");return s.innerHTML=t,s}}function S(t,i,s=t,e){var o,n,l,h;if(i===T$1)return i;let r=undefined!==e?null===(o=s._$Co)||undefined===o?undefined:o[e]:s._$Cl;const u=d(i)?undefined:i._$litDirective$;return (null==r?undefined:r.constructor)!==u&&(null===(n=null==r?undefined:r._$AO)||undefined===n||n.call(r,false),undefined===u?r=undefined:(r=new u(t),r._$AT(t,s,e)),undefined!==e?(null!==(l=(h=s)._$Co)&&undefined!==l?l:h._$Co=[])[e]=r:s._$Cl=r),undefined!==r&&(i=S(t,r._$AS(t,i.values),r,e)),i}class M{constructor(t,i){this._$AV=[],this._$AN=undefined,this._$AD=t,this._$AM=i;}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){var i;const{el:{content:s},parts:e}=this._$AD,o=(null!==(i=null==t?undefined:t.creationScope)&&undefined!==i?i:r).importNode(s,true);C$2.currentNode=o;let n=C$2.nextNode(),l=0,h=0,u=e[0];for(;undefined!==u;){if(l===u.index){let i;2===u.type?i=new R$1(n,n.nextSibling,this,t):1===u.type?i=new u.ctor(n,u.name,u.strings,this,t):6===u.type&&(i=new Z(n,this,t)),this._$AV.push(i),u=e[++h];}l!==(null==u?undefined:u.index)&&(n=C$2.nextNode(),l++);}return C$2.currentNode=r,o}v(t){let i=0;for(const s of this._$AV)undefined!==s&&(undefined!==s.strings?(s._$AI(t,s,i),i+=s.strings.length-2):s._$AI(t[i])),i++;}}let R$1 = class R{constructor(t,i,s,e){var o;this.type=2,this._$AH=A$1,this._$AN=undefined,this._$AA=t,this._$AB=i,this._$AM=s,this.options=e,this._$Cp=null===(o=null==e?undefined:e.isConnected)||undefined===o||o;}get _$AU(){var t,i;return null!==(i=null===(t=this._$AM)||undefined===t?undefined:t._$AU)&&undefined!==i?i:this._$Cp}get parentNode(){let t=this._$AA.parentNode;const i=this._$AM;return undefined!==i&&11===(null==t?undefined:t.nodeType)&&(t=i.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,i=this){t=S(this,t,i),d(t)?t===A$1||null==t||""===t?(this._$AH!==A$1&&this._$AR(),this._$AH=A$1):t!==this._$AH&&t!==T$1&&this._(t):undefined!==t._$litType$?this.g(t):undefined!==t.nodeType?this.$(t):v(t)?this.T(t):this._(t);}k(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}$(t){this._$AH!==t&&(this._$AR(),this._$AH=this.k(t));}_(t){this._$AH!==A$1&&d(this._$AH)?this._$AA.nextSibling.data=t:this.$(r.createTextNode(t)),this._$AH=t;}g(t){var i;const{values:s,_$litType$:e}=t,o="number"==typeof e?this._$AC(t):(undefined===e.el&&(e.el=N.createElement(P(e.h,e.h[0]),this.options)),e);if((null===(i=this._$AH)||undefined===i?undefined:i._$AD)===o)this._$AH.v(s);else {const t=new M(o,this),i=t.u(this.options);t.v(s),this.$(i),this._$AH=t;}}_$AC(t){let i=E.get(t.strings);return undefined===i&&E.set(t.strings,i=new N(t)),i}T(t){c$1(this._$AH)||(this._$AH=[],this._$AR());const i=this._$AH;let s,e=0;for(const o of t)e===i.length?i.push(s=new R(this.k(u$1()),this.k(u$1()),this,this.options)):s=i[e],s._$AI(o),e++;e<i.length&&(this._$AR(s&&s._$AB.nextSibling,e),i.length=e);}_$AR(t=this._$AA.nextSibling,i){var s;for(null===(s=this._$AP)||undefined===s||s.call(this,false,true,i);t&&t!==this._$AB;){const i=t.nextSibling;t.remove(),t=i;}}setConnected(t){var i;undefined===this._$AM&&(this._$Cp=t,null===(i=this._$AP)||undefined===i||i.call(this,t));}};class k{constructor(t,i,s,e,o){this.type=1,this._$AH=A$1,this._$AN=undefined,this.element=t,this.name=i,this._$AM=e,this.options=o,s.length>2||""!==s[0]||""!==s[1]?(this._$AH=Array(s.length-1).fill(new String),this.strings=s):this._$AH=A$1;}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(t,i=this,s,e){const o=this.strings;let n=false;if(undefined===o)t=S(this,t,i,0),n=!d(t)||t!==this._$AH&&t!==T$1,n&&(this._$AH=t);else {const e=t;let l,h;for(t=o[0],l=0;l<o.length-1;l++)h=S(this,e[s+l],i,l),h===T$1&&(h=this._$AH[l]),n||(n=!d(h)||h!==this._$AH[l]),h===A$1?t=A$1:t!==A$1&&(t+=(null!=h?h:"")+o[l+1]),this._$AH[l]=h;}n&&!e&&this.j(t);}j(t){t===A$1?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,null!=t?t:"");}}class H extends k{constructor(){super(...arguments),this.type=3;}j(t){this.element[this.name]=t===A$1?undefined:t;}}const I$1=s$1?s$1.emptyScript:"";class L extends k{constructor(){super(...arguments),this.type=4;}j(t){t&&t!==A$1?this.element.setAttribute(this.name,I$1):this.element.removeAttribute(this.name);}}class z extends k{constructor(t,i,s,e,o){super(t,i,s,e,o),this.type=5;}_$AI(t,i=this){var s;if((t=null!==(s=S(this,t,i,0))&&undefined!==s?s:A$1)===T$1)return;const e=this._$AH,o=t===A$1&&e!==A$1||t.capture!==e.capture||t.once!==e.once||t.passive!==e.passive,n=t!==A$1&&(e===A$1||o);o&&this.element.removeEventListener(this.name,this,e),n&&this.element.addEventListener(this.name,this,t),this._$AH=t;}handleEvent(t){var i,s;"function"==typeof this._$AH?this._$AH.call(null!==(s=null===(i=this.options)||undefined===i?undefined:i.host)&&undefined!==s?s:this.element,t):this._$AH.handleEvent(t);}}class Z{constructor(t,i,s){this.element=t,this.type=6,this._$AN=undefined,this._$AM=i,this.options=s;}get _$AU(){return this._$AM._$AU}_$AI(t){S(this,t);}}const B$1=i$1.litHtmlPolyfillSupport;null==B$1||B$1(N,R$1),(null!==(t$1=i$1.litHtmlVersions)&&undefined!==t$1?t$1:i$1.litHtmlVersions=[]).push("2.8.0");const D=(t,i,s)=>{var e,o;const n=null!==(e=null==s?undefined:s.renderBefore)&&undefined!==e?e:i;let l=n._$litPart$;if(undefined===l){const t=null!==(o=null==s?undefined:s.renderBefore)&&undefined!==o?o:null;n._$litPart$=l=new R$1(i.insertBefore(u$1(),t),t,undefined,null!=s?s:{});}return l._$AI(t),l};
 
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
- */var l,o;class s extends u$2{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0;}createRenderRoot(){var t,e;const i=super.createRenderRoot();return null!==(t=(e=this.renderOptions).renderBefore)&&void 0!==t||(e.renderBefore=i.firstChild),i}update(t){const i=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=D(i,this.renderRoot,this.renderOptions);}connectedCallback(){var t;super.connectedCallback(),null===(t=this._$Do)||void 0===t||t.setConnected(!0);}disconnectedCallback(){var t;super.disconnectedCallback(),null===(t=this._$Do)||void 0===t||t.setConnected(!1);}render(){return T$1}}s.finalized=!0,s._$litElement$=!0,null===(l=globalThis.litElementHydrateSupport)||void 0===l||l.call(globalThis,{LitElement:s});const n$1=globalThis.litElementPolyfillSupport;null==n$1||n$1({LitElement:s});(null!==(o=globalThis.litElementVersions)&&void 0!==o?o:globalThis.litElementVersions=[]).push("3.3.3");
+ */var l,o;class s extends u$2{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=undefined;}createRenderRoot(){var t,e;const i=super.createRenderRoot();return null!==(t=(e=this.renderOptions).renderBefore)&&undefined!==t||(e.renderBefore=i.firstChild),i}update(t){const i=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=D(i,this.renderRoot,this.renderOptions);}connectedCallback(){var t;super.connectedCallback(),null===(t=this._$Do)||undefined===t||t.setConnected(true);}disconnectedCallback(){var t;super.disconnectedCallback(),null===(t=this._$Do)||undefined===t||t.setConnected(false);}render(){return T$1}}s.finalized=true,s._$litElement$=true,null===(l=globalThis.litElementHydrateSupport)||undefined===l||l.call(globalThis,{LitElement:s});const n$1=globalThis.litElementPolyfillSupport;null==n$1||n$1({LitElement:s});(null!==(o=globalThis.litElementVersions)&&undefined!==o?o:globalThis.litElementVersions=[]).push("3.3.3");
 
 /* @license
  * Copyright 2019 Google LLC. All Rights Reserved.
@@ -40243,25 +40243,25 @@ const EnvironmentMixin = (ModelViewerElement) => {
     }
     __decorate$7([
         n$6({ type: String, attribute: 'environment-image' })
-    ], EnvironmentModelViewerElement.prototype, "environmentImage", void 0);
+    ], EnvironmentModelViewerElement.prototype, "environmentImage", undefined);
     __decorate$7([
         n$6({ type: String, attribute: 'skybox-image' })
-    ], EnvironmentModelViewerElement.prototype, "skyboxImage", void 0);
+    ], EnvironmentModelViewerElement.prototype, "skyboxImage", undefined);
     __decorate$7([
         n$6({ type: Number, attribute: 'shadow-intensity' })
-    ], EnvironmentModelViewerElement.prototype, "shadowIntensity", void 0);
+    ], EnvironmentModelViewerElement.prototype, "shadowIntensity", undefined);
     __decorate$7([
         n$6({ type: Number, attribute: 'shadow-softness' })
-    ], EnvironmentModelViewerElement.prototype, "shadowSoftness", void 0);
+    ], EnvironmentModelViewerElement.prototype, "shadowSoftness", undefined);
     __decorate$7([
         n$6({ type: Number })
-    ], EnvironmentModelViewerElement.prototype, "exposure", void 0);
+    ], EnvironmentModelViewerElement.prototype, "exposure", undefined);
     __decorate$7([
         n$6({ type: String, attribute: 'tone-mapping' })
-    ], EnvironmentModelViewerElement.prototype, "toneMapping", void 0);
+    ], EnvironmentModelViewerElement.prototype, "toneMapping", undefined);
     __decorate$7([
         n$6({ type: String, attribute: 'skybox-height' })
-    ], EnvironmentModelViewerElement.prototype, "skyboxHeight", void 0);
+    ], EnvironmentModelViewerElement.prototype, "skyboxHeight", undefined);
     return EnvironmentModelViewerElement;
 };
 
@@ -41084,7 +41084,7 @@ class DRACOLoader extends Loader {
 
 				this.workerPool.sort( function ( a, b ) {
 
-					return a._taskLoad > b._taskLoad ? - 1 : 1;
+					return a._taskLoad > b._taskLoad ? -1 : 1;
 
 				} );
 
@@ -41256,7 +41256,7 @@ function DRACOWorker() {
 
 				attributeID = decoder.GetAttributeId( dracoGeometry, draco[ attributeIDs[ attributeName ] ] );
 
-				if ( attributeID === - 1 ) continue;
+				if ( attributeID === -1 ) continue;
 
 				attribute = decoder.GetAttribute( dracoGeometry, attributeID );
 
@@ -41667,7 +41667,7 @@ class GLTFLoader extends Loader {
 
 	register( callback ) {
 
-		if ( this.pluginCallbacks.indexOf( callback ) === - 1 ) {
+		if ( this.pluginCallbacks.indexOf( callback ) === -1 ) {
 
 			this.pluginCallbacks.push( callback );
 
@@ -41679,7 +41679,7 @@ class GLTFLoader extends Loader {
 
 	unregister( callback ) {
 
-		if ( this.pluginCallbacks.indexOf( callback ) !== - 1 ) {
+		if ( this.pluginCallbacks.indexOf( callback ) !== -1 ) {
 
 			this.pluginCallbacks.splice( this.pluginCallbacks.indexOf( callback ), 1 );
 
@@ -41953,7 +41953,7 @@ class GLTFLightsExtension {
 
 			case 'directional':
 				lightNode = new DirectionalLight( color );
-				lightNode.target.position.set( 0, 0, - 1 );
+				lightNode.target.position.set( 0, 0, -1 );
 				lightNode.add( lightNode.target );
 				break;
 
@@ -41971,7 +41971,7 @@ class GLTFLightsExtension {
 				lightDef.spot.outerConeAngle = lightDef.spot.outerConeAngle !== undefined ? lightDef.spot.outerConeAngle : Math.PI / 4.0;
 				lightNode.angle = lightDef.spot.outerConeAngle;
 				lightNode.penumbra = 1.0 - lightDef.spot.innerConeAngle / lightDef.spot.outerConeAngle;
-				lightNode.target.position.set( 0, 0, - 1 );
+				lightNode.target.position.set( 0, 0, -1 );
 				lightNode.add( lightNode.target );
 				break;
 
@@ -43501,7 +43501,7 @@ class GLTFCubicSplineInterpolant extends Interpolant {
 		const offset1 = i1 * stride3;
 		const offset0 = offset1 - stride3;
 
-		const s2 = - 2 * ppp + 3 * pp;
+		const s2 = -2 * ppp + 3 * pp;
 		const s3 = ppp - pp;
 		const s0 = 1 - s2;
 		const s1 = s3 - pp + p;
@@ -43954,9 +43954,9 @@ class GLTFParser {
 		// expensive work of uploading a texture to the GPU off the main thread.
 
 		let isSafari = false;
-		let safariVersion = - 1;
+		let safariVersion = -1;
 		let isFirefox = false;
-		let firefoxVersion = - 1;
+		let firefoxVersion = -1;
 
 		if ( typeof navigator !== 'undefined' ) {
 
@@ -43964,10 +43964,10 @@ class GLTFParser {
 
 			isSafari = /^((?!chrome|android).)*safari/i.test( userAgent ) === true;
 			const safariMatch = userAgent.match( /Version\/(\d+)/ );
-			safariVersion = isSafari && safariMatch ? parseInt( safariMatch[ 1 ], 10 ) : - 1;
+			safariVersion = isSafari && safariMatch ? parseInt( safariMatch[ 1 ], 10 ) : -1;
 
-			isFirefox = userAgent.indexOf( 'Firefox' ) > - 1;
-			firefoxVersion = isFirefox ? userAgent.match( /Firefox\/([0-9]+)\./ )[ 1 ] : - 1;
+			isFirefox = userAgent.indexOf( 'Firefox' ) > -1;
+			firefoxVersion = isFirefox ? userAgent.match( /Firefox\/([0-9]+)\./ )[ 1 ] : -1;
 
 		}
 
@@ -44849,8 +44849,8 @@ class GLTFParser {
 				if ( useDerivativeTangents ) {
 
 					// https://github.com/mrdoob/three.js/issues/11438#issuecomment-507003995
-					if ( cachedMaterial.normalScale ) cachedMaterial.normalScale.y *= - 1;
-					if ( cachedMaterial.clearcoatNormalScale ) cachedMaterial.clearcoatNormalScale.y *= - 1;
+					if ( cachedMaterial.normalScale ) cachedMaterial.normalScale.y *= -1;
+					if ( cachedMaterial.clearcoatNormalScale ) cachedMaterial.clearcoatNormalScale.y *= -1;
 
 				}
 
@@ -46139,7 +46139,7 @@ class WorkerPool {
 		for ( let i = 0; i < this.pool; i ++ )
 			if ( ! ( this.workerStatus & ( 1 << i ) ) ) return i;
 
-		return - 1;
+		return -1;
 
 	}
 
@@ -46180,7 +46180,7 @@ class WorkerPool {
 
 			const workerId = this._getIdleWorker();
 
-			if ( workerId !== - 1 ) {
+			if ( workerId !== -1 ) {
 
 				this._initWorker( workerId );
 				this.workerStatus |= 1 << workerId;
@@ -46209,7 +46209,7 @@ class WorkerPool {
 
 }
 
-const t=0,n=2,g$1=1,u=2,T=0,C$1=1,R=10,it=0,ct=9,yt=15,xt=16,wt=22,Ft=37,Ct=43,te$1=76,ae=83,ge=97,ue=100,we=103,Ae=109,In=165,Sn=166,pi=1000066e3;class Ii{constructor(){this.vkFormat=0,this.typeSize=1,this.pixelWidth=0,this.pixelHeight=0,this.pixelDepth=0,this.layerCount=0,this.faceCount=1,this.supercompressionScheme=0,this.levels=[],this.dataFormatDescriptor=[{vendorId:0,descriptorType:0,descriptorBlockSize:0,versionNumber:2,colorModel:0,colorPrimaries:1,transferFunction:2,flags:0,texelBlockDimension:[0,0,0,0],bytesPlane:[0,0,0,0,0,0,0,0],samples:[]}],this.keyValue={},this.globalData=null;}}class Si{constructor(t,e,n,i){this._dataView=void 0,this._littleEndian=void 0,this._offset=void 0,this._dataView=new DataView(t.buffer,t.byteOffset+e,n),this._littleEndian=i,this._offset=0;}_nextUint8(){const t=this._dataView.getUint8(this._offset);return this._offset+=1,t}_nextUint16(){const t=this._dataView.getUint16(this._offset,this._littleEndian);return this._offset+=2,t}_nextUint32(){const t=this._dataView.getUint32(this._offset,this._littleEndian);return this._offset+=4,t}_nextUint64(){const t=this._dataView.getUint32(this._offset,this._littleEndian)+2**32*this._dataView.getUint32(this._offset+4,this._littleEndian);return this._offset+=8,t}_nextInt32(){const t=this._dataView.getInt32(this._offset,this._littleEndian);return this._offset+=4,t}_nextUint8Array(t){const e=new Uint8Array(this._dataView.buffer,this._dataView.byteOffset+this._offset,t);return this._offset+=t,e}_skip(t){return this._offset+=t,this}_scan(t,e){void 0===e&&(e=0);const n=this._offset;let i=0;for(;this._dataView.getUint8(this._offset)!==e&&i<t;)i++,this._offset++;return i<t&&this._offset++,new Uint8Array(this._dataView.buffer,this._dataView.byteOffset+n,i)}}const Oi=[171,75,84,88,32,50,48,187,13,10,26,10];function Ti(t){return (new TextDecoder).decode(t)}function Pi(t){const e=new Uint8Array(t.buffer,t.byteOffset,Oi.length);if(e[0]!==Oi[0]||e[1]!==Oi[1]||e[2]!==Oi[2]||e[3]!==Oi[3]||e[4]!==Oi[4]||e[5]!==Oi[5]||e[6]!==Oi[6]||e[7]!==Oi[7]||e[8]!==Oi[8]||e[9]!==Oi[9]||e[10]!==Oi[10]||e[11]!==Oi[11])throw new Error("Missing KTX 2.0 identifier.");const n=new Ii,i=17*Uint32Array.BYTES_PER_ELEMENT,s=new Si(t,Oi.length,i,!0);n.vkFormat=s._nextUint32(),n.typeSize=s._nextUint32(),n.pixelWidth=s._nextUint32(),n.pixelHeight=s._nextUint32(),n.pixelDepth=s._nextUint32(),n.layerCount=s._nextUint32(),n.faceCount=s._nextUint32();const a=s._nextUint32();n.supercompressionScheme=s._nextUint32();const r=s._nextUint32(),o=s._nextUint32(),l=s._nextUint32(),f=s._nextUint32(),h=s._nextUint64(),U=s._nextUint64(),c=new Si(t,Oi.length+i,3*a*8,!0);for(let e=0;e<a;e++)n.levels.push({levelData:new Uint8Array(t.buffer,t.byteOffset+c._nextUint64(),c._nextUint64()),uncompressedByteLength:c._nextUint64()});const _=new Si(t,r,o,!0),p={vendorId:_._skip(4)._nextUint16(),descriptorType:_._nextUint16(),versionNumber:_._nextUint16(),descriptorBlockSize:_._nextUint16(),colorModel:_._nextUint8(),colorPrimaries:_._nextUint8(),transferFunction:_._nextUint8(),flags:_._nextUint8(),texelBlockDimension:[_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8()],bytesPlane:[_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8()],samples:[]},g=(p.descriptorBlockSize/4-6)/4;for(let t=0;t<g;t++){const e={bitOffset:_._nextUint16(),bitLength:_._nextUint8(),channelType:_._nextUint8(),samplePosition:[_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8()],sampleLower:-Infinity,sampleUpper:Infinity};64&e.channelType?(e.sampleLower=_._nextInt32(),e.sampleUpper=_._nextInt32()):(e.sampleLower=_._nextUint32(),e.sampleUpper=_._nextUint32()),p.samples[t]=e;}n.dataFormatDescriptor.length=0,n.dataFormatDescriptor.push(p);const y=new Si(t,l,f,!0);for(;y._offset<f;){const t=y._nextUint32(),e=y._scan(t),i=Ti(e);if(n.keyValue[i]=y._nextUint8Array(t-e.byteLength-1),i.match(/^ktx/i)){const t=Ti(n.keyValue[i]);n.keyValue[i]=t.substring(0,t.lastIndexOf("\0"));}y._skip(t%4?4-t%4:0);}if(U<=0)return n;const x=new Si(t,h,U,!0),u=x._nextUint16(),b=x._nextUint16(),d=x._nextUint32(),w=x._nextUint32(),m=x._nextUint32(),D=x._nextUint32(),B=[];for(let t=0;t<a;t++)B.push({imageFlags:x._nextUint32(),rgbSliceByteOffset:x._nextUint32(),rgbSliceByteLength:x._nextUint32(),alphaSliceByteOffset:x._nextUint32(),alphaSliceByteLength:x._nextUint32()});const L=h+x._offset,v=L+d,A=v+w,k=A+m,V=new Uint8Array(t.buffer,t.byteOffset+L,d),I=new Uint8Array(t.buffer,t.byteOffset+v,w),S=new Uint8Array(t.buffer,t.byteOffset+A,m),F=new Uint8Array(t.buffer,t.byteOffset+k,D);return n.globalData={endpointCount:u,selectorCount:b,imageDescs:B,endpointsData:V,selectorsData:I,tablesData:S,extendedData:F},n}
+const t=0,n=2,g$1=1,u=2,T=0,C$1=1,R=10,it=0,ct=9,yt=15,xt=16,wt=22,Ft=37,Ct=43,te$1=76,ae=83,ge=97,ue=100,we=103,Ae=109,In=165,Sn=166,pi=1000066e3;class Ii{constructor(){this.vkFormat=0,this.typeSize=1,this.pixelWidth=0,this.pixelHeight=0,this.pixelDepth=0,this.layerCount=0,this.faceCount=1,this.supercompressionScheme=0,this.levels=[],this.dataFormatDescriptor=[{vendorId:0,descriptorType:0,descriptorBlockSize:0,versionNumber:2,colorModel:0,colorPrimaries:1,transferFunction:2,flags:0,texelBlockDimension:[0,0,0,0],bytesPlane:[0,0,0,0,0,0,0,0],samples:[]}],this.keyValue={},this.globalData=null;}}class Si{constructor(t,e,n,i){this._dataView=undefined,this._littleEndian=undefined,this._offset=undefined,this._dataView=new DataView(t.buffer,t.byteOffset+e,n),this._littleEndian=i,this._offset=0;}_nextUint8(){const t=this._dataView.getUint8(this._offset);return this._offset+=1,t}_nextUint16(){const t=this._dataView.getUint16(this._offset,this._littleEndian);return this._offset+=2,t}_nextUint32(){const t=this._dataView.getUint32(this._offset,this._littleEndian);return this._offset+=4,t}_nextUint64(){const t=this._dataView.getUint32(this._offset,this._littleEndian)+2**32*this._dataView.getUint32(this._offset+4,this._littleEndian);return this._offset+=8,t}_nextInt32(){const t=this._dataView.getInt32(this._offset,this._littleEndian);return this._offset+=4,t}_nextUint8Array(t){const e=new Uint8Array(this._dataView.buffer,this._dataView.byteOffset+this._offset,t);return this._offset+=t,e}_skip(t){return this._offset+=t,this}_scan(t,e){undefined===e&&(e=0);const n=this._offset;let i=0;for(;this._dataView.getUint8(this._offset)!==e&&i<t;)i++,this._offset++;return i<t&&this._offset++,new Uint8Array(this._dataView.buffer,this._dataView.byteOffset+n,i)}}const Oi=[171,75,84,88,32,50,48,187,13,10,26,10];function Ti(t){return (new TextDecoder).decode(t)}function Pi(t){const e=new Uint8Array(t.buffer,t.byteOffset,Oi.length);if(e[0]!==Oi[0]||e[1]!==Oi[1]||e[2]!==Oi[2]||e[3]!==Oi[3]||e[4]!==Oi[4]||e[5]!==Oi[5]||e[6]!==Oi[6]||e[7]!==Oi[7]||e[8]!==Oi[8]||e[9]!==Oi[9]||e[10]!==Oi[10]||e[11]!==Oi[11])throw new Error("Missing KTX 2.0 identifier.");const n=new Ii,i=17*Uint32Array.BYTES_PER_ELEMENT,s=new Si(t,Oi.length,i,true);n.vkFormat=s._nextUint32(),n.typeSize=s._nextUint32(),n.pixelWidth=s._nextUint32(),n.pixelHeight=s._nextUint32(),n.pixelDepth=s._nextUint32(),n.layerCount=s._nextUint32(),n.faceCount=s._nextUint32();const a=s._nextUint32();n.supercompressionScheme=s._nextUint32();const r=s._nextUint32(),o=s._nextUint32(),l=s._nextUint32(),f=s._nextUint32(),h=s._nextUint64(),U=s._nextUint64(),c=new Si(t,Oi.length+i,3*a*8,true);for(let e=0;e<a;e++)n.levels.push({levelData:new Uint8Array(t.buffer,t.byteOffset+c._nextUint64(),c._nextUint64()),uncompressedByteLength:c._nextUint64()});const _=new Si(t,r,o,true),p={vendorId:_._skip(4)._nextUint16(),descriptorType:_._nextUint16(),versionNumber:_._nextUint16(),descriptorBlockSize:_._nextUint16(),colorModel:_._nextUint8(),colorPrimaries:_._nextUint8(),transferFunction:_._nextUint8(),flags:_._nextUint8(),texelBlockDimension:[_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8()],bytesPlane:[_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8()],samples:[]},g=(p.descriptorBlockSize/4-6)/4;for(let t=0;t<g;t++){const e={bitOffset:_._nextUint16(),bitLength:_._nextUint8(),channelType:_._nextUint8(),samplePosition:[_._nextUint8(),_._nextUint8(),_._nextUint8(),_._nextUint8()],sampleLower:-Infinity,sampleUpper:Infinity};64&e.channelType?(e.sampleLower=_._nextInt32(),e.sampleUpper=_._nextInt32()):(e.sampleLower=_._nextUint32(),e.sampleUpper=_._nextUint32()),p.samples[t]=e;}n.dataFormatDescriptor.length=0,n.dataFormatDescriptor.push(p);const y=new Si(t,l,f,true);for(;y._offset<f;){const t=y._nextUint32(),e=y._scan(t),i=Ti(e);if(n.keyValue[i]=y._nextUint8Array(t-e.byteLength-1),i.match(/^ktx/i)){const t=Ti(n.keyValue[i]);n.keyValue[i]=t.substring(0,t.lastIndexOf("\0"));}y._skip(t%4?4-t%4:0);}if(U<=0)return n;const x=new Si(t,h,U,true),u=x._nextUint16(),b=x._nextUint16(),d=x._nextUint32(),w=x._nextUint32(),m=x._nextUint32(),D=x._nextUint32(),B=[];for(let t=0;t<a;t++)B.push({imageFlags:x._nextUint32(),rgbSliceByteOffset:x._nextUint32(),rgbSliceByteLength:x._nextUint32(),alphaSliceByteOffset:x._nextUint32(),alphaSliceByteLength:x._nextUint32()});const L=h+x._offset,v=L+d,A=v+w,k=A+m,V=new Uint8Array(t.buffer,t.byteOffset+L,d),I=new Uint8Array(t.buffer,t.byteOffset+v,w),S=new Uint8Array(t.buffer,t.byteOffset+A,m),F=new Uint8Array(t.buffer,t.byteOffset+k,D);return n.globalData={endpointCount:u,selectorCount:b,imageDescs:B,endpointsData:V,selectorsData:I,tablesData:S,extendedData:F},n}
 
 let A,I,B;const g={env:{emscripten_notify_memory_growth:function(A){B=new Uint8Array(I.exports.memory.buffer);}}};class Q{init(){return A||(A="undefined"!=typeof fetch?fetch("data:application/wasm;base64,"+C).then(A=>A.arrayBuffer()).then(A=>WebAssembly.instantiate(A,g)).then(this._init):WebAssembly.instantiate(Buffer.from(C,"base64"),g).then(this._init),A)}_init(A){I=A.instance,g.env.emscripten_notify_memory_growth(0);}decode(A,g=0){if(!I)throw new Error("ZSTDDecoder: Await .init() before decoding.");const Q=A.byteLength,C=I.exports.malloc(Q);B.set(A,C),g=g||Number(I.exports.ZSTD_findDecompressedSize(C,Q));const E=I.exports.malloc(g),i=I.exports.ZSTD_decompress(E,g,C,Q),D=B.slice(E,E+i);return I.exports.free(C),I.exports.free(E),D}}const C="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IAMNACAEQQNxBEADQCACRQ0FIAAgAkF/aiICaiIDIAEgAmotAAA6AAAgA0EDcQ0ACwsgAkEDTQ0AA0AgACACQXxqIgJqIAEgAmooAgA2AgAgAkEDSw0ACwsgAkUNAgNAIAAgAkF/aiICaiABIAJqLQAAOgAAIAINAAsMAgsgAkEDTQ0AIAIhBANAIAMgASgCADYCACABQQRqIQEgA0EEaiEDIARBfGoiBEEDSw0ACyACQQNxIQILIAJFDQADQCADIAEtAAA6AAAgA0EBaiEDIAFBAWohASACQX9qIgINAAsLIAAL8wICAn8BfgJAIAJFDQAgACACaiIDQX9qIAE6AAAgACABOgAAIAJBA0kNACADQX5qIAE6AAAgACABOgABIANBfWogAToAACAAIAE6AAIgAkEHSQ0AIANBfGogAToAACAAIAE6AAMgAkEJSQ0AIABBACAAa0EDcSIEaiIDIAFB/wFxQYGChAhsIgE2AgAgAyACIARrQXxxIgRqIgJBfGogATYCACAEQQlJDQAgAyABNgIIIAMgATYCBCACQXhqIAE2AgAgAkF0aiABNgIAIARBGUkNACADIAE2AhggAyABNgIUIAMgATYCECADIAE2AgwgAkFwaiABNgIAIAJBbGogATYCACACQWhqIAE2AgAgAkFkaiABNgIAIAQgA0EEcUEYciIEayICQSBJDQAgAa0iBUIghiAFhCEFIAMgBGohAQNAIAEgBTcDGCABIAU3AxAgASAFNwMIIAEgBTcDACABQSBqIQEgAkFgaiICQR9LDQALCyAACy8BAn8gACgCBCAAKAIAQQJ0aiICLQACIQMgACACLwEAIAEgAi0AAxAIajYCACADCy8BAn8gACgCBCAAKAIAQQJ0aiICLQACIQMgACACLwEAIAEgAi0AAxAFajYCACADCx8AIAAgASACKAIEEAg2AgAgARAEGiAAIAJBCGo2AgQLCAAgAGdBH3MLugUBDX8jAEEQayIKJAACfyAEQQNNBEAgCkEANgIMIApBDGogAyAEEAsaIAAgASACIApBDGpBBBAVIgBBbCAAEAMbIAAgACAESxsMAQsgAEEAIAEoAgBBAXRBAmoQECENQVQgAygAACIGQQ9xIgBBCksNABogAiAAQQVqNgIAIAMgBGoiAkF8aiEMIAJBeWohDiACQXtqIRAgAEEGaiELQQQh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ASIDNgLE4AEgACgCvOABIQQgACABNgK84AEgACABIAJqNgK44AEgACABIAQgA2tqNgLA4AELpgEBAX8gACAAKALs4QEQFjYCyOABIABCADcD+OABIABCADcDuOABIABBwOABakIANwMAIABBqNAAaiIBQYyAgOAANgIAIABBADYCmOIBIABCADcDiOEBIABCAzcDgOEBIABBrNABakHgEikCADcCACAAQbTQAWpB6BIoAgA2AgAgACABNgIMIAAgAEGYIGo2AgggACAAQaAwajYCBCAAIABBEGo2AgALYQEBf0G4fyEDAkAgAUEDSQ0AIAIgABAhIgFBA3YiADYCCCACIAFBAXE2AgQgAiABQQF2QQNxIgM2AgACQCADQX9qIgFBAksNAAJAIAFBAWsOAgEAAgtBbA8LIAAhAwsgAwsMACAAIAEgAkEAEC4LiAQCA38CfiADEBYhBCAAQQBBKBAQIQAgBCACSwRAIAQPCyABRQRAQX8PCwJAAkAgA0EBRg0AIAEoAAAiBkGo6r5pRg0AQXYhAyAGQXBxQdDUtMIBRw0BQQghAyACQQhJDQEgAEEAQSgQECEAIAEoAAQhASAAQQE2AhQgACABrTcDAEEADwsgASACIAMQLyIDIAJLDQAgACADNgIYQXIhAyABIARqIgVBf2otAAAiAkEIcQ0AIAJBIHEiBkUEQEFwIQMgBS0AACIFQacBSw0BIAVBB3GtQgEgBUEDdkEKaq2GIgdCA4h+IAd8IQggBEEBaiEECyACQQZ2IQMgAkECdiEFAkAgAkEDcUF/aiICQQJLBEBBACECDAELAkACQAJAIAJBAWsOAgECAAsgASAEai0AACECIARBAWohBAwCCyABIARqLwAAIQIgBEECaiEEDAELIAEgBGooAAAhAiAEQQRqIQQLIAVBAXEhBQJ+AkACQAJAIANBf2oiA0ECTQRAIANBAWsOAgIDAQtCfyAGRQ0DGiABIARqMQAADAMLIAEgBGovAACtQoACfAwCCyABIARqKAAArQwBCyABIARqKQAACyEHIAAgBTYCICAAIAI2AhwgACAHNwMAQQAhAyAAQQA2AhQgACAHIAggBhsiBzcDCCAAIAdCgIAIIAdCgIAIVBs+AhALIAMLWwEBf0G4fyEDIAIQFiICIAFNBH8gACACakF/ai0AACIAQQNxQQJ0QaAeaigC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C0Egak8NAQsgByAHKQNoNwMQIAcgBykDYDcDCCAEIA0gB0EIaiAHQdwAaiAPIA4gESAQEB4hCwwBCyACIARqIQggBCAKEAcgAkERTwRAIARBEGohAgNAIAIgCkEQaiIKEAcgAkEQaiICIAhJDQALCyAIIAlrIQIgByATNgJcIAkgCCAOa0sEQCAJIAggEWtLBEBBbCELDAILIBAgAiAOayICaiIKIANqIBBNBEAgCCAKIAMQDxoMAgsgCCAKQQAgAmsQDyEIIAcgAiADaiIDNgJkIAggAmshCCAOIQILIAlBEE8EQCADIAhqIQMDQCAIIAIQByACQRBqIQIgCEEQaiIIIANJDQALDAELAkAgCUEHTQRAIAggAi0AADoAACAIIAItAAE6AAEgCCACLQACOgACIAggAi0AAzoAAyAIQQRqIAIgCUECdCIDQcAeaigCAGoiAhAXIAIgA0HgHmooAgBrIQIgBygCZCEDDAELIAggAhAMCyADQQlJDQAgAyAIaiEDIAhBCGoiCCACQQhqIgJrQQ9MBEADQCAIIAIQDCACQQhqIQIgCEEIaiIIIANJDQAMAgALAAsDQCAIIAIQByACQRBqIQIgCEEQaiIIIANJDQALCyAHQRhqEAQaIAsgDCALEAMiAhshDCAEIAQgC2ogAhshBCAFQX9qIgUNAAsgDBADDQFBbCEMIAdBGGoQBEECSQ0BQQAhCANAIAhBA0cEQCAAIAhBAnQiAmpBrNABaiACIAdqKAJENgIAIAhBAWohCAwBCwsgBygCXCEIC0G6fyEMIA8gCGsiACANIARrSw0AIAQEfyAEIAggABALIABqBUEACyABayEMCyAHQfAAaiQAIAwLkRcCFn8FfiMAQdABayIHJAAgByAAKALw4QEiCDYCvAEgASACaiESIAggACgCgOIBaiETAkACQCAFRQRAIAEhAwwBCyAAKALE4AEhESAAKALA4AEhFSAAKAK84AEhDyAAQQE2AozhAUEAIQgDQCAIQQNHBEAgByAIQQJ0IgJqIAAgAmpBrNABaigCADYCVCAIQQFqIQgMAQsLIAcgETYCZCAHIA82AmAgByABIA9rNgJoQWwhECAHQShqIAMgBBAGEAMNASAFQQQgBUEESBshFyAHQTxqIAdBKGogACgCABATIAdBxABqIAdBKGogACgCCBATIAdBzABqIAdB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IAdB0AFqJAAgEAslACAAQgA3AgAgAEEAOwEIIABBADoACyAAIAE2AgwgACACOgAKC7QFAQN/IwBBMGsiBCQAIABB/wFqIgVBfWohBgJAIAMvAQIEQCAEQRhqIAEgAhAGIgIQAw0BIARBEGogBEEYaiADEBwgBEEIaiAEQRhqIAMQHCAAIQMDQAJAIARBGGoQBCADIAZPckUEQCADIARBEGogBEEYahASOgAAIAMgBEEIaiAEQRhqEBI6AAEgBEEYahAERQ0BIANBAmohAwsgBUF+aiEFAn8DQEG6fyECIAMiASAFSw0FIAEgBEEQaiAEQRhqEBI6AAAgAUEBaiEDIARBGGoQBEEDRgRAQQIhAiAEQQhqDAILIAMgBUsNBSABIARBCGogBEEYahASOgABIAFBAmohA0EDIQIgBEEYahAEQQNHDQALIARBEGoLIQUgAyAFIARBGGoQEjoAACABIAJqIABrIQIMAwsgAyAEQRBqIARBGGoQEjoAAiADIARBCGogBEEYahASOgADIANBBGohAwwAAAsACyAEQRhqIAEgAhAGIgIQAw0AIARBEGogBEEYaiADEBwgBEEIaiAEQRhqIAMQHCAAIQMDQAJAIARBGGoQBCADIAZPckUEQCADIARBEGogBEEYahAROgAAIAMgBEEIaiAEQRhqEBE6AAEgBEEYahAERQ0BIANBAmohAwsgBUF+aiEFAn8DQEG6fyECIAMiASAFSw0EIAEgBEEQaiAEQRhqEBE6AAAgAUEBaiEDIARBGGoQBEEDRgRAQQIhAiAEQQhqDAILIAMgBUsNBCABIARBCGogBEEYahAROgABIAFBAmohA0EDIQIgBEEYahAEQQNHDQALIARBEGoLIQUgAyAFIARBGGoQEToAACABIAJqIABrIQIMAgsgAyAEQRBqIARBGGoQEToAAiADIARBCGogBEEYahAROgADIANBBGohAwwAAAsACyAEQTBqJAAgAgtpAQF/An8CQAJAIAJBB00NACABKAAAQbfIwuF+Rw0AIAAgASgABDYCmOIBQWIgAEEQaiABIAIQPiIDEAMNAhogAEKBgICAEDcDiOEBIAAgASADaiACIANrECoMAQsgACABIAIQKgtBAAsLrQMBBn8jAEGAAWsiAyQAQWIhCAJAIAJBCUkNACAAQZjQAGogAUEIaiIEIAJBeGogAEGY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wOABCwutAgIEfwF+IwBBQGoiBCQAAkACQCACQQhJDQAgASgAAEFwcUHQ1LTCAUcNACABIAIQIiEBIABCADcDCCAAQQA2AgQgACABNgIADAELIARBGGogASACEC0iAxADBEAgACADEBoMAQsgAwRAIABBuH8QGgwBCyACIAQoAjAiA2shAiABIANqIQMDQAJAIAAgAyACIARBCGoQLCIFEAMEfyAFBSACIAVBA2oiBU8NAUG4fwsQGgwCCyAGQQFqIQYgAiAFayECIAMgBWohAyAEKAIMRQ0ACyAEKAI4BEAgAkEDTQRAIABBuH8QGgwCCyADQQRqIQMLIAQoAighAiAEKQMYIQcgAEEANgIEIAAgAyABazYCACAAIAIgBmytIAcgB0J/URs3AwgLIARBQGskAAslAQF/IwBBEGsiAiQAIAIgACABEFEgAigCACEAIAJBEGokACAAC30BBH8jAEGQBGsiBCQAIARB/wE2AggCQCAEQRBqIARBCGogBEEMaiABIAIQFSIGEAMEQCAGIQUMAQtBVCEFIAQoAgwiB0EGSw0AIAMgBEEQaiAEKAIIIAcQQSIFEAMNACAAIAEgBmogAiAGayADEDwhBQsgBEGQBGokACAFC4cBAgJ/An5BABAWIQMCQANAIAEgA08EQAJAIAAoAABBcHFB0NS0wgFGBEAgACABECIiAhADRQ0BQn4PCyAAIAEQVSIEQn1WDQMgBCAFfCIFIARUIQJCfiEEIAINAyAAIAEQUiICEAMNAwsgASACayEBIAAgAmohAAwBCwtCfiAFIAEbIQQLIAQLPwIBfwF+IwBBMGsiAiQAAn5CfiACQQhqIAAgARAtDQAaQgAgAigCHEEBRg0AGiACKQMICyEDIAJBMGokACADC40BAQJ/IwBBMGsiASQAAkAgAEUNACAAKAKI4gENACABIABB/OEBaigCADYCKCABIAApAvThATcDICAAEDAgACgCqOIBIQIgASABKAIoNgIYIAEgASkDIDcDECACIAFBEGoQGyAAQQA2AqjiASABIAEoAig2AgggASABKQMgNwMAIAAgARAbCyABQTBqJAALKgECfyMAQRBrIgAkACAAQQA2AgggAEIANwMAIAAQWCEBIABBEGokACABC4cBAQN/IwBBEGsiAiQAAkAgACgCAEUgACgCBEVzDQAgAiAAKAIINgIIIAIgACkCADcDAAJ/IAIoAgAiAQRAIAIoAghBqOMJIAERBQAMAQtBqOMJECgLIgFFDQAgASAAKQIANwL04QEgAUH84QFqIAAoAgg2AgAgARBZIAEhAwsgAkEQaiQAIAMLywEBAn8jAEEgayIBJAAgAEGBgIDAADYCtOIBIABBADYCiOIBIABBADYC7OEBIABCADcDkOIBIABBADYCpOMJIABBADYC3OIBIABCADcCzOIBIABBADYCvOIBIABBADYCxOABIABCADcCnOIBIABBpOIBakIANwIAIABBrOIBakEANgIAIAFCADcCECABQgA3AhggASABKQMYNwMIIAEgASkDEDcDACABKAIIQQh2QQFxIQIgAEEANgLg4gEgACACNgKM4gEgAUEgaiQAC3YBA38jAEEwayIBJAAgAARAIAEgAEHE0AFqIgIoAgA2AiggASAAKQK80AE3AyAgACgCACEDIAEgAigCADYCGCABIAApArzQATcDECADIAFBEGoQGyABIAEoAig2AgggASABKQMgNwMAIAAgARAbCyABQTBqJAALzAEBAX8gACABKAK00AE2ApjiASAAIAEoAgQiAjYCwOABIAAgAjYCvOABIAAgAiABKAIIaiICNgK44AEgACACNgLE4AEgASgCuNABBEAgAEKBgICAEDcDiOEBIAAgAUGk0ABqNgIMIAAgAUGUIGo2AgggACABQZwwajYCBCAAIAFBDGo2AgAgAEGs0AFqIAFBqNABaigCADYCACAAQbDQAWogAUGs0AFqKAIANgIAIABBtNABaiABQbDQAWooAgA2AgAPCyAAQgA3A4jhAQs7ACACRQRAQbp/DwsgBEUEQEFsDwsgAiAEEGAEQCAAIAEgAiADIAQgBRBhDwsgACABIAIgAyAEIAUQZQtGAQF/IwBBEGsiBSQAIAVBCGogBBAOAn8gBS0ACQRAIAAgASACIAMgBBAyDAELIAAgASACIAMgBBA0CyEAIAVBEGokACAACzQAIAAgAyAEIAUQNiIFEAMEQCAFDwsgBSAESQR/IAEgAiADIAVqIAQgBWsgABA1BUG4fwsLRgEBfyMAQRBrIgUkACAFQQhqIAQQDgJ/IAUtAAkEQCAAIAEgAiADIAQQYgwBCyAAIAEgAiADIAQQNQshACAFQRBqJAAgAAtZAQF/QQ8hAiABIABJBEAgAUEE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";
 
@@ -46707,7 +46707,7 @@ KTX2Loader.BasisWorker = function () {
 					}
 
 					const dst = new Uint8Array( ktx2File.getImageTranscodedSizeInBytes( mip, layer, 0, transcoderFormat ) );
-					const status = ktx2File.transcodeImage( dst, mip, layer, face, transcoderFormat, 0, - 1, - 1 );
+					const status = ktx2File.transcodeImage( dst, mip, layer, face, transcoderFormat, 0, -1, -1 );
 
 					if ( ! status ) {
 
@@ -47621,7 +47621,7 @@ class CSS2DRenderer {
 				_vector.setFromMatrixPosition( object.matrixWorld );
 				_vector.applyMatrix4( _viewProjectionMatrix );
 
-				const visible = ( _vector.z >= - 1 && _vector.z <= 1 ) && ( object.layers.test( camera.layers ) === true );
+				const visible = ( _vector.z >= -1 && _vector.z <= 1 ) && ( object.layers.test( camera.layers ) === true );
 
 				const element = object.element;
 				element.style.display = visible === true ? '' : 'none';
@@ -47630,7 +47630,7 @@ class CSS2DRenderer {
 
 					object.onBeforeRender( _this, scene, camera );
 
-					element.style.transform = 'translate(' + ( - 100 * object.center.x ) + '%,' + ( - 100 * object.center.y ) + '%)' + 'translate(' + ( _vector.x * _widthHalf + _widthHalf ) + 'px,' + ( - _vector.y * _heightHalf + _heightHalf ) + 'px)';
+					element.style.transform = 'translate(' + ( -100 * object.center.x ) + '%,' + ( -100 * object.center.y ) + '%)' + 'translate(' + ( _vector.x * _widthHalf + _widthHalf ) + 'px,' + ( - _vector.y * _heightHalf + _heightHalf ) + 'px)';
 
 					if ( element.parentNode !== domElement ) {
 
@@ -47978,7 +47978,7 @@ class GLTFExporter {
 
 	register( callback ) {
 
-		if ( this.pluginCallbacks.indexOf( callback ) === - 1 ) {
+		if ( this.pluginCallbacks.indexOf( callback ) === -1 ) {
 
 			this.pluginCallbacks.push( callback );
 
@@ -47990,7 +47990,7 @@ class GLTFExporter {
 
 	unregister( callback ) {
 
-		if ( this.pluginCallbacks.indexOf( callback ) !== - 1 ) {
+		if ( this.pluginCallbacks.indexOf( callback ) !== -1 ) {
 
 			this.pluginCallbacks.splice( this.pluginCallbacks.indexOf( callback ), 1 );
 
@@ -49102,7 +49102,7 @@ class GLTFWriter {
 			if ( flipY === true ) {
 
 				ctx.translate( 0, canvas.height );
-				ctx.scale( 1, - 1 );
+				ctx.scale( 1, -1 );
 
 			}
 
@@ -50351,7 +50351,7 @@ class GLTFLightExtension {
 				&& ( light.target.parent !== light
 				|| light.target.position.x !== 0
 				|| light.target.position.y !== 0
-				|| light.target.position.z !== - 1 ) ) {
+				|| light.target.position.z !== -1 ) ) {
 
 			console.warn( 'THREE.GLTFExporter: Light direction may be lost. For best results, '
 				+ 'make light.target a child of the light with position 0,0,-1.' );
@@ -53498,7 +53498,7 @@ const ControlsMixin = (ModelViewerElement) => {
     }
     __decorate$6([
         n$6({ type: Boolean, attribute: 'camera-controls' })
-    ], ControlsModelViewerElement.prototype, "cameraControls", void 0);
+    ], ControlsModelViewerElement.prototype, "cameraControls", undefined);
     __decorate$6([
         style({
             intrinsics: cameraOrbitIntrinsics,
@@ -53506,7 +53506,7 @@ const ControlsMixin = (ModelViewerElement) => {
             updateHandler: $syncCameraOrbit
         }),
         n$6({ type: String, attribute: 'camera-orbit', hasChanged: () => true })
-    ], ControlsModelViewerElement.prototype, "cameraOrbit", void 0);
+    ], ControlsModelViewerElement.prototype, "cameraOrbit", undefined);
     __decorate$6([
         style({
             intrinsics: cameraTargetIntrinsics,
@@ -53514,7 +53514,7 @@ const ControlsMixin = (ModelViewerElement) => {
             updateHandler: $syncCameraTarget
         }),
         n$6({ type: String, attribute: 'camera-target', hasChanged: () => true })
-    ], ControlsModelViewerElement.prototype, "cameraTarget", void 0);
+    ], ControlsModelViewerElement.prototype, "cameraTarget", undefined);
     __decorate$6([
         style({
             intrinsics: fieldOfViewIntrinsics,
@@ -53522,68 +53522,68 @@ const ControlsMixin = (ModelViewerElement) => {
             updateHandler: $syncFieldOfView
         }),
         n$6({ type: String, attribute: 'field-of-view', hasChanged: () => true })
-    ], ControlsModelViewerElement.prototype, "fieldOfView", void 0);
+    ], ControlsModelViewerElement.prototype, "fieldOfView", undefined);
     __decorate$6([
         style({
             intrinsics: minCameraOrbitIntrinsics,
             updateHandler: $syncMinCameraOrbit
         }),
         n$6({ type: String, attribute: 'min-camera-orbit', hasChanged: () => true })
-    ], ControlsModelViewerElement.prototype, "minCameraOrbit", void 0);
+    ], ControlsModelViewerElement.prototype, "minCameraOrbit", undefined);
     __decorate$6([
         style({
             intrinsics: maxCameraOrbitIntrinsics,
             updateHandler: $syncMaxCameraOrbit
         }),
         n$6({ type: String, attribute: 'max-camera-orbit', hasChanged: () => true })
-    ], ControlsModelViewerElement.prototype, "maxCameraOrbit", void 0);
+    ], ControlsModelViewerElement.prototype, "maxCameraOrbit", undefined);
     __decorate$6([
         style({
             intrinsics: minFieldOfViewIntrinsics,
             updateHandler: $syncMinFieldOfView
         }),
         n$6({ type: String, attribute: 'min-field-of-view', hasChanged: () => true })
-    ], ControlsModelViewerElement.prototype, "minFieldOfView", void 0);
+    ], ControlsModelViewerElement.prototype, "minFieldOfView", undefined);
     __decorate$6([
         style({ intrinsics: fieldOfViewIntrinsics, updateHandler: $syncMaxFieldOfView }),
         n$6({ type: String, attribute: 'max-field-of-view', hasChanged: () => true })
-    ], ControlsModelViewerElement.prototype, "maxFieldOfView", void 0);
+    ], ControlsModelViewerElement.prototype, "maxFieldOfView", undefined);
     __decorate$6([
         n$6({ type: Number, attribute: 'interaction-prompt-threshold' })
-    ], ControlsModelViewerElement.prototype, "interactionPromptThreshold", void 0);
+    ], ControlsModelViewerElement.prototype, "interactionPromptThreshold", undefined);
     __decorate$6([
         n$6({ type: String, attribute: 'interaction-prompt' })
-    ], ControlsModelViewerElement.prototype, "interactionPrompt", void 0);
+    ], ControlsModelViewerElement.prototype, "interactionPrompt", undefined);
     __decorate$6([
         n$6({ type: String, attribute: 'interaction-prompt-style' })
-    ], ControlsModelViewerElement.prototype, "interactionPromptStyle", void 0);
+    ], ControlsModelViewerElement.prototype, "interactionPromptStyle", undefined);
     __decorate$6([
         n$6({ type: Number, attribute: 'orbit-sensitivity' })
-    ], ControlsModelViewerElement.prototype, "orbitSensitivity", void 0);
+    ], ControlsModelViewerElement.prototype, "orbitSensitivity", undefined);
     __decorate$6([
         n$6({ type: Number, attribute: 'zoom-sensitivity' })
-    ], ControlsModelViewerElement.prototype, "zoomSensitivity", void 0);
+    ], ControlsModelViewerElement.prototype, "zoomSensitivity", undefined);
     __decorate$6([
         n$6({ type: Number, attribute: 'pan-sensitivity' })
-    ], ControlsModelViewerElement.prototype, "panSensitivity", void 0);
+    ], ControlsModelViewerElement.prototype, "panSensitivity", undefined);
     __decorate$6([
         n$6({ type: String, attribute: 'touch-action' })
-    ], ControlsModelViewerElement.prototype, "touchAction", void 0);
+    ], ControlsModelViewerElement.prototype, "touchAction", undefined);
     __decorate$6([
         n$6({ type: Boolean, attribute: 'disable-zoom' })
-    ], ControlsModelViewerElement.prototype, "disableZoom", void 0);
+    ], ControlsModelViewerElement.prototype, "disableZoom", undefined);
     __decorate$6([
         n$6({ type: Boolean, attribute: 'disable-pan' })
-    ], ControlsModelViewerElement.prototype, "disablePan", void 0);
+    ], ControlsModelViewerElement.prototype, "disablePan", undefined);
     __decorate$6([
         n$6({ type: Boolean, attribute: 'disable-tap' })
-    ], ControlsModelViewerElement.prototype, "disableTap", void 0);
+    ], ControlsModelViewerElement.prototype, "disableTap", undefined);
     __decorate$6([
         n$6({ type: Number, attribute: 'interpolation-decay' })
-    ], ControlsModelViewerElement.prototype, "interpolationDecay", void 0);
+    ], ControlsModelViewerElement.prototype, "interpolationDecay", undefined);
     __decorate$6([
         n$6()
-    ], ControlsModelViewerElement.prototype, "a11y", void 0);
+    ], ControlsModelViewerElement.prototype, "a11y", undefined);
     return ControlsModelViewerElement;
 };
 
@@ -55767,13 +55767,13 @@ class QuadRenderer {
             // user options
             type: this._type, // set in class property
             colorSpace: this._colorSpace, // set in class property
-            anisotropy: ((_a = options.renderTargetOptions) === null || _a === void 0 ? void 0 : _a.anisotropy) !== undefined ? (_b = options.renderTargetOptions) === null || _b === void 0 ? void 0 : _b.anisotropy : 1,
-            generateMipmaps: ((_c = options.renderTargetOptions) === null || _c === void 0 ? void 0 : _c.generateMipmaps) !== undefined ? (_d = options.renderTargetOptions) === null || _d === void 0 ? void 0 : _d.generateMipmaps : false,
-            magFilter: ((_e = options.renderTargetOptions) === null || _e === void 0 ? void 0 : _e.magFilter) !== undefined ? (_f = options.renderTargetOptions) === null || _f === void 0 ? void 0 : _f.magFilter : LinearFilter,
-            minFilter: ((_g = options.renderTargetOptions) === null || _g === void 0 ? void 0 : _g.minFilter) !== undefined ? (_h = options.renderTargetOptions) === null || _h === void 0 ? void 0 : _h.minFilter : LinearFilter,
-            samples: ((_j = options.renderTargetOptions) === null || _j === void 0 ? void 0 : _j.samples) !== undefined ? (_k = options.renderTargetOptions) === null || _k === void 0 ? void 0 : _k.samples : undefined,
-            wrapS: ((_l = options.renderTargetOptions) === null || _l === void 0 ? void 0 : _l.wrapS) !== undefined ? (_m = options.renderTargetOptions) === null || _m === void 0 ? void 0 : _m.wrapS : ClampToEdgeWrapping,
-            wrapT: ((_o = options.renderTargetOptions) === null || _o === void 0 ? void 0 : _o.wrapT) !== undefined ? (_p = options.renderTargetOptions) === null || _p === void 0 ? void 0 : _p.wrapT : ClampToEdgeWrapping
+            anisotropy: ((_a = options.renderTargetOptions) === null || _a === undefined ? undefined : _a.anisotropy) !== undefined ? (_b = options.renderTargetOptions) === null || _b === undefined ? undefined : _b.anisotropy : 1,
+            generateMipmaps: ((_c = options.renderTargetOptions) === null || _c === undefined ? undefined : _c.generateMipmaps) !== undefined ? (_d = options.renderTargetOptions) === null || _d === undefined ? undefined : _d.generateMipmaps : false,
+            magFilter: ((_e = options.renderTargetOptions) === null || _e === undefined ? undefined : _e.magFilter) !== undefined ? (_f = options.renderTargetOptions) === null || _f === undefined ? undefined : _f.magFilter : LinearFilter,
+            minFilter: ((_g = options.renderTargetOptions) === null || _g === undefined ? undefined : _g.minFilter) !== undefined ? (_h = options.renderTargetOptions) === null || _h === undefined ? undefined : _h.minFilter : LinearFilter,
+            samples: ((_j = options.renderTargetOptions) === null || _j === undefined ? undefined : _j.samples) !== undefined ? (_k = options.renderTargetOptions) === null || _k === undefined ? undefined : _k.samples : undefined,
+            wrapS: ((_l = options.renderTargetOptions) === null || _l === undefined ? undefined : _l.wrapS) !== undefined ? (_m = options.renderTargetOptions) === null || _m === undefined ? undefined : _m.wrapS : ClampToEdgeWrapping,
+            wrapT: ((_o = options.renderTargetOptions) === null || _o === undefined ? undefined : _o.wrapT) !== undefined ? (_p = options.renderTargetOptions) === null || _p === undefined ? undefined : _p.wrapT : ClampToEdgeWrapping
         };
         this._material = options.material;
         if (options.renderer) {
@@ -55811,7 +55811,7 @@ class QuadRenderer {
         this._quad.geometry.computeBoundingBox();
         this._scene.add(this._quad);
         this._renderTarget = new WebGLRenderTarget(this.width, this.height, rtOptions);
-        this._renderTarget.texture.mapping = ((_q = options.renderTargetOptions) === null || _q === void 0 ? void 0 : _q.mapping) !== undefined ? (_r = options.renderTargetOptions) === null || _r === void 0 ? void 0 : _r.mapping : UVMapping;
+        this._renderTarget.texture.mapping = ((_q = options.renderTargetOptions) === null || _q === undefined ? undefined : _q.mapping) !== undefined ? (_r = options.renderTargetOptions) === null || _r === undefined ? undefined : _r.mapping : UVMapping;
     }
     /**
      * Instantiates a temporary renderer
@@ -55852,11 +55852,11 @@ class QuadRenderer {
         // fixed values
         this.toArray(), this.width, this.height, RGBAFormat, this._type, 
         // user values
-        (options === null || options === void 0 ? void 0 : options.mapping) || UVMapping, (options === null || options === void 0 ? void 0 : options.wrapS) || ClampToEdgeWrapping, (options === null || options === void 0 ? void 0 : options.wrapT) || ClampToEdgeWrapping, (options === null || options === void 0 ? void 0 : options.magFilter) || LinearFilter, (options === null || options === void 0 ? void 0 : options.minFilter) || LinearFilter, (options === null || options === void 0 ? void 0 : options.anisotropy) || 1, 
+        (options === null || options === undefined ? undefined : options.mapping) || UVMapping, (options === null || options === undefined ? undefined : options.wrapS) || ClampToEdgeWrapping, (options === null || options === undefined ? undefined : options.wrapT) || ClampToEdgeWrapping, (options === null || options === undefined ? undefined : options.magFilter) || LinearFilter, (options === null || options === undefined ? undefined : options.minFilter) || LinearFilter, (options === null || options === undefined ? undefined : options.anisotropy) || 1, 
         // fixed value
         LinearSRGBColorSpace);
         // set this afterwards, we can't set it in constructor
-        returnValue.generateMipmaps = (options === null || options === void 0 ? void 0 : options.generateMipmaps) !== undefined ? options === null || options === void 0 ? void 0 : options.generateMipmaps : false;
+        returnValue.generateMipmaps = (options === null || options === undefined ? undefined : options.generateMipmaps) !== undefined ? options === null || options === undefined ? undefined : options.generateMipmaps : false;
         return returnValue;
     }
     /**
@@ -56689,7 +56689,7 @@ class RGBELoader extends DataTextureLoader {
 
 				lineLimit = ! lineLimit ? 1024 : lineLimit;
 				let p = buffer.pos,
-					i = - 1, len = 0, s = '',
+					i = -1, len = 0, s = '',
 					chunk = String.fromCharCode.apply( null, new Uint16Array( buffer.subarray( p, p + chunkSize ) ) );
 
 				while ( ( 0 > ( i = chunk.indexOf( NEWLINE ) ) ) && ( len < lineLimit ) && ( p < buffer.byteLength ) ) {
@@ -56700,7 +56700,7 @@ class RGBELoader extends DataTextureLoader {
 
 				}
 
-				if ( - 1 < i ) {
+				if ( -1 < i ) {
 
 					/*for (i=l-1; i>=0; i--) {
 						byteCode = m.charCodeAt(i);
@@ -57169,7 +57169,7 @@ const neutral = {
     },
     boxes: [
         {
-            position: [-10.906, -1.0, 1.846],
+            position: [-10.906, -1, 1.846],
             rotation: -0.195,
             scale: [2.328, 7.905, 4.651],
         },
@@ -57202,12 +57202,12 @@ const neutral = {
     lights: [
         {
             intensity: 80,
-            position: [-14.0, 10.0, 8.0],
+            position: [-14, 10.0, 8.0],
             scale: [0.1, 2.5, 2.5],
         },
         {
             intensity: 80,
-            position: [-14.0, 14.0, -4.0],
+            position: [-14, 14.0, -4],
             scale: [0.1, 2.5, 2.5],
         },
         {
@@ -57222,12 +57222,12 @@ const neutral = {
         },
         {
             intensity: 80,
-            position: [7.0, 8.0, -14.0],
+            position: [7.0, 8.0, -14],
             scale: [2.5, 2.5, 0.1],
         },
         {
             intensity: 80,
-            position: [-7.0, 16.0, -14.0],
+            position: [-7, 16.0, -14],
             scale: [2.5, 2.5, 0.1],
         },
         {
@@ -57688,7 +57688,7 @@ class Renderer extends EventDispatcher {
         };
         this.onWebGLContextRestored = () => {
             var _a;
-            (_a = this.textureUtils) === null || _a === void 0 ? void 0 : _a.dispose();
+            (_a = this.textureUtils) === null || _a === undefined ? undefined : _a.dispose();
             this.textureUtils = new TextureUtils(this.threeRenderer);
             for (const scene of this.scenes) {
                 scene.element[$updateEnvironment]();
@@ -57867,12 +57867,12 @@ class Renderer extends EventDispatcher {
             canvas.width = width;
             canvas.height = height;
             scene.forceRescale();
-            (_a = scene.effectRenderer) === null || _a === void 0 ? void 0 : _a.setSize(width, height);
+            (_a = scene.effectRenderer) === null || _a === undefined ? undefined : _a.setSize(width, height);
         }
     }
     updateRendererScale(delta) {
         const scaleStep = this.scaleStep;
-        this.avgFrameDuration += clamp(DURATION_DECAY * (delta - this.avgFrameDuration), -MAX_AVG_CHANGE_MS, MAX_AVG_CHANGE_MS);
+        this.avgFrameDuration += clamp(DURATION_DECAY * (delta - this.avgFrameDuration), -5, MAX_AVG_CHANGE_MS);
         if (this.avgFrameDuration > HIGH_FRAME_DURATION_MS) {
             ++this.scaleStep;
         }
@@ -58134,7 +58134,7 @@ const $threeTextures$1 = Symbol('threeTextures');
 let Image$1 = class Image extends ThreeDOMElement {
     get [$threeTexture$2]() {
         var _a;
-        return (_a = this[$correlatedObjects]) === null || _a === void 0 ? void 0 : _a.values().next().value;
+        return (_a = this[$correlatedObjects]) === null || _a === undefined ? undefined : _a.values().next().value;
     }
     get [$threeTextures$1]() {
         return this[$correlatedObjects];
@@ -58316,7 +58316,7 @@ const $setProperty = Symbol('setProperty');
 class Sampler extends ThreeDOMElement {
     get [$threeTexture$1]() {
         var _a;
-        return (_a = this[$correlatedObjects]) === null || _a === void 0 ? void 0 : _a.values().next().value;
+        return (_a = this[$correlatedObjects]) === null || _a === undefined ? undefined : _a.values().next().value;
     }
     get [$threeTextures]() {
         return this[$correlatedObjects];
@@ -58420,7 +58420,7 @@ class Texture extends ThreeDOMElement {
     }
     get [$threeTexture]() {
         var _a;
-        return (_a = this[$correlatedObjects]) === null || _a === void 0 ? void 0 : _a.values().next().value;
+        return (_a = this[$correlatedObjects]) === null || _a === undefined ? undefined : _a.values().next().value;
     }
     get name() {
         return this[$threeTexture].name || '';
@@ -58509,11 +58509,11 @@ class TextureInfo {
     setTexture(texture) {
         var _d, _e;
         const threeTexture = texture != null ? texture.source[$threeTexture$2] : null;
-        const oldTexture = (_d = this[$texture]) === null || _d === void 0 ? void 0 : _d.source[$threeTexture$2];
+        const oldTexture = (_d = this[$texture]) === null || _d === undefined ? undefined : _d.source[$threeTexture$2];
         if (oldTexture != null && oldTexture.isVideoTexture) {
             this[$activeVideo] = false;
         }
-        else if ((_e = this[$texture]) === null || _e === void 0 ? void 0 : _e.source.animation) {
+        else if ((_e = this[$texture]) === null || _e === undefined ? undefined : _e.source.animation) {
             this[$texture].source.animation.removeEventListener('enterFrame', this[$onUpdate]);
         }
         this[$texture] = texture;
@@ -58541,7 +58541,7 @@ class TextureInfo {
                 requestAnimationFrame(update);
             }
         }
-        else if ((texture === null || texture === void 0 ? void 0 : texture.source.animation) != null) {
+        else if ((texture === null || texture === undefined ? undefined : texture.source.animation) != null) {
             texture.source.animation.addEventListener('enterFrame', this[$onUpdate]);
         }
         let colorSpace = SRGBColorSpace;
@@ -58653,7 +58653,7 @@ class PBRMetallicRoughness extends ThreeDOMElement {
     }
     get [$threeMaterial]() {
         var _a;
-        return (_a = this[$correlatedObjects]) === null || _a === void 0 ? void 0 : _a.values().next().value;
+        return (_a = this[$correlatedObjects]) === null || _a === undefined ? undefined : _a.values().next().value;
     }
     get baseColorFactor() {
         const rgba = [0, 0, 0, this[$threeMaterial].opacity];
@@ -59920,13 +59920,13 @@ const SceneGraphMixin = (ModelViewerElement) => {
     }
     __decorate$5([
         n$6({ type: String, attribute: 'variant-name' })
-    ], SceneGraphModelViewerElement.prototype, "variantName", void 0);
+    ], SceneGraphModelViewerElement.prototype, "variantName", undefined);
     __decorate$5([
         n$6({ type: String, attribute: 'orientation' })
-    ], SceneGraphModelViewerElement.prototype, "orientation", void 0);
+    ], SceneGraphModelViewerElement.prototype, "orientation", undefined);
     __decorate$5([
         n$6({ type: String, attribute: 'scale' })
-    ], SceneGraphModelViewerElement.prototype, "scale", void 0);
+    ], SceneGraphModelViewerElement.prototype, "scale", undefined);
     return SceneGraphModelViewerElement;
 };
 
@@ -61259,7 +61259,7 @@ class ModelScene extends Scene {
         const normal = hit.face != null ?
             hit.face.normal.clone().applyNormalMatrix(new Matrix3().getNormalMatrix(hit.object.matrixWorld)) :
             raycaster.ray.direction.clone().multiplyScalar(-1);
-        const uv = (_a = hit.uv) !== null && _a !== void 0 ? _a : null;
+        const uv = (_a = hit.uv) !== null && _a !== undefined ? _a : null;
         return { position, normal, uv };
     }
     /**
@@ -61408,7 +61408,7 @@ class ModelScene extends Scene {
             const encoding = [{
                     '@type': 'MediaObject',
                     contentUrl: src,
-                    encodingFormat: ((_a = src.split('.').pop()) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === 'gltf' ?
+                    encodingFormat: ((_a = src.split('.').pop()) === null || _a === undefined ? undefined : _a.toLowerCase()) === 'gltf' ?
                         'model/gltf+json' :
                         'model/gltf-binary'
                 }];
@@ -61422,8 +61422,8 @@ class ModelScene extends Scene {
             const structuredData = {
                 '@context': 'http://schema.org/',
                 '@type': '3DModel',
-                image: poster !== null && poster !== void 0 ? poster : undefined,
-                name: alt !== null && alt !== void 0 ? alt : undefined,
+                image: poster !== null && poster !== undefined ? poster : undefined,
+                name: alt !== null && alt !== undefined ? alt : undefined,
                 encoding
             };
             schemaElement.textContent = JSON.stringify(structuredData);
@@ -61964,7 +61964,7 @@ class ModelViewerElementBase extends u$2 {
     }
     [$tick](time, delta) {
         var _p;
-        (_p = this[$scene].effectRenderer) === null || _p === void 0 ? void 0 : _p.beforeRender(time, delta);
+        (_p = this[$scene].effectRenderer) === null || _p === undefined ? undefined : _p.beforeRender(time, delta);
     }
     [$markLoaded]() {
         if (this[$loaded]) {
@@ -62040,16 +62040,16 @@ class ModelViewerElementBase extends u$2 {
 }
 __decorate$4([
     n$6({ type: String })
-], ModelViewerElementBase.prototype, "alt", void 0);
+], ModelViewerElementBase.prototype, "alt", undefined);
 __decorate$4([
     n$6({ type: String })
-], ModelViewerElementBase.prototype, "src", void 0);
+], ModelViewerElementBase.prototype, "src", undefined);
 __decorate$4([
     n$6({ type: Boolean, attribute: 'with-credentials' })
-], ModelViewerElementBase.prototype, "withCredentials", void 0);
+], ModelViewerElementBase.prototype, "withCredentials", undefined);
 __decorate$4([
     n$6({ type: Boolean, attribute: 'generate-schema' })
-], ModelViewerElementBase.prototype, "generateSchema", void 0);
+], ModelViewerElementBase.prototype, "generateSchema", undefined);
 
 /* @license
  * Copyright 2019 Google LLC. All Rights Reserved.
@@ -62168,7 +62168,7 @@ const AnimationMixin = (ModelViewerElement) => {
         }
         [$changeAnimation](options = DEFAULT_PLAY_OPTIONS) {
             var _b;
-            const repetitions = (_b = options.repetitions) !== null && _b !== void 0 ? _b : Infinity;
+            const repetitions = (_b = options.repetitions) !== null && _b !== undefined ? _b : Infinity;
             const mode = options.pingpong ?
                 LoopPingPong :
                 (repetitions === 1 ? LoopOnce : LoopRepeat);
@@ -62183,13 +62183,13 @@ const AnimationMixin = (ModelViewerElement) => {
     }
     __decorate$3([
         n$6({ type: Boolean })
-    ], AnimationModelViewerElement.prototype, "autoplay", void 0);
+    ], AnimationModelViewerElement.prototype, "autoplay", undefined);
     __decorate$3([
         n$6({ type: String, attribute: 'animation-name' })
-    ], AnimationModelViewerElement.prototype, "animationName", void 0);
+    ], AnimationModelViewerElement.prototype, "animationName", undefined);
     __decorate$3([
         n$6({ type: Number, attribute: 'animation-crossfade-duration' })
-    ], AnimationModelViewerElement.prototype, "animationCrossfadeDuration", void 0);
+    ], AnimationModelViewerElement.prototype, "animationCrossfadeDuration", undefined);
     return AnimationModelViewerElement;
 };
 
@@ -63298,7 +63298,7 @@ function imageToCanvas( image, flipY, maxTextureSize ) {
 		if ( flipY === true ) {
 
 			context.translate( 0, canvas.height );
-			context.scale( 1, - 1 );
+			context.scale( 1, -1 );
 
 		}
 
@@ -64110,7 +64110,7 @@ configuration or device capabilities');
                                     navigator.userAgentData.getHighEntropyValues &&
                                     ((_l = (await navigator.userAgentData.getHighEntropyValues([
                                         'formFactor'
-                                    ])).formFactor) === null || _l === void 0 ? void 0 : _l.includes('XR'))))) {
+                                    ])).formFactor) === null || _l === undefined ? undefined : _l.includes('XR'))))) {
                             arMode = ARMode.SCENE_VIEWER;
                             break;
                         }
@@ -64307,22 +64307,22 @@ configuration or device capabilities');
     }
     __decorate$2([
         n$6({ type: Boolean, attribute: 'ar' })
-    ], ARModelViewerElement.prototype, "ar", void 0);
+    ], ARModelViewerElement.prototype, "ar", undefined);
     __decorate$2([
         n$6({ type: String, attribute: 'ar-scale' })
-    ], ARModelViewerElement.prototype, "arScale", void 0);
+    ], ARModelViewerElement.prototype, "arScale", undefined);
     __decorate$2([
         n$6({ type: String, attribute: 'ar-placement' })
-    ], ARModelViewerElement.prototype, "arPlacement", void 0);
+    ], ARModelViewerElement.prototype, "arPlacement", undefined);
     __decorate$2([
         n$6({ type: String, attribute: 'ar-modes' })
-    ], ARModelViewerElement.prototype, "arModes", void 0);
+    ], ARModelViewerElement.prototype, "arModes", undefined);
     __decorate$2([
         n$6({ type: String, attribute: 'ios-src' })
-    ], ARModelViewerElement.prototype, "iosSrc", void 0);
+    ], ARModelViewerElement.prototype, "iosSrc", undefined);
     __decorate$2([
         n$6({ type: Boolean, attribute: 'xr-environment' })
-    ], ARModelViewerElement.prototype, "xrEnvironment", void 0);
+    ], ARModelViewerElement.prototype, "xrEnvironment", undefined);
     return ARModelViewerElement;
 };
 
@@ -64634,13 +64634,13 @@ const LoadingMixin = (ModelViewerElement) => {
     }
     __decorate$1([
         n$6({ type: String })
-    ], LoadingModelViewerElement.prototype, "poster", void 0);
+    ], LoadingModelViewerElement.prototype, "poster", undefined);
     __decorate$1([
         n$6({ type: String })
-    ], LoadingModelViewerElement.prototype, "reveal", void 0);
+    ], LoadingModelViewerElement.prototype, "reveal", undefined);
     __decorate$1([
         n$6({ type: String })
-    ], LoadingModelViewerElement.prototype, "loading", void 0);
+    ], LoadingModelViewerElement.prototype, "loading", undefined);
     return LoadingModelViewerElement;
 };
 
@@ -64736,14 +64736,14 @@ const StagingMixin = (ModelViewerElement) => {
     _c = $onCameraChange;
     __decorate([
         n$6({ type: Boolean, attribute: 'auto-rotate' })
-    ], StagingModelViewerElement.prototype, "autoRotate", void 0);
+    ], StagingModelViewerElement.prototype, "autoRotate", undefined);
     __decorate([
         n$6({ type: Number, attribute: 'auto-rotate-delay' })
-    ], StagingModelViewerElement.prototype, "autoRotateDelay", void 0);
+    ], StagingModelViewerElement.prototype, "autoRotateDelay", undefined);
     __decorate([
         style({ intrinsics: rotationRateIntrinsics, updateHandler: $syncRotationRate }),
         n$6({ type: String, attribute: 'rotation-per-second' })
-    ], StagingModelViewerElement.prototype, "rotationPerSecond", void 0);
+    ], StagingModelViewerElement.prototype, "rotationPerSecond", undefined);
     return StagingModelViewerElement;
 };
 

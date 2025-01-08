@@ -11,6 +11,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'minio.livemodel.xyz',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   webpack: (config) => {

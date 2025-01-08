@@ -58,7 +58,7 @@ function Avatar({ user, size = 'md', className }: AvatarProps) {
             imageLoaded ? 'opacity-100' : 'opacity-0',
             "transition-opacity duration-300"
           )}
-          onLoadingComplete={() => setImageLoaded(true)}
+          onLoad={() => setImageLoaded(true)}
         />
       </div>
     )

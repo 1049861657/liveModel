@@ -6,6 +6,7 @@
 # testing
 /coverage
 /src/app/test/
+/public/test/
 
 # next.js
 /.next/
