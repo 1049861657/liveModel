@@ -59,7 +59,7 @@ export default function ThreeComponents({ modelId }: ThreeComponentsProps) {
         minPolarAngle={Math.PI/4}
         maxPolarAngle={Math.PI/1.5}
       />
-      <Environment preset="city" />
+      <Environment files="/hdr/meadow_2_4k.hdr" />
     </Canvas>
   )
 } 

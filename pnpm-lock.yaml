@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@babylonjs/core':
+        specifier: ^7.43.0
+        version: 7.43.0
+      '@babylonjs/loaders':
+        specifier: ^7.43.0
+        version: 7.43.0(@babylonjs/core@7.43.0)(babylonjs-gltf2interface@7.43.0)
       '@google/model-viewer':
         specifier: ^4.0.0
         version: 4.0.0(three@0.169.0)
@@ -145,6 +151,15 @@ packages:
   '@babel/runtime@7.26.0':
     resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
     engines: {node: '>=6.9.0'}
+
+  '@babylonjs/core@7.43.0':
+    resolution: {integrity: sha512-IgIHoju3kprOyJJzKa/3LcprYffl35LVFW55IWGSeZ0hOVnAdUkjDXuGVGue31PKmjVI/uonpsR0nJ4ZHHI4UQ==}
+
+  '@babylonjs/loaders@7.43.0':
+    resolution: {integrity: sha512-NUPluqw+LmFabr+sbmMa2baaVyZ7CfQmuK+4y+M3i47mqlayvWpN62U66ccLrIhrwN9EGbGmdQqKyrQ3hZ3xTA==}
+    peerDependencies:
+      '@babylonjs/core': ^7.0.0
+      babylonjs-gltf2interface: ^7.0.0
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -997,6 +1012,9 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
+
+  babylonjs-gltf2interface@7.43.0:
+    resolution: {integrity: sha512-/I8nyrsEV7ihpiuqNadT9eZxVLdfnIL5wTGovotmoMCUScR+5/Ibm31gD/U2ND8W0JfQxGKEI+aUETlfOceJ1w==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -2517,6 +2535,13 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
+  '@babylonjs/core@7.43.0': {}
+
+  '@babylonjs/loaders@7.43.0(@babylonjs/core@7.43.0)(babylonjs-gltf2interface@7.43.0)':
+    dependencies:
+      '@babylonjs/core': 7.43.0
+      babylonjs-gltf2interface: 7.43.0
+
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -3237,6 +3262,8 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.0.0
+
+  babylonjs-gltf2interface@7.43.0: {}
 
   balanced-match@1.0.2: {}
 

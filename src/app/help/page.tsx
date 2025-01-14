@@ -18,6 +18,13 @@ type ContentItem =
       type: 'steps'
       content: string[]
     }
+  | {
+      type: 'list'
+      items: {
+        title: string
+        description: string
+      }[]
+    }
 
 interface Question {
   id: string
@@ -87,6 +94,19 @@ function RenderContent({ content }: { content: ContentItem | ContentItem[] }) {
           )
         }
 
+        if (item.type === 'list') {
+          return (
+            <div key={index} className="space-y-3">
+              {item.items.map((listItem, listIndex) => (
+                <div key={listIndex} className="bg-gray-50 rounded-lg p-4">
+                  <div className="font-medium text-gray-900 mb-1">{listItem.title}</div>
+                  <div className="text-gray-600 text-sm">{listItem.description}</div>
+                </div>
+              ))}
+            </div>
+          )
+        }
+
         return null
       })}
     </div>
@@ -102,7 +122,24 @@ const helpItems: Category[] = [
         id: 'model-1',
         q: '支持哪些格式的模型？',
         a: [
-          '目前支持 .glb 和 .dae (Collada) 格式的模型文件。'
+          '目前支持以下格式的模型文件：',
+          {
+            type: 'list',
+            items: [
+              {
+                title: 'GLB (.glb)',
+                description: '推荐格式，包含完整的模型、材质和动画数据，无需额外的资源文件'
+              },
+              {
+                title: 'GLTF (.gltf)',
+                description: '支持外部资源引用的模型格式，适合需要分离资源的场景'
+              },
+              {
+                title: 'Collada (.dae)',
+                description: '支持带贴图的静态模型，可搭配 SMD 动画，适合需要自定义动画的场景'
+              }
+            ]
+          }
         ]
       },
       {
@@ -123,6 +160,11 @@ const helpItems: Category[] = [
         id: 'model-3',
         q: '模型文件大小有限制吗？',
         a: '单个模型文件大小限制为 100MB。建议在上传前对模型进行适当压缩以获得更好的加载性能。'
+      },
+      {
+        id: 'model-4',
+        q: 'gltf提示材质错误？',
+        a: '本站默认采用three.js进行模型加载，但是新版本的three移除了对KHR材质扩展的支持，所以如果模型使用了KHR材质扩展，则无法加载贴图。您可以使用实验性的预览方式，但是这种方式目前还存在些bug。'
       }
     ]
   },

@@ -48,7 +48,9 @@ export async function GET() {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
-        points: user.checkIns.reduce((sum, checkIn) => sum + checkIn.points, 0)
+        points: user.checkIns.reduce((sum, checkIn) => {
+          return sum + (checkIn.points || 0)
+        }, 0)
       }))
       .sort((a, b) => b.points - a.points)
       .slice(0, 6)  // 只取前6名

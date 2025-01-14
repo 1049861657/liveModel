@@ -247,6 +247,18 @@ export default function CheckInPage() {
     }
   }
 
+  // 监听排行榜刷新事件
+  useEffect(() => {
+    const handleRefreshRankings = () => {
+      fetchRankings()
+    }
+
+    window.addEventListener('refreshRankings', handleRefreshRankings)
+    return () => {
+      window.removeEventListener('refreshRankings', handleRefreshRankings)
+    }
+  }, [])
+
   useEffect(() => {
     if (session) {
       fetchRankings()

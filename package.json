@@ -1,6 +1,6 @@
 {
   "name": "live-model",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,6 +10,8 @@
     "rollup": "rollup -c"
   },
   "dependencies": {
+    "@babylonjs/core": "^7.43.0",
+    "@babylonjs/loaders": "^7.43.0",
     "@google/model-viewer": "^4.0.0",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",

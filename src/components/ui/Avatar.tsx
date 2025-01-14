@@ -53,6 +53,7 @@ function Avatar({ user, size = 'md', className }: AvatarProps) {
           alt={user?.name || '用户头像'}
           width={64}
           height={64}
+          priority={true}
           className={cn(
             "w-full h-full object-cover",
             imageLoaded ? 'opacity-100' : 'opacity-0',

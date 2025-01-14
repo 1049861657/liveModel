@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
-import PreviewScene from '@/components/preview/PreviewScene'
+import PreviewGlbScene from '@/components/preview/PreviewGlbScene'
 import PreviewDaeScene from '@/components/preview/PreviewDaeScene'
+import PreviewGltfScene from '@/components/preview/PreviewGltfScene'
 
 async function getModelData(id: string) {
   try {
@@ -34,7 +35,13 @@ async function getModelData(id: string) {
   }
 }
 
-export default async function PreviewPage({ params }: { params: { id: string } }) {
+export default async function PreviewPage({ 
+  params,
+  searchParams 
+}: { 
+  params: { id: string }
+  searchParams: { engine?: string }
+}) {
   console.log('Fetching model for preview, ID:', params.id)
 
   const model = await prisma.model.findUnique({
@@ -68,14 +75,19 @@ export default async function PreviewPage({ params }: { params: { id: string } }
   }
 
   // 检查文件类型
-  const isDAE = model.filePath.toLowerCase().endsWith('.dae')
+  const fileExt = model.filePath.toLowerCase()
+  const isDAE = fileExt.endsWith('.dae')
+  const isGLTF = fileExt.endsWith('.gltf')
+  const isGLB = fileExt.endsWith('.glb')
 
   return (
     <div className="min-h-screen bg-gray-50">
       {isDAE ? (
         <PreviewDaeScene initialModel={model} />
+      ) : (isGLTF || isGLB) && searchParams.engine === 'gltf' ? (
+        <PreviewGltfScene initialModel={model} />
       ) : (
-        <PreviewScene initialModel={model} />
+        <PreviewGlbScene initialModel={model} />
       )}
     </div>
   )

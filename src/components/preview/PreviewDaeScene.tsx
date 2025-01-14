@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react'
+import { useEffect, useRef, useState, useCallback, useLayoutEffect, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
@@ -19,6 +19,13 @@ interface Part {
 
 interface PreviewDaeSceneProps {
   initialModel: ExtendedModel
+}
+
+// 格式化时间的辅助函数
+function formatTime(seconds: number) {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
 function ModelScene({ initialModel }: PreviewDaeSceneProps) {
@@ -69,12 +76,6 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
   const [showAxes, setShowAxes] = useState(false)
   const [showGround, setShowGround] = useState(true)
 
-  // 添加必要的 refs
-  const mixerRef = useRef<THREE.AnimationMixer | null>(null)
-  const actionRef = useRef<THREE.AnimationAction | null>(null)
-  const hasInitialized = useRef(false)
-  const initialPoses = useRef(new Map())
-
   // 添加相机初始状态
   const initialCameraRef = useRef<{
     position: THREE.Vector3
@@ -88,6 +89,21 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
   const [animationToDelete, setAnimationToDelete] = useState<{id: string, name: string} | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [textureErrors, setTextureErrors] = useState<string[]>([])
+
+  // 添加新的状态
+  const [currentAnimation, setCurrentAnimation] = useState<string>('')
+  const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
+
+  // 在加载模型时设置可用动画
+  useEffect(() => {
+    if (builtInAnimations.length > 0) {
+      const names = builtInAnimations.map(clip => clip.name)
+      setAvailableAnimations(names)
+      if (names.length > 0) {
+        setCurrentAnimation(names[0])
+      }
+    }
+  }, [builtInAnimations])
 
   // 初始化 LoadingManager
   useEffect(() => {
@@ -350,12 +366,18 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
     const updateAnimation = () => {
       const delta = clock.getDelta()
       animationMixer.update(delta)
+      frameId = requestAnimationFrame(updateAnimation)
+    }
+
+    const updateProgress = () => {
+      const duration = currentAction.getClip().duration
+      const currentTime = currentAction.time % duration
       
       setAnimationControl({
         isPlaying: currentAction.isRunning(),
         speed: currentAction.getEffectiveTimeScale(),
-        currentTime: currentAction.time,
-        duration: currentAction.getClip().duration,
+        currentTime: currentTime,
+        duration: duration,
         play: () => {
           currentAction.paused = false
           currentAction.play()
@@ -372,16 +394,25 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
           currentAction.timeScale = speed
         },
         setTime: (time) => {
-          currentAction.time = time % currentAction.getClip().duration
+          currentAction.time = time % duration
         }
       })
-      
-      frameId = requestAnimationFrame(updateAnimation)
     }
 
-    updateAnimation()
+    // 添加事件监听
+    animationMixer.addEventListener('loop', updateProgress)
+    animationMixer.addEventListener('finished', updateProgress)
+
+    // 定期更新进度
+    const interval = setInterval(updateProgress, 100)
+
+    frameId = requestAnimationFrame(updateAnimation)
+    
     return () => {
       if (frameId) cancelAnimationFrame(frameId)
+      animationMixer.removeEventListener('loop', updateProgress)
+      animationMixer.removeEventListener('finished', updateProgress)
+      clearInterval(interval)
     }
   }, [animationMixer, currentAction])
 
@@ -533,14 +564,19 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
   }
 
   // 添加一个函数来判断是否需要显示右侧面板
-  const shouldShowRightPanel = () => {
-    // 有动画信息需要显示
-    const hasAnimationInfo = (builtInAnimations.length > 0 && !selectedAnimation) || selectedAnimation
-    // 有模型部件且需要显示
-    const hasPartsToShow = showParts && parts.length > 0
+  const shouldShowRightPanel = useCallback(() => {
+    return showParts && parts.length > 0
+  }, [parts.length, showParts])
 
-    return hasAnimationInfo || hasPartsToShow
-  }
+  // 计算所有部件的选中状态
+  const allPartsState = useMemo(() => {
+    if (parts.length === 0) return { allSelected: false, allUnselected: false }
+    const selectedCount = parts.filter(part => part.visible).length
+    return {
+      allSelected: selectedCount === parts.length,
+      allUnselected: selectedCount === 0
+    }
+  }, [parts])
 
   const handleDeleteAnimation = async () => {
     if (!animationToDelete) return
@@ -1124,62 +1160,87 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
 
                       {/* 动画控制器 */}
                       {animationMixer && animationClip && !isLoadingAnimation && !animationError && (
-                        <div className="space-y-2">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => animationControl?.play()}
-                              className="flex-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                              disabled={!animationControl || animationControl.isPlaying}
-                            >
-                              播放
-                            </button>
-                            <button
-                              onClick={() => animationControl?.pause()}
-                              className="flex-1 px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                              disabled={!animationControl || !animationControl.isPlaying}
-                            >
-                              暂停
-                            </button>
-                            <button
-                              onClick={() => animationControl?.stop()}
-                              className="flex-1 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                              disabled={!animationControl}
-                            >
-                              停止
-                            </button>
-                          </div>
-
-                          {/* 速度控制 */}
-                          <div className="space-y-1">
-                            <label className="text-xs text-gray-600">播放速度</label>
+                        <div className="space-y-4">
+                          {/* 播放速度控制 */}
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-500">播放速度</span>
+                              <span className="text-gray-700">{animationControl?.speed || 1}x</span>
+                            </div>
                             <input
                               type="range"
                               min="0.1"
                               max="2"
                               step="0.1"
                               value={animationControl?.speed || 1}
-                              onChange={(e) => animationControl?.setSpeed(parseFloat(e.target.value))}
-                              className="w-full"
-                              disabled={!animationControl}
+                              onChange={(e) => {
+                                const newSpeed = parseFloat(e.target.value)
+                                animationControl?.setSpeed(newSpeed)
+                              }}
+                              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                             />
-                            <div className="text-xs text-gray-600">
-                              {animationControl?.speed.toFixed(1)}x
+                            <div className="flex justify-between text-xs text-gray-400">
+                              <span>0.1x</span>
+                              <span style={{ transform: 'translateX(-50%)', marginLeft: '0%' }}>1x</span>
+                              <span>2x</span>
                             </div>
                           </div>
 
-                          {/* 进度控制 */}
+                          {/* 播放控制按钮 */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                if (animationControl) {
+                                  animationControl.isPlaying ? animationControl.pause() : animationControl.play()
+                                }
+                              }}
+                              className="flex-1 px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                              disabled={!animationControl}
+                            >
+                              <svg 
+                                className="w-4 h-4" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2"
+                              >
+                                {animationControl?.isPlaying ? (
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 4h4v16H6zM14 4h4v16h-4z" />
+                                ) : (
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
+                                )}
+                              </svg>
+                              {animationControl?.isPlaying ? '暂停' : '播放'}
+                            </button>
+                            <button
+                              onClick={() => animationControl?.stop()}
+                              className="flex-1 px-3 py-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                              disabled={!animationControl}
+                            >
+                              <svg 
+                                className="w-4 h-4" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2"
+                              >
+                                <rect x="4" y="4" width="16" height="16" rx="2" />
+                              </svg>
+                              停止
+                            </button>
+                          </div>
+
+                          {/* 进度条 */}
                           <div className="space-y-1">
-                            <label className="text-xs text-gray-600">播放进度</label>
-                            <div className="relative w-full h-2 bg-gray-200 rounded">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
                               <div 
-                                className="absolute h-full bg-blue-500 rounded"
-                                style={{ 
-                                  width: `${((animationControl?.currentTime || 0) / (animationControl?.duration || 1)) * 100}%` 
-                                }}
+                                className="bg-blue-500 h-2 rounded-full transition-all"
+                                style={{ width: `${((animationControl?.currentTime || 0) / (animationControl?.duration || 1)) * 100}%` }}
                               />
                             </div>
-                            <div className="text-xs text-gray-600">
-                              {(animationControl?.currentTime || 0).toFixed(2)}s / {(animationControl?.duration || 0).toFixed(2)}s
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <span>{formatTime(animationControl?.currentTime || 0)}</span>
+                              <span>{formatTime(animationControl?.duration || 0)}</span>
                             </div>
                           </div>
                         </div>
@@ -1210,7 +1271,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                         模型部件 ({parts.length})
                       </h3>
                       
-                      {/* 按钮组 - 使用更紧凑的布局 */}
+                      {/* 按钮组 */}
                       <div className="flex bg-gray-100 rounded-lg p-0.5">
                         <button
                           onClick={() => {
@@ -1221,8 +1282,12 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                               })
                             )
                           }}
-                          className="px-2.5 py-1 text-xs rounded-l-md bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                          title="显示所有部"
+                          className={`px-2.5 py-1 text-xs rounded-l-md ${
+                            allPartsState.allSelected 
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-500 text-white hover:bg-gray-600'
+                          } transition-colors`}
+                          title="显示所有部件"
                         >
                           全选
                         </button>
@@ -1235,7 +1300,11 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                               })
                             )
                           }}
-                          className="px-2.5 py-1 text-xs rounded-r-md bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+                          className={`px-2.5 py-1 text-xs rounded-r-md ${
+                            allPartsState.allUnselected
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-500 text-white hover:bg-gray-600'
+                          } transition-colors`}
                           title="隐藏所有部件"
                         >
                           全不选

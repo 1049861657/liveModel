@@ -74,6 +74,11 @@ export default function CheckInButton({ onCheckIn }: CheckInButtonProps) {
       if (onCheckIn) {
         await onCheckIn()
       }
+
+      // 刷新排行榜
+      const event = new CustomEvent('refreshRankings')
+      window.dispatchEvent(event)
+      
     } catch (error) {
       toast.error(error instanceof Error ? error.message : '签到失败')
     } finally {
