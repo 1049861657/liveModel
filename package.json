@@ -19,8 +19,6 @@
     "@react-three/drei": "^9.121.1",
     "@react-three/fiber": "^8.17.12",
     "@react-three/postprocessing": "^2.16.6",
-    "@types/react-virtualized-auto-sizer": "^1.0.4",
-    "@types/react-window": "^1.8.8",
     "ali-oss": "^6.22.0",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",

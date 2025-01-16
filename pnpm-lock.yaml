@@ -35,12 +35,6 @@ importers:
       '@react-three/postprocessing':
         specifier: ^2.16.6
         version: 2.16.6(@react-three/fiber@8.17.12(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.169.0))(@types/three@0.169.0)(react@18.3.1)(three@0.169.0)
-      '@types/react-virtualized-auto-sizer':
-        specifier: ^1.0.4
-        version: 1.0.4
-      '@types/react-window':
-        specifier: ^1.8.8
-        version: 1.8.8
       ali-oss:
         specifier: ^6.22.0
         version: 6.22.0(proxy-agent@6.5.0)
@@ -908,12 +902,6 @@ packages:
     resolution: {integrity: sha512-HHM3nxyUZ3zAylX8ZEyrDNd2XZOnQ0D5XfunJF5FLQnZbHHYq4UWvW1QfelQNXv1ICNkwYhfxjwfnqivYB6bFg==}
     peerDependencies:
       '@types/react': '*'
-
-  '@types/react-virtualized-auto-sizer@1.0.4':
-    resolution: {integrity: sha512-nhYwlFiYa8M3S+O2T9QO/e1FQUYMr/wJENUdf/O0dhRi1RS/93rjrYQFYdbUqtdFySuhrtnEDX29P6eKOttY+A==}
-
-  '@types/react-window@1.8.8':
-    resolution: {integrity: sha512-8Ls660bHR1AUA2kuRvVG9D/4XpRC6wjAaPT9dil7Ckc76eP9TKWZwwmgfq8Q1LANX3QNDnoU4Zp48A3w+zK69Q==}
 
   '@types/react@18.3.18':
     resolution: {integrity: sha512-t4yC+vtgnkYjNSKlFx1jkAhH8LgTo2N/7Qvi83kdEaUtMDiwpbLAktKDaAMlRcJ5eSxZkH74eEGt1ky31d7kfQ==}
@@ -3110,14 +3098,6 @@ snapshots:
       '@types/react': 18.3.18
 
   '@types/react-reconciler@0.28.9(@types/react@18.3.18)':
-    dependencies:
-      '@types/react': 18.3.18
-
-  '@types/react-virtualized-auto-sizer@1.0.4':
-    dependencies:
-      '@types/react': 18.3.18
-
-  '@types/react-window@1.8.8':
     dependencies:
       '@types/react': 18.3.18
 
