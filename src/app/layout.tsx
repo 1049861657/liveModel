@@ -15,9 +15,9 @@ export const metadata: Metadata = {
   title: '魔抖',
   description: '在线预览和分享3D模型',
   icons: {
-    icon: '/icon.ico',
-    shortcut: '/icon.ico',
-    apple: '/apple-icon.png',
+    icon: '/metadata/icon.ico',
+    shortcut: '/metadata/icon.ico',
+    apple: '/metadata/apple-icon.png',
   },
 }
 
