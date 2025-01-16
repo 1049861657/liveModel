@@ -86,12 +86,13 @@ export async function GET(request: Request) {
         <model-viewer
           id="viewer"
           src="${modelPath}"
+          environment-image="/hdr/buikslotermeerplein_1k.hdr"
+          exposure="1"
+          shadow-intensity="1"
           auto-rotate
           camera-controls
           touch-action="pan-y"
           interaction-prompt="none"
-          shadow-intensity="1"
-          exposure="1"
           camera-orbit="-45deg 60deg auto"
           min-camera-orbit="auto auto auto"
           max-camera-orbit="auto auto auto"

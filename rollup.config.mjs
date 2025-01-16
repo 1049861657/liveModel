@@ -16,4 +16,14 @@ export default [{
     name: 'Three'
   },
   plugins: [nodeResolve()]
+}, {
+  input: 'src/vendor/babylon-bundle.js',
+  output: {
+    file: 'public/vendor/babylon-bundle.js',
+    format: 'iife',
+    name: 'BABYLON',
+    extend: true
+  },
+  inlineDynamicImports: true,
+  plugins: [nodeResolve()]
 }] 

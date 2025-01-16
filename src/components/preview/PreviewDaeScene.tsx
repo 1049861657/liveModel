@@ -1113,7 +1113,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                 maxDistance={100}
                 target={[0, 0, 0]}
               />
-              <Environment files="/hdr/meadow_2_4k.hdr" />
+              <Environment files="/hdr/buikslotermeerplein_1k.hdr" />
             </>
           )}
         </Canvas>

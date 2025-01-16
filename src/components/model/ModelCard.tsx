@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { type Model as PrismaModel } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
@@ -37,9 +36,7 @@ function ModelPreview({ model }: { model: ExtendedModel }) {
             // 元素进入可视区域，加载 iframe
             const iframe = entry.target as HTMLIFrameElement
             if (!iframe.src) {
-              iframe.src = model.format === 'dae'
-                ? `/api/thumbnail/dae?model=${encodeURIComponent(model.filePath)}`
-                : `/api/thumbnail/glb?model=${encodeURIComponent(model.filePath)}`
+              iframe.src = `/api/thumbnail/${model.format}?model=${model.filePath}`
             }
           }
         })
@@ -101,7 +98,8 @@ function ModelPreview({ model }: { model: ExtendedModel }) {
         className={`w-full h-full border-none transition-opacity duration-300 ${
           isLoading || hasError ? 'opacity-0' : 'opacity-100'
         }`}
-        sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+        sandbox="allow-scripts allow-same-origin"
+        allow="autoplay"
         style={{ pointerEvents: 'auto' }}
         onLoad={handleLoad}
         onError={handleError}
@@ -537,7 +535,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
             size === 'medium' && 'p-3 pb-4',
             size === 'large' && 'p-4 pb-5'
           )}>
-            {/* ���题和描述 */}
+            {/* 题和描述 */}
             <div className="space-y-1">
               <h3 className={clsx(
                 'font-medium text-gray-900 dark:text-white truncate',
@@ -742,10 +740,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                 {/* 预览区域 */}
                 <div className="w-full h-full bg-gray-100 relative">
                   <iframe
-                    src={model.format === 'dae' 
-                      ? `/api/thumbnail/dae?model=${model.filePath}`
-                      : `/api/thumbnail/glb?model=${model.filePath}`
-                    }
+                    src={`/api/thumbnail/${model.format}?model=${model.filePath}`}
                     className="w-full h-full border-none"
                     title={model.name}
                     sandbox="allow-scripts allow-same-origin"

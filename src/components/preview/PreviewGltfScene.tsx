@@ -216,7 +216,7 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
 
         // 只使用HDR光照，不创建天空盒
         const envTexture = new BABYLON.HDRCubeTexture(
-          '/hdr/meadow_2_4k.hdr',
+          '/hdr/buikslotermeerplein_1k.hdr',
           scene,
           512
         )

@@ -19,6 +19,22 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    turbo: {
+      rules: {
+        '*.svg': ['@svgr/webpack'],
+        '*.module.css': ['style-loader', 'css-loader'],
+      },
+      resolveAlias: {
+        'react-dom$': 'react-dom/profiling',
+        'scheduler/tracing': 'scheduler/tracing-profiling',
+      },
+    },
+    serverComponentsExternalPackages: [
+      'utf-8-validate',
+      'bufferutil'
+    ],
+  },
   webpack: (config) => {
     config.externals.push({
       'utf-8-validate': 'commonjs utf-8-validate',

@@ -584,7 +584,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                 </mesh>
               </group>
             )}
-            <Environment files="/hdr/meadow_2_4k.hdr" />
+            <Environment files="/hdr/buikslotermeerplein_1k.hdr" />
           </Suspense>
         </Canvas>
       </div>

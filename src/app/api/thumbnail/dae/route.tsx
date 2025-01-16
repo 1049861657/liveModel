@@ -103,6 +103,8 @@ export async function GET(request: Request) {
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
 
             const controls = new OrbitControls(camera, canvas);
             controls.enableDamping = true;
@@ -117,6 +119,19 @@ export async function GET(request: Request) {
               RIGHT: THREE.MOUSE.PAN
             };
             controls.maxPolarAngle = Math.PI / 1.5;
+
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            pmremGenerator.compileEquirectangularShader();
+
+            new THREE.TextureLoader().load(
+              '/hdr/buikslotermeerplein_1k.hdr',
+              function (texture) {
+                const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                scene.environment = envMap;
+                texture.dispose();
+                pmremGenerator.dispose();
+              }
+            );
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
