@@ -35,14 +35,6 @@ export async function GET(
             reviews: true
           }
         },
-        textures: {
-          select: {
-            id: true,
-            name: true,
-            filePath: true,
-            fileSize: true
-          }
-        },
         animations: {
           select: {
             id: true,
@@ -101,11 +93,10 @@ export async function DELETE(
       )
     }
 
-    // 获取模型信息及其关联的贴图和动画
+    // 获取模型信息及其关联的动画
     const model = await prisma.model.findUnique({
       where: { id: params.id },
       include: {
-        textures: true,
         animations: true
       }
     })
@@ -126,32 +117,9 @@ export async function DELETE(
     }
 
     try {
-      // 1. 删除模型文件
-      const modelOssKey = `models/${model.format}/${model.componentName}${path.extname(model.filePath)}`
-      await storageClient.delete(modelOssKey)
-
-      // 2. 删除贴图文件
-      if (model.textures.length > 0) {
-        const texturePromises = model.textures.map(texture => {
-          const textureOssKey = `models/${model.format}/${model.componentName}/textures/${path.basename(texture.filePath)}`
-          return storageClient.delete(textureOssKey).catch(err => {
-            console.error('删除贴图失败:', err)
-          })
-        })
-        await Promise.all(texturePromises)
-      }
-
-      // 3. 删除动画文件
-      if (model.animations.length > 0) {
-        const animationPromises = model.animations.map(animation => {
-          const animationOssKey = `models/${model.format}/${model.componentName}/animations/${path.basename(animation.filePath)}`
-          return storageClient.delete(animationOssKey).catch(err => {
-            console.error('删除动画失败:', err)
-          })
-        })
-        await Promise.all(animationPromises)
-      }
-
+      // 直接删除模型的整个文件夹
+      const modelFolderKey = `models/${model.format}/${model.componentName}/`
+      await storageClient.delete(modelFolderKey)
     } catch (error) {
       console.error('删除OSS文件失败:', error)
       // 继续执行数据库删除操作
@@ -161,10 +129,6 @@ export async function DELETE(
     await prisma.$transaction([
       // 删除动画记录
       prisma.animation.deleteMany({
-        where: { modelId: params.id }
-      }),
-      // 删除贴图记录
-      prisma.texture.deleteMany({
         where: { modelId: params.id }
       }),
       // 删除收藏记录

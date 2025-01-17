@@ -2,6 +2,7 @@ import { type Model as PrismaModel } from '@prisma/client'
 
 export interface ExtendedModel extends PrismaModel {
   isFavorited?: boolean
+  texturesSize?: number
   user?: {
     id: string
     name: string | null

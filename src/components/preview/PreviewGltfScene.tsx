@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import * as BABYLON from '@babylonjs/core'
 import '@babylonjs/loaders'
-import type { Model } from '@prisma/client'
+import { type ExtendedModel } from '@/types/model'
 
 // 内联Spinner组件
 function Spinner() {
@@ -15,7 +15,7 @@ function Spinner() {
 }
 
 interface PreviewGltfSceneProps {
-  initialModel: Model & {
+  initialModel: ExtendedModel & {
     user: {
       id: string
       name: string | null

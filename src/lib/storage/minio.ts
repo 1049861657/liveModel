@@ -111,9 +111,43 @@ export class MinioStorage implements StorageProvider {
   async delete(path: string): Promise<void> {
     try {
       console.log(`Deleting from MinIO: ${this.bucket}/${path}`);
-      await this.client.removeObject(this.bucket, path);
+      // 检查路径是否以斜杠结尾（表示文件夹）
+      if (path.endsWith('/')) {
+        await this.deleteFolder(path);
+      } else {
+        await this.client.removeObject(this.bucket, path);
+      }
     } catch (error) {
       console.error('MinIO delete error:', error);
+      throw error;
+    }
+  }
+
+  private async deleteFolder(prefix: string): Promise<void> {
+    try {
+      console.log(`Deleting folder from MinIO: ${this.bucket}/${prefix}`);
+      const objectsList: string[] = [];
+      
+      // 列出文件夹下的所有对象
+      const objectsStream = this.client.listObjects(this.bucket, prefix, true);
+      
+      for await (const obj of objectsStream) {
+        if (obj.name) {
+          objectsList.push(obj.name);
+        }
+      }
+
+      if (objectsList.length === 0) {
+        console.log(`No objects found in folder: ${prefix}`);
+        return;
+      }
+
+      // 批量删除对象
+      console.log(`Deleting ${objectsList.length} objects from folder ${prefix}`);
+      await this.client.removeObjects(this.bucket, objectsList);
+      
+    } catch (error) {
+      console.error('MinIO delete folder error:', error);
       throw error;
     }
   }

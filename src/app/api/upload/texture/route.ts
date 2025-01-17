@@ -63,6 +63,9 @@ export async function POST(request: Request) {
       )
     }
 
+    // 计算贴图总大小
+    let totalTextureSize = 0
+
     // 保存贴图文件并记录信息
     const texturePromises = textureFiles.map(async (textureFile) => {
       if (textureFile instanceof Blob) {
@@ -73,12 +76,13 @@ export async function POST(request: Request) {
         
         // 上传贴图到存储服务
         const textureResult = await storageClient.put(textureOssPath, textureBuffer)
+        
+        totalTextureSize += textureFile.size
 
         return {
           name: textureName,
           filePath: textureResult.url,
-          fileSize: textureFile.size,
-          modelId: model.id
+          fileSize: textureFile.size
         }
       }
     })
@@ -86,9 +90,14 @@ export async function POST(request: Request) {
     // 等待所有贴图上传完成
     const textureInfos = await Promise.all(texturePromises)
 
-    // 保存贴图记录到数据库
-    await prisma.texture.createMany({
-      data: textureInfos.filter(Boolean) as any[]
+    // 更新模型的贴图总大小
+    await prisma.model.update({
+      where: { id: modelId },
+      data: {
+        texturesSize: {
+          increment: totalTextureSize
+        }
+      }
     })
 
     // 如果是DAE文件，需要更新贴图引用
@@ -98,18 +107,15 @@ export async function POST(request: Request) {
           throw new Error('Component name is required for DAE files')
         }
         
-        // 从URL中提取OSS对象键
-        const ossKey = `models/${model.format}/${model.componentName}${path.extname(model.filePath)}`
-        
-        // 从存储服务获取DAE文件内容
-        const modelResult = await storageClient.get(ossKey)
-        const daeContent = modelResult.content.toString('utf8')
+        // 获取DAE文件内容
+        const daeFilePath = `models/dae/${model.componentName}/${model.componentName}.dae`
+        const daeContent = await storageClient.get(daeFilePath)
         
         // 更新贴图引用
-        const updatedContent = await updateDaeTextureReferences(daeContent, textureInfos.filter(Boolean) as any[], model.componentName)
+        const updatedContent = await updateDaeTextureReferences(daeContent.content.toString('utf8'), textureInfos.filter(Boolean) as TextureInfo[], model.componentName)
         
         // 将更新后的内容重新上传到存储服务
-        await storageClient.put(ossKey, Buffer.from(updatedContent))
+        await storageClient.put(daeFilePath, Buffer.from(updatedContent))
       } catch (error) {
         console.error('处理DAE文件失败:', error)
         throw error
@@ -152,7 +158,7 @@ async function updateDaeTextureReferences(
       // 获取新的文件名（从完整路径中提取）
       const newName = path.basename(texture.filePath)
       // 存储映射关系
-      textureMap.set(originalName, `${componentName}/textures/${newName}`)
+      textureMap.set(originalName, `textures/${newName}`)
     })
 
     // 替换所有贴图引用

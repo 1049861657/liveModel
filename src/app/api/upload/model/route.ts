@@ -27,8 +27,8 @@ async function updateDaeTextureReferences(
       const originalName = path.basename(texture.name)
       // 获取新的文件名（从完整路径中提取）
       const newName = path.basename(texture.filePath)
-      // 存储映射关系
-      textureMap.set(originalName, `${componentName}/textures/${newName}`)
+      // 存储映射关系，包含完整的相对路径
+      textureMap.set(originalName, `textures/${newName}`)
     })
 
     // 替换所有贴图引用
@@ -69,6 +69,7 @@ export async function POST(request: Request) {
     const name = formData.get('name') as string
     const description = formData.get('description') as string
     const isPublic = formData.get('isPublic') === 'true'
+    const texturesSize = parseInt(formData.get('texturesSize') as string) || 0
     
     // 收集所有贴图文件
     const textureFiles: FormDataEntryValue[] = []
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
 
     if (!modelFile || !name || !(modelFile instanceof Blob)) {
       return NextResponse.json(
-        { error: '缺少必要的字段' },
+        { error: '缺少必要字段' },
         { status: 400 }
       )
     }
@@ -128,25 +129,20 @@ export async function POST(request: Request) {
         }
       })
 
-      // 获取原始文件夹名称（不包含时间戳）
-      const originalFolderName = fileNameWithoutExt.split('_')[0]
-
-      // 上传所有 GLTF 相关文件，保持原始路径结构
       for (const gltfFile of gltfFiles) {
         if (gltfFile instanceof Blob) {
           const fileBuffer = Buffer.from(await gltfFile.arrayBuffer())
           const originalFileName = 'name' in gltfFile ? gltfFile.name : `file_${Date.now()}`
           
-          // 如果是主 GLTF 文件，跳过
           if (originalFileName.toLowerCase() === originalName.toLowerCase()) {
-            continue // 跳过，因为主 GLTF 文件已经上传
+            continue
           }
           
-          // 获取相对于原始文件夹的路径
-          const relativePath = originalFileName.replace(new RegExp(`^${originalFolderName}/?`), '')
+          const pathParts = originalFileName.split(/[\/\\]/)
+          pathParts.shift()
+          const targetPath = pathParts.join('/')
+          const filePath = `models/gltf/${componentName}/${targetPath}`
           
-          // 构建新的文件路径，所有文件放在时间戳文件夹下
-          const filePath = `models/gltf/${componentName}/${relativePath}`
           await storageClient.put(filePath, fileBuffer)
         }
       }
@@ -189,9 +185,9 @@ export async function POST(request: Request) {
       // 重新上传更新后的文件到存储服务
       await storageClient.put(modelOssPath, finalModelBuffer)
     }
-    
+
     try {
-      // 使用事务保存模型和贴图信息
+      // 创建模型记录
       const model = await prisma.model.create({
         data: {
           name,
@@ -202,14 +198,7 @@ export async function POST(request: Request) {
           componentName,
           isPublic,
           userId: session.user.id,
-          textures: {
-            create: textures.map(texture => ({
-              name: texture.name,
-              filePath: texture.filePath,
-              fileSize: texture.fileSize,
-              userId: session.user.id
-            }))
-          }
+          texturesSize
         }
       })
 

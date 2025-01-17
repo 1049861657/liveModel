@@ -38,6 +38,20 @@ export async function GET(request: Request) {
             z-index: 20;
             color: #6b7280;
           }
+          .reload-button {
+            margin-top: 16px;
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: background-color 0.2s;
+          }
+          .reload-button:hover {
+            background-color: #2563eb;
+          }
           model-viewer {
             width: 100%;
             height: 100%;
@@ -81,6 +95,7 @@ export async function GET(request: Request) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <div style="margin-top: 8px;">加载失败</div>
+          <button class="reload-button" onclick="window.location.reload()">重新加载</button>
         </div>
         
         <model-viewer
@@ -109,7 +124,7 @@ export async function GET(request: Request) {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'flex';
             window.parent.postMessage({ type: 'modelLoadError' }, '*');
-          }, 10000);
+          }, 20000);
 
           window.addEventListener('error', () => {
             clearTimeout(timeout);

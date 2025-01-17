@@ -37,13 +37,13 @@ model Model {
   format        String
   componentName String?
   isPublic      Boolean   @default(true)
+  texturesSize  Int       @default(0)  // 所有贴图的总大小（字节）
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   userId        String
   user          User      @relation(fields: [userId], references: [id])
   reviews       Review[]
   animations    Animation[]
-  textures      Texture[]
   favorites     Favorite[]
   totalReviews  Int       @default(0)
   avgRating     Float?    
@@ -144,20 +144,6 @@ model ReviewLike {
 
 // 添加动画模型
 model Animation {
-  id        String   @id @default(cuid())
-  name      String
-  filePath  String
-  fileSize  Int
-  modelId   String
-  model     Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([modelId])
-}
-
-// 添加贴图模型
-model Texture {
   id        String   @id @default(cuid())
   name      String
   filePath  String

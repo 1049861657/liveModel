@@ -97,19 +97,29 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
 
     setUploading(true)
     try {
+      const texturesSize = selectedFile.textures.reduce((sum, texture) => sum + texture.size, 0) + 
+        (selectedFile.gltfFiles?.reduce((sum, file) => {
+          // 排除主 GLTF 文件
+          if (file.name.toLowerCase().endsWith('.gltf')) {
+            return sum
+          }
+          return sum + file.size
+        }, 0) || 0)
+
       const formData = new FormData()
       formData.append('model', selectedFile.file)
       formData.append('name', selectedFile.name)
       formData.append('description', selectedFile.description)
       formData.append('isPublic', String(selectedFile.isPublic))
+      formData.append('texturesSize', String(texturesSize))
+      
+      selectedFile.textures.forEach((texture, index) => {
+        formData.append(`texture_${index}`, texture)
+      })
       
       if (selectedFile.gltfFiles) {
         selectedFile.gltfFiles.forEach((file, index) => {
           formData.append(`gltf_${index}`, file)
-        })
-      } else {
-        selectedFile.textures.forEach((texture, index) => {
-          formData.append(`texture_${index}`, texture)
         })
       }
 
