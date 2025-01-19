@@ -565,8 +565,10 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
 
   // 添加一个函数来判断是否需要显示右侧面板
   const shouldShowRightPanel = useCallback(() => {
-    return showParts && parts.length > 0
-  }, [parts.length, showParts])
+    const hasAnimationPanel = ((builtInAnimations.length > 0 && !selectedAnimation) || selectedAnimation) && !isLoadingAnimation && !animationError;
+    const hasPartsPanel = showParts && parts.length > 0;
+    return hasAnimationPanel || hasPartsPanel;
+  }, [builtInAnimations.length, selectedAnimation, isLoadingAnimation, animationError, showParts, parts.length])
 
   // 计算所有部件的选中状态
   const allPartsState = useMemo(() => {
@@ -1085,7 +1087,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
               />
               
               {/* 有条件渲染坐标轴 */}
-              {showAxes && <axesHelper args={[5]} />}
+              {showAxes && <axesHelper args={[10]} />}
               
               {/* 有条件渲染地面 */}
               {showGround && (

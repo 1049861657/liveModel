@@ -37,10 +37,10 @@ async function getModelData(id: string) {
 
 export default async function PreviewPage({ 
   params,
-  searchParams 
+  searchParams
 }: { 
   params: { id: string }
-  searchParams: { engine?: string }
+  searchParams: { engine?: 'dae' | 'gltf' | 'glb' }
 }) {
   console.log('Fetching model for preview, ID:', params.id)
 
@@ -76,15 +76,22 @@ export default async function PreviewPage({
 
   // 检查文件类型
   const fileExt = model.filePath.toLowerCase()
-  const isDAE = fileExt.endsWith('.dae')
-  const isGLTF = fileExt.endsWith('.gltf')
-  const isGLB = fileExt.endsWith('.glb')
+  let defaultEngine = 'glb'
+
+  if (fileExt.endsWith('.dae')) {
+    defaultEngine = 'dae'
+  } else if (fileExt.endsWith('.gltf')) {
+    defaultEngine = 'gltf'
+  }
+
+  // 使用 engine 参数或默认引擎
+  const engine = searchParams.engine || defaultEngine
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {isDAE ? (
+      {engine === 'dae' ? (
         <PreviewDaeScene initialModel={model} />
-      ) : (isGLTF || isGLB) && searchParams.engine === 'gltf' ? (
+      ) : engine === 'gltf' ? (
         <PreviewGltfScene initialModel={model} />
       ) : (
         <PreviewGlbScene initialModel={model} />

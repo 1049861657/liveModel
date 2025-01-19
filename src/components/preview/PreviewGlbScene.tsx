@@ -6,6 +6,8 @@ import { OrbitControls, Environment, useGLTF, useAnimations } from '@react-three
 import { Group, AnimationClip, Box3, Vector3 } from 'three'
 import * as THREE from 'three'
 import Link from 'next/link'
+import * as Select from '@radix-ui/react-select'
+import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@radix-ui/react-icons'
 
 // 动态导入 Canvas 以避免 SSR 问题
 const Canvas = dynamic(
@@ -178,8 +180,8 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
 
   // 判断是否显示右侧面板
   const shouldShowRightPanel = useCallback(() => {
-    return showParts && parts.length > 0
-  }, [parts.length, showParts])
+    return availableAnimations.length > 0 || (showParts && parts.length > 0)
+  }, [parts.length, showParts, availableAnimations.length])
 
   // 计算所有部件的选中状态
   const allPartsState = useMemo(() => {
@@ -403,12 +405,8 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
-                        <span>尝试实验性预览</span>
+                        <span>换为 Babylon 预览</span>
                       </Link>
-                      <div className="absolute left-0 bottom-full mb-2 w-64 p-2 bg-gray-800/95 text-xs text-white rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                        <div>换为 Babylon 预览，可能会出现贴图加载不完全与高亮丢失</div>
-                        <div className="absolute -bottom-1 left-4 w-2 h-2 bg-gray-800/95 rotate-45"></div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -548,6 +546,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
         <Canvas
           camera={{ position: [0, 1.5, 3] }}
           gl={{ preserveDrawingBuffer: true }}
+          style={{ background: '#f0f0f0' }}
         >
           <Suspense fallback={null}>
             <ambientLight intensity={0.5} />
@@ -567,7 +566,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
               enableZoom={true}
               enableRotate={true}
             />
-            {showAxes && <axesHelper args={[5]} />}
+            {showAxes && <axesHelper args={[10]} />}
             {showGround && (
               <group position={[0, 0, 0]}>
                 <gridHelper args={[20, 20, '#888888', '#CCCCCC']} />
@@ -607,7 +606,9 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                       <div className="text-sm space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500">名称:</span>
-                          <span className="text-gray-700">{currentAnimation || 'default'}</span>
+                          <span className="text-gray-700 truncate max-w-[180px]" title={currentAnimation || 'default'}>
+                            {currentAnimation || 'default'}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500">时长:</span>
@@ -622,17 +623,56 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
 
                     {/* 动画控制器 */}
                     <div className="space-y-4">
-                      <select
-                        value={currentAnimation}
-                        onChange={(e) => handleAnimationChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
-                      >
-                        {availableAnimations.map((name) => (
-                          <option key={name} value={name}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
+                      <Select.Root value={currentAnimation} onValueChange={handleAnimationChange}>
+                        <Select.Trigger 
+                          className="inline-flex items-center justify-between w-full px-4 py-2.5 text-sm
+                                     bg-white border border-gray-200 rounded-lg gap-2 outline-none
+                                     hover:border-gray-300 focus:border-blue-500 focus:ring-2 
+                                     focus:ring-blue-500/20 data-[placeholder]:text-gray-500"
+                        >
+                          <div className="truncate max-w-[200px]" title={currentAnimation || 'default'}>
+                            <Select.Value placeholder="选择动画" />
+                          </div>
+                          <Select.Icon className="flex-shrink-0">
+                            <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+                          </Select.Icon>
+                        </Select.Trigger>
+
+                        <Select.Portal>
+                          <Select.Content 
+                            className="overflow-hidden bg-white rounded-lg border border-gray-200 shadow-lg z-[100] w-[var(--radix-select-trigger-width)]"
+                            position="popper"
+                            sideOffset={4}
+                          >
+                            <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-gradient-to-b from-white to-white/80 text-gray-500 cursor-default sticky top-0 hover:bg-gray-50 transition-colors">
+                              <ChevronUpIcon className="w-5 h-5" />
+                            </Select.ScrollUpButton>
+                            
+                            <Select.Viewport className="p-1 max-h-[600px] overflow-y-auto relative">
+                              {availableAnimations.map((name) => (
+                                <Select.Item
+                                  key={name}
+                                  value={name}
+                                  className="relative flex items-center px-6 py-2 text-sm rounded-md
+                                           select-none data-[highlighted]:outline-none truncate
+                                           data-[highlighted]:bg-blue-50 data-[state=checked]:font-medium
+                                           cursor-pointer"
+                                >
+                                  <Select.ItemText>{name}</Select.ItemText>
+                                  <Select.ItemIndicator className="absolute left-2 flex items-center justify-center">
+                                    <CheckIcon className="w-4 h-4 text-blue-500" />
+                                  </Select.ItemIndicator>
+                                </Select.Item>
+                              ))}
+                            </Select.Viewport>
+
+                            <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-gradient-to-t from-white to-white/80 text-gray-500 cursor-default sticky bottom-0 hover:bg-gray-50 transition-colors border-t border-gray-100">
+                              <ChevronDownIcon className="w-5 h-5" />
+                              <div className="absolute -top-6 left-0 right-0 h-6 bg-gradient-to-b from-transparent to-white/50 pointer-events-none" />
+                            </Select.ScrollDownButton>
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
 
                       {/* 播放速度控制 */}
                       <div className="space-y-2">
