@@ -40,7 +40,7 @@ export default async function PreviewPage({
   searchParams
 }: { 
   params: { id: string }
-  searchParams: { engine?: 'dae' | 'gltf' | 'glb' }
+  searchParams: { engine?: string}
 }) {
   console.log('Fetching model for preview, ID:', params.id)
 

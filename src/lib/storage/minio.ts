@@ -1,5 +1,5 @@
 import { Client as MinioClient } from 'minio';
-import { StorageProvider, PutResult } from './types';
+import { StorageProvider, PutResult, ListOptions, ListResult } from './types';
 
 interface MinioConfig {
   endPoint: string;
@@ -166,5 +166,42 @@ export class MinioStorage implements StorageProvider {
     const protocol = this.secure ? 'https' : 'http';
     const portStr = this.isDomain ? '' : (this.port ? `:${this.port}` : '');
     return `${protocol}://${this.endPoint}${portStr}/${this.bucket}/${path}`;
+  }
+
+  async list(options?: ListOptions): Promise<ListResult> {
+    try {
+      console.log(`Listing objects from MinIO: ${this.bucket}/${options?.prefix || ''}`);
+      const objects: Array<{
+        name: string;
+        size: number;
+        lastModified?: Date;
+      }> = [];
+
+      const objectsStream = this.client.listObjects(
+        this.bucket,
+        options?.prefix || '',
+        true,
+        { MaxKeys: options?.['max-keys'] || 100 }
+      );
+
+      for await (const obj of objectsStream) {
+        if (obj.name) {
+          objects.push({
+            name: obj.name,
+            size: obj.size,
+            lastModified: obj.lastModified
+          });
+        }
+      }
+
+      return {
+        objects,
+        prefixes: [],
+        isTruncated: false
+      };
+    } catch (error) {
+      console.error('MinIO list error:', error);
+      throw error;
+    }
   }
 } 

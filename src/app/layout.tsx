@@ -30,6 +30,9 @@ export default async function RootLayout({
 
   return (
     <html lang="zh">
+      <head>
+        <meta name="msvalidate.01" content="5058D208486CE0B008F765C9475DC9C2" />
+      </head>
       <body className={inter.className}>
         <AuthProvider session={session}>
           <div className="min-h-screen flex flex-col">

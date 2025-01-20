@@ -144,13 +144,21 @@ const helpItems: Category[] = [
       },
       {
         id: 'model-2',
-        q: '为什么我的模型显示不正确？',
+        q: '为什么我的模型显示错误？',
         a: [
-          '请确保模型文件完整且格式正确。对于 DAE 格式，请检查是否上传了所需的贴图文件。',
+          '对于 DAE 格式，请检查是否上传了所需的贴图文件。',
           {
             type: 'image',
-            src: '/help/model-2.png',
-            alt: '上传贴图步骤示例',
+            src: '/help/model-2-1.png',
+            alt: 'DAE 上传贴图步骤示例',
+            width: 600,
+            height: 300
+          },
+          '对于 GLTF 格式，请确保同时上传相关的贴图文件和二进制文件（.bin）。如果实在没有贴图，可以切换为glb引擎。',
+          {
+            type: 'image',
+            src: '/help/model-2-2.jpg',
+            alt: 'GLTF 文件结构示例',
             width: 600,
             height: 300
           }

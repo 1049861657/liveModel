@@ -52,6 +52,20 @@ export async function GET(request: Request) {
           .reload-button:hover {
             background-color: #2563eb;
           }
+          .help-button {
+            margin-top: 16px;
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: background-color 0.2s;
+          }
+          .help-button:hover {
+            background-color: #2563eb;
+          }
           #renderCanvas {
             width: 100%;
             height: 100%;
@@ -93,7 +107,10 @@ export async function GET(request: Request) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <div style="margin-top: 8px;">加载失败</div>
-          <button class="reload-button" onclick="window.location.reload()">重新加载</button>
+          <div id="error-buttons">
+            <button id="reload-button" class="reload-button" onclick="window.location.reload()">重新加载</button>
+            <button id="help-button" class="help-button" onclick="window.parent.postMessage({ type: 'openHelp', anchor: 'category=model&question=model-2' }, '*')">查看帮助</button>
+          </div>
         </div>
 
         <canvas id="renderCanvas"></canvas>
@@ -320,9 +337,21 @@ export async function GET(request: Request) {
               clearTimeout(timeout);
               document.getElementById('loading').style.display = 'none';
               document.getElementById('error').style.display = 'flex';
+              
+              // 检查错误类型
+              const isResourceMissing = error.message.includes('Failed to load') || 
+                                      error.message.includes('404') ||
+                                      error.message.includes('找不到资源') ||
+                                      error.message.includes('资源缺失');
+              
+              // 根据错误类型显示不同的按钮
+              document.getElementById('reload-button').style.display = isResourceMissing ? 'none' : 'block';
+              document.getElementById('help-button').style.display = isResourceMissing ? 'block' : 'none';
+              
               window.parent.postMessage({ 
                 type: 'modelLoadError',
-                error: error.message
+                error: error.message,
+                isResourceMissing: isResourceMissing
               }, '*');
             }
 

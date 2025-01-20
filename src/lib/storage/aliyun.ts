@@ -1,5 +1,5 @@
 import OSS from 'ali-oss';
-import { StorageProvider, PutResult } from './types';
+import { StorageProvider, PutResult, ListOptions, ListResult } from './types';
 
 interface AliyunConfig {
   region: string;
@@ -41,12 +41,71 @@ export class AliyunStorage implements StorageProvider {
   }
 
   async delete(path: string): Promise<void> {
-    await this.client.delete(path);
+    try {
+      console.log(`Deleting from OSS: ${this.bucket}/${path}`);
+      // 检查路径是否以斜杠结尾（表示文件夹）
+      if (path.endsWith('/')) {
+        await this.deleteFolder(path);
+      } else {
+        await this.client.delete(path);
+      }
+    } catch (error) {
+      console.error('OSS delete error:', error);
+      throw error;
+    }
+  }
+
+  private async deleteFolder(prefix: string): Promise<void> {
+    try {
+      console.log(`Deleting folder from OSS: ${this.bucket}/${prefix}`);
+      let continuationToken: string | undefined;
+      
+      do {
+        // 列出文件夹下的所有对象
+        const result = await this.client.list({
+          prefix,
+          'max-keys': 1000,
+          marker: continuationToken
+        }, {});
+
+        if (!result.objects || result.objects.length === 0) {
+          console.log(`No objects found in folder: ${prefix}`);
+          break;
+        }
+
+        // 批量删除对象
+        console.log(`Deleting ${result.objects.length} objects from folder ${prefix}`);
+        await this.client.deleteMulti(result.objects.map(obj => obj.name));
+        
+        continuationToken = result.nextMarker;
+      } while (continuationToken);
+      
+    } catch (error) {
+      console.error('OSS delete folder error:', error);
+      throw error;
+    }
   }
 
   async getSignedUrl(path: string, expiresIn: number = 3600): Promise<string> {
     return this.client.signatureUrl(path, {
       expires: expiresIn
     });
+  }
+
+  async list(options?: ListOptions): Promise<ListResult> {
+    const result = await this.client.list({
+      ...options,
+      'max-keys': options?.['max-keys'] || 100
+    }, {});
+    return {
+      objects: result.objects?.map(obj => ({
+        name: obj.name,
+        size: obj.size,
+        lastModified: obj.lastModified ? new Date(obj.lastModified) : undefined
+      })),
+      prefixes: result.prefixes,
+      nextContinuationToken: result.nextMarker,
+      isTruncated: result.isTruncated
+    };
   }
 } 

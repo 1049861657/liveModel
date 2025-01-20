@@ -115,7 +115,7 @@ export default function AnimationUploadModal({
         formData.append('modelId', selectedModel.id)
         formData.append('name', name)
 
-        const response = await fetch('/api/animations/upload', {
+        const response = await fetch('/api/upload/animation', {
           method: 'POST',
           body: formData
         })

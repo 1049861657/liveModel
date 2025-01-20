@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import * as BABYLON from '@babylonjs/core'
 import '@babylonjs/loaders'
 import { type ExtendedModel } from '@/types/model'
+import { formatFileSize } from '@/lib/format'
 
 // 内联Spinner组件
 function Spinner() {
@@ -58,12 +59,12 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
   const modelSizeInfo = useMemo(() => {
     const modelSize = initialModel.fileSize || 0
     const texturesSize = initialModel.texturesSize || 0
-    const totalSize = (modelSize + texturesSize) / (1024 * 1024) // 转换为 MB
+    const totalSize = modelSize + texturesSize
     return {
-      modelSize: (modelSize / (1024 * 1024)).toFixed(1),
-      texturesSize: (texturesSize / (1024 * 1024)).toFixed(1),
-      totalSize: totalSize.toFixed(1),
-      isLarge: totalSize > 30
+      modelSize: formatFileSize(modelSize),
+      texturesSize: formatFileSize(texturesSize),
+      totalSize: formatFileSize(totalSize),
+      isLarge: totalSize > 30 * 1024 * 1024 // 30MB
     }
   }, [initialModel.fileSize, initialModel.texturesSize])
   
@@ -541,22 +542,57 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">加载失败</h3>
-          <p className="mt-1 text-sm text-gray-500">{error.message}</p>
+        <div className="text-center max-w-lg p-8">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <svg
+              className="mx-auto h-12 w-12 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">模型加载失败</h3>
+            {error.message.includes('404') ? (
+              <>
+                <p className="mt-2 text-sm text-gray-600">模型文件或贴图缺失：</p>
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm text-gray-600 break-all">
+                  {error.message}
+                </div>
+                <div className="mt-4 flex justify-center">
+                  <a
+                    href="/help?category=model&question=model-2"
+                    className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
+                  >
+                    <span>查看解决方案</span>
+                  </a>
+                  <div className="text-sm text-gray-500">或者</div>
+                  <a 
+                    href={`?engine=glb`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const url = new URL(window.location.href);
+                      url.searchParams.set('engine', 'glb');
+                      window.location.href = url.toString();
+                    }}
+                    className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
+                  >
+                    <span>切换到 GLB 引擎预览</span>
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </a>
+                </div>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-gray-600">{error.message}</p>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -853,9 +889,9 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
               <Spinner />
               <div className="mt-6 space-y-3">
                 <div className="text-gray-600">
-                  模型大小：{modelSizeInfo.modelSize}MB
-                  {modelSizeInfo.texturesSize !== "0.0" && (
-                    <span> + 贴图：{modelSizeInfo.texturesSize}MB</span>
+                  模型大小：{modelSizeInfo.modelSize}
+                  {modelSizeInfo.texturesSize !== "0 KB" && (
+                    <span> + 贴图：{modelSizeInfo.texturesSize}</span>
                   )}
                 </div>
                 {modelSizeInfo.isLarge && (

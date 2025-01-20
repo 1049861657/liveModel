@@ -10,6 +10,7 @@ import ReviewSection from '@/components/reviews/ReviewSection'
 import { type ExtendedModel } from '@/types/model'
 import clsx from 'clsx'
 import Avatar from '@/components/ui/Avatar'
+import { formatFileSize } from '@/lib/format'
 
 interface ModelCardProps {
   model: ExtendedModel
@@ -181,20 +182,47 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
   }
 
   // 处理下载
-  const handleDownload = (e: React.MouseEvent) => {
+  const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault()
     if (!session) {
       toast.error('请先登录')
       router.push('/login')
       return
     }
-    
-    const link = document.createElement('a')
-    link.href = model.filePath
-    link.download = `${model.name}.${getFileExtension(model.format)}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+
+    try {
+      const response = await fetch(`/api/models/${model.id}/download`)
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || '下载失败')
+      }
+
+      // 获取文件名
+      const contentDisposition = response.headers.get('content-disposition')
+      let filename = `${model.name}.zip`
+      if (contentDisposition) {
+        const matches = /filename="([^"]*)"/.exec(contentDisposition)
+        if (matches?.[1]) {
+          filename = matches[1]
+        }
+      }
+
+      // 下载文件
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('开始下载')
+    } catch (error) {
+      console.error('下载失败:', error)
+      toast.error(error instanceof Error ? error.message : '下载失败')
+    }
   }
 
   // 处理更新模型信息
@@ -319,19 +347,22 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
     setRetryCount(0)
   }
 
-  // 添加消息监听
+  // 修改消息监听
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'modelLoadError') {
         handlePreviewError()
       } else if (event.data.type === 'modelLoadSuccess') {
         handlePreviewLoad()
+      } else if (event.data.type === 'openHelp') {
+        // 处理打开帮助页面的消息
+        router.push(`/help?${event.data.anchor}`)
       }
     }
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [])
+  }, [router])
 
   // 简化 handlePreviewError 函数
   const handlePreviewError = () => {
@@ -774,11 +805,11 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             </svg>
                             <span>{formatFileType(model.format)}</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
                             </svg>
-                            <span>{(model.fileSize / 1024 / 1024).toFixed(2)} MB</span>
+                            {formatFileSize(model.fileSize || 0)}
                           </div>
                           {model._count?.favorites !== undefined && (
                             <div className="flex items-center gap-1">
