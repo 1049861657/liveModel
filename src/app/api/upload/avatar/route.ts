@@ -97,11 +97,19 @@ export async function POST(request: Request) {
     // 如果存在旧头像，从存储服务中删除
     if (oldImage) {
       try {
-        // 从URL中提取OSS路径
-        const oldPath = new URL(oldImage.url).pathname.slice(1)
+        // 从URL中提取OSS路径，移除bucket名称
+        const url = new URL(oldImage.url)
+        const pathParts = url.pathname.split('/')
+        // 移除开头的空字符串和bucket名称
+        pathParts.splice(0, 2)
+        const oldPath = pathParts.join('/')
+        
         await storageClient.delete(oldPath)
       } catch (error) {
-        console.error('删除旧头像失败:', error)
+        console.error('删除旧头像失败:', {
+          url: oldImage.url,
+          error: error instanceof Error ? error.message : String(error)
+        })
       }
     }
 

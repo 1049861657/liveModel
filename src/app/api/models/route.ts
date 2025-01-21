@@ -8,7 +8,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const showFavorites = searchParams.get('favorites') === 'true'
     const format = searchParams.get('format')
-    const own = searchParams.get('own') === 'true'
+    const owner = searchParams.get('owner')
+    const search = searchParams.get('search')
+    const sort = searchParams.get('sort') || 'newest'
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '9')
     const session = await getServerSession(authOptions)
     
     // 构建查询条件
@@ -19,17 +23,35 @@ export async function GET(request: Request) {
       where.format = format
     }
 
-    // 所有权过滤
-    if (own && session?.user?.id) {
+    // 搜索过滤
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { description: { contains: search } }
+      ]
+    }
+
+    // 所有权和可见性过滤
+    if (owner === 'mine' && session?.user?.id) {
       where.userId = session.user.id
     } else if (session?.user?.id) {
-      // 非 own 模式下显示公开的和自己的
-      where.OR = [
-        { isPublic: true },
-        { userId: session.user.id }
-      ]
+      // 非 mine 模式下显示公开的和自己的
+      if (!where.OR) {
+        where.OR = []
+      } else {
+        // 如果已经有搜索的 OR 条件，需要将其包装在 AND 中
+        where.AND = [{
+          OR: where.OR
+        }]
+        delete where.OR
+      }
+      where[where.AND ? 'AND' : 'OR'].push({
+        OR: [
+          { isPublic: true },
+          { userId: session.user.id }
+        ]
+      })
     } else {
-      // 未登录只显示公开的
       where.isPublic = true
     }
 
@@ -42,37 +64,60 @@ export async function GET(request: Request) {
       }
     }
 
-    const models = await prisma.model.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-            avatar: {
-              select: {
-                url: true
+    // 构建排序条件
+    let orderBy: any = {}
+    switch (sort) {
+      case 'oldest':
+        orderBy = { createdAt: 'asc' }
+        break
+      case 'name':
+        orderBy = { name: 'asc' }
+        break
+      case 'favorites':
+        orderBy = { favorites: { _count: 'desc' } }
+        break
+      default: // newest
+        orderBy = { createdAt: 'desc' }
+    }
+
+    // 使用事务执行查询以确保数据一致性
+    const [models, total] = await prisma.$transaction([
+      // 获取分页数据
+      prisma.model.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatar: {
+                select: {
+                  url: true
+                }
               }
             }
-          }
+          },
+          _count: {
+            select: {
+              favorites: true,
+              reviews: true
+            }
+          },
+          ...(session?.user?.id ? {
+            favorites: {
+              where: { userId: session.user.id },
+              select: { id: true }
+            }
+          } : {})
         },
-        _count: {
-          select: {
-            favorites: true,
-            reviews: true
-          }
-        },
-        ...(session?.user?.id ? {
-          favorites: {
-            where: { userId: session.user.id },
-            select: { id: true }
-          }
-        } : {})
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit
+      }),
+      // 获取总数
+      prisma.model.count({ where })
+    ])
 
     // 处理返回数据
     const processedModels = models.map(model => {
@@ -88,7 +133,11 @@ export async function GET(request: Request) {
       }
     })
 
-    return NextResponse.json(processedModels)
+    return NextResponse.json({
+      models: processedModels,
+      total,
+      pages: Math.ceil(total / limit)
+    })
   } catch (error) {
     console.error('获取模型列表失败:', error)
     return NextResponse.json(

@@ -345,8 +345,16 @@ export async function GET(request: Request) {
                                       error.message.includes('资源缺失');
               
               // 根据错误类型显示不同的按钮
-              document.getElementById('reload-button').style.display = isResourceMissing ? 'none' : 'block';
-              document.getElementById('help-button').style.display = isResourceMissing ? 'block' : 'none';
+              const reloadButton = document.getElementById('reload-button');
+              const helpButton = document.getElementById('help-button');
+              
+              if (isResourceMissing) {
+                reloadButton.style.display = 'none';
+                helpButton.style.display = 'inline-block';
+              } else {
+                reloadButton.style.display = 'inline-block';
+                helpButton.style.display = 'none';
+              }
               
               window.parent.postMessage({ 
                 type: 'modelLoadError',
