@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server'
+import {getTranslations} from 'next-intl/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const modelPath = searchParams.get('model')
+  const locale = searchParams.get('locale') || 'zh'
 
   if (!modelPath) {
     return new NextResponse('Missing model path', { status: 400 })
   }
-  // GLB 格式使用 model-viewer (原有代码)
+
+  const t = await getTranslations({locale, namespace: 'ModelPreview'});
+
+  // GLB 格式使用 model-viewer
   const html = `
     <!DOCTYPE html>
     <html>
@@ -87,15 +92,15 @@ export async function GET(request: Request) {
       <body>
         <div id="loading" class="loading">
           <div class="spinner"></div>
-          <div style="color: #6b7280; font-family: system-ui, -apple-system, sans-serif;">加载中...</div>
+          <div style="color: #6b7280; font-family: system-ui, -apple-system, sans-serif;">${t('loading')}</div>
         </div>
         
         <div id="error" class="error">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <div style="margin-top: 8px;">加载失败</div>
-          <button class="reload-button" onclick="window.location.reload()">重新加载</button>
+          <div style="margin-top: 8px;">${t('error.title')}</div>
+          <button class="reload-button" onclick="window.location.reload()">${t('error.reload')}</button>
         </div>
         
         <model-viewer

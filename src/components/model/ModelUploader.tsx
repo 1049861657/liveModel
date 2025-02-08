@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { formatFileSize } from '@/lib/format'
+import { useTranslations } from 'next-intl'
 
 interface FileInfo {
   file: File
@@ -35,13 +36,14 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const directoryInputRef = useRef<HTMLInputElement>(null)
+  const t = useTranslations('ModelUploader')
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return
     const file = acceptedFiles[0]
     
     if (file.name.toLowerCase().endsWith('.gltf')) {
-      toast.error('GLTF格式请点击"选择文件夹"按钮上传完整文件夹')
+      toast.error(t('gltfUploadError'))
       return
     }
 
@@ -52,7 +54,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
       isPublic: true,
       textures: []
     })
-  }, [])
+  }, [t])
 
   const buildFileTree = (files: File[]): FileTreeNode => {
     const root: FileTreeNode = {
@@ -221,12 +223,12 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
     const gltfFiles = Array.from(files).filter(file => file.name.toLowerCase().endsWith('.gltf'))
     
     if (gltfFiles.length === 0) {
-      toast.error('未找到 GLTF 文件')
+      toast.error(t('fileNotFound'))
       return
     }
 
     if (gltfFiles.length > 1) {
-      toast.error('文件夹中包含多个 GLTF 文件，请确保只有一个主要的 GLTF 文件')
+      toast.error(t('multipleFiles'))
       return
     }
 
@@ -304,10 +306,10 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
 
       if (!uploadResponse.ok) {
         const errorData = await uploadResponse.json()
-        throw new Error(errorData.error || '文件上传失败')
+        throw new Error(errorData.error || t('uploadFailed'))
       }
 
-      toast.success('模型上传成功')
+      toast.success(t('uploadSuccess'))
       onUploadSuccess?.()
       formRef.current?.reset()
       setSelectedFile(null)
@@ -315,7 +317,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
 
     } catch (error) {
       console.error('上传错误:', error)
-      toast.error(error instanceof Error ? error.message : '上传失败')
+      toast.error(error instanceof Error ? error.message : t('uploadFailed'))
     } finally {
       setUploading(false)
     }
@@ -342,7 +344,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
           <div className="fixed left-8 top-24 w-[420px] z-10">
             <div className="bg-white rounded-lg border shadow-sm">
               <div className="p-3 border-b bg-gray-50">
-                <h3 className="text-sm font-medium text-gray-700">相关文件</h3>
+                <h3 className="text-sm font-medium text-gray-700">{t('relatedFiles')}</h3>
               </div>
               <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-2">
                 {selectedFile?.fileTree ? (
@@ -354,7 +356,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
                     <svg className="w-12 h-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                     </svg>
-                    <p className="text-sm">请选择文件以查看相关内容</p>
+                    <p className="text-sm">{t('selectFileToView')}</p>
                   </div>
                 )}
               </div>
@@ -367,7 +369,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
           <form onSubmit={handleSubmit} className="space-y-6" ref={formRef}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                文件名
+                {t('fileName')}
               </label>
               <input
                 type="text"
@@ -383,7 +385,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                描述
+                {t('description')}
               </label>
               <textarea
                 value={selectedFile.description}
@@ -415,7 +417,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
             {isDaeFile && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  贴图（可选）
+                  {t('textures')}
                 </label>
                 <div className="mt-2">
                   <input
@@ -479,7 +481,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
                 className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor="isPublic" className="ml-2 text-sm text-gray-700">
-                公开分享
+                {t('publicShare')}
               </label>
             </div>
 
@@ -493,14 +495,14 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
                 disabled={uploading}
               >
-                取消
+                {t('cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 disabled={uploading}
               >
-                {uploading ? '上传中...' : '上传'}
+                {uploading ? t('uploading') : t('upload')}
               </button>
             </div>
           </form>
@@ -523,10 +525,10 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
           <div className="text-gray-600">
-            拖放文件到此处，或点击选择文件
+            {t('dragDropText')}
           </div>
           <p className="text-sm text-gray-500">
-            支持 GLB、DAE 格式
+            {t('supportedFormats')}
           </p>
         </div>
       </div>
@@ -547,7 +549,7 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
           </svg>
-          选择 GLTF 文件夹
+          {t('selectGltfFolder')}
         </button>
       </div>
     </div>

@@ -5,9 +5,10 @@ import dynamic from 'next/dynamic'
 import { OrbitControls, Environment, useGLTF, useAnimations } from '@react-three/drei'
 import { Group, AnimationClip, Box3, Vector3 } from 'three'
 import * as THREE from 'three'
-import Link from 'next/link'
+import { Link } from '@/i18n/routing';
 import * as Select from '@radix-ui/react-select'
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@radix-ui/react-icons'
+import { useTranslations } from 'next-intl'
 
 // 动态导入 Canvas 以避免 SSR 问题
 const Canvas = dynamic(
@@ -158,6 +159,7 @@ interface PreviewSceneProps {
 }
 
 export default function PreviewScene({ initialModel }: PreviewSceneProps) {
+  const t = useTranslations('PreviewGlbScene')
   const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
   const [currentAnimation, setCurrentAnimation] = useState<string>('')
   const [isPlaying, setIsPlaying] = useState(true)
@@ -340,7 +342,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
     console.warn = (...args: any[]) => {
       const message = args.join(' ')
       if (message.includes('KHR_materials_pbrSpecularGlossiness')) {
-        setMaterialWarning('模型使用了Three不支持的KHR材质扩展，贴图将不会被加载。')
+        setMaterialWarning(t('materialWarning'))
       }
       originalWarn.apply(console, args)
     }
@@ -348,7 +350,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
     return () => {
       console.warn = originalWarn
     }
-  }, [])
+  }, [t])
 
   return (
     <div className="h-screen flex">
@@ -380,7 +382,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
               <button
                 onClick={() => setShowMaterialWarning(false)}
                 className="absolute top-2 right-2 p-1 hover:bg-yellow-600/50 rounded-lg transition-colors"
-                title="关闭提示"
+                title={t('closeHint')}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -391,11 +393,11 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <div className="space-y-1">
-                  <div className="font-medium">材质警告</div>
+                  <div className="font-medium">{t('materialWarningTitle')}</div>
                   <div className="text-sm">{materialWarning}</div>
                   <div className="text-sm mt-2 flex items-center gap-4">
                     <Link href="/help?category=model&question=model-4" className="underline">
-                      了解更多
+                      {t('learnMore')}
                     </Link>
                     <div className="relative group">
                       <Link 
@@ -405,7 +407,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
-                        <span>换为 Babylon 预览</span>
+                        <span>{t('switchToBabylon')}</span>
                       </Link>
                     </div>
                   </div>
@@ -418,13 +420,13 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
         {/* 右侧控制按钮组 */}
         <div className={`absolute top-4 z-10 flex flex-col gap-2 ${
           shouldShowRightPanel() 
-            ? 'right-[18.5rem]' // 72px(面板宽度) + 2px(间距)
+            ? 'right-[18.5rem]'
             : 'right-4'
         }`}>
           <button
             onClick={resetCamera}
             className="p-2 rounded-lg backdrop-blur-sm bg-white/80 text-gray-600 hover:bg-white/90 transition-colors"
-            title="重置视角"
+            title={t('resetView')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -448,7 +450,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white/80 text-gray-600 hover:bg-white/90'
             }`}
-            title="显示/隐藏坐轴"
+            title={t('toggleAxes')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -497,7 +499,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white/80 text-gray-600 hover:bg-white/90'
             }`}
-            title="显示/隐藏网格地面"
+            title={t('toggleGround')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -523,7 +525,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white/80 text-gray-600 hover:bg-white/90'
             }`}
-            title="显示/隐藏模型部件控制"
+            title={t('toggleParts')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -602,20 +604,20 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                 {availableAnimations.length > 0 && (
                   <>
                     <div className="space-y-2">
-                      <h3 className="font-bold">内置动画</h3>
+                      <h3 className="font-bold">{t('builtInAnimation')}</h3>
                       <div className="text-sm space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-500">名称:</span>
+                          <span className="text-gray-500">{t('name')}:</span>
                           <span className="text-gray-700 truncate max-w-[180px]" title={currentAnimation || 'default'}>
                             {currentAnimation || 'default'}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-500">时长:</span>
+                          <span className="text-gray-500">{t('duration')}:</span>
                           <span className="text-gray-700">{formatTime(progress.total)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-500">帧数:</span>
+                          <span className="text-gray-500">{t('frameCount')}:</span>
                           <span className="text-gray-700">{Math.round(progress.total * 30)}</span>
                         </div>
                       </div>
@@ -631,7 +633,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                                      focus:ring-blue-500/20 data-[placeholder]:text-gray-500"
                         >
                           <div className="truncate max-w-[200px]" title={currentAnimation || 'default'}>
-                            <Select.Value placeholder="选择动画" />
+                            <Select.Value placeholder={t('selectAnimation')} />
                           </div>
                           <Select.Icon className="flex-shrink-0">
                             <ChevronDownIcon className="w-4 h-4 text-gray-500" />
@@ -677,7 +679,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                       {/* 播放速度控制 */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-500">播放速度</span>
+                          <span className="text-gray-500">{t('playbackSpeed')}</span>
                           <span className="text-gray-700">{playbackSpeed}x</span>
                         </div>
                         <input
@@ -719,7 +721,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
                             )}
                           </svg>
-                          {isPlaying ? '暂停' : '播放'}
+                          {isPlaying ? t('pause') : t('play')}
                         </button>
                         <button
                           onClick={() => handleAnimationControl('stop')}
@@ -734,7 +736,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                           >
                             <rect x="4" y="4" width="16" height="16" rx="2" />
                           </svg>
-                          停止
+                          {t('stop')}
                         </button>
                       </div>
 
@@ -774,7 +776,7 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-                        模型部件 ({parts.length})
+                        {t('modelParts')} ({parts.length})
                       </h3>
                       
                       {/* 按钮组 */}
@@ -793,9 +795,9 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                               ? 'bg-blue-500 text-white'
                               : 'bg-gray-500 text-white hover:bg-gray-600'
                           } transition-colors`}
-                          title="显示所有部件"
+                          title={t('showAllParts')}
                         >
-                          全选
+                          {t('selectAll')}
                         </button>
                         <button
                           onClick={() => {
@@ -811,9 +813,9 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                               ? 'bg-blue-500 text-white'
                               : 'bg-gray-500 text-white hover:bg-gray-600'
                           } transition-colors`}
-                          title="隐藏所有部件"
+                          title={t('hideAllParts')}
                         >
-                          全不选
+                          {t('selectNone')}
                         </button>
                       </div>
                     </div>

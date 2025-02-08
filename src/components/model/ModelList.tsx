@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import { type ExtendedModel } from '@/types/model'
-import ModelCard from './ModelCard'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import Pagination from '../ui/Pagination'
-import ModelSkeleton from './ModelSkeleton'
+import ModelCard from '@/components/model/ModelCard'
+import { useSearchParams } from 'next/navigation'
+import Pagination from '@/components/ui/Pagination'
+import ModelSkeleton from '@/components/model/ModelSkeleton'
 import clsx from 'clsx'
+import { useRouter } from '@/i18n/routing'
+import { useTranslations } from 'next-intl'
 
 interface ModelListProps {
   initialModels: {
@@ -22,6 +23,8 @@ function ViewSizeToggle({ viewSize, onViewSizeChange }: {
   viewSize: 'large' | 'medium' | 'small'
   onViewSizeChange: (size: 'large' | 'medium' | 'small') => void
 }) {
+  const t = useTranslations('ModelList')
+  
   return (
     <div className="fixed top-[76px] right-4 z-20 flex bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 p-1">
       <button
@@ -32,7 +35,7 @@ function ViewSizeToggle({ viewSize, onViewSizeChange }: {
             ? "bg-blue-500 text-white shadow-sm"
             : "text-gray-600 hover:bg-gray-100"
         )}
-        title="大图视图"
+        title={t('viewSizes.large')}
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
@@ -49,7 +52,7 @@ function ViewSizeToggle({ viewSize, onViewSizeChange }: {
             ? "bg-blue-500 text-white shadow-sm"
             : "text-gray-600 hover:bg-gray-100"
         )}
-        title="中图视图"
+        title={t('viewSizes.medium')}
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -65,7 +68,7 @@ function ViewSizeToggle({ viewSize, onViewSizeChange }: {
             ? "bg-blue-500 text-white shadow-sm"
             : "text-gray-600 hover:bg-gray-100"
         )}
-        title="小图视图"
+        title={t('viewSizes.small')}
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -76,8 +79,8 @@ function ViewSizeToggle({ viewSize, onViewSizeChange }: {
   )
 }
 
-// 模型网格组件 (可以是服务器组件)
-export function ModelGrid({ 
+// 模型网格组件
+function ModelGrid({ 
   models, 
   loading, 
   viewSize,
@@ -90,6 +93,8 @@ export function ModelGrid({
   highlightModelId?: string | null
   onDelete: () => void
 }) {
+  const t = useTranslations('ModelList')
+  
   return (
     <div className={clsx(
       'grid gap-6',
@@ -110,7 +115,7 @@ export function ModelGrid({
       ))}
       {models.length === 0 && !loading && (
         <div className="col-span-full text-center py-12 text-gray-500">
-          没有找到匹配的模型
+          {t('noResults')}
         </div>
       )}
     </div>
@@ -125,10 +130,10 @@ export default function ModelListClient({ initialModels }: ModelListProps) {
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { data: session } = useSession()
   const highlightModelId = searchParams.get('highlight')
   const currentPage = parseInt(searchParams.get('page') || '1')
   const [viewSize, setViewSize] = useState<'large' | 'medium' | 'small'>('large')
+  const t = useTranslations('ModelList')
 
   // 根据视图大小获取每页显示数量
   const getItemsPerPage = (size: 'large' | 'medium' | 'small') => {
@@ -147,13 +152,13 @@ export default function ModelListClient({ initialModels }: ModelListProps) {
       const params = new URLSearchParams(searchParams.toString())
       params.set('limit', getItemsPerPage(viewSize).toString())
       const response = await fetch(`/api/models?${params.toString()}`)
-      if (!response.ok) throw new Error('获取模型列表失败')
+      if (!response.ok) throw new Error(t('errors.fetchFailed'))
       const data = await response.json()
       setModels(data.models)
       setTotal(data.total)
       setPages(data.pages)
     } catch (error) {
-      console.error('刷新列表失败:', error)
+      console.error("刷新列表失败")
     } finally {
       setLoading(false)
     }

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Dialog } from '@headlessui/react'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { toast } from 'react-hot-toast'
 import { formatTimeDistance } from '@/utils/format'
+import { useTranslations } from 'next-intl'
 
 interface Model {
   id: string
@@ -23,6 +24,7 @@ export default function TextureUploadModal({
   onClose,
   onUploadSuccess
 }: TextureUploadModalProps) {
+  const t = useTranslations('TextureUploadModal')
   const [daeModels, setDaeModels] = useState<Model[]>([])
   const [selectedModel, setSelectedModel] = useState<Model | null>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -42,19 +44,22 @@ export default function TextureUploadModal({
     try {
       setLoading(true)
       const response = await fetch('/api/models?format=dae&own=true')
-      if (!response.ok) throw new Error('获取 DAE 模型失败')
+      if (!response.ok) throw new Error(t('fetchError'))
       const data = await response.json()
-      setDaeModels(data)
       
-      if (data.length === 0) {
-        toast.error('请先上传 DAE 模型')
+      // 处理返回的数据结构
+      const models = Array.isArray(data.models) ? data.models : []
+      setDaeModels(models)
+      
+      if (models.length === 0) {
+        toast.error(t('noDaeModels'))
         onClose()
       } else {
-        setSelectedModel(data[0])
+        setSelectedModel(models[0])
       }
     } catch (error) {
-      console.error('获取 DAE 模型失败:', error)
-      toast.error('获取 DAE 模型失败')
+      console.error(t('fetchError'), error)
+      toast.error(t('fetchError'))
       onClose()
     } finally {
       setLoading(false)
@@ -73,7 +78,7 @@ export default function TextureUploadModal({
       )
 
       if (files.length !== imageFiles.length) {
-        toast.error('只支持 PNG、JPG 格式的图片')
+        toast.error(t('invalidFormat'))
       }
 
       setSelectedFiles(prev => [...prev, ...imageFiles])
@@ -86,12 +91,12 @@ export default function TextureUploadModal({
 
   const handleUpload = async () => {
     if (!selectedModel) {
-      toast.error('请选择模型')
+      toast.error(t('selectModel'))
       return
     }
 
     if (selectedFiles.length === 0) {
-      toast.error('请选择贴图文件')
+      toast.error(t('selectTexture'))
       return
     }
 
@@ -111,15 +116,15 @@ export default function TextureUploadModal({
 
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error || '上传失败')
+        throw new Error(data.error || t('uploadFailed'))
       }
 
-      toast.success('贴图上传成功')
+      toast.success(t('uploadSuccess'))
       onUploadSuccess?.()
       onClose()
     } catch (error) {
-      console.error('上传错误:', error)
-      toast.error(error instanceof Error ? error.message : '上传失败')
+      console.error(t('uploadError'), error)
+      toast.error(error instanceof Error ? error.message : t('uploadFailed'))
     } finally {
       setIsUploading(false)
     }
@@ -136,23 +141,23 @@ export default function TextureUploadModal({
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-xl w-full bg-white rounded-xl shadow-lg">
+        <DialogPanel className="mx-auto max-w-xl w-full bg-white rounded-xl shadow-lg">
           <div className="p-6">
-            <Dialog.Title className="text-lg font-semibold mb-4">
-              上传贴图
-            </Dialog.Title>
+            <DialogTitle className="text-lg font-semibold mb-4">
+              {t('title')}
+            </DialogTitle>
 
             {loading ? (
               <div className="py-12 text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500" />
-                <div className="mt-2 text-gray-500">加载中...</div>
+                <div className="mt-2 text-gray-500">{t('loading')}</div>
               </div>
             ) : (
               <div className="space-y-6">
                 {/* 模型选择下拉框 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    选择关联模型
+                    {t('selectModel')}
                   </label>
                   <select
                     value={selectedModel?.id || ''}
@@ -173,7 +178,7 @@ export default function TextureUploadModal({
                 {/* 文件上传区域 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    选择贴图
+                    {t('selectTexture')}
                   </label>
                   <div className="relative">
                     <input
@@ -193,10 +198,10 @@ export default function TextureUploadModal({
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <div className="text-gray-600">
-                          点击或拖放文件到此处上传
+                          {t('clickToUpload')}
                         </div>
                         <p className="text-sm text-gray-500">
-                          支持 PNG、JPG 格式
+                          {t('supportFormat')}
                         </p>
                       </div>
                     </label>
@@ -206,7 +211,7 @@ export default function TextureUploadModal({
                   {selectedFiles.length > 0 && (
                     <div className="mt-4">
                       <div className="text-sm font-medium text-gray-700 mb-2">
-                        已选择 {selectedFiles.length} 个文件
+                        {t('selectedFiles', { count: selectedFiles.length })}
                       </div>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
                         {selectedFiles.map((file, index) => (
@@ -220,6 +225,7 @@ export default function TextureUploadModal({
                             <button
                               onClick={() => handleRemoveFile(index)}
                               className="text-gray-400 hover:text-red-500"
+                              title={t('removeFile')}
                             >
                               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -239,7 +245,7 @@ export default function TextureUploadModal({
                     disabled={isUploading}
                     className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
                   >
-                    取消
+                    {t('cancel')}
                   </button>
                   <button
                     onClick={handleUpload}
@@ -252,17 +258,17 @@ export default function TextureUploadModal({
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        上传中...
+                        {t('uploading')}
                       </>
                     ) : (
-                      '上传'
+                      t('upload')
                     )}
                   </button>
                 </div>
               </div>
             )}
           </div>
-        </Dialog.Panel>
+        </DialogPanel>
       </div>
     </Dialog>
   )

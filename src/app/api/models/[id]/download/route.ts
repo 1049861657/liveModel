@@ -91,7 +91,10 @@ export async function GET(
     // 设置响应头
     const headers = new Headers()
     headers.set('Content-Type', 'application/zip')
-    headers.set('Content-Disposition', `attachment; filename="${model.componentName}.zip"`)
+    headers.set(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(model.componentName)}.zip`
+    )
 
     return new NextResponse(zipBuffer, {
       status: 200,

@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server'
+import {getTranslations} from 'next-intl/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   let modelPath = searchParams.get('model')
+  const locale = searchParams.get('locale') || 'zh'
 
   if (!modelPath) {
     return new NextResponse('Missing model path', { status: 400 })
   }
+
+  const t = await getTranslations({locale, namespace: 'ModelPreview'});
 
   const html = `
     <!DOCTYPE html>
@@ -66,19 +70,34 @@ export async function GET(request: Request) {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
           }
+          .reload-button {
+            margin-top: 16px;
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: background-color 0.2s;
+          }
+          .reload-button:hover {
+            background-color: #2563eb;
+          }
         </style>
       </head>
       <body>
         <div id="loading" class="loading">
           <div class="spinner"></div>
-          <div style="color: #6b7280;">加载中...</div>
+          <div style="color: #6b7280;">${t('loading')}</div>
         </div>
         
         <div id="error" class="error">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <div style="margin-top: 8px;">加载失败</div>
+          <div style="margin-top: 8px;">${t('error.title')}</div>
+          <button class="reload-button" onclick="window.location.reload()">${t('error.reload')}</button>
         </div>
 
         <canvas id="canvas"></canvas>
@@ -204,7 +223,7 @@ export async function GET(request: Request) {
               },
               undefined,
               (error) => {
-                console.error('Error loading DAE:', error);
+                console.error('${t('console.loadError')}', error);
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'flex';
                 window.parent.postMessage({ type: 'modelLoadError' }, '*');
@@ -237,7 +256,7 @@ export async function GET(request: Request) {
             });
 
           } catch (error) {
-            console.error('Failed to initialize 3D viewer:', error);
+            console.error('${t('console.loadError')}', error);
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'flex';
             window.parent.postMessage({ type: 'modelLoadError', error: error.message }, '*');

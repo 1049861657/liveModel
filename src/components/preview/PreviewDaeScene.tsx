@@ -8,8 +8,9 @@ import { ColladaLoader,Collada } from 'three/examples/jsm/loaders/ColladaLoader.
 import smdParser, {AnimationInfo, BoneData, Frame } from '@/utils/smdParser'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { toast } from 'react-hot-toast'
-import Link from 'next/link'
+import { Link } from '@/i18n/routing';
 import { type ExtendedModel } from '@/types/model'
+import { useTranslations } from 'next-intl'
 
 interface Part {
   name: string
@@ -29,6 +30,7 @@ function formatTime(seconds: number) {
 }
 
 function ModelScene({ initialModel }: PreviewDaeSceneProps) {
+  const t = useTranslations('PreviewDaeScene')
   const sceneRef = useRef<THREE.Group>(null)
   const originalMaterials = useRef<Map<string, THREE.Material | THREE.Material[]>>(new Map())
   const controlsRef = useRef<any>(null)
@@ -670,7 +672,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="font-medium">SMD 动画</span>
+                        <span className="font-medium">{t('builtInAnimation')}</span>
                       </div>
                       <svg 
                         className="w-5 h-5 rotate-180"
@@ -733,7 +735,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                                 setShowDeleteDialog(true)
                               }}
                               className="p-1 text-gray-400 hover:text-red-500 transition-colors relative group"
-                              title="删除动画"
+                              title={t('deleteAnimation')}
                               disabled={isDeleting}
                             >
                               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -769,7 +771,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                           </svg>
                           <span className="font-medium">
-                            {animations.find(a => a.id === selectedAnimation)?.name || 'SMD 动画'}
+                            {animations.find(a => a.id === selectedAnimation)?.name || t('builtInAnimation')}
                           </span>
                         </button>
                         <button
@@ -791,7 +793,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                               action.play()
                               setCurrentAction(action)
                               setAnimationInfo({
-                                name: builtInAnimations[0].name || '默认动画',
+                                name: builtInAnimations[0].name || t('defaultAnimation'),
                                 duration: builtInAnimations[0].duration,
                                 frameCount: Math.floor(builtInAnimations[0].duration * 30),
                                 boneCount: 0
@@ -799,7 +801,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                             }
                           }}
                           className="px-4 py-3 text-red-500 hover:bg-red-50 transition-colors border-l border-gray-100"
-                          title="退出 SMD 动画"
+                          title={t('exitSmdAnimation')}
                         >
                           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -827,7 +829,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="font-medium">SMD 动画</span>
+                          <span className="font-medium">{t('builtInAnimation')}</span>
                         </div>
                         <svg 
                           className="w-5 h-5"
@@ -858,15 +860,23 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                 </svg>
                 <div className="absolute left-0 bottom-full mb-2 w-72 p-2 bg-gray-800/95 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div>
-                    在<Link href="/upload" className="text-blue-400 hover:text-blue-300">上传模型页面</Link>点击"上传动画"按钮以添加SMD动画
+                    {t.rich('uploadAnimationHint', {
+                      uploadLink: (chunks) => (
+                        <Link href="/upload" className="text-blue-400 hover:text-blue-300">
+                          {chunks}
+                        </Link>
+                      )
+                    })}
                   </div>
                   <div className="mt-1.5 pt-1.5 border-t border-gray-700">
-                    <Link href="/help?category=animation&question=animation-1" className="text-blue-400 hover:text-blue-300">需要帮助？</Link>
+                    <Link href="/help?category=animation&question=animation-1" className="text-blue-400 hover:text-blue-300">
+                      {t('needHelp')}
+                    </Link>
                   </div>
                   <div className="absolute -bottom-1.5 left-4 w-3 h-3 bg-gray-800/95 rotate-45"></div>
                 </div>
               </div>
-              <span className="text-sm">SMD 动画</span>
+              <span className="text-sm">{t('builtInAnimation')}</span>
               <svg 
                 className="w-3.5 h-3.5 text-red-500"
                 viewBox="0 0 24 24"
@@ -888,7 +898,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  <span>正在加载动画...</span>
+                  <span>{t('loadingAnimation')}</span>
                 </div>
               )}
               {animationError && (
@@ -910,7 +920,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <div className="space-y-1">
-                  <div className="font-medium">以下贴图加载失败：</div>
+                  <div className="font-medium">{t('textureLoadError')}：</div>
                   <ul className="text-sm space-y-1">
                     {textureErrors.map((error, index) => (
                       <li key={index} className="flex items-center gap-2">
@@ -919,9 +929,9 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                     ))}
                   </ul>
                   <div className="text-sm mt-2">
-                    请确保已上传所有必需的贴图文件。
+                    {t('textureUploadHint')}
                     <Link href="/help?category=model&question=model-2" className="underline ml-1">
-                      了解更多
+                      {t('learnMore')}
                     </Link>
                   </div>
                 </div>
@@ -939,7 +949,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
           <button
             onClick={resetCamera}
             className="p-2 rounded-lg backdrop-blur-sm bg-white/80 text-gray-600 hover:bg-white/90 transition-colors"
-            title="重置视角"
+            title={t('resetView')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -962,7 +972,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white/80 text-gray-600 hover:bg-white/90'
             }`}
-            title="显示/隐藏坐轴"
+            title={t('toggleAxes')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -1016,7 +1026,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white/80 text-gray-600 hover:bg-white/90'
             }`}
-            title="显示/隐藏网格地面"
+            title={t('toggleGround')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -1042,7 +1052,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                 ? 'bg-blue-500 text-white' 
                 : 'bg-white/80 text-gray-600 hover:bg-white/90'
             }`}
-            title="显示/隐藏模型部件控制"
+            title={t('toggleParts')}
           >
             <svg 
               viewBox="0 0 24 24" 
@@ -1137,9 +1147,9 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                   {/* 内置动画信息 */}
                   {builtInAnimations.length > 0 && !selectedAnimation && currentAction && (
                     <div className="space-y-2">
-                      <h3 className="font-bold">内置动画</h3>
+                      <h3 className="font-bold">{t('builtInAnimation')}</h3>
                       <div className="text-sm text-gray-600">
-                        正在播放: {animationClip?.name || '默认动画'}
+                        {t('nowPlaying')}: {animationClip?.name || t('defaultAnimation')}
                       </div>
                     </div>
                   )}
@@ -1150,12 +1160,12 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                       {/* 动画信息 */}
                       {animationInfo && !isLoadingAnimation && !animationError && (
                         <div className="space-y-2">
-                          <h3 className="font-bold">动画信息</h3>
+                          <h3 className="font-bold">{t('animationInfo')}</h3>
                           <div className="text-sm space-y-1">
-                            <p>名称: {animationInfo.name}</p>
-                            <p>时长: {animationInfo.duration.toFixed(2)}</p>
-                            <p>帧数: {animationInfo.frameCount}</p>
-                            <p>骨骼数: {animationInfo.boneCount}</p>
+                            <p>{t('name')}: {animationInfo.name}</p>
+                            <p>{t('duration')}: {animationInfo.duration.toFixed(2)}</p>
+                            <p>{t('frameCount')}: {animationInfo.frameCount}</p>
+                            <p>{t('boneCount')}: {animationInfo.boneCount}</p>
                           </div>
                         </div>
                       )}
@@ -1166,7 +1176,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                           {/* 播放速度控制 */}
                           <div className="space-y-2">
                             <div className="flex justify-between items-center text-sm">
-                              <span className="text-gray-500">播放速度</span>
+                              <span className="text-gray-500">{t('playbackSpeed')}</span>
                               <span className="text-gray-700">{animationControl?.speed || 1}x</span>
                             </div>
                             <input
@@ -1212,7 +1222,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
                                 )}
                               </svg>
-                              {animationControl?.isPlaying ? '暂停' : '播放'}
+                              {animationControl?.isPlaying ? t('pause') : t('play')}
                             </button>
                             <button
                               onClick={() => animationControl?.stop()}
@@ -1228,7 +1238,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                               >
                                 <rect x="4" y="4" width="16" height="16" rx="2" />
                               </svg>
-                              停止
+                              {t('stop')}
                             </button>
                           </div>
 
@@ -1270,7 +1280,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-                        模型部件 ({parts.length})
+                        {t('modelParts')} ({parts.length})
                       </h3>
                       
                       {/* 按钮组 */}
@@ -1289,9 +1299,9 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                               ? 'bg-blue-500 text-white'
                               : 'bg-gray-500 text-white hover:bg-gray-600'
                           } transition-colors`}
-                          title="显示所有部件"
+                          title={t('showAllParts')}
                         >
-                          全选
+                          {t('selectAll')}
                         </button>
                         <button
                           onClick={() => {
@@ -1307,9 +1317,9 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                               ? 'bg-blue-500 text-white'
                               : 'bg-gray-500 text-white hover:bg-gray-600'
                           } transition-colors`}
-                          title="隐藏所有部件"
+                          title={t('hideAllParts')}
                         >
-                          全不选
+                          {t('selectNone')}
                         </button>
                       </div>
                     </div>
@@ -1382,9 +1392,10 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
           }
         }}
         onConfirm={handleDeleteAnimation}
-        title="删除动画"
-        message={`确定要删除动画 "${animationToDelete?.name}" 吗？此操作无法撤销。`}
-        confirmText={isDeleting ? "删除中..." : "删除"}
+        title={t('deleteAnimation')}
+        message={t('deleteAnimationConfirm', { name: animationToDelete?.name })}
+        confirmText={isDeleting ? t('deleting') : t('delete')}
+        cancelText={t('cancel')}
         type="danger"
         disabled={isDeleting}
       />

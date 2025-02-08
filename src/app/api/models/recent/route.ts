@@ -35,7 +35,8 @@ export async function GET() {
         },
         _count: {
           select: {
-            favorites: true
+            favorites: true,
+            reviews: true
           }
         }
       }

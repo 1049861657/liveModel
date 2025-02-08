@@ -1,14 +1,17 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useSession } from 'next-auth/react'
+import { useRouter } from '@/i18n/routing'
+import { useTranslations } from 'next-intl'
 
 export default function ModelFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session } = useSession()
+  const t = useTranslations('ModelFilters')
   
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [format, setFormat] = useState(searchParams.get('format') || '')
@@ -101,7 +104,7 @@ export default function ModelFilters() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              全部
+              {t('all')}
             </button>
             <button
               onClick={() => {
@@ -114,7 +117,7 @@ export default function ModelFilters() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              已收藏
+              {t('favorites')}
             </button>
           </div>
         </div>
@@ -125,7 +128,7 @@ export default function ModelFilters() {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="搜索模型..."
+              placeholder={t('searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -140,8 +143,8 @@ export default function ModelFilters() {
               }}
               className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">所有模型</option>
-              <option value="mine">我的模型</option>
+              <option value="all">{t('ownerOptions.all')}</option>
+              <option value="mine">{t('ownerOptions.mine')}</option>
             </select>
           )}
           <select
@@ -152,7 +155,7 @@ export default function ModelFilters() {
             }}
             className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">所有格式</option>
+            <option value="">{t('formatOptions.all')}</option>
             <option value="glb">GLB</option>
             <option value="dae">DAE</option>
             <option value="gltf">GLTF</option>
@@ -167,10 +170,10 @@ export default function ModelFilters() {
             }}
             className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="newest">最新上传</option>
-            <option value="oldest">最早上传</option>
-            <option value="name">名称排序</option>
-            <option value="favorites">收藏排序</option>
+            <option value="newest">{t('sortOptions.newest')}</option>
+            <option value="oldest">{t('sortOptions.oldest')}</option>
+            <option value="name">{t('sortOptions.name')}</option>
+            <option value="favorites">{t('sortOptions.favorites')}</option>
           </select>
         </div>
       </div>

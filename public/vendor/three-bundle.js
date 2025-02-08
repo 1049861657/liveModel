@@ -59066,7 +59066,7 @@ class ColladaLoader extends Loader {
 
 		let tgaLoader;
 
-		{
+		if ( TGALoader ) {
 
 			tgaLoader = new TGALoader( this.manager );
 			tgaLoader.setPath( this.resourcePath || path );

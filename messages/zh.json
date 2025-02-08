@@ -1,0 +1,540 @@
+{
+    "HomePage": {
+      "platform": "在线3D模型预览平台",
+      "title": "魔抖",
+      "description": "轻松上传、预览和分享您的3D模型，支持多种格式，实时渲染，高性能显示。",
+      "browse": "浏览模型库",
+      "upload": "上传模型",
+      "stats": {
+        "models": "模型数量",
+        "users": "活跃用户",
+        "uptime": "正常运行"
+      },
+      "features": {
+        "title": "强大功能，简单使用",
+        "subtitle": "为您提供专业的3D模型管理和预览解决方案",
+        "preview": {
+          "title": "实时预览",
+          "description": "支持多种3D文件格式的在线实时预览，流畅的交互体验"
+        },
+        "upload": {
+          "title": "便捷上传",
+          "description": "拖拽上传，支持批量处理，自动优化模型文件"
+        },
+        "manage": {
+          "title": "模型管理",
+          "description": "便捷的模型管理和分享功能，支持团队协作"
+        }
+      }
+    },
+    "Navbar": {
+      "preview": "预览",
+      "models": "模型库",
+      "upload": "上传模型",
+      "chat": "聊天室",
+      "login": "登录",
+      "register": "注册",
+      "profile": "个人资料",
+      "myModels": "我的模型",
+      "checkin": "每日签到",
+      "logout": "退出登录",
+      "user": "用户"
+    },
+    "ModelsPage": {
+      "title": "3D模型库",
+      "description": "探索、分享和下载精彩的3D模型，让创意无限延伸",
+      "uploadButton": "上传模型",
+      "filters": {
+        "search": "搜索模型",
+        "format": "文件格式",
+        "sort": "排序方式",
+        "viewSize": "视图大小"
+      },
+      "sortOptions": {
+        "newest": "最新",
+        "oldest": "最早",
+        "name": "名称",
+        "favorites": "收藏数"
+      }
+    },
+    "Footer": {
+      "copyright": "© 2024-2025 魔抖. All rights reserved.",
+      "links": {
+        "about": "关于我们",
+        "privacy": "隐私政策",
+        "terms": "使用条款",
+        "contact": "联系我们"
+      },
+      "sections": {
+        "about": {
+          "title": "师傅你是做什么工作的?",
+          "description": "提供专业的3D模型在线预览和分享服务，让3D创作更简单。"
+        },
+        "quickLinks": {
+          "title": "快速链接",
+          "models": "模型库",
+          "upload": "上传模型",
+          "help": "帮助中心"
+        },
+        "contact": {
+          "title": "联系我们",
+          "email": "contact@example.com",
+          "phone": "+86 123 4567 8900",
+          "labels": {
+            "email": "邮箱",
+            "phone": "电话"
+          }
+        }
+      }
+    },
+    "UploadPage": {
+      "title": "上传模型",
+      "uploadTexture": "上传贴图",
+      "uploadAnimation": "上传动画",
+      "loading": "加载中...",
+      "noUploads": "暂无上传记录",
+      "private": "私有",
+      "view": "查看",
+      "delete": "删除",
+      "deleting": "删除中",
+      "recentUploads": "最近上传",
+      "instructions": {
+        "title": "上传说明",
+        "formats": "目前支持 .glb、.gltf 和 .dae 格式",
+        "size": "单个文件大小限制：100MB",
+        "compression": "建议使用压缩后的模型文件以获得更好的加载性能"
+      },
+      "deleteDialog": {
+        "title": "警告",
+        "message": "确定要删除 {name} 吗？此操作无法撤销。",
+        "confirm": "确认删除"
+      }
+    },
+    "ModelFilters": {
+      "all": "全部",
+      "favorites": "已收藏",
+      "searchPlaceholder": "搜索模型...",
+      "ownerOptions": {
+        "all": "所有模型",
+        "mine": "我的模型"
+      },
+      "formatOptions": {
+        "all": "所有格式"
+      },
+      "sortOptions": {
+        "newest": "最新上传",
+        "oldest": "最早上传",
+        "name": "名称排序",
+        "favorites": "收藏排序"
+      }
+    },
+    "ModelList": {
+      "noResults": "没有找到匹配的模型",
+      "viewSizes": {
+        "large": "大图视图",
+        "medium": "中图视图",
+        "small": "小图视图"
+      },
+      "errors": {
+        "fetchFailed": "获取模型列表失败"
+      }
+    },
+    "ModelCard": {
+      "actions": {
+        "viewDetails": "查看详情",
+        "edit": "编辑",
+        "delete": "删除",
+        "close": "关闭",
+        "save": "保存",
+        "saving": "保存中",
+        "cancel": "取消",
+        "favorite": "收藏",
+        "favorited": "已收藏",
+        "openInScene": "在场景中打开",
+        "downloadModel": "下载模型",
+        "comments": "条评论",
+        "noComments": "还没有评论呢",
+        "closeComments": "关闭评论"
+      },
+      "status": {
+        "private": "私有",
+        "myModel": "我的模型"
+      },
+      "loading": {
+        "title": "场景加载中",
+        "preparing": "正在准备"
+      },
+      "dialog": {
+        "deleteTitle": "删除模型",
+        "deleteMessage": "确定要删除 {name} 吗？此操作无法撤销。",
+        "deleteConfirm": "确认删除"
+      },
+      "form": {
+        "namePlaceholder": "输入模型名称",
+        "descriptionPlaceholder": "添加描述（可选）",
+        "public": "公开"
+      },
+      "info": {
+        "unknownUser": "未知用户",
+        "favorites": "收藏",
+        "comments": "评价"
+      },
+      "success": {
+        "downloadStarted": "开始下载",
+        "updateSuccess": "更新成功"
+      },
+      "errors": {
+        "loginRequired": "请先登录",
+        "downloadFailed": "下载失败",
+        "updateFailed": "更新失败，请稍后重试",
+        "loadFailed": "加载失败",
+        "deleteFailed":"删除失败",
+        "fetchFailed": "获取模型数据失败"
+      },
+      "fileInfo": {
+        "format": "格式",
+        "size": "大小",
+        "favorites": "收藏"
+      },
+      "preview": {
+        "loading": "加载中",
+        "error": "加载失败"
+      }
+    },
+    "LoginPage": {
+      "title": "欢迎回来",
+      "subtitle": "登录以继续访问魔抖",
+      "errors": {
+        "invalidCredentials": "邮箱或密码错误",
+        "loginFailed": "登录失败，请稍后重试"
+      },
+      "success": {
+        "loginSuccess": "登录成功"
+      },
+      "form": {
+        "registerLink": "注册新账号"
+      }
+    },
+    "AuthForm": {
+      "placeholders": {
+        "username": "用户名",
+        "email": "邮箱地址",
+        "password": "密码"
+      },
+      "buttons": {
+        "login": "登录",
+        "register": "注册",
+        "processing": "处理中..."
+      }
+    },
+    "RegisterPage": {
+      "title": "创建账号",
+      "subtitle": "加入魔抖，开启创作之旅",
+      "errors": {
+        "registerFailed": "注册失败，请稍后重试"
+      },
+      "success": {
+        "registerSuccess": "注册成功"
+      },
+      "form": {
+        "loginLink": "登录已有账号"
+      }
+    },
+    "ReviewSection": {
+      "title": "评论区",
+      "noReviews": "暂无评论",
+      "writeReview": "写评论",
+      "placeholder": "分享你的想法...",
+      "submit": "发表评论",
+      "submitting": "发送中...",
+      "cancel": "取消",
+      "reply": "回复",
+      "replyPlaceholder": "写下你的回复...",
+      "replySubmit": "发表回复",
+      "replySubmitting": "发送中...",
+      "replyCancel": "取消",
+      "rating": {
+        "stars": "{count} 星",
+        "placeholder": "选择评分"
+      },
+      "sort": {
+        "latest": "最新",
+        "rating": "评分",
+        "likes": "点赞"
+      },
+      "totalReviews": "共 {count} 条评论",
+      "loading": {
+        "fetching": "加载评论中...",
+        "liking": "点赞中...",
+        "replying": "回复中..."
+      },
+      "errors": {
+        "fetchFailed": "获取评论失败",
+        "submitFailed": "发送失败",
+        "replyFailed": "回复失败",
+        "likeFailed": "点赞失败",
+        "deleteFailed": "删除失败",
+        "loginRequired": "请先登录",
+        "ratingRequired": "请选择评分",
+        "emptyContent": "内容不能为空"
+      },
+      "success": {
+        "submitted": "点赞成功",
+        "deleted": "已取消点赞",
+        "replySubmitted": "回复成功",
+        "reviewSubmitted": "评论成功"
+      },
+      "confirmDelete": {
+        "title": "确认删除",
+        "message": "确定要删除这条{type}吗？",
+        "confirm": "确认删除"
+      },
+      "types": {
+        "review": "评论",
+        "reply": "回复"
+      },
+      "pagination": {
+        "page": "第 {page} 页"
+      },
+      "titles": {
+        "deleteReview": "删除评论",
+        "deleteReply": "删除回复",
+        "reply": "回复评论",
+        "closeForm": "关闭评论框"
+      },
+      "info": {
+        "unknownUser": "用户",
+        "likes": "点赞",
+        "replies": "回复"
+      }
+    },
+    "ModelPreview": {
+      "loading": "加载中...",
+      "error": {
+        "title": "加载失败",
+        "reload": "重新加载",
+        "help": "查看帮助"
+      },
+      "console": {
+        "loadError": "加载模型时发生错误:"
+      }
+    },
+    "ModelUploader": {
+      "fileNotFound": "未找到 GLTF 文件",
+      "multipleFiles": "文件夹中包含多个 GLTF 文件，请确保只有一个主要的 GLTF 文件",
+      "uploadSuccess": "模型上传成功",
+      "uploadFailed": "上传失败",
+      "fileName": "文件名",
+      "description": "描述",
+      "relatedFiles": "相关文件",
+      "selectFileToView": "请选择文件以查看相关内容",
+      "textures": "贴图（可选）",
+      "publicShare": "公开分享",
+      "cancel": "取消",
+      "uploading": "上传中...",
+      "upload": "上传",
+      "dragDropText": "拖放文件到此处，或点击选择文件",
+      "supportedFormats": "支持 GLB、DAE 格式",
+      "selectGltfFolder": "选择 GLTF 文件夹",
+      "gltfUploadError": "GLTF格式请点击\"选择文件夹\"按钮上传完整文件夹"
+    },
+    "ChatPage": {
+      "title": "世界聊天室",
+      "subtitle": "在线用户交流讨论",
+      "onlineUsers": "{count} 人在线",
+      "welcome": {
+        "title": "欢迎来到世界聊天室",
+        "description": "欢迎来到世界聊天室！这里是一个开放的交流空间，您可以与其他用户分享想法、讨论技术，结交志同道合的朋友。"
+      },
+      "input": {
+        "placeholder": "输入消息...",
+        "send": "发送"
+      },
+      "login": {
+        "title": "欢迎来到世界聊天室",
+        "description": "登录后即可与其他作者交流，分享你的想法和作品",
+        "button": "立即登录"
+      },
+      "errors": {
+        "fetchFailed": "获取消息失败",
+        "sendFailed": "发送失败"
+      },
+      "defaultUsername": "用户"
+    },
+    "AboutPage": {
+      "title": "关于我们",
+      "subtitle": "致力于为用户提供最优质的3D模型在线预览和分享服务",
+      "whoWeAre": {
+        "title": "我们是谁",
+        "description": "我们是一家专注于3D技术创新的科技公司，成立于2024年。通过先进的Web3D技术，我们为用户提供了一个便捷的3D模型在线预览和分享平台，让3D创作者能够更轻松地展示和分享他们的作品。"
+      },
+      "mission": {
+        "title": "使命与愿景",
+        "mission": {
+          "title": "我们的使命",
+          "description": "让3D创作和分享变得简单，为创作者提供优质的展示平台。"
+        },
+        "vision": {
+          "title": "我们的愿景",
+          "description": "成为全球领先的3D内容分享和交流平台，推动3D技术的普及与发展。"
+        }
+      },
+      "features": {
+        "title": "技术特色",
+        "realtime": {
+          "title": "实时渲染",
+          "description": "采用WebGL技术，提供流畅的3D模型实时渲染体验"
+        },
+        "formats": {
+          "title": "多格式支持",
+          "description": "支持多种主流3D文件格式，包括GLB、DAE等"
+        },
+        "security": {
+          "title": "安全可靠",
+          "description": "采用先进的安全技术，保护用户数据和知识产权"
+        }
+      },
+      "contact": {
+        "title": "联系我们",
+        "description": "如果您有任何问题或建议，欢迎随时与我们联系",
+        "email": {
+          "label": "邮箱地址",
+          "value": "contact@example.com"
+        },
+        "phone": {
+          "label": "联系电话",
+          "value": "+86 123 4567 8900"
+        }
+      }
+    },
+    "HelpPage": {
+      "title": "帮助中心",
+      "description": "在这里您可以找到关于模型预览系统的常见问题解答。如果没有找到您需要的答案，请联系技术支持。",
+      "feedback": {
+        "text": "还有其他问题？",
+        "link": "点击这里反馈"
+      },
+      "selectQuestion": "请选择一个问题查看详细解答"
+    },
+    "PreviewDaeScene": {
+      "builtInAnimation": "SMD 动画",
+      "nowPlaying": "正在播放",
+      "defaultAnimation": "默认动画",
+      "animationInfo": "动画信息",
+      "name": "名称",
+      "duration": "时长",
+      "frameCount": "帧数",
+      "boneCount": "骨骼数",
+      "playbackSpeed": "播放速度",
+      "play": "播放",
+      "pause": "暂停",
+      "stop": "停止",
+      "modelParts": "模型部件",
+      "selectAll": "全选",
+      "selectNone": "全不选",
+      "showAllParts": "显示所有部件",
+      "hideAllParts": "隐藏所有部件",
+      "deleteAnimation": "删除动画",
+      "deleteAnimationConfirm": "确定要删除动画 \"{name}\" 吗？此操作无法撤销。",
+      "deleting": "删除中...",
+      "delete": "删除",
+      "loadingAnimation": "正在加载动画...",
+      "textureLoadError": "以下贴图加载失败",
+      "textureUploadHint": "请确保已上传所有必需的贴图文件。",
+      "learnMore": "了解更多",
+      "resetView": "重置视角",
+      "toggleAxes": "显示/隐藏坐标轴",
+      "toggleGround": "显示/隐藏网格地面",
+      "toggleParts": "显示/隐藏模型部件控制",
+      "uploadAnimationHint": "在<uploadLink>上传模型页面</uploadLink>点击\"上传动画\"按钮以添加SMD动画",
+      "needHelp": "需要帮助？",
+      "uploadPage": "上传模型页面",
+      "cancel": "取消",
+      "exitSmdAnimation": "退出 SMD 动画"
+    },
+    "PreviewGlbScene": {
+      "materialWarningTitle": "材质警告",
+      "materialWarning": "模型使用了Three不支持的KHR材质扩展，贴图将不会被加载。",
+      "learnMore": "了解更多",
+      "switchToBabylon": "换为 Babylon 预览",
+      "closeHint": "关闭提示",
+      "resetView": "重置视角",
+      "toggleAxes": "显示/隐藏坐标轴",
+      "toggleGround": "显示/隐藏网格地面",
+      "toggleParts": "显示/隐藏模型部件控制",
+      "builtInAnimation": "内置动画",
+      "name": "名称",
+      "duration": "时长",
+      "frameCount": "帧数",
+      "playbackSpeed": "播放速度",
+      "pause": "暂停",
+      "play": "播放",
+      "stop": "停止",
+      "modelParts": "模型部件",
+      "selectAll": "全选",
+      "selectNone": "全不选",
+      "showAllParts": "显示所有部件",
+      "hideAllParts": "隐藏所有部件"
+    },
+    "AnimationUploadModal": {
+      "title": "上传动画",
+      "loading": "加载中...",
+      "selectModel": "选择关联模型",
+      "selectAnimation": "选择动画",
+      "clickToUpload": "点击上传",
+      "supportFormat": "支持 SMD 格式",
+      "selectedFiles": "已选择 {count} 个文件",
+      "animationName": "输入动画名称",
+      "removeFile": "移除文件",
+      "cancel": "取消",
+      "upload": "上传",
+      "uploading": "上传中...",
+      "fetchError": "获取 DAE 模型失败",
+      "noDaeModels": "请先上传 DAE 模型",
+      "invalidFormat": "文件 {name} 不是SMD格式",
+      "uploadSuccess": "所有动画上传成功",
+      "uploadError": "上传错误",
+      "uploadFailed": "上传 {name} 失败"
+    },
+    "TextureUploadModal": {
+      "title": "上传贴图",
+      "loading": "加载中...",
+      "selectModel": "选择关联模型",
+      "selectTexture": "选择贴图",
+      "clickToUpload": "点击或拖放文件到此处上传",
+      "supportFormat": "支持 PNG、JPG 格式",
+      "selectedFiles": "已选择 {count} 个文件",
+      "removeFile": "移除文件",
+      "cancel": "取消",
+      "upload": "上传",
+      "uploading": "上传中...",
+      "fetchError": "获取 DAE 模型失败",
+      "noDaeModels": "请先上传 DAE 模型",
+      "invalidFormat": "只支持 PNG、JPG 格式的图片",
+      "uploadSuccess": "贴图上传成功",
+      "uploadError": "上传错误",
+      "uploadFailed": "上传失败"
+    },
+    "PreviewGltfScene": {
+      "loadFailed": "模型加载失败",
+      "fileOrTextureMissing": "模型文件或贴图缺失",
+      "viewSolution": "查看解决方案",
+      "or": "或者",
+      "switchToGLBEngine": "切换到 GLB 引擎预览",
+      "switchToGLBEngineShort": "切换到 GLB 引擎",
+      "modelSize": "模型大小",
+      "textures": "贴图",
+      "largeModelWarning": "当前模型较大，如为首次加载请耐心等待",
+      "loadingTakingTooLong": "加载时间过长？可以尝试",
+      "loading": "加载中",
+      "resetView": "重置视角",
+      "toggleAxes": "显示/隐藏坐轴",
+      "toggleGround": "显示/隐藏网格地面",
+      "toggleParts": "显示/隐藏模型部件控制",
+      "modelParts": "模型部件",
+      "selectAll": "全选",
+      "selectNone": "全不选",
+      "showAllParts": "显示所有部件",
+      "hideAllParts": "隐藏所有部件"
+    }
+  }

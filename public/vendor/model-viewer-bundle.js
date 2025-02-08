@@ -43549,26 +43549,13 @@ class GLTFCubicSplineQuaternionInterpolant extends GLTFCubicSplineInterpolant {
 /* CONSTANTS */
 
 const WEBGL_CONSTANTS$1 = {
-	FLOAT: 5126,
-	//FLOAT_MAT2: 35674,
-	FLOAT_MAT3: 35675,
-	FLOAT_MAT4: 35676,
-	FLOAT_VEC2: 35664,
-	FLOAT_VEC3: 35665,
-	FLOAT_VEC4: 35666,
-	LINEAR: 9729,
-	REPEAT: 10497,
-	SAMPLER_2D: 35678,
 	POINTS: 0,
 	LINES: 1,
 	LINE_LOOP: 2,
 	LINE_STRIP: 3,
 	TRIANGLES: 4,
 	TRIANGLE_STRIP: 5,
-	TRIANGLE_FAN: 6,
-	UNSIGNED_BYTE: 5121,
-	UNSIGNED_SHORT: 5123
-};
+	TRIANGLE_FAN: 6};
 
 const WEBGL_COMPONENT_TYPES = {
 	5120: Int8Array,
@@ -48047,9 +48034,6 @@ const WEBGL_CONSTANTS = {
 	LINE_LOOP: 0x0002,
 	LINE_STRIP: 0x0003,
 	TRIANGLES: 0x0004,
-	TRIANGLE_STRIP: 0x0005,
-	TRIANGLE_FAN: 0x0006,
-
 	BYTE: 0x1400,
 	UNSIGNED_BYTE: 0x1401,
 	SHORT: 0x1402,
@@ -52910,16 +52894,12 @@ const POLAR_TRIENT_LABELS = ['upper-', '', 'lower-'];
 const DEFAULT_INTERACTION_PROMPT_THRESHOLD = 3000;
 const INTERACTION_PROMPT = '. Use mouse, touch or arrow keys to move.';
 const InteractionPromptStrategy = {
-    AUTO: 'auto',
-    NONE: 'none'
-};
+    AUTO: 'auto'};
 const InteractionPromptStyle = {
     BASIC: 'basic',
     WIGGLE: 'wiggle'
 };
 const TouchAction = {
-    PAN_Y: 'pan-y',
-    PAN_X: 'pan-x',
     NONE: 'none'
 };
 const fieldOfViewIntrinsics = () => {
@@ -55398,7 +55378,7 @@ class CorrelatedSceneGraph {
         const associations = threeGLTF.parser.associations;
         const gltfElementMap = new Map();
         const defaultMaterial = { name: 'Default' };
-        const defaultReference = { type: 'materials', index: -1 };
+        const defaultReference = { index: -1 };
         for (const threeMaterial of associations.keys()) {
             // Note: GLTFLoader creates a "default" material that has no
             // corresponding glTF element in the case that no materials are
@@ -64351,12 +64331,9 @@ const DEFAULT_DRACO_DECODER_LOCATION = 'https://www.gstatic.com/draco/versioned/
 const DEFAULT_KTX2_TRANSCODER_LOCATION = 'https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/';
 const DEFAULT_LOTTIE_LOADER_LOCATION = 'https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/loaders/LottieLoader.js';
 const RevealStrategy = {
-    AUTO: 'auto',
-    MANUAL: 'manual'
-};
+    AUTO: 'auto'};
 const LoadingStrategy = {
     AUTO: 'auto',
-    LAZY: 'lazy',
     EAGER: 'eager'
 };
 const $defaultProgressBarElement = Symbol('defaultProgressBarElement');

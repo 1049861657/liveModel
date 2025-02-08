@@ -1,8 +1,8 @@
-import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
-import { zhCN } from 'date-fns/locale'
+import { formatDistanceToNow } from 'date-fns'
+import { zhCN, enUS, ja } from 'date-fns/locale'; 
 
 // 安全的时间格式化函数
-export function formatTimeDistance(date: Date | string) {
+export function formatTimeDistance(date: Date | string, locale: string = 'zh') {
   if (!date) return ''
   
   try {
@@ -10,7 +10,7 @@ export function formatTimeDistance(date: Date | string) {
     
     return formatDistanceToNow(d, { 
       addSuffix: true,
-      locale: zhCN,
+      locale: locale === 'zh' ? zhCN : (locale === 'ja' ? ja : enUS),
       includeSeconds: false
     })
   } catch (error) {

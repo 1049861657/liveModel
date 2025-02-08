@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { Link } from '@/i18n/routing';
+import { motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
 interface AuthFormProps {
   mode: 'login' | 'register'
@@ -24,6 +25,7 @@ export default function AuthForm({
     password: '',
     name: ''
   })
+  const t = useTranslations('AuthForm')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +47,7 @@ export default function AuthForm({
           <input
             type="text"
             name="name"
-            placeholder="用户名"
+            placeholder={t('placeholders.username')}
             required
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -58,7 +60,7 @@ export default function AuthForm({
         <input
           type="email"
           name="email"
-          placeholder="邮箱地址"
+          placeholder={t('placeholders.email')}
           required
           value={formData.email}
           onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -70,7 +72,7 @@ export default function AuthForm({
         <input
           type="password"
           name="password"
-          placeholder="密码"
+          placeholder={t('placeholders.password')}
           required
           value={formData.password}
           onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
@@ -94,9 +96,9 @@ export default function AuthForm({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
-              处理中...
+              {t('buttons.processing')}
             </>
-          ) : mode === 'login' ? '登录' : '注册'}
+          ) : mode === 'login' ? t('buttons.login') : t('buttons.register')}
         </motion.button>
       </div>
 

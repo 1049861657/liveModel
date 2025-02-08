@@ -1,0 +1,540 @@
+{
+    "HomePage": {
+      "platform": "オンライン3Dモデルプレビュープラットフォーム",
+      "title": "LiveModel",
+      "description": "複数のフォーマット対応、リアルタイムレンダリング、高性能表示で3Dモデルを簡単にアップロード、プレビュー、共有できます。",
+      "browse": "モデルを閲覧",
+      "upload": "モデルをアップロード",
+      "stats": {
+        "models": "モデル数",
+        "users": "アクティブユーザー",
+        "uptime": "稼働時間"
+      },
+      "features": {
+        "title": "パワフルな機能、シンプルな使用法",
+        "subtitle": "プロフェッショナルな3Dモデル管理とプレビューソリューション",
+        "preview": {
+          "title": "リアルタイムプレビュー",
+          "description": "複数の3Dファイル形式に対応し、スムーズな対話型体験を提供"
+        },
+        "upload": {
+          "title": "簡単アップロード",
+          "description": "ドラッグ＆ドロップでアップロード、一括処理と自動最適化機能付き"
+        },
+        "manage": {
+          "title": "モデル管理",
+          "description": "便利なモデル管理と共有機能、チームコラボレーション対応"
+        }
+      }
+    },
+    "Navbar": {
+      "preview": "プレビュー",
+      "models": "モデル",
+      "upload": "アップロード",
+      "chat": "チャット",
+      "login": "ログイン",
+      "register": "登録",
+      "profile": "プロフィール",
+      "myModels": "マイモデル",
+      "checkin": "チェックイン",
+      "logout": "ログアウト",
+      "user": "ユーザー"
+    },
+    "ModelsPage": {
+      "title": "3Dモデルライブラリ",
+      "description": "素晴らしい3Dモデルを探索、共有、ダウンロード。創造性を無限に広げましょう",
+      "uploadButton": "モデルをアップロード",
+      "filters": {
+        "search": "モデルを検索",
+        "format": "ファイル形式",
+        "sort": "並び替え",
+        "viewSize": "表示サイズ"
+      },
+      "sortOptions": {
+        "newest": "最新順",
+        "oldest": "古い順",
+        "name": "名前順",
+        "favorites": "お気に入り順"
+      }
+    },
+    "Footer": {
+      "copyright": "© 2024-2025 LiveModel. All rights reserved.",
+      "links": {
+        "about": "会社概要",
+        "privacy": "プライバシーポリシー",
+        "terms": "利用規約",
+        "contact": "お問い合わせ"
+      },
+      "sections": {
+        "about": {
+          "title": "サービス内容",
+          "description": "プロフェッショナルな3Dモデルプレビューと共有サービスを提供し、3D創作をよりシンプルに。"
+        },
+        "quickLinks": {
+          "title": "クイックリンク",
+          "models": "モデル",
+          "upload": "アップロード",
+          "help": "ヘルプセンター"
+        },
+        "contact": {
+          "title": "お問い合わせ",
+          "email": "contact@example.com",
+          "phone": "+86 123 4567 8900",
+          "labels": {
+            "email": "メール",
+            "phone": "電話"
+          }
+        }
+      }
+    },
+    "UploadPage": {
+      "title": "モデルをアップロード",
+      "uploadTexture": "テクスチャをアップロード",
+      "uploadAnimation": "アニメーションをアップロード",
+      "loading": "読み込み中...",
+      "noUploads": "アップロードはまだありません",
+      "private": "非公開",
+      "view": "表示",
+      "delete": "削除",
+      "deleting": "削除中",
+      "recentUploads": "最近のアップロード",
+      "instructions": {
+        "title": "アップロード手順",
+        "formats": "現在.glb、.gltf、.dae形式に対応しています",
+        "size": "ファイルサイズ制限：1ファイルあたり100MB",
+        "compression": "より良い読み込みパフォーマンスのため、圧縮モデルファイルを推奨します"
+      },
+      "deleteDialog": {
+        "title": "警告",
+        "message": "{name}を削除してもよろしいですか？この操作は取り消せません。",
+        "confirm": "削除を確認"
+      }
+    },
+    "ModelFilters": {
+      "all": "すべて",
+      "favorites": "お気に入り",
+      "searchPlaceholder": "モデルを検索...",
+      "ownerOptions": {
+        "all": "すべてのモデル",
+        "mine": "マイモデル"
+      },
+      "formatOptions": {
+        "all": "すべての形式"
+      },
+      "sortOptions": {
+        "newest": "最新順",
+        "oldest": "古い順",
+        "name": "名前順",
+        "favorites": "お気に入り数"
+      }
+    },
+    "ModelList": {
+      "noResults": "該当するモデルが見つかりません",
+      "viewSizes": {
+        "large": "大きい表示",
+        "medium": "中間表示",
+        "small": "小さい表示"
+      },
+      "errors": {
+        "fetchFailed": "モデルリストの取得に失敗しました"
+      }
+    },
+    "ModelCard": {
+      "actions": {
+        "viewDetails": "詳細を表示",
+        "edit": "編集",
+        "delete": "削除",
+        "close": "閉じる",
+        "save": "保存",
+        "saving": "保存中",
+        "cancel": "キャンセル",
+        "favorite": "お気に入り",
+        "favorited": "お気に入り済み",
+        "openInScene": "シーンで開く",
+        "downloadModel": "モデルをダウンロード",
+        "comments": "コメント",
+        "noComments": "コメントはまだありません",
+        "closeComments": "コメントを閉じる"
+      },
+      "status": {
+        "private": "非公開",
+        "myModel": "マイモデル"
+      },
+      "loading": {
+        "title": "シーンを読み込み中",
+        "preparing": "準備中"
+      },
+      "dialog": {
+        "deleteTitle": "モデルを削除",
+        "deleteMessage": "{name}を削除してもよろしいですか？この操作は取り消せません。",
+        "deleteConfirm": "削除を確認"
+      },
+      "form": {
+        "namePlaceholder": "モデル名を入力",
+        "descriptionPlaceholder": "説明を追加（任意）",
+        "public": "公開"
+      },
+      "info": {
+        "unknownUser": "不明なユーザー",
+        "favorites": "お気に入り",
+        "comments": "コメント"
+      },
+      "success": {
+        "downloadStarted": "ダウンロードを開始しました",
+        "updateSuccess": "更新が成功しました"
+      },
+      "errors": {
+        "loginRequired": "ログインしてください",
+        "downloadFailed": "ダウンロードに失敗しました",
+        "updateFailed": "更新に失敗しました。後でもう一度お試しください",
+        "loadFailed": "読み込みに失敗しました",
+        "deleteFailed": "削除に失敗しました",
+        "fetchFailed": "取得に失敗しました"
+      },
+      "fileInfo": {
+        "format": "形式",
+        "size": "サイズ",
+        "favorites": "お気に入り"
+      },
+      "preview": {
+        "loading": "読み込み中",
+        "error": "読み込みに失敗しました"
+      }
+    },
+    "LoginPage": {
+      "title": "おかえりなさい",
+      "subtitle": "LiveModelにサインインしてください",
+      "errors": {
+        "invalidCredentials": "メールアドレスまたはパスワードが無効です",
+        "loginFailed": "ログインに失敗しました。後でもう一度お試しください"
+      },
+      "success": {
+        "loginSuccess": "ログインに成功しました"
+      },
+      "form": {
+        "registerLink": "新規アカウントを登録"
+      }
+    },
+    "AuthForm": {
+      "placeholders": {
+        "username": "ユーザー名",
+        "email": "メールアドレス",
+        "password": "パスワード"
+      },
+      "buttons": {
+        "login": "ログイン",
+        "register": "登録",
+        "processing": "処理中..."
+      }
+    },
+    "RegisterPage": {
+      "title": "アカウント作成",
+      "subtitle": "LiveModelに参加して、創造の旅を始めましょう",
+      "errors": {
+        "registerFailed": "登録に失敗しました。後でもう一度お試しください"
+      },
+      "success": {
+        "registerSuccess": "登録に成功しました"
+      },
+      "form": {
+        "loginLink": "既存のアカウントでサインイン"
+      }
+    },
+    "ReviewSection": {
+      "title": "レビュー",
+      "noReviews": "まだレビューはありません",
+      "writeReview": "レビューを書く",
+      "placeholder": "あなたの感想を共有してください...",
+      "submit": "レビューを投稿",
+      "submitting": "投稿中...",
+      "cancel": "キャンセル",
+      "reply": "返信",
+      "replyPlaceholder": "返信を書く...",
+      "replySubmit": "返信を投稿",
+      "replySubmitting": "投稿中...",
+      "replyCancel": "キャンセル",
+      "rating": {
+        "stars": "{count}つ星",
+        "placeholder": "評価を選択"
+      },
+      "sort": {
+        "latest": "最新順",
+        "rating": "評価順",
+        "likes": "いいね順"
+      },
+      "totalReviews": "{count}件のレビュー",
+      "loading": {
+        "fetching": "レビューを読み込み中...",
+        "liking": "いいね処理中...",
+        "replying": "返信処理中..."
+      },
+      "errors": {
+        "fetchFailed": "レビューの取得に失敗しました",
+        "submitFailed": "投稿に失敗しました",
+        "replyFailed": "返信に失敗しました",
+        "likeFailed": "いいねに失敗しました",
+        "deleteFailed": "削除に失敗しました",
+        "loginRequired": "ログインしてください",
+        "ratingRequired": "評価を選択してください",
+        "emptyContent": "内容を入力してください"
+      },
+      "success": {
+        "submitted": "いいねしました",
+        "deleted": "いいねを取り消しました",
+        "replySubmitted": "返信を投稿しました",
+        "reviewSubmitted": "レビューを投稿しました"
+      },
+      "confirmDelete": {
+        "title": "削除の確認",
+        "message": "この{type}を削除してもよろしいですか？",
+        "confirm": "削除"
+      },
+      "types": {
+        "review": "レビュー",
+        "reply": "返信"
+      },
+      "pagination": {
+        "page": "ページ {page}"
+      },
+      "titles": {
+        "deleteReview": "レビューを削除",
+        "deleteReply": "返信を削除",
+        "reply": "レビューに返信",
+        "closeForm": "レビューフォームを閉じる"
+      },
+      "info": {
+        "unknownUser": "ユーザー",
+        "likes": "いいね",
+        "replies": "返信"
+      }
+    },
+    "ModelPreview": {
+      "loading": "読み込み中...",
+      "error": {
+        "title": "読み込みに失敗しました",
+        "reload": "再読み込み",
+        "help": "ヘルプを見る"
+      },
+      "console": {
+        "loadError": "モデル読み込みエラー:"
+      }
+    },
+    "ModelUploader": {
+      "fileNotFound": "GLTFファイルが見つかりません",
+      "multipleFiles": "フォルダ内に複数のGLTFファイルが見つかりました。メインのGLTFファイルは1つだけにしてください",
+      "uploadSuccess": "モデルのアップロードに成功しました",
+      "uploadFailed": "アップロードに失敗しました",
+      "fileName": "ファイル名",
+      "description": "説明",
+      "relatedFiles": "関連ファイル",
+      "selectFileToView": "関連コンテンツを表示するファイルを選択してください",
+      "textures": "テクスチャ（任意）",
+      "publicShare": "公開共有",
+      "cancel": "キャンセル",
+      "uploading": "アップロード中...",
+      "upload": "アップロード",
+      "dragDropText": "ファイルをドラッグ＆ドロップ、またはクリックして選択",
+      "supportedFormats": "GLB、DAE形式に対応",
+      "selectGltfFolder": "GLTFフォルダを選択",
+      "gltfUploadError": "GLTF形式の場合は、「GLTFフォルダを選択」ボタンをクリックして完全なフォルダをアップロードしてください"
+    },
+    "ChatPage": {
+      "title": "ワールドチャットルーム",
+      "subtitle": "オンラインユーザーディスカッション",
+      "onlineUsers": "{count}人オンライン",
+      "welcome": {
+        "title": "ワールドチャットルームへようこそ",
+        "description": "ワールドチャットルームへようこそ！ここはアイデアを共有し、技術について議論し、同じ志を持つ仲間と友達になれるオープンスペースです。"
+      },
+      "input": {
+        "placeholder": "メッセージを入力...",
+        "send": "送信"
+      },
+      "login": {
+        "title": "ワールドチャットルームへようこそ",
+        "description": "ログインして他のクリエイターとチャットし、あなたの考えや作品を共有しましょう",
+        "button": "今すぐログイン"
+      },
+      "errors": {
+        "fetchFailed": "メッセージの取得に失敗しました",
+        "sendFailed": "送信に失敗しました"
+      },
+      "defaultUsername": "ユーザー"
+    },
+    "AboutPage": {
+      "title": "会社概要",
+      "subtitle": "最高の3Dモデルプレビューと共有サービスの提供に専念",
+      "whoWeAre": {
+        "title": "私たちについて",
+        "description": "私たちは2024年に設立された3Dイノベーションに焦点を当てた技術企業です。先進的なWeb3D技術を通じて、3Dクリエイターが作品を簡単に展示・共有できる便利なプラットフォームを提供しています。"
+      },
+      "mission": {
+        "title": "ミッション＆ビジョン",
+        "mission": {
+          "title": "私たちのミッション",
+          "description": "3D創作と共有をシンプルにし、クリエイターに質の高いプラットフォームを提供します。"
+        },
+        "vision": {
+          "title": "私たちのビジョン",
+          "description": "世界をリードする3Dコンテンツ共有・コミュニケーションプラットフォームとなり、3D技術の普及と発展を促進します。"
+        }
+      },
+      "features": {
+        "title": "技術的特徴",
+        "realtime": {
+          "title": "リアルタイムレンダリング",
+          "description": "WebGL技術を使用して、スムーズな3Dモデルのリアルタイムレンダリング体験を提供"
+        },
+        "formats": {
+          "title": "複数フォーマット対応",
+          "description": "GLB、DAEなど、主要な3Dファイル形式に対応"
+        },
+        "security": {
+          "title": "安全性と信頼性",
+          "description": "先進的なセキュリティ技術を使用して、ユーザーデータと知的財産を保護"
+        }
+      },
+      "contact": {
+        "title": "お問い合わせ",
+        "description": "ご質問やご提案がございましたら、お気軽にお問い合わせください",
+        "email": {
+          "label": "メールアドレス",
+          "value": "contact@example.com"
+        },
+        "phone": {
+          "label": "電話番号",
+          "value": "+86 123 4567 8900"
+        }
+      }
+    },
+    "HelpPage": {
+      "title": "ヘルプセンター",
+      "description": "モデルプレビューシステムに関する一般的な質問の回答をここで見つけることができます。必要な情報が見つからない場合は、技術サポートにお問い合わせください。",
+      "feedback": {
+        "text": "さらに質問がありますか？",
+        "link": "こちらをクリックしてフィードバックを送信"
+      },
+      "selectQuestion": "詳細な回答を表示する質問を選択してください"
+    },
+    "PreviewDaeScene": {
+      "builtInAnimation": "SMDアニメーション",
+      "nowPlaying": "再生中",
+      "defaultAnimation": "デフォルトアニメーション",
+      "animationInfo": "アニメーション情報",
+      "name": "名前",
+      "duration": "長さ",
+      "frameCount": "フレーム数",
+      "boneCount": "ボーン数",
+      "playbackSpeed": "再生速度",
+      "play": "再生",
+      "pause": "一時停止",
+      "stop": "停止",
+      "modelParts": "パーツ",
+      "selectAll": "すべて",
+      "selectNone": "なし",
+      "showAllParts": "すべてのパーツを表示",
+      "hideAllParts": "すべてのパーツを非表示",
+      "deleteAnimation": "アニメーションを削除",
+      "deleteAnimationConfirm": "アニメーション「{name}」を削除してもよろしいですか？この操作は取り消せません。",
+      "deleting": "削除中...",
+      "delete": "削除",
+      "loadingAnimation": "アニメーションを読み込み中...",
+      "textureLoadError": "以下のテクスチャの読み込みに失敗しました",
+      "textureUploadHint": "必要なテクスチャファイルがすべてアップロードされていることを確認してください。",
+      "learnMore": "詳細を見る",
+      "resetView": "視点をリセット",
+      "toggleAxes": "軸の表示切替",
+      "toggleGround": "地面の表示切替",
+      "toggleParts": "パーツ制御の表示切替",
+      "uploadAnimationHint": "<uploadLink>モデルアップロードページ</uploadLink>の「アニメーションをアップロード」ボタンをクリックしてSMDアニメーションを追加",
+      "needHelp": "ヘルプが必要ですか？",
+      "uploadPage": "モデルアップロードページ",
+      "cancel": "キャンセル",
+      "exitSmdAnimation": "SMDアニメーションを終了"
+    },
+    "PreviewGlbScene": {
+      "materialWarningTitle": "マテリアルの警告",
+      "materialWarning": "このモデルはThree.jsでサポートされていないKHRマテリアル拡張を使用しているため、テクスチャは読み込まれません。",
+      "learnMore": "詳細を見る",
+      "switchToBabylon": "Babylonプレビューに切り替え",
+      "closeHint": "ヒントを閉じる",
+      "resetView": "視点をリセット",
+      "toggleAxes": "軸の表示切替",
+      "toggleGround": "グリッド地面の表示切替",
+      "toggleParts": "パーツ制御の表示切替",
+      "builtInAnimation": "内蔵アニメーション",
+      "name": "名前",
+      "duration": "長さ",
+      "frameCount": "フレーム数",
+      "playbackSpeed": "再生速度",
+      "pause": "一時停止",
+      "play": "再生",
+      "stop": "停止",
+      "modelParts": "パーツ",
+      "selectAll": "すべて",
+      "selectNone": "なし",
+      "showAllParts": "すべてのパーツを表示",
+      "hideAllParts": "すべてのパーツを非表示"
+    },
+    "AnimationUploadModal": {
+      "title": "アニメーションをアップロード",
+      "loading": "読み込み中...",
+      "selectModel": "関連モデルを選択",
+      "selectAnimation": "アニメーションを選択",
+      "clickToUpload": "クリックしてアップロード",
+      "supportFormat": "SMD形式に対応",
+      "selectedFiles": "{count}個のファイルが選択されました",
+      "animationName": "アニメーション名を入力",
+      "removeFile": "ファイルを削除",
+      "cancel": "キャンセル",
+      "upload": "アップロード",
+      "uploading": "アップロード中...",
+      "fetchError": "DAEモデルの取得に失敗しました",
+      "noDaeModels": "先にDAEモデルをアップロードしてください",
+      "invalidFormat": "ファイル{name}はSMD形式ではありません",
+      "uploadSuccess": "すべてのアニメーションのアップロードに成功しました",
+      "uploadError": "アップロードエラー",
+      "uploadFailed": "{name}のアップロードに失敗しました"
+    },
+    "TextureUploadModal": {
+      "title": "テクスチャをアップロード",
+      "loading": "読み込み中...",
+      "selectModel": "関連モデルを選択",
+      "selectTexture": "テクスチャを選択",
+      "clickToUpload": "クリックまたはファイルをドラッグしてアップロード",
+      "supportFormat": "PNG、JPG形式に対応",
+      "selectedFiles": "{count}個のファイルが選択されました",
+      "removeFile": "ファイルを削除",
+      "cancel": "キャンセル",
+      "upload": "アップロード",
+      "uploading": "アップロード中...",
+      "fetchError": "DAEモデルの取得に失敗しました",
+      "noDaeModels": "先にDAEモデルをアップロードしてください",
+      "invalidFormat": "PNG、JPG形式のみ対応しています",
+      "uploadSuccess": "テクスチャのアップロードに成功しました",
+      "uploadError": "アップロードエラー",
+      "uploadFailed": "アップロードに失敗しました"
+    },
+    "PreviewGltfScene": {
+      "loadFailed": "モデルの読み込みに失敗しました",
+      "fileOrTextureMissing": "モデルファイルまたはテクスチャが見つかりません",
+      "viewSolution": "解決策を見る",
+      "or": "または",
+      "switchToGLBEngine": "GLBエンジンプレビューに切り替え",
+      "switchToGLBEngineShort": "GLBエンジンに切り替え",
+      "modelSize": "モデルサイズ",
+      "textures": "テクスチャ",
+      "largeModelWarning": "現在のモデルは大きいため、初回読み込みの場合は時間がかかる場合があります",
+      "loadingTakingTooLong": "読み込みに時間がかかりすぎる場合は",
+      "loading": "読み込み中",
+      "resetView": "視点をリセット",
+      "toggleAxes": "座標軸の表示/非表示",
+      "toggleGround": "グリッド地面の表示/非表示",
+      "toggleParts": "モデルパーツ制御の表示/非表示",
+      "modelParts": "モデルパーツ",
+      "selectAll": "すべて選択",
+      "selectNone": "選択解除",
+      "showAllParts": "すべてのパーツを表示",
+      "hideAllParts": "すべてのパーツを非表示"
+    }
+} 

@@ -1,16 +1,17 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
-import { formatTimeDistance, formatFileType, getFileExtension } from '@/utils/format'
+import { formatTimeDistance, formatFileType } from '@/utils/format'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import ReviewSection from '@/components/reviews/ReviewSection'
 import { type ExtendedModel } from '@/types/model'
 import clsx from 'clsx'
 import Avatar from '@/components/ui/Avatar'
 import { formatFileSize } from '@/lib/format'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface ModelCardProps {
   model: ExtendedModel
@@ -27,6 +28,8 @@ function ModelPreview({ model }: { model: ExtendedModel }) {
   const [hasError, setHasError] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
+  const t = useTranslations('ModelCard')
+  const locale = useLocale()
 
   useEffect(() => {
     // 创建 Intersection Observer
@@ -37,7 +40,7 @@ function ModelPreview({ model }: { model: ExtendedModel }) {
             // 元素进入可视区域，加载 iframe
             const iframe = entry.target as HTMLIFrameElement
             if (!iframe.src) {
-              iframe.src = `/api/thumbnail/${model.format}?model=${model.filePath}`
+              iframe.src = `/api/thumbnail/${model.format}?model=${model.filePath}&locale=${locale}`
             }
           }
         })
@@ -88,7 +91,7 @@ function ModelPreview({ model }: { model: ExtendedModel }) {
             <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <p>加载失败</p>
+            <p>{t('preview.error')}</p>
           </div>
         </div>
       )}
@@ -135,6 +138,8 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
   const [isVisible, setIsVisible] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const hasLoadedData = useRef(false)  // 添加标记，避免重复加载
+  const t = useTranslations('ModelCard')
+  const locale = useLocale()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -173,11 +178,11 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
   // 修改场景预览处理函数
   const handlePreview = () => {
     setIsTransitioning(true)
-    // 先关闭模态口
+    // 先关闭模态框
     setShowDetails(false)
     // 然后延迟跳转
     setTimeout(() => {
-      window.location.href = `/preview/${model.id}`
+      router.push(`/preview/${model.id}`)
     }, 500)
   }
 
@@ -185,7 +190,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault()
     if (!session) {
-      toast.error('请先登录')
+      toast.error(t('errors.loginRequired'))
       router.push('/login')
       return
     }
@@ -194,7 +199,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
       const response = await fetch(`/api/models/${model.id}/download`)
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || '下载失败')
+        throw new Error(error.error || t('errors.downloadFailed'))
       }
 
       // 获取文件名
@@ -218,10 +223,10 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
 
-      toast.success('开始下载')
+      toast.success(t('success.downloadStarted'))
     } catch (error) {
-      console.error('下载失败:', error)
-      toast.error(error instanceof Error ? error.message : '下载失败')
+      console.error("下载失败", error)
+      toast.error(error instanceof Error ? error.message : t('errors.downloadFailed'))
     }
   }
 
@@ -240,17 +245,17 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
       })
 
       if (!response.ok) {
-        throw new Error('更新失败')
+        throw new Error(t('errors.updateFailed'))
       }
 
-      toast.success('更新成功')
+      toast.success(t('success.updateSuccess'))
       // 更新本地状态
       model.name = editName
       model.isPublic = isPublic
       model.description = description
       setIsEditing(false)
     } catch (error) {
-      toast.error('更新失败，请稍后重试')
+      toast.error(t('errors.updateFailed'))
     } finally {
       setIsSaving(false)
     }
@@ -271,17 +276,17 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
       })
 
       if (!response.ok) {
-        throw new Error('删除失败')
+        throw new Error(t('errors.deleteFailed'))
       }
 
-      toast.success('删除成功')
+      toast.success(t('success.deleteSuccess'))
       // 先调用回调
       onDelete?.()
       // 然后关闭模态框和清理状态
       handleClose()
     } catch (error) {
-      console.error('删除失败:', error)
-      toast.error('删除失败，请稍后重试')
+      console.error("删除失败", error)
+      toast.error(t('errors.deleteFailed'))
     } finally {
       setDeletingId(null)
     }
@@ -298,7 +303,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!session) {
-      toast.error('请先登录')
+      toast.error(t('errors.loginRequired'))
       router.push('/login')
       return
     }
@@ -330,12 +335,12 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
           modelData._count.favorites = data.favoriteCount
         }
         
-        toast.success(data.isFavorited ? '已添加到收藏' : '已取消收藏')
+        toast.success(data.isFavorited ? t('success.favoriteAdded') : t('success.favoriteRemoved'))
       } else {
         throw new Error(data.error)
       }
     } catch (error) {
-      toast.error('操作失败，请稍后重试')
+      toast.error(t('errors.operationFailed'))
     } finally {
       setIsTogglingFavorite(false)
     }
@@ -389,7 +394,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
     
     try {
       const response = await fetch(`/api/models/${model.id}`)
-      if (!response.ok) throw new Error('获取模型数据失败')
+      if (!response.ok) throw new Error(t('errors.fetchFailed'))
       const data = await response.json()
       
       // 只有当数据真正发生变化时才更新状态
@@ -400,7 +405,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
       
       hasLoadedData.current = true
     } catch (error) {
-      console.error('获取模型数据失败:', error)
+      console.error("获取模型数据失败", error)
     }
   }, [model.id, showReviews])
 
@@ -439,15 +444,15 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
   // 使用 useEffect 在客户端更新时间
   useEffect(() => {
     // 初始化时间
-    setTimeAgo(formatTimeDistance(model.createdAt))
+    setTimeAgo(formatTimeDistance(model.createdAt, locale))
     
     // 每分钟更新一次时间
     const timer = setInterval(() => {
-      setTimeAgo(formatTimeDistance(model.createdAt))
+      setTimeAgo(formatTimeDistance(model.createdAt, locale))
     }, 60000) // 每分钟更新
     
     return () => clearInterval(timer)
-  }, [model.createdAt])
+  }, [model.createdAt, locale])
 
   // 处理评论数量变化
   const handleReviewChange = useCallback((change: number) => {
@@ -484,7 +489,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
               <button
                 onClick={handleFavoriteClick}
                 disabled={isTogglingFavorite}
-                title="收藏"
+                title={isFavorited ? t('actions.favorited') : t('actions.favorite')}
                 className={`flex items-center gap-1 px-2 py-1 rounded-full transition-all duration-200 ${
                   isFavorited 
                     ? 'text-white bg-pink-500 hover:bg-pink-600 shadow-lg' 
@@ -525,14 +530,14 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
               size !== 'large' && "opacity-0 group-hover:opacity-100"
             )}>
               {isOwner && (
-                <span className="w-6 h-6 flex items-center justify-center bg-blue-500 bg-opacity-90 rounded-full shadow-md" title="我的模型">
+                <span className="w-6 h-6 flex items-center justify-center bg-blue-500 bg-opacity-90 rounded-full shadow-md" title={t('status.myModel')}>
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </span>
               )}
               {!model.isPublic && (
-                <span className="w-6 h-6 flex items-center justify-center bg-gray-700 bg-opacity-90 rounded-full shadow-md" title="私有">
+                <span className="w-6 h-6 flex items-center justify-center bg-gray-700 bg-opacity-90 rounded-full shadow-md" title={t('status.private')}>
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
@@ -597,7 +602,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                   size === 'medium' && 'text-sm',
                   size === 'large' && 'text-sm'
                 )}>
-                  {timeAgo || formatTimeDistance(model.createdAt)}
+                  {timeAgo || formatTimeDistance(model.createdAt, locale)}
                 </span>
                 <span className={clsx(
                   "px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300",
@@ -605,7 +610,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                   size === 'medium' && 'text-xs',
                   size === 'large' && 'text-sm'
                 )}>
-                  {formatFileType(model.format)}
+                  {t('fileInfo.format')}: {formatFileType(model.format)}
                 </span>
               </div>
               <button
@@ -617,7 +622,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                   size === 'large' && 'text-sm'
                 )}
               >
-                查看详情
+                {t('actions.viewDetails')}
               </button>
             </div>
           </div>
@@ -647,7 +652,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
                             className="flex-1 text-2xl font-bold px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="输入模型名称"
+                            placeholder={t('form.namePlaceholder')}
                           />
                           {/* 公开状态开关 */}
                           <div className="flex items-center gap-2 shrink-0">
@@ -660,7 +665,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                               />
                               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                             </label>
-                            <span className="text-sm text-gray-600">公开</span>
+                            <span className="text-sm text-gray-600">{t('form.public')}</span>
                           </div>
                         </div>
                         {/* 描述输入框 */}
@@ -668,7 +673,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                          placeholder="添加描述（可选）"
+                          placeholder={t('form.descriptionPlaceholder')}
                           rows={2}
                         />
                       </div>
@@ -684,7 +689,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                               <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                               </svg>
-                              私有
+                              {t('status.private')}
                             </span>
                           )}
                         </div>
@@ -711,9 +716,9 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                   </svg>
-                                  保存中
+                                  {t('actions.saving')}
                                 </>
-                              ) : '保存'}
+                              ) : t('actions.save')}
                             </button>
                             {/* 取消按钮 */}
                             <button
@@ -725,7 +730,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                               }}
                               className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg bg-white hover:bg-gray-50"
                             >
-                              取消
+                              {t('actions.cancel')}
                             </button>
                           </div>
                         ) : (
@@ -733,7 +738,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             <button
                               onClick={() => setIsEditing(true)}
                               className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="编辑"
+                              title={t('actions.edit')}
                             >
                               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -743,7 +748,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                               onClick={handleDeleteClick}
                               disabled={deletingId === model.id}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                              title="删除"
+                              title={t('actions.delete')}
                             >
                               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -756,7 +761,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                     <button
                       onClick={handleClose}
                       className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                      title="关闭"
+                      title={t('actions.close')}
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -771,7 +776,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                 {/* 预览区域 */}
                 <div className="w-full h-full bg-gray-100 relative">
                   <iframe
-                    src={`/api/thumbnail/${model.format}?model=${model.filePath}`}
+                    src={`/api/thumbnail/${model.format}?model=${model.filePath}&locale=${locale}`}
                     className="w-full h-full border-none"
                     title={model.name}
                     sandbox="allow-scripts allow-same-origin"
@@ -789,10 +794,10 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                           <Avatar user={modelData.user} size="md" />
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {modelData.user?.name || '未知用户'}
+                              {modelData.user?.name || t('info.unknownUser')}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {timeAgo || formatTimeDistance(modelData.createdAt)}
+                              {timeAgo || formatTimeDistance(modelData.createdAt, locale)}
                             </div>
                           </div>
                         </div>
@@ -803,20 +808,20 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span>{formatFileType(model.format)}</span>
+                            <span>{t('fileInfo.format')}: {formatFileType(model.format)}</span>
                           </div>
                           <div className="flex items-center gap-1 text-xs text-gray-500">
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
                             </svg>
-                            {formatFileSize(model.fileSize || 0)}
+                            <span>{t('fileInfo.size')}: {formatFileSize(model.fileSize || 0)}</span>
                           </div>
                           {model._count?.favorites !== undefined && (
                             <div className="flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                               </svg>
-                              <span>{model._count.favorites} 收藏</span>
+                              <span>{model._count.favorites} {t('info.favorites')}</span>
                             </div>
                           )}
                         </div>
@@ -842,7 +847,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
                         )}
-                        <span>{isFavorited ? '已收藏' : '收藏'}</span>
+                        <span>{isFavorited ? t('actions.favorited') : t('actions.favorite')}</span>
                       </button>
                     </div>
 
@@ -856,7 +861,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
-                        在场景中打开
+                        {t('actions.openInScene')}
                       </button>
                       <button
                         onClick={handleDownload}
@@ -865,7 +870,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        下载模型
+                        {t('actions.downloadModel')}
                       </button>
                       <button
                         onClick={handleToggleReviews}
@@ -875,8 +880,8 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                         </svg>
                         {(modelData?._count?.reviews ?? 0) > 0
-                          ? `${modelData._count?.reviews} 条评论` 
-                          : '还没有评论呢'}
+                          ? `${modelData._count?.reviews} ${t('actions.comments')}` 
+                          : t('actions.noComments')}
                       </button>
                     </div>
                   </div>
@@ -890,12 +895,12 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                 {/* 评论区头部 */}
                 <div className="sticky top-0 z-10 flex items-center justify-between px-8 py-5 bg-white border-b">
                   <div>
-                    <h3 className="text-xl font-medium">评价</h3>
+                    <h3 className="text-xl font-medium">{t('info.comments')}</h3>
                   </div>
                   <button
                     onClick={() => setShowReviews(false)}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    title="关闭评论"
+                    title={t('actions.closeComments')}
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -923,8 +928,8 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
             <div className="flex items-center justify-center mb-4">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
             </div>
-            <h2 className="text-2xl font-bold">场景加载中</h2>
-            <p className="mt-2 text-blue-100">正在准备 {model.name}</p>
+            <h2 className="text-2xl font-bold">{t('loading.title')}</h2>
+            <p className="mt-2 text-blue-100">{t('loading.preparing')} {model.name}</p>
           </div>
         </div>
       )}
@@ -935,9 +940,9 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
           isOpen={showConfirmDialog}
           onClose={() => setShowConfirmDialog(false)}
           onConfirm={handleConfirmDelete}
-          title="删除模型"
-          message={`确定要删除 "${model.name}" 吗？此操作无法撤销。`}
-          confirmText="确认删除"
+          title={t('dialog.deleteTitle')}
+          message={t('dialog.deleteMessage', { name: model.name })}
+          confirmText={t('dialog.deleteConfirm')}
           type="danger"
         />
       </div>

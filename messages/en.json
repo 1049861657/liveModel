@@ -1,0 +1,540 @@
+{
+    "HomePage": {
+      "platform": "Online 3D Model Preview Platform",
+      "title": "LiveModel",
+      "description": "Easily upload, preview and share your 3D models with support for multiple formats, real-time rendering, and high-performance display.",
+      "browse": "Browse Models",
+      "upload": "Upload Model",
+      "stats": {
+        "models": "Models",
+        "users": "Active Users",
+        "uptime": "Uptime"
+      },
+      "features": {
+        "title": "Powerful Features, Simple to Use",
+        "subtitle": "Professional 3D model management and preview solutions",
+        "preview": {
+          "title": "Real-time Preview",
+          "description": "Support for multiple 3D file formats with smooth interactive experience"
+        },
+        "upload": {
+          "title": "Easy Upload",
+          "description": "Drag and drop upload with batch processing and automatic optimization"
+        },
+        "manage": {
+          "title": "Model Management",
+          "description": "Convenient model management and sharing features with team collaboration"
+        }
+      }
+    },
+    "Navbar": {
+      "preview": "Preview",
+      "models": "Models",
+      "upload": "Upload",
+      "chat": "Chat",
+      "login": "Login",
+      "register": "Register",
+      "profile": "Profile",
+      "myModels": "My Models",
+      "checkin": "Check In",
+      "logout": "Logout",
+      "user": "User"
+    },
+    "ModelsPage": {
+      "title": "3D Model Library",
+      "description": "Explore, share and download amazing 3D models, let creativity extend infinitely",
+      "uploadButton": "Upload Model",
+      "filters": {
+        "search": "Search Models",
+        "format": "File Format",
+        "sort": "Sort By",
+        "viewSize": "View Size"
+      },
+      "sortOptions": {
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "name": "Name",
+        "favorites": "Favorites"
+      }
+    },
+    "Footer": {
+      "copyright": "© 2024-2025 LiveModel. All rights reserved.",
+      "links": {
+        "about": "About Us",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "contact": "Contact Us"
+      },
+      "sections": {
+        "about": {
+          "title": "What Do We Do?",
+          "description": "Providing professional 3D model preview and sharing services, making 3D creation simpler."
+        },
+        "quickLinks": {
+          "title": "Quick Links",
+          "models": "Models",
+          "upload": "Upload",
+          "help": "Help Center"
+        },
+        "contact": {
+          "title": "Contact Us",
+          "email": "contact@example.com",
+          "phone": "+86 123 4567 8900",
+          "labels": {
+            "email": "Email",
+            "phone": "Phone"
+          }
+        }
+      }
+    },
+    "UploadPage": {
+      "title": "Upload Model",
+      "uploadTexture": "Upload Texture",
+      "uploadAnimation": "Upload Animation",
+      "loading": "Loading...",
+      "noUploads": "No uploads yet",
+      "private": "Private",
+      "view": "View",
+      "delete": "Delete",
+      "deleting": "Deleting",
+      "recentUploads": "Recent Uploads",
+      "instructions": {
+        "title": "Upload Instructions",
+        "formats": "Currently supports .glb, .gltf and .dae formats",
+        "size": "File size limit: 100MB per file",
+        "compression": "Compressed model files are recommended for better loading performance"
+      },
+      "deleteDialog": {
+        "title": "Warning",
+        "message": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "confirm": "Confirm Delete"
+      }
+    },
+    "ModelFilters": {
+      "all": "All",
+      "favorites": "Favorites",
+      "searchPlaceholder": "Search models...",
+      "ownerOptions": {
+        "all": "All Models",
+        "mine": "My Models"
+      },
+      "formatOptions": {
+        "all": "All Formats"
+      },
+      "sortOptions": {
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "name": "Name",
+        "favorites": "Most Favorites"
+      }
+    },
+    "ModelList": {
+      "noResults": "No matching models found",
+      "viewSizes": {
+        "large": "Large View",
+        "medium": "Medium View",
+        "small": "Small View"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch model list"
+      }
+    },
+    "ModelCard": {
+      "actions": {
+        "viewDetails": "View Details",
+        "edit": "Edit",
+        "delete": "Delete",
+        "close": "Close",
+        "save": "Save",
+        "saving": "Saving",
+        "cancel": "Cancel",
+        "favorite": "Favorite",
+        "favorited": "Favorited",
+        "openInScene": "Open in Scene",
+        "downloadModel": "Download Model",
+        "comments": "comments",
+        "noComments": "No comments yet",
+        "closeComments": "Close Comments"
+      },
+      "status": {
+        "private": "Private",
+        "myModel": "My Model"
+      },
+      "loading": {
+        "title": "Loading Scene",
+        "preparing": "Preparing"
+      },
+      "dialog": {
+        "deleteTitle": "Delete Model",
+        "deleteMessage": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteConfirm": "Confirm Delete"
+      },
+      "form": {
+        "namePlaceholder": "Enter model name",
+        "descriptionPlaceholder": "Add description (optional)",
+        "public": "Public"
+      },
+      "info": {
+        "unknownUser": "Unknown User",
+        "favorites": "favorites",
+        "comments": "Comments"
+      },
+      "success": {
+        "downloadStarted": "Download started",
+        "updateSuccess": "Update successful"
+      },
+      "errors": {
+        "loginRequired": "Please login first",
+        "downloadFailed": "Download failed",
+        "updateFailed": "Update failed, please try again later",
+        "loadFailed": "Failed to load",
+        "deleteFailed":"delete failed",
+        "fetchFailed": "Fetech failed"
+      },
+      "fileInfo": {
+        "format": "Format",
+        "size": "Size",
+        "favorites": "Favorites"
+      },
+      "preview": {
+        "loading": "Loading",
+        "error": "Failed to load"
+      }
+    },
+    "LoginPage": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue to LiveModel",
+      "errors": {
+        "invalidCredentials": "Invalid email or password",
+        "loginFailed": "Login failed, please try again later"
+      },
+      "success": {
+        "loginSuccess": "Login successful"
+      },
+      "form": {
+        "registerLink": "Register new account"
+      }
+    },
+    "AuthForm": {
+      "placeholders": {
+        "username": "Username",
+        "email": "Email address",
+        "password": "Password"
+      },
+      "buttons": {
+        "login": "Login",
+        "register": "Register",
+        "processing": "Processing..."
+      }
+    },
+    "RegisterPage": {
+      "title": "Create Account",
+      "subtitle": "Join LiveModel, start your creative journey",
+      "errors": {
+        "registerFailed": "Registration failed, please try again later"
+      },
+      "success": {
+        "registerSuccess": "Registration successful"
+      },
+      "form": {
+        "loginLink": "Sign in existing account"
+      }
+    },
+    "ReviewSection": {
+      "title": "Reviews",
+      "noReviews": "No reviews yet",
+      "writeReview": "Write a Review",
+      "placeholder": "Share your thoughts...",
+      "submit": "Post Review",
+      "submitting": "Posting...",
+      "cancel": "Cancel",
+      "reply": "Reply",
+      "replyPlaceholder": "Write your reply...",
+      "replySubmit": "Post Reply",
+      "replySubmitting": "Posting...",
+      "replyCancel": "Cancel",
+      "rating": {
+        "stars": "{count, plural, one {# star} other {# stars}}",
+        "placeholder": "Select Rating"
+      },
+      "sort": {
+        "latest": "Latest",
+        "rating": "Rating",
+        "likes": "Most Liked"
+      },
+      "totalReviews": "{count, plural, one {# review} other {# reviews}}",
+      "loading": {
+        "fetching": "Loading reviews...",
+        "liking": "Liking...",
+        "replying": "Replying..."
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch reviews",
+        "submitFailed": "Failed to submit",
+        "replyFailed": "Failed to reply",
+        "likeFailed": "Failed to like",
+        "deleteFailed": "Failed to delete",
+        "loginRequired": "Please login first",
+        "ratingRequired": "Please select a rating",
+        "emptyContent": "Content cannot be empty"
+      },
+      "success": {
+        "submitted": "Liked successfully",
+        "deleted": "Like removed",
+        "replySubmitted": "Reply posted successfully",
+        "reviewSubmitted": "Review posted successfully"
+      },
+      "confirmDelete": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this {type}?",
+        "confirm": "Delete"
+      },
+      "types": {
+        "review": "review",
+        "reply": "reply"
+      },
+      "pagination": {
+        "page": "Page {page}"
+      },
+      "titles": {
+        "deleteReview": "Delete review",
+        "deleteReply": "Delete reply",
+        "reply": "Reply to review",
+        "closeForm": "Close review form"
+      },
+      "info": {
+        "unknownUser": "User",
+        "likes": "likes",
+        "replies": "replies"
+      }
+    },
+    "ModelPreview": {
+      "loading": "Loading...",
+      "error": {
+        "title": "Failed to load",
+        "reload": "Reload",
+        "help": "Get Help"
+      },
+      "console": {
+        "loadError": "Error loading model:"
+      }
+    },
+    "ModelUploader": {
+      "fileNotFound": "GLTF file not found",
+      "multipleFiles": "Multiple GLTF files found in the folder, please ensure there is only one main GLTF file",
+      "uploadSuccess": "Model uploaded successfully",
+      "uploadFailed": "Upload failed",
+      "fileName": "File Name",
+      "description": "Description",
+      "relatedFiles": "Related Files",
+      "selectFileToView": "Please select a file to view related content",
+      "textures": "Textures (Optional)",
+      "publicShare": "Public Share",
+      "cancel": "Cancel",
+      "uploading": "Uploading...",
+      "upload": "Upload",
+      "dragDropText": "Drag and drop files here, or click to select",
+      "supportedFormats": "Supports GLB, DAE formats",
+      "selectGltfFolder": "Select GLTF Folder",
+      "gltfUploadError": "For GLTF format, please click \"Select GLTF Folder\" button to upload the complete folder"
+    },
+    "ChatPage": {
+      "title": "World Chat Room",
+      "subtitle": "Online User Discussion",
+      "onlineUsers": "{count} Online",
+      "welcome": {
+        "title": "Welcome to World Chat Room",
+        "description": "Welcome to the World Chat Room! This is an open space where you can share ideas, discuss technology, and make friends with like-minded people."
+      },
+      "input": {
+        "placeholder": "Type a message...",
+        "send": "Send"
+      },
+      "login": {
+        "title": "Welcome to World Chat Room",
+        "description": "Login to chat with other creators and share your thoughts and works",
+        "button": "Login Now"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch messages",
+        "sendFailed": "Failed to send"
+      },
+      "defaultUsername": "User"
+    },
+    "AboutPage": {
+      "title": "About Us",
+      "subtitle": "Dedicated to providing the best 3D model preview and sharing service",
+      "whoWeAre": {
+        "title": "Who We Are",
+        "description": "We are a technology company focused on 3D innovation, established in 2024. Through advanced Web3D technology, we provide a convenient 3D model preview and sharing platform, making it easier for 3D creators to showcase and share their work."
+      },
+      "mission": {
+        "title": "Mission & Vision",
+        "mission": {
+          "title": "Our Mission",
+          "description": "Make 3D creation and sharing simple, providing a quality platform for creators."
+        },
+        "vision": {
+          "title": "Our Vision",
+          "description": "Become the world's leading 3D content sharing and communication platform, promoting the popularization and development of 3D technology."
+        }
+      },
+      "features": {
+        "title": "Technical Features",
+        "realtime": {
+          "title": "Real-time Rendering",
+          "description": "Using WebGL technology to provide smooth 3D model real-time rendering experience"
+        },
+        "formats": {
+          "title": "Multiple Formats",
+          "description": "Support for multiple mainstream 3D file formats, including GLB, DAE, etc."
+        },
+        "security": {
+          "title": "Secure & Reliable",
+          "description": "Using advanced security technology to protect user data and intellectual property"
+        }
+      },
+      "contact": {
+        "title": "Contact Us",
+        "description": "If you have any questions or suggestions, feel free to contact us",
+        "email": {
+          "label": "Email Address",
+          "value": "contact@example.com"
+        },
+        "phone": {
+          "label": "Phone",
+          "value": "+86 123 4567 8900"
+        }
+      }
+    },
+    "HelpPage": {
+      "title": "Help Center",
+      "description": "Here you can find answers to common questions about the model preview system. If you can't find what you need, please contact technical support.",
+      "feedback": {
+        "text": "Have more questions?",
+        "link": "Click here for feedback"
+      },
+      "selectQuestion": "Please select a question to view detailed answer"
+    },
+    "PreviewDaeScene": {
+      "builtInAnimation": "SMD Animation",
+      "nowPlaying": "Now Playing",
+      "defaultAnimation": "Default Animation",
+      "animationInfo": "Animation Info",
+      "name": "Name",
+      "duration": "Duration",
+      "frameCount": "Frame Count",
+      "boneCount": "Bone Count",
+      "playbackSpeed": "Playback Speed",
+      "play": "Play",
+      "pause": "Pause",
+      "stop": "Stop",
+      "modelParts": "Parts",
+      "selectAll": "All",
+      "selectNone": "None",
+      "showAllParts": "Show All Parts",
+      "hideAllParts": "Hide All Parts",
+      "deleteAnimation": "Delete Animation",
+      "deleteAnimationConfirm": "Are you sure you want to delete animation \"{name}\"? This action cannot be undone.",
+      "deleting": "Deleting...",
+      "delete": "Delete",
+      "loadingAnimation": "Loading animation...",
+      "textureLoadError": "The following textures failed to load",
+      "textureUploadHint": "Please ensure all required texture files have been uploaded.",
+      "learnMore": "Learn More",
+      "resetView": "Reset View",
+      "toggleAxes": "Toggle Axes",
+      "toggleGround": "Toggle Ground",
+      "toggleParts": "Toggle Parts Control",
+      "uploadAnimationHint": "Click \"Upload Animation\" button on the <uploadLink>Upload Model page</uploadLink> to add SMD animations",
+      "needHelp": "Need Help?",
+      "uploadPage": "Upload Model page",
+      "cancel": "Cancel",
+      "exitSmdAnimation": "Exit SMD Animation"
+    },
+    "PreviewGlbScene": {
+      "materialWarningTitle": "Material Warning",
+      "materialWarning": "The model uses KHR material extensions not supported by Three.js, textures will not be loaded.",
+      "learnMore": "Learn More",
+      "switchToBabylon": "Switch to Babylon Preview",
+      "closeHint": "Close Hint",
+      "resetView": "Reset View",
+      "toggleAxes": "Toggle Axes",
+      "toggleGround": "Toggle Ground Grid",
+      "toggleParts": "Toggle Parts Control",
+      "builtInAnimation": "Built-in Animation",
+      "name": "Name",
+      "duration": "Duration",
+      "frameCount": "Frame Count",
+      "playbackSpeed": "Playback Speed",
+      "pause": "Pause",
+      "play": "Play",
+      "stop": "Stop",
+      "modelParts": "Parts",
+      "selectAll": "All",
+      "selectNone": "None",
+      "showAllParts": "Show All Parts",
+      "hideAllParts": "Hide All Parts"
+    },
+    "AnimationUploadModal": {
+      "title": "Upload Animation",
+      "loading": "Loading...",
+      "selectModel": "Select Associated Model",
+      "selectAnimation": "Select Animation",
+      "clickToUpload": "Click to Upload",
+      "supportFormat": "Supports SMD format",
+      "selectedFiles": "{count} files selected",
+      "animationName": "Enter animation name",
+      "removeFile": "Remove file",
+      "cancel": "Cancel",
+      "upload": "Upload",
+      "uploading": "Uploading...",
+      "fetchError": "Failed to fetch DAE models",
+      "noDaeModels": "Please upload a DAE model first",
+      "invalidFormat": "File {name} is not in SMD format",
+      "uploadSuccess": "All animations uploaded successfully",
+      "uploadError": "Upload error",
+      "uploadFailed": "Failed to upload {name}"
+    },
+    "TextureUploadModal": {
+      "title": "Upload Texture",
+      "loading": "Loading...",
+      "selectModel": "Select Associated Model",
+      "selectTexture": "Select Texture",
+      "clickToUpload": "Click or drag files here to upload",
+      "supportFormat": "Supports PNG, JPG formats",
+      "selectedFiles": "{count} files selected",
+      "removeFile": "Remove file",
+      "cancel": "Cancel",
+      "upload": "Upload",
+      "uploading": "Uploading...",
+      "fetchError": "Failed to fetch DAE models",
+      "noDaeModels": "Please upload a DAE model first",
+      "invalidFormat": "Only PNG and JPG formats are supported",
+      "uploadSuccess": "Textures uploaded successfully",
+      "uploadError": "Upload error",
+      "uploadFailed": "Upload failed"
+    },
+    "PreviewGltfScene": {
+      "loadFailed": "Model Loading Failed",
+      "fileOrTextureMissing": "Model file or textures are missing",
+      "viewSolution": "View Solution",
+      "or": "or",
+      "switchToGLBEngine": "Switch to GLB Engine Preview",
+      "switchToGLBEngineShort": "Switch to GLB Engine",
+      "modelSize": "Model Size",
+      "textures": "Textures",
+      "largeModelWarning": "Current model is large, please be patient if this is the first load",
+      "loadingTakingTooLong": "Loading taking too long? Try",
+      "loading": "Loading",
+      "resetView": "Reset View",
+      "toggleAxes": "Show/Hide Axes",
+      "toggleGround": "Show/Hide Ground Grid",
+      "toggleParts": "Show/Hide Model Parts",
+      "modelParts": "Parts",
+      "selectAll": "All",
+      "selectNone": "None",
+      "showAllParts": "Show All Parts",
+      "hideAllParts": "Hide All Parts"
+    }
+  }
