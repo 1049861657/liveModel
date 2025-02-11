@@ -12,6 +12,7 @@ import clsx from 'clsx'
 import Avatar from '@/components/ui/Avatar'
 import { formatFileSize } from '@/lib/format'
 import { useTranslations, useLocale } from 'next-intl'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface ModelCardProps {
   model: ExtendedModel
@@ -23,124 +24,244 @@ interface ModelCardProps {
   size?: 'large' | 'medium' | 'small'
 }
 
-function ModelPreview({ model }: { model: ExtendedModel }) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasError, setHasError] = useState(false)
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  const observerRef = useRef<IntersectionObserver | null>(null)
+function ModelPreview({ model, isVisible }: { model: ExtendedModel; isVisible: boolean }) {
   const t = useTranslations('ModelCard')
   const locale = useLocale()
+  
+  // 使用 react-query 管理预览加载状态
+  const { isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['modelPreview', model.id],
+    queryFn: async () => {
+      // 这里可以添加预览资源预加载的逻辑
+      return true
+    },
+    enabled: isVisible, // 只在组件可见时才加载
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000)
+  })
+
+  // 处理加载消息
+  const handleMessage = useCallback((event: MessageEvent) => {
+    if (event.data.type === 'modelLoadError') {
+      refetch()
+    }
+  }, [refetch])
 
   useEffect(() => {
-    // 创建 Intersection Observer
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // 元素进入可视区域，加载 iframe
-            const iframe = entry.target as HTMLIFrameElement
-            if (!iframe.src) {
-              iframe.src = `/api/thumbnail/${model.format}?model=${model.filePath}&locale=${locale}`
-            }
-          }
-        })
-      },
-      {
-        rootMargin: '50px', // 提前 50px 开始加载
-        threshold: 0.1
-      }
-    )
-
-    // 观察 iframe 元素
-    if (iframeRef.current) {
-      observerRef.current.observe(iframeRef.current)
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect()
-      }
-    }
-  }, [model.filePath, model.format])
-
-  // 处理加载状态
-  const handleLoad = () => {
-    setIsLoading(false)
-    setHasError(false)
-  }
-
-  // 处理错误状态
-  const handleError = () => {
-    setIsLoading(false)
-    setHasError(true)
-  }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [handleMessage])
 
   return (
     <div className="relative w-full h-full">
       {/* 加载状态 */}
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+        <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="text-sm text-gray-600">{t('preview.loading')}</p>
+          </div>
         </div>
       )}
 
       {/* 错误状态 */}
-      {hasError && (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <div className="text-center text-gray-500">
-            <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      {isError && (
+        <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <p>{t('preview.error')}</p>
+            <p className="text-gray-600 mb-2">{t('preview.error')}</p>
+            <button
+              onClick={() => refetch()}
+              className="text-sm text-blue-500 hover:text-blue-600 font-medium"
+            >
+              {t('preview.retry')}
+            </button>
           </div>
         </div>
       )}
 
       {/* iframe */}
-      <iframe
-        ref={iframeRef}
-        className={`w-full h-full border-none transition-opacity duration-300 ${
-          isLoading || hasError ? 'opacity-0' : 'opacity-100'
-        }`}
-        sandbox="allow-scripts allow-same-origin"
-        allow="autoplay"
-        style={{ pointerEvents: 'auto' }}
-        onLoad={handleLoad}
-        onError={handleError}
-      />
+      {isVisible && (
+        <iframe
+          src={`/api/thumbnail/${model.format}?model=${model.filePath}&locale=${locale}`}
+          className={clsx(
+            'w-full h-full border-none transition-opacity duration-300',
+            (isLoading || isError) ? 'opacity-0' : 'opacity-100'
+          )}
+          sandbox="allow-scripts allow-same-origin"
+          allow="autoplay"
+          title={model.name}
+        />
+      )}
     </div>
   )
 }
 
-export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, modalOnly, size = 'large' }: ModelCardProps) {
+export default function ModelCard({ model: initialModel, onDelete, defaultOpen, id, onClose, modalOnly, size = 'large' }: ModelCardProps) {
   const [showDetails, setShowDetails] = useState(defaultOpen || false)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const { data: session } = useSession()
-  const isOwner = session?.user?.id === model.userId
+  const isOwner = session?.user?.id === initialModel.userId
   const [isEditing, setIsEditing] = useState(false)
-  const [editName, setEditName] = useState(model.name)
-  const [isPublic, setIsPublic] = useState(model.isPublic)
-  const [isSaving, setIsSaving] = useState(false)
+  const [editName, setEditName] = useState(initialModel.name)
+  const [isPublic, setIsPublic] = useState(initialModel.isPublic)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [description, setDescription] = useState(model.description || '')
-  const [isFavorited, setIsFavorited] = useState(!!model.isFavorited)
-  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
-  const maxRetries = 3
-  const [modelData, setModelData] = useState(model)
+  const [description, setDescription] = useState(initialModel.description || '')
+  const [isFavorited, setIsFavorited] = useState(!!initialModel.isFavorited)
   const [showReviews, setShowReviews] = useState(false)
-  const loadingTimeoutRef = useRef<NodeJS.Timeout>()
-  const modelDataRef = useRef(model)
   const [timeAgo, setTimeAgo] = useState('')
   const [isVisible, setIsVisible] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
-  const hasLoadedData = useRef(false)  // 添加标记，避免重复加载
   const t = useTranslations('ModelCard')
   const locale = useLocale()
+  const queryClient = useQueryClient()
 
+  const { data: model = initialModel, isError } = useQuery({
+    queryKey: ['model', initialModel.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/models/${initialModel.id}`)
+      if (!response.ok) throw new Error(t('errors.fetchFailed'))
+      return response.json()
+    },
+    initialData: initialModel,
+    staleTime: 1000 * 30,
+    retry: 2
+  })
+
+  // 监听错误
+  useEffect(() => {
+    if (isError) {
+      console.error("获取模型数据失败")
+      toast.error(t('errors.fetchFailed'))
+    }
+  }, [isError, t])
+
+  // 收藏/取消收藏操作
+  const { mutate: toggleFavorite, isPending: isTogglingFavorite } = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/models/${model.id}/favorite`, {
+        method: 'POST'
+      })
+      if (!response.ok) throw new Error('操作失败')
+      return response.json()
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['model', model.id] })
+      const previousModel = queryClient.getQueryData(['model', model.id])
+      
+      queryClient.setQueryData(['model', model.id], (old: any) => ({
+        ...old,
+        isFavorited: !old.isFavorited,
+        _count: {
+          ...old._count,
+          favorites: old.isFavorited ? old._count.favorites - 1 : old._count.favorites + 1
+        }
+      }))
+
+      return { previousModel }
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousModel) {
+        queryClient.setQueryData(['model', model.id], context.previousModel)
+      }
+      toast.error('操作失败')
+    },
+    onSuccess: (data) => {
+      toast.success(data.isFavorited ? '已添加收藏' : '已取消收藏')
+      queryClient.invalidateQueries({ queryKey: ['model'] })
+    }
+  })
+
+  // 删除模型操作
+  const { mutate: deleteModel, isPending: isDeleting } = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/models/${model.id}`, {
+        method: 'DELETE'
+      })
+      if (!response.ok) throw new Error(t('errors.deleteFailed'))
+      return response.json()
+    },
+    onSuccess: () => {
+      toast.success(t('success.deleteSuccess'))
+      onDelete?.()
+      handleClose()
+      queryClient.invalidateQueries({ queryKey: ['models'] }) // 更新模型列表
+    },
+    onError: () => {
+      toast.error(t('errors.deleteFailed'))
+    }
+  })
+
+  // 更新模型操作
+  const { mutate: updateModel, isPending: isSavingModel } = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/models/${model.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName,
+          isPublic,
+          description
+        })
+      })
+      if (!response.ok) throw new Error(t('errors.updateFailed'))
+      return response.json()
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['model', model.id], data)
+      toast.success(t('success.updateSuccess'))
+      setIsEditing(false)
+      queryClient.invalidateQueries({ queryKey: ['models'] }) // 更新模型列表
+    },
+    onError: () => {
+      toast.error(t('errors.updateFailed'))
+    }
+  })
+
+  // 下载模型操作
+  const { mutate: downloadModel, isPending: isDownloading } = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/models/${model.id}/download`)
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || t('errors.downloadFailed'))
+      }
+      return response
+    },
+    onSuccess: async (response) => {
+      // 获取文件名
+      const contentDisposition = response.headers.get('content-disposition')
+      let filename = `${model.name}.zip`
+      if (contentDisposition) {
+        const matches = /filename="([^"]*)"/.exec(contentDisposition)
+        if (matches?.[1]) {
+          filename = matches[1]
+        }
+      }
+
+      // 下载文件
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success(t('success.downloadStarted'))
+    },
+    onError: (error) => {
+      console.error("下载失败", error)
+      toast.error(error instanceof Error ? error.message : t('errors.downloadFailed'))
+    }
+  })
+
+  // 使用 useEffect 监听卡片可见性
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -186,7 +307,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
     }, 500)
   }
 
-  // 处理下载
+  // 修改 handleDownload 函数
   const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault()
     if (!session) {
@@ -194,71 +315,12 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
       router.push('/login')
       return
     }
-
-    try {
-      const response = await fetch(`/api/models/${model.id}/download`)
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || t('errors.downloadFailed'))
-      }
-
-      // 获取文件名
-      const contentDisposition = response.headers.get('content-disposition')
-      let filename = `${model.name}.zip`
-      if (contentDisposition) {
-        const matches = /filename="([^"]*)"/.exec(contentDisposition)
-        if (matches?.[1]) {
-          filename = matches[1]
-        }
-      }
-
-      // 下载文件
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-
-      toast.success(t('success.downloadStarted'))
-    } catch (error) {
-      console.error("下载失败", error)
-      toast.error(error instanceof Error ? error.message : t('errors.downloadFailed'))
-    }
+    downloadModel()
   }
 
   // 处理更新模型信息
-  const handleUpdateModel = async () => {
-    setIsSaving(true)
-    try {
-      const response = await fetch(`/api/models/${model.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editName,
-          isPublic: isPublic,
-          description: description
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(t('errors.updateFailed'))
-      }
-
-      toast.success(t('success.updateSuccess'))
-      // 更新本地状态
-      model.name = editName
-      model.isPublic = isPublic
-      model.description = description
-      setIsEditing(false)
-    } catch (error) {
-      toast.error(t('errors.updateFailed'))
-    } finally {
-      setIsSaving(false)
-    }
+  const handleUpdateModel = () => {
+    updateModel()
   }
 
   // 处理删除
@@ -266,30 +328,9 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
     setShowConfirmDialog(true)
   }
 
-  const handleConfirmDelete = async () => {
-    setDeletingId(model.id)
+  const handleConfirmDelete = () => {
     setShowConfirmDialog(false)
-    
-    try {
-      const response = await fetch(`/api/models/${model.id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error(t('errors.deleteFailed'))
-      }
-
-      toast.success(t('success.deleteSuccess'))
-      // 先调用回调
-      onDelete?.()
-      // 然后关闭模态框和清理状态
-      handleClose()
-    } catch (error) {
-      console.error("删除失败", error)
-      toast.error(t('errors.deleteFailed'))
-    } finally {
-      setDeletingId(null)
-    }
+    deleteModel()
   }
 
   // 修改关闭处理
@@ -307,139 +348,8 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
       router.push('/login')
       return
     }
-
-    setIsTogglingFavorite(true)
-    try {
-      const response = await fetch(`/api/models/${model.id}/favorite`, {
-        method: 'POST'
-      })
-      const data = await response.json()
-      if (response.ok) {
-        setIsFavorited(data.isFavorited)
-        // 安全地更新收藏数
-        if (!model._count) {
-          model._count = { 
-            favorites: 0,
-            reviews: 0 
-          }
-        }
-        model._count.favorites = data.favoriteCount
-
-        if (modelData) {
-          if (!modelData._count) {
-            modelData._count = { 
-              favorites: 0,
-              reviews: 0 
-            }
-          }
-          modelData._count.favorites = data.favoriteCount
-        }
-        
-        toast.success(data.isFavorited ? t('success.favoriteAdded') : t('success.favoriteRemoved'))
-      } else {
-        throw new Error(data.error)
-      }
-    } catch (error) {
-      toast.error(t('errors.operationFailed'))
-    } finally {
-      setIsTogglingFavorite(false)
-    }
+    toggleFavorite()
   }
-
-  // 简化 handlePreviewLoad 函数
-  const handlePreviewLoad = () => {
-    setIsLoading(false)
-    setRetryCount(0)
-  }
-
-  // 修改消息监听
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'modelLoadError') {
-        handlePreviewError()
-      } else if (event.data.type === 'modelLoadSuccess') {
-        handlePreviewLoad()
-      } else if (event.data.type === 'openHelp') {
-        // 处理打开帮助页面的消息
-        router.push(`/help?${event.data.anchor}`)
-      }
-    }
-
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [router])
-
-  // 简化 handlePreviewError 函数
-  const handlePreviewError = () => {
-    if (retryCount < maxRetries) {
-      setRetryCount(prev => prev + 1)
-      setIsLoading(true)
-    } else {
-      setIsLoading(false)
-    }
-  }
-
-  // 在组件卸载时重置状态
-  useEffect(() => {
-    return () => {
-      setIsLoading(true)
-      setRetryCount(0)
-    }
-  }, [])
-
-  // 优化获取模型数据的函数
-  const fetchModelData = useCallback(async () => {
-    // 如果已经加载过数据，且不是评论区打开/关闭的情况，就不重复加载
-    if (hasLoadedData.current && !showReviews) return
-    
-    try {
-      const response = await fetch(`/api/models/${model.id}`)
-      if (!response.ok) throw new Error(t('errors.fetchFailed'))
-      const data = await response.json()
-      
-      // 只有当数据真正发生变化时才更新状态
-      if (JSON.stringify(data) !== JSON.stringify(modelDataRef.current)) {
-        setModelData(data)
-        modelDataRef.current = data
-      }
-      
-      hasLoadedData.current = true
-    } catch (error) {
-      console.error("获取模型数据失败", error)
-    }
-  }, [model.id, showReviews])
-
-  // 优化打开详情的处理
-  const handleShowDetails = useCallback(() => {
-    setShowDetails(true)
-    // 只在首次打开时获取数据
-    if (!hasLoadedData.current) {
-      fetchModelData()
-    }
-  }, [fetchModelData])
-
-  // 优化评论区显示的处理
-  const handleToggleReviews = useCallback(() => {
-    setShowReviews(prev => !prev)
-    // 只在打开评论区且没有最新数据时获取
-    if (!showReviews && !hasLoadedData.current) {
-      fetchModelData()
-    }
-  }, [fetchModelData, showReviews])
-
-  // 处理评论提交后的更新
-  const handleReviewSubmit = useCallback(async () => {
-    // 评论提交后，强制刷新一次数据
-    hasLoadedData.current = false
-    await fetchModelData()
-  }, [fetchModelData])
-
-  // 组件卸载时重置状态
-  useEffect(() => {
-    return () => {
-      hasLoadedData.current = false
-    }
-  }, [])
 
   // 使用 useEffect 在客户端更新时间
   useEffect(() => {
@@ -454,20 +364,20 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
     return () => clearInterval(timer)
   }, [model.createdAt, locale])
 
-  // 处理评论数量变化
+  // 修改 handleReviewChange 回调
   const handleReviewChange = useCallback((change: number) => {
-    setModelData(prev => ({
-      ...prev,
+    queryClient.setQueryData(['model', model.id], (oldData: any) => ({
+      ...oldData,
       _count: {
-        ...prev._count,
-        reviews: (prev._count?.reviews ?? 0) + change,
-        favorites: prev._count?.favorites ?? 0
+        ...oldData._count,
+        reviews: (oldData._count?.reviews ?? 0) + change,
+        favorites: oldData._count?.favorites ?? 0
       }
     }))
     
-    hasLoadedData.current = false
-    fetchModelData()
-  }, [])
+    // 使数据失效，触发重新获取
+    queryClient.invalidateQueries({ queryKey: ['model', model.id] })
+  }, [model.id, queryClient])
 
   return (
     <div ref={cardRef} id={id}>
@@ -554,13 +464,9 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
               )} />
               
               {/* 保持原有的预览内容 */}
-              {isVisible ? (
-                <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
-                  <ModelPreview model={model} />
-                </div>
-              ) : (
-                <div className="aspect-square bg-gray-50" />
-              )}
+              <div className="w-full h-full" style={{ pointerEvents: 'auto' }}>
+                <ModelPreview model={model} isVisible={isVisible} />
+              </div>
             </div>
           </div>
 
@@ -614,7 +520,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                 </span>
               </div>
               <button
-                onClick={handleShowDetails}
+                onClick={() => setShowDetails(true)}
                 className={clsx(
                   "text-blue-500 hover:text-blue-600 font-medium transition-colors",
                   size === 'small' && 'text-xs',
@@ -681,10 +587,10 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                       <div>
                         <div className="flex items-center gap-3">
                           <h2 className="text-2xl font-bold text-gray-900 truncate">
-                            {modelData.name}
+                            {model.name}
                           </h2>
                           {/* 状态图标 */}
-                          {!modelData.isPublic && (
+                          {!model.isPublic && (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                               <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -693,8 +599,8 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             </span>
                           )}
                         </div>
-                        {modelData.description && (
-                          <p className="mt-2 text-gray-600">{modelData.description}</p>
+                        {model.description && (
+                          <p className="mt-2 text-gray-600">{model.description}</p>
                         )}
                       </div>
                     )}
@@ -707,10 +613,10 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             {/* 保存按钮 */}
                             <button
                               onClick={handleUpdateModel}
-                              disabled={isSaving}
+                              disabled={isSavingModel}
                               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
-                              {isSaving ? (
+                              {isSavingModel ? (
                                 <>
                                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -746,13 +652,20 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                             </button>
                             <button
                               onClick={handleDeleteClick}
-                              disabled={deletingId === model.id}
+                              disabled={isDeleting}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                               title={t('actions.delete')}
                             >
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
+                              {isDeleting ? (
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              ) : (
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              )}
                             </button>
                           </div>
                         )}
@@ -775,12 +688,7 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
               <div className="flex flex-col h-[calc(90vh-200px)]">
                 {/* 预览区域 */}
                 <div className="w-full h-full bg-gray-100 relative">
-                  <iframe
-                    src={`/api/thumbnail/${model.format}?model=${model.filePath}&locale=${locale}`}
-                    className="w-full h-full border-none"
-                    title={model.name}
-                    sandbox="allow-scripts allow-same-origin"
-                  />
+                  <ModelPreview model={model} isVisible={true} />
                 </div>
 
                 {/* 底部信息和操作栏 */}
@@ -791,13 +699,13 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                       <div className="flex items-center gap-6">
                         {/* 上传者信息 */}
                         <div className="flex items-center gap-2">
-                          <Avatar user={modelData.user} size="md" />
+                          <Avatar user={model.user} size="md" />
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {modelData.user?.name || t('info.unknownUser')}
+                              {model.user?.name || t('info.unknownUser')}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {timeAgo || formatTimeDistance(modelData.createdAt, locale)}
+                              {timeAgo || formatTimeDistance(model.createdAt, locale)}
                             </div>
                           </div>
                         </div>
@@ -873,14 +781,14 @@ export default function ModelCard({ model, onDelete, defaultOpen, id, onClose, m
                         {t('actions.downloadModel')}
                       </button>
                       <button
-                        onClick={handleToggleReviews}
+                        onClick={() => setShowReviews(prev => !prev)}
                         className="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg bg-white hover:bg-gray-50"
                       >
                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                         </svg>
-                        {(modelData?._count?.reviews ?? 0) > 0
-                          ? `${modelData._count?.reviews} ${t('actions.comments')}` 
+                        {(model._count?.reviews ?? 0) > 0
+                          ? `${model._count?.reviews} ${t('actions.comments')}` 
                           : t('actions.noComments')}
                       </button>
                     </div>

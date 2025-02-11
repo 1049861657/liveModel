@@ -280,7 +280,7 @@
       },
       "success": {
         "submitted": "点赞成功",
-        "deleted": "已取消点赞",
+        "deleted": "删除成功",
         "replySubmitted": "回复成功",
         "reviewSubmitted": "评论成功"
       },
@@ -536,5 +536,108 @@
       "selectNone": "全不选",
       "showAllParts": "显示所有部件",
       "hideAllParts": "隐藏所有部件"
+    },
+    "CheckInButton": {
+      "loading": "加载中",
+      "checkingIn": "签到中",
+      "checkedIn": "已签到",
+      "checkIn": "立即签到",
+      "loginRequired": "请先登录",
+      "alreadyCheckedIn": "今天已经签到过了",
+      "checkInFailed": "签到失败",
+      "fetchError": "获取签到状态失败"
+    },
+    "CheckInPage": {
+      "title": "每日签到",
+      "subtitle": "连续签到可获得额外积分",
+      "rules": {
+        "title": "签到规则",
+        "baseReward": {
+          "title": "基础奖励",
+          "desc": "每日签到可获得10积分"
+        },
+        "consecutiveReward": {
+          "title": "连续签到",
+          "desc": "每天额外+2积分（最高20分）"
+        },
+        "monthlyReward": {
+          "title": "月度奖励",
+          "items": {
+            "week1": "满1周：+30积分",
+            "week2": "满2周：+60积分",
+            "week3": "满3周：+90积分",
+            "fullMonth": "月度全勤：+120积分"
+          }
+        },
+        "notes": {
+          "reset": "* 断签后连续天数重新计算",
+          "usage": "* 积分可用于平台功能解锁"
+        }
+      },
+      "stats": {
+        "totalDays": "总签到天数",
+        "currentStreak": "当前连续",
+        "maxStreak": "最长连续",
+        "totalPoints": "总积分"
+      },
+      "rankings": {
+        "title": "积分排行榜",
+        "unknownUser": "未知用户"
+      },
+      "calendar": {
+        "year": "{year}年",
+        "month": "{month}月",
+        "weekdays": {
+          "mon": "一",
+          "tue": "二",
+          "wed": "三",
+          "thu": "四",
+          "fri": "五",
+          "sat": "六",
+          "sun": "日"
+        }
+      }
+    },
+    "Profile": {
+      "title": "个人资料",
+      "subtitle": "管理您的账号信息和安全设置",
+      "avatar": {
+        "upload": "更换头像",
+        "uploading": "上传中...",
+        "tip": "点击更换头像图片"
+      },
+      "basicInfo": {
+        "title": "基本信息",
+        "username": "用户名",
+        "email": "邮箱"
+      },
+      "password": {
+        "title": "密码设置",
+        "edit": "修改密码",
+        "cancel": "取消修改",
+        "current": "当前密码",
+        "new": "新密码",
+        "requirement": "密码至少需要6个字符"
+      },
+      "button": {
+        "saving": "保存中...",
+        "save": "保存修改"
+      },
+      "message": {
+        "avatarSuccess": "头像更新成功",
+        "avatarError": "上传失败",
+        "profileSuccess": "个人资料更新成功",
+        "profileError": "更新失败",
+        "loading": "加载中..."
+      },
+      "validation": {
+        "username": "用户名至少2个字符",
+        "email": "邮箱格式不正确",
+        "password": "新密码至少6个字符"
+      }
+    },
+    "Metadata": {
+      "title": "魔抖",
+      "description": "在线预览和分享3D模型"
     }
   }

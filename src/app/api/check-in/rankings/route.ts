@@ -1,19 +1,5 @@
 import { NextResponse } from 'next/server'
 import {prisma} from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-
-interface CheckIn {
-  points: number
-}
-
-interface UserWithCheckIns {
-  id: string
-  name: string | null
-  email: string | null
-  avatar: { url: string } | null
-  checkIns: CheckIn[]
-}
 
 interface RankedUser {
   id: string

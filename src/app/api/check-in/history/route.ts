@@ -2,7 +2,85 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getMonthRange, fromUTCStorage } from '@/lib/date'
+import { getMonthRange, getTodayStart, getUTCDayStart } from '@/lib/date'
+
+interface CheckInRecord {
+  createdAt: Date
+  points: number
+}
+
+interface CheckInStats {
+  totalDays: number
+  currentStreak: number
+  maxStreak: number
+  totalPoints: number
+}
+
+// 计算连续签到统计（使用UTC时间）
+function calculateStreaks(checkIns: Date[]): { currentStreak: number; maxStreak: number } {
+  if (!checkIns.length) return { currentStreak: 0, maxStreak: 0 }
+
+  // 按UTC时间排序
+  const sortedDates = [...checkIns].sort((a, b) => a.getTime() - b.getTime())
+  
+  // 获取UTC今天0点
+  const todayStart = getTodayStart()
+  
+  let currentStreak = 0
+  let maxStreak = 0
+  let tempStreak = 1
+  
+  // 使用UTC时间计算连续天数
+  const { maxStreak: calculatedMaxStreak, lastDate, lastStreak } = sortedDates.reduce(
+    (acc, curr, index) => {
+      if (index === 0) return { ...acc, lastDate: curr, lastStreak: 1 }
+      
+      const currDayStart = getUTCDayStart(curr)
+      const prevDayStart = getUTCDayStart(acc.lastDate)
+      const dayDiff = Math.floor(
+        (prevDayStart.getTime() - currDayStart.getTime()) 
+        / (1000 * 60 * 60 * 24)
+      )
+      
+      if (dayDiff === 1) {
+        const newStreak = acc.lastStreak + 1
+        return {
+          maxStreak: Math.max(acc.maxStreak, newStreak),
+          lastDate: curr,
+          lastStreak: newStreak
+        }
+      }
+      
+      return {
+        maxStreak: Math.max(acc.maxStreak, acc.lastStreak),
+        lastDate: curr,
+        lastStreak: 1
+      }
+    },
+    { maxStreak: 1, lastDate: sortedDates[0], lastStreak: 1 }
+  )
+  
+  // 计算当前连续天数
+  const lastCheckIn = sortedDates[sortedDates.length - 1]
+  const lastCheckInDayStart = getUTCDayStart(lastCheckIn)
+  const daysSinceLastCheckIn = Math.floor(
+    (todayStart.getTime() - lastCheckInDayStart.getTime()) 
+    / (1000 * 60 * 60 * 24)
+  )
+  
+  if (daysSinceLastCheckIn === 0) {
+    currentStreak = lastStreak
+  } else if (daysSinceLastCheckIn === 1) {
+    currentStreak = lastStreak
+  } else {
+    currentStreak = 0 // 超过1天未签到，重置连续天数
+  }
+  
+  return {
+    currentStreak,
+    maxStreak: Math.max(calculatedMaxStreak, maxStreak)
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -16,119 +94,64 @@ export async function GET(request: Request) {
 
     // 获取查询参数
     const { searchParams } = new URL(request.url)
-    const month = parseInt(searchParams.get('month') || String(new Date().getMonth() + 1))
-    const year = parseInt(searchParams.get('year') || String(new Date().getFullYear()))
+    const month = parseInt(searchParams.get('month') || String(new Date().getUTCMonth() + 1))
+    const year = parseInt(searchParams.get('year') || String(new Date().getUTCFullYear()))
 
-    // 使用工具函数获取月份范围
+    // 获取UTC月份范围
     const { start: startDate, end: endDate } = getMonthRange(year, month)
 
-    // 获取指定月份的签到记录
-    const checkIns = await prisma.checkIn.findMany({
-      where: {
-        userId: session.user.id,
-        createdAt: {
-          gte: startDate,
-          lte: endDate
-        }
-      },
-      orderBy: {
-        createdAt: 'asc'
-      }
-    })
-
-    // 转换为本地时间
-    const localCheckIns = checkIns.map(checkIn => ({
-      ...checkIn,
-      createdAt: fromUTCStorage(checkIn.createdAt)
-    }))
-
-    // 获取所有签到记录用于计算统计信息
-    const allCheckIns = await prisma.checkIn.findMany({
-      where: {
-        userId: session.user.id
-      },
-      orderBy: {
-        createdAt: 'asc'
-      },
-      select: {
-        createdAt: true,
-        points: true
-      }
-    })
-
-    // 计算连续签到和最长连续签到
-    let currentStreak = 0
-    let maxStreak = 0
-    let tempStreak = 0
-    let lastCheckInDate: Date | null = null
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    // 按日期排序处理签到记录
-    const sortedCheckIns = allCheckIns
-      .map(checkIn => fromUTCStorage(checkIn.createdAt))
-      .sort((a, b) => a.getTime() - b.getTime())
-
-    for (let i = 0; i < sortedCheckIns.length; i++) {
-      const checkInDate = new Date(sortedCheckIns[i])
-      checkInDate.setHours(0, 0, 0, 0)
-
-      if (i === 0) {
-        tempStreak = 1
-        lastCheckInDate = checkInDate
-      } else {
-        const dayDiff = Math.floor(
-          (checkInDate.getTime() - lastCheckInDate!.getTime()) / (1000 * 60 * 60 * 24)
-        )
-
-        if (dayDiff === 1) {
-          // 连续签到
-          tempStreak++
-        } else {
-          // 连续中断
-          if (tempStreak > maxStreak) {
-            maxStreak = tempStreak
+    // 查询签到记录（使用UTC时间）
+    const [monthlyCheckIns, allCheckIns] = await Promise.all([
+      prisma.checkIn.findMany({
+        where: {
+          userId: session.user.id,
+          createdAt: {
+            gte: startDate,
+            lte: endDate
           }
-          tempStreak = 1
+        },
+        orderBy: {
+          createdAt: 'asc'
+        },
+        select: {
+          createdAt: true,
+          points: true
         }
-        lastCheckInDate = checkInDate
-      }
-
-      // 更新最长连续记录
-      if (tempStreak > maxStreak) {
-        maxStreak = tempStreak
-      }
-
-      // 如果是最后一次签到，检查是否是今天，更新当前连续天数
-      if (i === sortedCheckIns.length - 1) {
-        const daysSinceLastCheckIn = Math.floor(
-          (today.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
-        )
-        
-        if (daysSinceLastCheckIn === 0) {
-          // 今天已签到，当前连续天数就是临时连续天数
-          currentStreak = tempStreak
-        } else if (daysSinceLastCheckIn === 1) {
-          // 昨天签到过，但今天还没签到，连续天数保持不变
-          currentStreak = tempStreak
-        } else {
-          // 超过一天没签到，连续中断
-          currentStreak = 0
+      }),
+      prisma.checkIn.findMany({
+        where: {
+          userId: session.user.id
+        },
+        orderBy: {
+          createdAt: 'asc'
+        },
+        select: {
+          createdAt: true,
+          points: true
         }
-      }
-    }
+      })
+    ])
+
+    // 计算连续签到统计
+    const { currentStreak, maxStreak } = calculateStreaks(
+      allCheckIns.map(checkIn => checkIn.createdAt)
+    )
 
     // 计算总积分
     const totalPoints = allCheckIns.reduce((sum, checkIn) => sum + checkIn.points, 0)
 
+    // 构建返回数据
+    const stats: CheckInStats = {
+      totalDays: allCheckIns.length,
+      currentStreak,
+      maxStreak,
+      totalPoints
+    }
+
+    // 返回UTC时间，由客户端负责显示转换
     return NextResponse.json({
-      dates: localCheckIns.map(c => c.createdAt),
-      stats: {
-        totalDays: allCheckIns.length,
-        currentStreak,
-        maxStreak,
-        totalPoints
-      }
+      dates: monthlyCheckIns.map(c => c.createdAt),
+      stats
     })
   } catch (error) {
     console.error('获取签到记录失败:', error)

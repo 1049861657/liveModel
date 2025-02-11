@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import { type ExtendedModel } from '@/types/model'
 import ModelCard from '@/components/model/ModelCard'
 import { useSearchParams } from 'next/navigation'
@@ -9,6 +9,7 @@ import ModelSkeleton from '@/components/model/ModelSkeleton'
 import clsx from 'clsx'
 import { useRouter } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
+import { useQuery } from '@tanstack/react-query'
 
 interface ModelListProps {
   initialModels: {
@@ -18,10 +19,17 @@ interface ModelListProps {
   }
 }
 
+// 视图大小配置
+const VIEW_SIZE_CONFIG = {
+  small: { cols: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5', itemsPerPage: 20 },
+  medium: { cols: 'grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4', itemsPerPage: 12 },
+  large: { cols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3', itemsPerPage: 9 }
+} as const
+
 // 视图切换按钮组件
 function ViewSizeToggle({ viewSize, onViewSizeChange }: {
-  viewSize: 'large' | 'medium' | 'small'
-  onViewSizeChange: (size: 'large' | 'medium' | 'small') => void
+  viewSize: keyof typeof VIEW_SIZE_CONFIG
+  onViewSizeChange: (size: keyof typeof VIEW_SIZE_CONFIG) => void
 }) {
   const t = useTranslations('ModelList')
   
@@ -82,14 +90,14 @@ function ViewSizeToggle({ viewSize, onViewSizeChange }: {
 // 模型网格组件
 function ModelGrid({ 
   models, 
-  loading, 
+  isLoading, 
   viewSize,
   highlightModelId,
   onDelete,
 }: { 
   models: ExtendedModel[]
-  loading: boolean
-  viewSize: 'large' | 'medium' | 'small'
+  isLoading: boolean
+  viewSize: keyof typeof VIEW_SIZE_CONFIG
   highlightModelId?: string | null
   onDelete: () => void
 }) {
@@ -98,10 +106,8 @@ function ModelGrid({
   return (
     <div className={clsx(
       'grid gap-6',
-      viewSize === 'small' && 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5',
-      viewSize === 'medium' && 'grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-      viewSize === 'large' && 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-      loading && 'opacity-50'
+      VIEW_SIZE_CONFIG[viewSize].cols,
+      isLoading && 'opacity-50'
     )}>
       {models.map((model) => (
         <ModelCard 
@@ -113,7 +119,7 @@ function ModelGrid({
           size={viewSize}
         />
       ))}
-      {models.length === 0 && !loading && (
+      {models.length === 0 && !isLoading && (
         <div className="col-span-full text-center py-12 text-gray-500">
           {t('noResults')}
         </div>
@@ -124,88 +130,64 @@ function ModelGrid({
 
 // 客户端列表组件
 export default function ModelListClient({ initialModels }: ModelListProps) {
-  const [models, setModels] = useState(initialModels.models)
-  const [total, setTotal] = useState(initialModels.total)
-  const [pages, setPages] = useState(initialModels.pages)
-  const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const router = useRouter()
+  const t = useTranslations('ModelList')
   const highlightModelId = searchParams.get('highlight')
   const currentPage = parseInt(searchParams.get('page') || '1')
-  const [viewSize, setViewSize] = useState<'large' | 'medium' | 'small'>('large')
-  const t = useTranslations('ModelList')
+  const [viewSize, setViewSize] = useState<keyof typeof VIEW_SIZE_CONFIG>('large')
 
-  // 根据视图大小获取每页显示数量
-  const getItemsPerPage = (size: 'large' | 'medium' | 'small') => {
-    switch (size) {
-      case 'small': return 20  // 5列 x 4行
-      case 'medium': return 12 // 4列 x 3行
-      case 'large': return 9   // 3列 x 3行
-      default: return 9
-    }
-  }
-
-  // 刷新列表的函数
-  const refreshList = async () => {
-    try {
-      setLoading(true)
+  // 使用 react-query 获取模型列表
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['models', searchParams.toString(), viewSize],
+    queryFn: async () => {
       const params = new URLSearchParams(searchParams.toString())
-      params.set('limit', getItemsPerPage(viewSize).toString())
+      params.set('limit', VIEW_SIZE_CONFIG[viewSize].itemsPerPage.toString())
       const response = await fetch(`/api/models?${params.toString()}`)
       if (!response.ok) throw new Error(t('errors.fetchFailed'))
-      const data = await response.json()
-      setModels(data.models)
-      setTotal(data.total)
-      setPages(data.pages)
-    } catch (error) {
-      console.error("刷新列表失败")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // 当搜索参数改变时刷新列表
-  useEffect(() => {
-    refreshList()
-  }, [searchParams, viewSize])
+      return response.json()
+    },
+    initialData: initialModels,
+    staleTime: 1000 * 30 // 30秒内不重新获取
+  })
 
   // 处理视图大小变化
-  const handleViewSizeChange = (newSize: 'large' | 'medium' | 'small') => {
+  const handleViewSizeChange = useCallback((newSize: keyof typeof VIEW_SIZE_CONFIG) => {
     setViewSize(newSize)
     const params = new URLSearchParams(searchParams.toString())
-    params.set('limit', getItemsPerPage(newSize).toString())
+    params.set('limit', VIEW_SIZE_CONFIG[newSize].itemsPerPage.toString())
     params.set('page', '1') // 重置页码
     router.push(`/models?${params.toString()}`)
-  }
+  }, [router, searchParams])
 
   // 处理页码变化
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('page', page.toString())
-    params.set('limit', getItemsPerPage(viewSize).toString())
+    params.set('limit', VIEW_SIZE_CONFIG[viewSize].itemsPerPage.toString())
     router.push(`/models?${params.toString()}`)
-  }
+  }, [router, searchParams, viewSize])
 
   return (
     <div className="space-y-6">
       <ViewSizeToggle viewSize={viewSize} onViewSizeChange={handleViewSizeChange} />
       
-      {loading && <ModelSkeleton viewSize={viewSize} count={getItemsPerPage(viewSize)} />}
+      {isLoading && <ModelSkeleton viewSize={viewSize} count={VIEW_SIZE_CONFIG[viewSize].itemsPerPage} />}
 
-      {!loading && (
+      {!isLoading && (
         <ModelGrid 
-          models={models}
-          loading={loading}
+          models={data.models}
+          isLoading={isLoading}
           viewSize={viewSize}
           highlightModelId={highlightModelId}
-          onDelete={refreshList}
+          onDelete={refetch}
         />
       )}
 
-      {pages > 1 && (
+      {data.pages > 1 && (
         <Pagination
           currentPage={currentPage}
-          totalPages={pages}
+          totalPages={data.pages}
           onPageChange={handlePageChange}
         />
       )}

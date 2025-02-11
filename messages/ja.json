@@ -1,7 +1,7 @@
 {
     "HomePage": {
       "platform": "オンライン3Dモデルプレビュープラットフォーム",
-      "title": "LiveModel",
+      "title": "モードウ",
       "description": "複数のフォーマット対応、リアルタイムレンダリング、高性能表示で3Dモデルを簡単にアップロード、プレビュー、共有できます。",
       "browse": "モデルを閲覧",
       "upload": "モデルをアップロード",
@@ -58,7 +58,7 @@
       }
     },
     "Footer": {
-      "copyright": "© 2024-2025 LiveModel. All rights reserved.",
+      "copyright": "© 2024-2025 モードウ. All rights reserved.",
       "links": {
         "about": "会社概要",
         "privacy": "プライバシーポリシー",
@@ -203,7 +203,7 @@
     },
     "LoginPage": {
       "title": "おかえりなさい",
-      "subtitle": "LiveModelにサインインしてください",
+      "subtitle": "モードウにサインインしてください",
       "errors": {
         "invalidCredentials": "メールアドレスまたはパスワードが無効です",
         "loginFailed": "ログインに失敗しました。後でもう一度お試しください"
@@ -229,7 +229,7 @@
     },
     "RegisterPage": {
       "title": "アカウント作成",
-      "subtitle": "LiveModelに参加して、創造の旅を始めましょう",
+      "subtitle": "モードウに参加して、創造の旅を始めましょう",
       "errors": {
         "registerFailed": "登録に失敗しました。後でもう一度お試しください"
       },
@@ -536,5 +536,108 @@
       "selectNone": "選択解除",
       "showAllParts": "すべてのパーツを表示",
       "hideAllParts": "すべてのパーツを非表示"
+    },
+    "CheckInButton": {
+    "loading": "読み込み中",
+    "checkingIn": "チェックイン中",
+    "checkedIn": "チェックイン済み",
+    "checkIn": "チェックイン",
+    "loginRequired": "ログインしてください",
+    "alreadyCheckedIn": "本日は既にチェックイン済みです",
+    "checkInFailed": "チェックインに失敗しました",
+    "fetchError": "チェックイン状態の取得に失敗しました"
+  },
+  "CheckInPage": {
+    "title": "デイリーチェックイン",
+    "subtitle": "毎日チェックインでポイントアップ！",
+    "rules": {
+      "title": "チェックインルール",
+      "baseReward": {
+        "title": "基本報酬",
+        "desc": "デイリーチェックインで10ポイント獲得"
+      },
+      "consecutiveReward": {
+        "title": "連続チェックイン",
+        "desc": "1日につき+2ポイント（最大20ポイント）"
+      },
+      "monthlyReward": {
+        "title": "月間報酬",
+        "items": {
+          "week1": "1週間達成：+30ポイント",
+          "week2": "2週間達成：+60ポイント",
+          "week3": "3週間達成：+90ポイント",
+          "fullMonth": "月間皆勤：+120ポイント"
+        }
+      },
+      "notes": {
+        "reset": "* 1日でも欠席すると連続日数がリセットされます",
+        "usage": "* ポイントはプラットフォーム機能のロック解除に使用できます"
+      }
+    },
+    "stats": {
+      "totalDays": "累計日数",
+      "currentStreak": "現在の連続",
+      "maxStreak": "最長連続",
+      "totalPoints": "累計ポイント"
+    },
+    "rankings": {
+      "title": "ポイントランキング",
+      "unknownUser": "不明なユーザー"
+    },
+    "calendar": {
+      "year": "{year}年",
+      "month": "{month}月",
+      "weekdays": {
+        "mon": "月",
+        "tue": "火",
+        "wed": "水",
+        "thu": "木",
+        "fri": "金",
+        "sat": "土",
+        "sun": "日"
+      }
     }
+  },
+  "Profile": {
+    "title": "プロフィール",
+    "subtitle": "アカウント情報とセキュリティ設定の管理",
+    "avatar": {
+      "upload": "変更",
+      "uploading": "アップロード中...",
+      "tip": "クリックしてアバター画像を変更"
+    },
+    "basicInfo": {
+      "title": "基本情報",
+      "username": "ユーザー名",
+      "email": "メールアドレス"
+    },
+    "password": {
+      "title": "パスワード設定",
+      "edit": "パスワードを変更",
+      "cancel": "キャンセル",
+      "current": "現在のパスワード",
+      "new": "新しいパスワード",
+      "requirement": "パスワードは6文字以上必要です"
+    },
+    "button": {
+      "saving": "保存中...",
+      "save": "変更を保存"
+    },
+    "message": {
+      "avatarSuccess": "アバターを更新しました",
+      "avatarError": "アップロードに失敗しました",
+      "profileSuccess": "プロフィールを更新しました",
+      "profileError": "更新に失敗しました",
+      "loading": "読み込み中..."
+    },
+    "validation": {
+      "username": "ユーザー名は2文字以上必要です",
+      "email": "メールアドレスの形式が正しくありません",
+      "password": "パスワードは6文字以上必要です"
+    }
+  },
+  "Metadata": {
+    "title": "モードウ",
+    "description": "3Dモデルのオンラインプレビューと共有"
+  }
 } 

@@ -5,10 +5,11 @@ import { useSession } from 'next-auth/react'
 import { format, startOfMonth, endOfMonth, isSameMonth, isToday, isBefore } from 'date-fns'
 import { eachDayOfInterval } from 'date-fns/eachDayOfInterval'
 import { getDay } from 'date-fns/getDay'
-import { zhCN } from 'date-fns/locale'
 import { motion, AnimatePresence } from 'motion/react'
 import CheckInButton from '@/components/checkin/CheckInButton'
 import Avatar from '@/components/ui/Avatar'
+import { useQuery } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 
 interface CheckInStats {
   totalDays: number
@@ -28,6 +29,7 @@ interface RankingUser {
 
 export default function CheckInPage() {
   const { data: session } = useSession()
+  const t = useTranslations('CheckInPage')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [checkInDates, setCheckInDates] = useState<Date[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,8 +41,22 @@ export default function CheckInPage() {
     maxStreak: 0,
     totalPoints: 0
   })
-  const [rankings, setRankings] = useState<RankingUser[]>([])
-  const [rankingsLoading, setRankingsLoading] = useState(true)
+
+  // 使用 React Query 获取排行榜数据
+  const { data: rankings, isLoading: rankingsLoading } = useQuery<RankingUser[]>({
+    queryKey: ['rankings'],
+    queryFn: async () => {
+      const response = await fetch('/api/check-in/rankings')
+      if (!response.ok) throw new Error('获取排行榜失败')
+      return response.json()
+    },
+    enabled: !!session,
+    staleTime: 1000 * 60, // 1分钟内不重新获取数据
+    refetchOnWindowFocus: false, // 窗口获得焦点时不重新获取
+    refetchOnMount: false, // 组件挂载时不重新获取
+    refetchOnReconnect: false, // 重新连接时不重新获取
+    retry: false // 失败时不重试
+  })
 
   // 处理月份切换
   const handleMonthChange = (direction: 'prev' | 'next') => {
@@ -232,39 +248,6 @@ export default function CheckInPage() {
     )
   }, [loading, currentDate, checkInDates])
 
-  // 获取排行榜数据
-  const fetchRankings = async () => {
-    try {
-      setRankingsLoading(true)
-      const response = await fetch('/api/check-in/rankings')
-      if (!response.ok) throw new Error('获取排行榜失败')
-      const data = await response.json()
-      setRankings(data)
-    } catch (error) {
-      console.error('获取排行榜失败:', error)
-    } finally {
-      setRankingsLoading(false)
-    }
-  }
-
-  // 监听排行榜刷新事件
-  useEffect(() => {
-    const handleRefreshRankings = () => {
-      fetchRankings()
-    }
-
-    window.addEventListener('refreshRankings', handleRefreshRankings)
-    return () => {
-      window.removeEventListener('refreshRankings', handleRefreshRankings)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (session) {
-      fetchRankings()
-    }
-  }, [session])
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-6 px-4">
       <div className="max-w-7xl mx-auto">
@@ -276,7 +259,7 @@ export default function CheckInPage() {
               <div className="p-5 text-center relative">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold text-gray-800">每日签到</h2>
+                    <h2 className="text-xl font-bold text-gray-800">{t('title')}</h2>
                     <div className="group relative">
                       <svg 
                         className="w-5 h-5 text-gray-400 cursor-help hover:text-gray-600 transition-colors" 
@@ -294,33 +277,32 @@ export default function CheckInPage() {
                       <div className="absolute left-0 top-full mt-1 w-72 bg-white text-gray-600 text-sm rounded-xl 
                         opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999] shadow-xl border border-gray-100">
                         <div className="relative">
-                          {/* 小三角形指示器 */}
                           <div className="absolute -top-2 left-2 w-4 h-4 bg-white transform rotate-45 border-l border-t border-gray-100"></div>
                           <div className="relative">
                             <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-t-xl">
-                              <p className="font-semibold">签到规则</p>
+                              <p className="font-semibold">{t('rules.title')}</p>
                             </div>
                             <div className="p-4 space-y-3">
                               <div className="bg-blue-50 rounded-lg p-2.5">
-                                <p className="font-medium text-blue-600 mb-1">基础奖励</p>
-                                <p className="text-gray-600">每日签到可获得10积分</p>
+                                <p className="font-medium text-blue-600 mb-1">{t('rules.baseReward.title')}</p>
+                                <p className="text-gray-600">{t('rules.baseReward.desc')}</p>
                               </div>
                               <div className="bg-green-50 rounded-lg p-2.5">
-                                <p className="font-medium text-green-600 mb-1">连续签到</p>
-                                <p className="text-gray-600">每天额外+2积分（最高20分）</p>
+                                <p className="font-medium text-green-600 mb-1">{t('rules.consecutiveReward.title')}</p>
+                                <p className="text-gray-600">{t('rules.consecutiveReward.desc')}</p>
                               </div>
                               <div className="bg-yellow-50 rounded-lg p-2.5">
-                                <p className="font-medium text-yellow-600 mb-1">月度奖励</p>
+                                <p className="font-medium text-yellow-600 mb-1">{t('rules.monthlyReward.title')}</p>
                                 <ul className="space-y-1 text-gray-600">
-                                  <li>• 满1周：+30积分</li>
-                                  <li>• 满2周：+60积分</li>
-                                  <li>• 满3周：+90积分</li>
-                                  <li>• 月度全勤：+120积分</li>
+                                  <li>• {t('rules.monthlyReward.items.week1')}</li>
+                                  <li>• {t('rules.monthlyReward.items.week2')}</li>
+                                  <li>• {t('rules.monthlyReward.items.week3')}</li>
+                                  <li>• {t('rules.monthlyReward.items.fullMonth')}</li>
                                 </ul>
                               </div>
                               <div className="text-xs text-gray-400 border-t border-gray-100 pt-2 space-y-1">
-                                <p>* 断签后连续天数重新计算</p>
-                                <p>* 积分可用于平台功能解锁</p>
+                                <p>{t('rules.notes.reset')}</p>
+                                <p>{t('rules.notes.usage')}</p>
                               </div>
                             </div>
                           </div>
@@ -337,7 +319,7 @@ export default function CheckInPage() {
                     <CheckInButton onCheckIn={fetchCheckInHistory} />
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 mt-3">连续签到可获得额外积分</p>
+                <p className="text-sm text-gray-500 mt-3">{t('subtitle')}</p>
               </div>
             </div>
 
@@ -352,7 +334,7 @@ export default function CheckInPage() {
                         <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                         </svg>
-                        总签到天数
+                        {t('stats.totalDays')}
                       </div>
                     </div>
                   </div>
@@ -366,7 +348,7 @@ export default function CheckInPage() {
                         <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                         </svg>
-                        当前连续
+                        {t('stats.currentStreak')}
                       </div>
                     </div>
                   </div>
@@ -380,7 +362,7 @@ export default function CheckInPage() {
                         <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
-                        最长连续
+                        {t('stats.maxStreak')}
                       </div>
                     </div>
                   </div>
@@ -394,7 +376,7 @@ export default function CheckInPage() {
                         <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        总积分
+                        {t('stats.totalPoints')}
                       </div>
                     </div>
                   </div>
@@ -405,7 +387,7 @@ export default function CheckInPage() {
             {/* 积分排行榜 */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">积分排行榜</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-4">{t('rankings.title')}</h3>
                 <div className="space-y-3">
                   {rankingsLoading ? (
                     // 加载占位
@@ -433,48 +415,46 @@ export default function CheckInPage() {
                         </div>
                       </motion.div>
                     ))
-                  ) : (
-                    rankings.map((user, index) => (
-                      <motion.div 
-                        key={user.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className={`flex items-center gap-3 p-2 rounded-lg transition-colors
-                          ${user.id === session?.user?.id ? 'bg-blue-50' : 'hover:bg-gray-50'}
-                        `}
-                      >
-                        {/* 排名 */}
-                        <div className={`
-                          w-6 h-6 flex items-center justify-center rounded-full text-sm font-bold
-                          ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                            index === 1 ? 'bg-gray-100 text-gray-700' :
-                            index === 2 ? 'bg-orange-100 text-orange-700' :
-                            'bg-blue-50 text-blue-600'}
-                        `}>
-                          {user.rank}
-                        </div>
+                  ) : rankings?.map((user, index) => (
+                    <motion.div 
+                      key={user.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`flex items-center gap-3 p-2 rounded-lg transition-colors
+                        ${user.id === session?.user?.id ? 'bg-blue-50' : 'hover:bg-gray-50'}
+                      `}
+                    >
+                      {/* 排名 */}
+                      <div className={`
+                        w-6 h-6 flex items-center justify-center rounded-full text-sm font-bold
+                        ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                          index === 1 ? 'bg-gray-100 text-gray-700' :
+                          index === 2 ? 'bg-orange-100 text-orange-700' :
+                          'bg-blue-50 text-blue-600'}
+                      `}>
+                        {user.rank}
+                      </div>
 
-                        {/* 头像和名称 */}
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <Avatar user={user} size="sm" />
-                          <span className="text-sm font-medium text-gray-700 truncate">
-                            {user.name || '未知用户'}
-                          </span>
-                        </div>
+                      {/* 头像和名称 */}
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Avatar user={user} size="sm" />
+                        <span className="text-sm font-medium text-gray-700 truncate">
+                          {user.name || t('rankings.unknownUser')}
+                        </span>
+                      </div>
 
-                        {/* 积分 */}
-                        <div className="flex items-center gap-1">
-                          <svg className="w-4 h-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          <span className="text-sm font-semibold text-yellow-600">
-                            {user.points}
-                          </span>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
+                      {/* 积分 */}
+                      <div className="flex items-center gap-1">
+                        <svg className="w-4 h-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span className="text-sm font-semibold text-yellow-600">
+                          {user.points}
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -500,8 +480,12 @@ export default function CheckInPage() {
                   </svg>
                 </button>
                 <h2 className="text-xl font-bold text-white tracking-wide flex items-center gap-3">
-                  <span className="text-white/80">{format(currentDate, 'yyyy年')}</span>
-                  <span>{format(currentDate, 'MM月')}</span>
+                  <span className="text-white/80">
+                    {t('calendar.year', { year: format(currentDate, 'yyyy') })}
+                  </span>
+                  <span>
+                    {t('calendar.month', { month: format(currentDate, 'MM') })}
+                  </span>
                 </h2>
                 <button
                   onClick={() => !isAnimating && !isSameMonth(currentDate, new Date()) && handleMonthChange('next')}
@@ -544,7 +528,15 @@ export default function CheckInPage() {
               >
                 {/* 星期标题 */}
                 <div className="grid grid-cols-7 mb-6">
-                  {['一', '二', '三', '四', '五', '六', '日'].map((day, index) => (
+                  {[
+                    t('calendar.weekdays.mon'),
+                    t('calendar.weekdays.tue'),
+                    t('calendar.weekdays.wed'),
+                    t('calendar.weekdays.thu'),
+                    t('calendar.weekdays.fri'),
+                    t('calendar.weekdays.sat'),
+                    t('calendar.weekdays.sun')
+                  ].map((day, index) => (
                     <motion.div 
                       key={day}
                       initial={{ opacity: 0, y: -10 }}

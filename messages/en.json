@@ -536,5 +536,108 @@
       "selectNone": "None",
       "showAllParts": "Show All Parts",
       "hideAllParts": "Hide All Parts"
+    },
+    "CheckInButton": {
+      "loading": "Loading",
+      "checkingIn": "Checking in",
+      "checkedIn": "Checked in",
+      "checkIn": "Check in",
+      "loginRequired": "Please login first",
+      "alreadyCheckedIn": "Already checked in today",
+      "checkInFailed": "Check-in failed",
+      "fetchError": "Failed to get check-in status"
+    },
+    "CheckInPage": {
+      "title": "Daily Check-in",
+      "subtitle": "Check in every day for extra points!",
+      "rules": {
+        "title": "Check-in Rules",
+        "baseReward": {
+          "title": "Base Reward",
+          "desc": "Get 10 points for daily check-in"
+        },
+        "consecutiveReward": {
+          "title": "Consecutive Check-in",
+          "desc": "+2 points per day (max 20 points)"
+        },
+        "monthlyReward": {
+          "title": "Monthly Rewards",
+          "items": {
+            "week1": "1 Week: +30 points",
+            "week2": "2 Weeks: +60 points",
+            "week3": "3 Weeks: +90 points",
+            "fullMonth": "Full Month: +120 points"
+          }
+        },
+        "notes": {
+          "reset": "* Consecutive days reset after missing a day",
+          "usage": "* Points can be used to unlock platform features"
+        }
+      },
+      "stats": {
+        "totalDays": "Total Days",
+        "currentStreak": "Current Streak",
+        "maxStreak": "Max Streak",
+        "totalPoints": "Total Points"
+      },
+      "rankings": {
+        "title": "Points Leaderboard",
+        "unknownUser": "Unknown User"
+      },
+      "calendar": {
+        "year": "Year {year}",
+        "month": "Month {month}",
+        "weekdays": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        }
+      }
+    },
+    "Profile": {
+      "title": "Profile",
+      "subtitle": "Manage your account information and security settings",
+      "avatar": {
+        "upload": "Change",
+        "uploading": "Uploading...",
+        "tip": "Click to change avatar image"
+      },
+      "basicInfo": {
+        "title": "Basic Information",
+        "username": "Username",
+        "email": "Email"
+      },
+      "password": {
+        "title": "Password Settings",
+        "edit": "Change Password",
+        "cancel": "Cancel",
+        "current": "Current Password",
+        "new": "New Password",
+        "requirement": "Password must be at least 6 characters"
+      },
+      "button": {
+        "saving": "Saving...",
+        "save": "Save Changes"
+      },
+      "message": {
+        "avatarSuccess": "Avatar updated successfully",
+        "avatarError": "Failed to upload",
+        "profileSuccess": "Profile updated successfully",
+        "profileError": "Update failed",
+        "loading": "Loading..."
+      },
+      "validation": {
+        "username": "Username must be at least 2 characters",
+        "email": "Invalid email format",
+        "password": "Password must be at least 6 characters"
+      }
+    },
+    "Metadata": {
+      "title": "LiveModel",
+      "description": "Preview and share 3D models online"
     }
   }

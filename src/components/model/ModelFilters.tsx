@@ -1,124 +1,164 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback, useMemo, useTransition, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useSession } from 'next-auth/react'
 import { useRouter } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
+import { useQuery } from '@tanstack/react-query'
+import clsx from 'clsx'
 
+interface FilterState {
+  search: string
+  format: string
+  sort: string
+  owner: string
+  favorites: boolean
+}
+
+// 过滤按钮组件
+const FilterButton = ({ active, onClick, children }: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) => (
+  <button
+    onClick={onClick}
+    className={clsx(
+      'px-4 py-2 text-sm font-medium',
+      active 
+        ? 'bg-blue-500 text-white'
+        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+    )}
+  >
+    {children}
+  </button>
+)
+
+// 主过滤器组件
 export default function ModelFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session } = useSession()
   const t = useTranslations('ModelFilters')
+  const [isPending, startTransition] = useTransition()
+
+  // 本地状态管理
+  const [localFilters, setLocalFilters] = useState<FilterState>({
+    search: searchParams.get('search') || '',
+    format: searchParams.get('format') || '',
+    sort: searchParams.get('sort') || 'newest',
+    owner: searchParams.get('owner') || 'all',
+    favorites: searchParams.get('favorites') === 'true'
+  })
   
-  const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [format, setFormat] = useState(searchParams.get('format') || '')
-  const [sort, setSort] = useState(searchParams.get('sort') || 'newest')
-  const [owner, setOwner] = useState(searchParams.get('owner') || 'all')
-  const [showFavorites, setShowFavorites] = useState(searchParams.get('favorites') === 'true')
+  // 使用 react-query 管理过滤状态
+  const { refetch: refetchFilters } = useQuery<FilterState>({
+    queryKey: ['modelFilters'],
+    queryFn: () => localFilters,
+    staleTime: Infinity,
+    initialData: localFilters
+  })
 
-  // 使用防抖来处理搜索
-  const debouncedSearch = useDebounce(search, 500)
+  // 使用 useMemo 缓存选项列表
+  const formatOptions = useMemo(() => [
+    { value: '', label: t('formatOptions.all') },
+    { value: 'glb', label: 'GLB' },
+    { value: 'dae', label: 'DAE' },
+    { value: 'gltf', label: 'GLTF' },
+    { value: 'fbx', label: 'FBX' },
+    { value: 'obj', label: 'OBJ' }
+  ], [t])
 
-  // 确保组件挂载时应用 URL 中的过滤条件
-  useEffect(() => {
-    const ownerParam = searchParams.get('owner')
-    if (ownerParam) {
-      setOwner(ownerParam)
-    }
-  }, [searchParams])
+  const sortOptions = useMemo(() => [
+    { value: 'newest', label: t('sortOptions.newest') },
+    { value: 'oldest', label: t('sortOptions.oldest') },
+    { value: 'name', label: t('sortOptions.name') },
+    { value: 'favorites', label: t('sortOptions.favorites') }
+  ], [t])
 
-  // 更新 URL 参数
-  const updateFilters = useCallback((
-    newSearch?: string,
-    newFormat?: string,
-    newSort?: string,
-    newOwner?: string,
-    newFavorites?: string
-  ) => {
-    const params = new URLSearchParams(searchParams.toString())
-    
-    if (newSearch !== undefined) {
-      if (newSearch) {
-        params.set('search', newSearch)
-      } else {
-        params.delete('search')
-      }
-    }
-    
-    if (newFormat !== undefined) {
-      if (newFormat) {
-        params.set('format', newFormat)
-      } else {
-        params.delete('format')
-      }
-    }
-    
-    if (newSort !== undefined) {
-      if (newSort) {
-        params.set('sort', newSort)
-      } else {
-        params.delete('sort')
-      }
-    }
+  // 优化的 updateFilters 函数
+  const updateFilters = useCallback((updates: Partial<FilterState>) => {
+    // 立即更新本地状态
+    setLocalFilters(prev => {
+      const newFilters = { ...prev, ...updates }
+      
+      // 更新 URL 参数
+      const params = new URLSearchParams(searchParams.toString())
+      Object.entries(newFilters).forEach(([key, value]) => {
+        if (!value || value === '' || (key === 'owner' && value === 'all')) {
+          params.delete(key)
+        } else {
+          params.set(key, String(value))
+        }
+      })
 
-    if (newOwner !== undefined) {
-      if (newOwner && newOwner !== 'all') {
-        params.set('owner', newOwner)
-      } else {
-        params.delete('owner')
-      }
-    }
+      // 使用 startTransition 来更新 URL
+      startTransition(() => {
+        router.push(`/models?${params.toString()}`)
+        refetchFilters()
+      })
 
-    if (newFavorites !== undefined) {
-      if (newFavorites === 'true') {
-        params.set('favorites', 'true')
-      } else {
-        params.delete('favorites')
-      }
-    }
+      return newFilters
+    })
+  }, [router, searchParams, refetchFilters])
 
-    router.push(`/models?${params.toString()}`)
-  }, [router, searchParams])
+  // 使用防抖的搜索处理
+  const debouncedSearch = useDebounce(localFilters.search, 800)
 
   // 监听防抖后的搜索值变化
   useEffect(() => {
-    updateFilters(debouncedSearch, undefined, undefined, undefined, undefined)
-  }, [debouncedSearch, updateFilters])
+    const params = new URLSearchParams(searchParams.toString())
+    if (debouncedSearch) {
+      params.set('search', debouncedSearch)
+    } else {
+      params.delete('search')
+    }
+    startTransition(() => {
+      router.push(`/models?${params.toString()}`)
+      refetchFilters()
+    })
+  }, [debouncedSearch, router, searchParams, refetchFilters])
+  
+  // 事件处理函数
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalFilters(prev => ({ ...prev, search: e.target.value }))
+  }, [])
+
+  const handleFormatChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateFilters({ format: e.target.value })
+  }, [updateFilters])
+
+  const handleSortChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateFilters({ sort: e.target.value })
+  }, [updateFilters])
+
+  const handleOwnerChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateFilters({ owner: e.target.value })
+  }, [updateFilters])
+
+  const toggleFavorites = useCallback(() => {
+    updateFilters({ favorites: !localFilters.favorites })
+  }, [updateFilters, localFilters.favorites])
 
   return (
     <div className="flex flex-col gap-4">
       {session && (
         <div className="flex justify-end">
           <div className="inline-flex rounded-lg overflow-hidden">
-            <button
-              onClick={() => {
-                setShowFavorites(false)
-                updateFilters(undefined, undefined, undefined, undefined, 'false')
-              }}
-              className={`px-4 py-2 text-sm font-medium ${
-                !showFavorites 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+            <FilterButton
+              active={!localFilters.favorites}
+              onClick={() => updateFilters({ favorites: false })}
             >
               {t('all')}
-            </button>
-            <button
-              onClick={() => {
-                setShowFavorites(true)
-                updateFilters(undefined, undefined, undefined, undefined, 'true')
-              }}
-              className={`px-4 py-2 text-sm font-medium ${
-                showFavorites 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+            </FilterButton>
+            <FilterButton
+              active={localFilters.favorites}
+              onClick={() => updateFilters({ favorites: true })}
             >
               {t('favorites')}
-            </button>
+            </FilterButton>
           </div>
         </div>
       )}
@@ -129,18 +169,15 @@ export default function ModelFilters() {
             <input
               type="text"
               placeholder={t('searchPlaceholder')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={localFilters.search}
+              onChange={handleSearchChange}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           {session && (
             <select
-              value={owner}
-              onChange={(e) => {
-                setOwner(e.target.value)
-                updateFilters(undefined, undefined, undefined, e.target.value, undefined)
-              }}
+              value={localFilters.owner}
+              onChange={handleOwnerChange}
               className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">{t('ownerOptions.all')}</option>
@@ -148,32 +185,26 @@ export default function ModelFilters() {
             </select>
           )}
           <select
-            value={format}
-            onChange={(e) => {
-              setFormat(e.target.value)
-              updateFilters(undefined, e.target.value, undefined, undefined, undefined)
-            }}
+            value={localFilters.format}
+            onChange={handleFormatChange}
             className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">{t('formatOptions.all')}</option>
-            <option value="glb">GLB</option>
-            <option value="dae">DAE</option>
-            <option value="gltf">GLTF</option>
-            <option value="fbx">FBX</option>
-            <option value="obj">OBJ</option>
+            {formatOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
           <select
-            value={sort}
-            onChange={(e) => {
-              setSort(e.target.value)
-              updateFilters(undefined, undefined, e.target.value, undefined, undefined)
-            }}
+            value={localFilters.sort}
+            onChange={handleSortChange}
             className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="newest">{t('sortOptions.newest')}</option>
-            <option value="oldest">{t('sortOptions.oldest')}</option>
-            <option value="name">{t('sortOptions.name')}</option>
-            <option value="favorites">{t('sortOptions.favorites')}</option>
+            {sortOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

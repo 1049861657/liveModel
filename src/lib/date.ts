@@ -4,64 +4,101 @@
 
 import { startOfMonth, endOfMonth } from 'date-fns'
 
-// 获取指定月份的起始和结束时间(UTC)
+// 获取时区信息
+function getTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone
+}
+
+// 获取指定月份的UTC时间范围
 export function getMonthRange(year: number, month: number) {
-  const date = new Date(year, month - 1)
+  // 直接使用UTC时间创建日期
+  const date = new Date(Date.UTC(year, month - 1))
   return {
     start: startOfMonth(date),
     end: endOfMonth(date)
   }
 }
 
-// 转换本地时间为 UTC 存储时间
-export function toUTCStorage(localDate: Date): Date {
-  return new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000))
-}
-
-// 转换 UTC 存储时间为本地显示时间
-export function fromUTCStorage(utcDate: Date): Date {
-  return new Date(utcDate.getTime() + (new Date().getTimezoneOffset() * 60000))
-}
-
-// 获取当天起始时间(UTC)
+// 获取UTC当天开始时间
 export function getTodayStart(): Date {
-  const today = new Date()
-  const todayStart = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
+  const now = new Date()
+  // 使用 UTC 时间创建今天的开始
+  return new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
     0, 0, 0, 0
-  )
-  return toUTCStorage(todayStart)
+  ))
+}
+
+// 获取UTC日期的开始时间
+export function getUTCDayStart(date: Date): Date {
+  return new Date(Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    0, 0, 0, 0
+  ))
+}
+
+// 创建UTC时间
+export function createUTCDate(year: number, month: number, day: number, hours = 0, minutes = 0, seconds = 0, ms = 0): Date {
+  return new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds, ms))
 }
 
 /**
- * 格式化聊天消息时间
- * @param date 消息时间
- * @returns 格式化后的时间字符串
+ * 仅用于客户端显示的时区转换函数
+ * 将UTC时间转换为用户本地时间显示
  */
-export function formatMessageTime(date: Date): string {
+export function formatLocalTime(utcDate: Date): string {
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: getTimeZone()
+  }).format(utcDate)
+}
+
+/**
+ * 格式化聊天消息时间（客户端显示）
+ */
+export function formatMessageTime(utcDate: Date): string {
   const now = new Date()
-  const messageDate = new Date(date)
-  const diffDays = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24))
+  const diffDays = Math.floor(
+    (now.getTime() - utcDate.getTime()) / (1000 * 60 * 60 * 24)
+  )
   
+  const timeStr = new Intl.DateTimeFormat(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: getTimeZone()
+  }).format(utcDate)
+
+  // 获取本地化的相对时间描述
+  const relativeTimeFormat = new Intl.RelativeTimeFormat(undefined, {
+    numeric: 'auto'
+  })
+
   if (diffDays === 0) {
-    // 今天的消息只显示时间
-    return messageDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    return timeStr
   } else if (diffDays === 1) {
-    // 昨天的消息
-    return `昨天 ${messageDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+    return `${relativeTimeFormat.format(-1, 'day')} ${timeStr}`
   } else if (diffDays === 2) {
-    // 前天的消息
-    return `前天 ${messageDate.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+    return `${relativeTimeFormat.format(-2, 'day')} ${timeStr}`
   } else {
-    // 更早的消息显示完整日期
-    return messageDate.toLocaleString('zh-CN', {
+    return new Intl.DateTimeFormat(undefined, {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
-    })
+      minute: '2-digit',
+      hour12: false,
+      timeZone: getTimeZone()
+    }).format(utcDate)
   }
 } 

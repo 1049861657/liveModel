@@ -9,9 +9,10 @@ import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
 import { zhCN, enUS, ja } from 'date-fns/locale'; 
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import Avatar from '@/components/ui/Avatar'
 import { useTranslations, useLocale } from 'next-intl'
+import { useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 
 interface Review {
   id: string
@@ -44,6 +45,11 @@ interface Reply {
 interface ReviewSectionProps {
   modelId: string
   onReviewChange?: (change: number) => void
+}
+
+interface ReviewData {
+  reviews: Review[]
+  pages: number
 }
 
 // 将 RatingStars 组件独立出来，使用自己的状态
@@ -209,180 +215,299 @@ const ReplyBox = memo(({
 
 ReplyBox.displayName = 'ReplyBox'
 
+// 添加 API 函数
+const reviewApi = {
+  getReviews: async (modelId: string, page: number, sort: string) => {
+    const response = await fetch(`/api/models/${modelId}/reviews?page=${page}&sort=${sort}`)
+    if (!response.ok) throw new Error('Failed to fetch reviews')
+    return response.json()
+  },
+
+  submitReview: async (modelId: string, data: { content: string; rating: number }) => {
+    const response = await fetch(`/api/models/${modelId}/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) throw new Error('Failed to submit review')
+    return response.json()
+  },
+
+  deleteReview: async (modelId: string, reviewId: string) => {
+    const response = await fetch(`/api/models/${modelId}/reviews/${reviewId}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) throw new Error('Failed to delete review')
+    return response.json()
+  },
+
+  likeReview: async (modelId: string, reviewId: string) => {
+    const response = await fetch(`/api/models/${modelId}/reviews/${reviewId}/like`, {
+      method: 'POST',
+    })
+    if (!response.ok) throw new Error('Failed to like review')
+    return response.json()
+  },
+
+  submitReply: async (modelId: string, reviewId: string, content: string) => {
+    const response = await fetch(`/api/models/${modelId}/reviews/${reviewId}/replies`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    })
+    if (!response.ok) throw new Error('Failed to submit reply')
+    return response.json()
+  },
+
+  deleteReply: async (modelId: string, reviewId: string, replyId: string) => {
+    const response = await fetch(`/api/models/${modelId}/reviews/${reviewId}/replies/${replyId}`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) throw new Error('Failed to delete reply')
+    return response.json()
+  },
+}
+
 export default function ReviewSection({ modelId, onReviewChange }: ReviewSectionProps) {
   const { data: session } = useSession()
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
   const [sortBy, setSortBy] = useState<'latest' | 'rating' | 'likes'>('latest')
-  const [replyStates, setReplyStates] = useState<{
-    [key: string]: {
-      isReplying: boolean;
-      content: string;
-    }
-  }>({})
-  const [isLiking, setIsLiking] = useState<string | null>(null)
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{
     type: 'review' | 'reply'
     reviewId: string
     replyId?: string
   } | null>(null)
-  const [activeReplyId, setActiveReplyId] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const router = useRouter()
   const t = useTranslations('ReviewSection')
   const locale = useLocale()
-  const dateLocale = locale === 'zh' ? zhCN : (locale === 'ja' ? ja : enUS);
+  const dateLocale = locale === 'zh' ? zhCN : (locale === 'ja' ? ja : enUS)
+  const queryClient = useQueryClient()
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [isLiking, setIsLiking] = useState<string | null>(null)
+  const reviewListRef = useRef<HTMLDivElement>(null)
 
-  // 重命名为 fetchReviews 并提升到组件级别
-  const fetchReviews = async (pageNum = page, sort = sortBy) => {
-    try {
-      setLoading(true)
-      const response = await fetch(
-        `/api/models/${modelId}/reviews?page=${pageNum}&sort=${sort}`
-      )
-      if (!response.ok) throw new Error(t('errors.fetchFailed'))
-      const data = await response.json()
-      setReviews(data.reviews)
-      setTotalPages(data.pages)
-    } catch (error) {
-      console.error(t('errors.fetchFailed'), error)
-      toast.error(t('errors.fetchFailed'))
-    } finally {
-      setLoading(false)
-    }
-  }
+  // 使用 useInfiniteQuery 替代 useQuery
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: loading
+  } = useInfiniteQuery<ReviewData, Error>({
+    queryKey: ['reviews', modelId, sortBy] as const,
+    queryFn: ({ pageParam = 1 }) => reviewApi.getReviews(modelId, pageParam as number, sortBy),
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.pages > allPages.length ? allPages.length + 1 : undefined
+    },
+    initialPageParam: 1
+  })
 
-  // 修改 useEffect 使用 fetchReviews
+  // 合并所有页面的评论
+  const reviews = data?.pages.flatMap(page => page.reviews) ?? []
+
+  // 监听滚动到底部
   useEffect(() => {
-    let isSubscribed = true
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.5 }
+    )
 
-    const loadInitialReviews = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch(
-          `/api/models/${modelId}/reviews?page=${page}&sort=${sortBy}`
-        )
-        if (!response.ok) throw new Error(t('errors.fetchFailed'))
-        const data = await response.json()
-        
-        if (isSubscribed) {
-          setReviews(data.reviews)
-          setTotalPages(data.pages)
-        }
-      } catch (error) {
-        console.error(t('errors.fetchFailed'), error)
-        if (isSubscribed) {
-          toast.error(t('errors.fetchFailed'))
-        }
-      } finally {
-        if (isSubscribed) {
-          setLoading(false)
-        }
-      }
+    const reviewList = reviewListRef.current
+    if (reviewList) {
+      observer.observe(reviewList)
     }
-
-    loadInitialReviews()
 
     return () => {
-      isSubscribed = false
+      if (reviewList) {
+        observer.unobserve(reviewList)
+      }
     }
-  }, [modelId, page, sortBy])
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  // 修改点赞处理函数
-  const handleLike = async (reviewId: string) => {
-    if (!session) {
-      toast.error(t('errors.loginRequired'))
-      return
-    }
-
-    setIsLiking(reviewId)
-    try {
-      const response = await fetch(`/api/models/${modelId}/reviews/${reviewId}/like`, {
-        method: 'POST'
+  // 提交评论
+  const submitReviewMutation = useMutation({
+    mutationFn: (data: { content: string; rating: number }) => 
+      reviewApi.submitReview(modelId, data),
+    onSuccess: (newReview) => {
+      queryClient.setQueryData(['reviews', modelId, sortBy], (old: any) => {
+        if (!old?.pages?.length) return old
+        return {
+          ...old,
+          pages: [
+            {
+              ...old.pages[0],
+              reviews: [newReview, ...old.pages[0].reviews]
+            },
+            ...old.pages.slice(1)
+          ]
+        }
       })
-      if (!response.ok) throw new Error(t('errors.likeFailed'))
+      if (onReviewChange) onReviewChange(1)
+      toast.success(t('success.reviewSubmitted'))
+      setShowReviewForm(false)
+    },
+    onError: () => {
+      toast.error(t('errors.reviewFailed'))
+    },
+  })
+
+  // 删除评论
+  const deleteReviewMutation = useMutation({
+    mutationFn: (reviewId: string) => {
+      setIsDeleting(reviewId)
+      return reviewApi.deleteReview(modelId, reviewId)
+    },
+    onSuccess: (_, reviewId) => {
+      queryClient.setQueryData(['reviews', modelId, sortBy], (old: any) => {
+        if (!old?.pages?.length) return old
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            reviews: page.reviews.filter((review: Review) => review.id !== reviewId)
+          }))
+        }
+      })
+      if (onReviewChange) onReviewChange(-1)
+      toast.success(t('success.deleted'))
+      setShowDeleteConfirm(false)
+      setDeleteTarget(null)
+      setIsDeleting(null)
+    },
+    onError: () => {
+      toast.error(t('errors.deleteFailed'))
+      setShowDeleteConfirm(false)
+      setDeleteTarget(null)
+      setIsDeleting(null)
+    },
+  })
+
+  // 点赞评论
+  const likeReviewMutation = useMutation({
+    mutationFn: (reviewId: string) => {
+      setIsLiking(reviewId)
+      return reviewApi.likeReview(modelId, reviewId)
+    },
+    onMutate: async (reviewId) => {
+      await queryClient.cancelQueries({
+        queryKey: ['reviews', modelId, sortBy]
+      })
+      const previousReviews = queryClient.getQueryData(['reviews', modelId, sortBy])
       
-      setReviews(prev => prev.map(review => {
-        if (review.id === reviewId) {
-          const newIsLiked = !review.isLiked
-          return {
-            ...review,
-            isLiked: newIsLiked,
-            _count: {
-              ...review._count,
-              likedBy: review.isLiked 
-                ? review._count.likedBy - 1 
-                : review._count.likedBy + 1
-            }
-          }
+      queryClient.setQueryData(['reviews', modelId, sortBy], (old: any) => {
+        if (!old?.pages?.length) return old
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            reviews: page.reviews.map((review: Review) => {
+              if (review.id === reviewId) {
+                const newIsLiked = !review.isLiked
+                return {
+                  ...review,
+                  isLiked: newIsLiked,
+                  _count: {
+                    ...review._count,
+                    likedBy: review.isLiked ? review._count.likedBy - 1 : review._count.likedBy + 1
+                  }
+                }
+              }
+              return review
+            })
+          }))
         }
-        return review
-      }))
-
-      const data = await response.json()
-      toast.success(data.isLiked ? t('success.submitted') : t('success.deleted'))
-    } catch (error) {
-      toast.error(t('errors.likeFailed'))
-    } finally {
-      setIsLiking(null)
-    }
-  }
-
-  // 修改回复按钮点击处理
-  const handleReplyClick = (reviewId: string) => {
-    if (!session) {
-      toast.error(t('errors.loginRequired'))
-      router.push('/login')
-      return
-    }
-    setActiveReplyId(activeReplyId === reviewId ? null : reviewId)
-  }
-
-  // 处理回复提交
-  const handleReplySubmit = async (reviewId: string, content: string) => {
-    if (!session) {
-      toast.error(t('errors.loginRequired'))
-      router.push('/login')
-      return
-    }
-
-    if (!content.trim()) {
-      toast.error(t('errors.emptyContent'))
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/models/${modelId}/reviews/${reviewId}/replies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
       })
 
-      if (!response.ok) throw new Error(t('errors.replyFailed'))
+      return { previousReviews }
+    },
+    onError: (_, __, context: any) => {
+      queryClient.setQueryData(['reviews', modelId, sortBy], context.previousReviews)
+      toast.error(t('errors.likeFailed'))
+      setIsLiking(null)
+    },
+    onSuccess: (data) => {
+      toast.success(data.isLiked ? t('success.submitted') : t('success.deleted'))
+      setIsLiking(null)
+    },
+  })
 
-      const newReply = await response.json()
-      setReviews(prev => prev.map(review => {
-        if (review.id === reviewId) {
-          return {
-            ...review,
-            replies: [...review.replies, newReply]
-          }
-        }
-        return review
-      }))
+  // 提交回复
+  const submitReplyMutation = useMutation({
+    mutationFn: ({ reviewId, content }: { reviewId: string; content: string }) => {
       setActiveReplyId(null)
+      return reviewApi.submitReply(modelId, reviewId, content)
+    },
+    onSuccess: (newReply, { reviewId }) => {
+      queryClient.setQueryData(['reviews', modelId, sortBy], (old: any) => {
+        if (!old?.pages?.length) return old
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            reviews: page.reviews.map((review: Review) => {
+              if (review.id === reviewId) {
+                return {
+                  ...review,
+                  replies: [...review.replies, newReply]
+                }
+              }
+              return review
+            })
+          }))
+        }
+      })
       toast.success(t('success.replySubmitted'))
-    } catch (error) {
-      console.error(t('errors.replyFailed'), error)
+    },
+    onError: () => {
       toast.error(t('errors.replyFailed'))
-    }
-  }
+      setActiveReplyId(null)
+    },
+  })
 
-  // 修改评价提交处理函数
+  // 删除回复
+  const deleteReplyMutation = useMutation({
+    mutationFn: ({ reviewId, replyId }: { reviewId: string; replyId: string }) => {
+      setIsDeleting(replyId)
+      return reviewApi.deleteReply(modelId, reviewId, replyId)
+    },
+    onSuccess: (_, { reviewId, replyId }) => {
+      queryClient.setQueryData(['reviews', modelId, sortBy], (old: any) => {
+        if (!old?.pages?.length) return old
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            reviews: page.reviews.map((review: Review) => {
+              if (review.id === reviewId) {
+                return {
+                  ...review,
+                  replies: review.replies.filter(reply => reply.id !== replyId)
+                }
+              }
+              return review
+            })
+          }))
+        }
+      })
+      toast.success(t('success.deleted'))
+      setShowDeleteConfirm(false)
+      setDeleteTarget(null)
+      setIsDeleting(null)
+    },
+    onError: () => {
+      toast.error(t('errors.deleteFailed'))
+      setShowDeleteConfirm(false)
+      setDeleteTarget(null)
+      setIsDeleting(null)
+    },
+  })
+
   const handleReviewSubmit = async (content: string, rating: number) => {
     if (!session) {
       toast.error(t('errors.loginRequired'))
@@ -400,76 +525,42 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
       return
     }
 
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/models/${modelId}/reviews`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, rating }),
-      })
+    submitReviewMutation.mutate({ content, rating })
+  }
 
-      if (!response.ok) throw new Error(t('errors.reviewFailed'))
-
-      const newReview = await response.json()
-      setReviews(prev => [newReview, ...prev])
-      if (onReviewChange) onReviewChange(1)
-      toast.success(t('success.reviewSubmitted'))
-    } catch (error) {
-      console.error(t('errors.reviewFailed'), error)
-      toast.error(t('errors.reviewFailed'))
-    } finally {
-      setLoading(false)
+  const handleLike = async (reviewId: string) => {
+    if (!session) {
+      toast.error(t('errors.loginRequired'))
+      return
     }
+    likeReviewMutation.mutate(reviewId)
   }
 
-  // 修改删除评论的处理函数
-  const handleDeleteReview = async (reviewId: string) => {
-    setDeleteTarget({ type: 'review', reviewId })
-    setShowDeleteConfirm(true)
+  const handleReplySubmit = async (reviewId: string, content: string) => {
+    if (!session) {
+      toast.error(t('errors.loginRequired'))
+      router.push('/login')
+      return
+    }
+
+    if (!content.trim()) {
+      toast.error(t('errors.emptyContent'))
+      return
+    }
+
+    submitReplyMutation.mutate({ reviewId, content })
   }
 
-  // 修改删除回复的处理函数
-  const handleDeleteReply = async (reviewId: string, replyId: string) => {
-    setDeleteTarget({ type: 'reply', reviewId, replyId })
-    setShowDeleteConfirm(true)
-  }
-
-  // 添加确认删除的处理函数
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
 
-    setIsDeleting(deleteTarget.reviewId)
-    try {
-      const endpoint = deleteTarget.type === 'reply'
-        ? `/api/models/${modelId}/reviews/${deleteTarget.reviewId}/replies/${deleteTarget.replyId}`
-        : `/api/models/${modelId}/reviews/${deleteTarget.reviewId}`
-
-      const response = await fetch(endpoint, { method: 'DELETE' })
-      if (!response.ok) throw new Error(t('errors.deleteFailed'))
-
-      if (deleteTarget.type === 'review') {
-        setReviews(prev => prev.filter(review => review.id !== deleteTarget.reviewId))
-        if (onReviewChange) onReviewChange(-1)
-      } else {
-        setReviews(prev => prev.map(review => {
-          if (review.id === deleteTarget.reviewId) {
-            return {
-              ...review,
-              replies: review.replies.filter(reply => reply.id !== deleteTarget.replyId)
-            }
-          }
-          return review
-        }))
-      }
-
-      toast.success(t('success.deleted'))
-    } catch (error) {
-      console.error(t('errors.deleteFailed'), error)
-      toast.error(t('errors.deleteFailed'))
-    } finally {
-      setIsDeleting(null)
-      setShowDeleteConfirm(false)
-      setDeleteTarget(null)
+    if (deleteTarget.type === 'review') {
+      deleteReviewMutation.mutate(deleteTarget.reviewId)
+    } else if (deleteTarget.replyId) {
+      deleteReplyMutation.mutate({
+        reviewId: deleteTarget.reviewId,
+        replyId: deleteTarget.replyId,
+      })
     }
   }
 
@@ -477,6 +568,25 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
   const ReviewCard = ({ review }: { review: Review }) => {
     const dateFormat = locale === 'zh' ? 'yyyy年MM月dd日 HH:mm:ss' : (locale === 'ja' ? 'yyyy/MM/dd HH:mm:ss' : 'MMM d, yyyy HH:mm:ss');
     const replyDateFormat = locale === 'zh' ? 'yyyy年MM月dd日 HH:mm:ss' : (locale === 'ja' ? 'yyyy/MM/dd HH:mm:ss' : 'MMM d, yyyy HH:mm:ss');
+
+    const handleDeleteReview = (reviewId: string) => {
+      setDeleteTarget({ type: 'review', reviewId })
+      setShowDeleteConfirm(true)
+    }
+
+    const handleDeleteReply = (reviewId: string, replyId: string) => {
+      setDeleteTarget({ type: 'reply', reviewId, replyId })
+      setShowDeleteConfirm(true)
+    }
+
+    const handleReplyClick = (reviewId: string) => {
+      if (!session) {
+        toast.error(t('errors.loginRequired'))
+        router.push('/login')
+        return
+      }
+      setActiveReplyId(activeReplyId === reviewId ? null : reviewId)
+    }
 
     return (
       <motion.div
@@ -700,8 +810,11 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
           <select
             value={sortBy}
             onChange={(e) => {
-              setSortBy(e.target.value as typeof sortBy)
-              fetchReviews(1, e.target.value as typeof sortBy)
+              const newSortBy = e.target.value as typeof sortBy
+              setSortBy(newSortBy)
+              queryClient.invalidateQueries({
+                queryKey: ['reviews', modelId]
+              })
             }}
             className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white"
           >
@@ -709,9 +822,6 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
             <option value="rating">{t('sort.rating')}</option>
             <option value="likes">{t('sort.likes')}</option>
           </select>
-        </div>
-        <div className="text-sm text-gray-500">
-          {reviews.length > 0 && t('totalReviews', { count: reviews.length })}
         </div>
       </div>
 
@@ -726,7 +836,7 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
       {/* 评价列表 */}
       {!loading && (
         <div className="flex-1 overflow-y-auto px-4">
-          <div className="py-4 space-y-4">
+          <div className="py-4 space-y-4" ref={reviewListRef}>
             <AnimatePresence>
               {reviews.map((review) => (
                 <ReviewCard key={review.id} review={review} />
@@ -741,30 +851,14 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
                 <p>{t('noReviews')}</p>
               </div>
             )}
-          </div>
-        </div>
-      )}
 
-      {/* 分页 */}
-      {totalPages > 1 && (
-        <div className="flex justify-center space-x-2 p-4 border-t flex-shrink-0 bg-white">
-          {Array.from({ length: totalPages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setPage(i + 1)
-                fetchReviews(i + 1)
-              }}
-              className={`w-8 h-8 rounded-lg ${
-                page === i + 1
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              } transition-colors`}
-              title={t('pagination.page', { page: i + 1 })}
-            >
-              {i + 1}
-            </button>
-          ))}
+            {/* 加载更多的loading状态 */}
+            {isFetchingNextPage && (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

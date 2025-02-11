@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useCallback, useState, useRef } from 'react'
+import React, { useCallback, useState, useRef, useReducer, useMemo } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { formatFileSize } from '@/lib/format'
 import { useTranslations } from 'next-intl'
+import { useMutation } from '@tanstack/react-query'
 
 interface FileInfo {
   file: File
@@ -30,13 +31,103 @@ interface ModelUploaderProps {
   onUploadSuccess?: () => void;
 }
 
+// 状态类型定义
+interface UploadState {
+  uploading: boolean
+  selectedFile: FileInfo | null
+}
+
+// Action 类型定义
+type UploadAction =
+  | { type: 'SET_UPLOADING'; payload: boolean }
+  | { type: 'SET_SELECTED_FILE'; payload: FileInfo | null }
+  | { type: 'UPDATE_SELECTED_FILE'; payload: Partial<FileInfo> }
+  | { type: 'ADD_TEXTURES'; payload: File[] }
+  | { type: 'REMOVE_TEXTURE'; payload: number }
+  | { type: 'RESET' }
+
+// 初始状态
+const initialState: UploadState = {
+  uploading: false,
+  selectedFile: null
+}
+
+// Reducer 函数
+function uploadReducer(state: UploadState, action: UploadAction): UploadState {
+  switch (action.type) {
+    case 'SET_UPLOADING':
+      return { ...state, uploading: action.payload }
+    case 'SET_SELECTED_FILE':
+      return { ...state, selectedFile: action.payload }
+    case 'UPDATE_SELECTED_FILE':
+      return state.selectedFile
+        ? { ...state, selectedFile: { ...state.selectedFile, ...action.payload } }
+        : state
+    case 'ADD_TEXTURES':
+      return state.selectedFile
+        ? {
+            ...state,
+            selectedFile: {
+              ...state.selectedFile,
+              textures: [...state.selectedFile.textures, ...action.payload]
+            }
+          }
+        : state
+    case 'REMOVE_TEXTURE':
+      return state.selectedFile
+        ? {
+            ...state,
+            selectedFile: {
+              ...state.selectedFile,
+              textures: state.selectedFile.textures.filter((_, i) => i !== action.payload)
+            }
+          }
+        : state
+    case 'RESET':
+      return initialState
+    default:
+      return state
+  }
+}
+
 export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
-  const [uploading, setUploading] = useState(false)
-  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null)
+  const [state, dispatch] = useReducer(uploadReducer, initialState)
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const directoryInputRef = useRef<HTMLInputElement>(null)
   const t = useTranslations('ModelUploader')
+
+  // 使用 react-query 管理上传操作
+  const uploadMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await fetch('/api/upload/model', {
+        method: 'POST',
+        body: formData,
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || t('uploadFailed'))
+      }
+      return response.json()
+    },
+    onMutate: () => {
+      dispatch({ type: 'SET_UPLOADING', payload: true })
+    },
+    onSuccess: () => {
+      toast.success(t('uploadSuccess'))
+      onUploadSuccess?.()
+      formRef.current?.reset()
+      dispatch({ type: 'RESET' })
+      router.refresh()
+    },
+    onError: (error) => {
+      console.error('上传错误:', error)
+      toast.error(error instanceof Error ? error.message : t('uploadFailed'))
+    },
+    onSettled: () => {
+      dispatch({ type: 'SET_UPLOADING', payload: false })
+    }
+  })
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return
@@ -47,12 +138,15 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
       return
     }
 
-    setSelectedFile({
-      file,
-      name: file.name.replace(/\.[^/.]+$/, ''),
-      description: '',
-      isPublic: true,
-      textures: []
+    dispatch({
+      type: 'SET_SELECTED_FILE',
+      payload: {
+        file,
+        name: file.name.replace(/\.[^/.]+$/, ''),
+        description: '',
+        isPublic: true,
+        textures: []
+      }
     })
   }, [t])
 
@@ -238,89 +332,58 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
     const allFiles = Array.from(files)
     const fileTree = buildFileTree(allFiles)
 
-    setSelectedFile({
-      file: gltfFile,
-      name: mainFileName,
-      description: '',
-      isPublic: true,
-      textures: [],
-      gltfFiles: allFiles,
-      fileTree: fileTree
+    dispatch({
+      type: 'SET_SELECTED_FILE',
+      payload: {
+        file: gltfFile,
+        name: mainFileName,
+        description: '',
+        isPublic: true,
+        textures: [],
+        gltfFiles: allFiles,
+        fileTree: fileTree
+      }
     })
   }
 
-  const handleTextureUpload = (files: FileList | null) => {
-    if (!files || !selectedFile) return
-    
-    const newTextures = Array.from(files)
-    setSelectedFile({
-      ...selectedFile,
-      textures: [...selectedFile.textures, ...newTextures]
-    })
-  }
+  const handleTextureUpload = useCallback((files: FileList | null) => {
+    if (!files || !state.selectedFile) return
+    dispatch({ type: 'ADD_TEXTURES', payload: Array.from(files) })
+  }, [state.selectedFile])
 
-  const removeTexture = (index: number) => {
-    if (!selectedFile) return
-    setSelectedFile({
-      ...selectedFile,
-      textures: selectedFile.textures.filter((_, i) => i !== index)
-    })
-  }
+  const removeTexture = useCallback((index: number) => {
+    dispatch({ type: 'REMOVE_TEXTURE', payload: index })
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!selectedFile) return
+    if (!state.selectedFile) return
 
-    setUploading(true)
-    try {
-      const texturesSize = selectedFile.textures.reduce((sum, texture) => sum + texture.size, 0) + 
-        (selectedFile.gltfFiles?.reduce((sum, file) => {
-          // 排除主 GLTF 文件
-          if (file.name.toLowerCase().endsWith('.gltf')) {
-            return sum
-          }
-          return sum + file.size
-        }, 0) || 0)
+    const formData = new FormData()
+    formData.append('model', state.selectedFile.file)
+    formData.append('name', state.selectedFile.name)
+    formData.append('description', state.selectedFile.description)
+    formData.append('isPublic', String(state.selectedFile.isPublic))
 
-      const formData = new FormData()
-      formData.append('model', selectedFile.file)
-      formData.append('name', selectedFile.name)
-      formData.append('description', selectedFile.description)
-      formData.append('isPublic', String(selectedFile.isPublic))
-      formData.append('texturesSize', String(texturesSize))
-      
-      selectedFile.textures.forEach((texture, index) => {
-        formData.append(`texture_${index}`, texture)
+    const texturesSize = state.selectedFile.textures.reduce((sum, texture) => sum + texture.size, 0) + 
+      (state.selectedFile.gltfFiles?.reduce((sum, file) => {
+        if (file.name.toLowerCase().endsWith('.gltf')) return sum
+        return sum + file.size
+      }, 0) || 0)
+    
+    formData.append('texturesSize', String(texturesSize))
+    
+    state.selectedFile.textures.forEach((texture, index) => {
+      formData.append(`texture_${index}`, texture)
+    })
+    
+    if (state.selectedFile.gltfFiles) {
+      state.selectedFile.gltfFiles.forEach((file, index) => {
+        formData.append(`gltf_${index}`, file)
       })
-      
-      if (selectedFile.gltfFiles) {
-        selectedFile.gltfFiles.forEach((file, index) => {
-          formData.append(`gltf_${index}`, file)
-        })
-      }
-
-      const uploadResponse = await fetch('/api/upload/model', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json()
-        throw new Error(errorData.error || t('uploadFailed'))
-      }
-
-      toast.success(t('uploadSuccess'))
-      onUploadSuccess?.()
-      formRef.current?.reset()
-      setSelectedFile(null)
-      router.refresh()
-
-    } catch (error) {
-      console.error('上传错误:', error)
-      toast.error(error instanceof Error ? error.message : t('uploadFailed'))
-    } finally {
-      setUploading(false)
     }
+
+    uploadMutation.mutate(formData)
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -333,10 +396,63 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
     multiple: false,
   })
 
-  const isDaeFile = selectedFile?.file.name.toLowerCase().endsWith('.dae') ?? false
-  const isGltfFile = selectedFile?.file.name.toLowerCase().endsWith('.gltf') ?? false
+  // 使用 useMemo 缓存文件类型检查
+  const isValidFileType = useMemo(() => {
+    const validTypes = new Set(['.glb', '.dae', '.gltf', '.fbx', '.obj'])
+    return (fileName: string) => {
+      const ext = fileName.toLowerCase().slice(fileName.lastIndexOf('.'))
+      return validTypes.has(ext)
+    }
+  }, [])
 
-  if (selectedFile) {
+  // 使用 useMemo 缓存文件大小限制
+  const FILE_SIZE_LIMIT = useMemo(() => 1024 * 1024 * 100, []) // 100MB
+
+  // 使用 useMemo 缓存拖放配置
+  const dropzoneConfig = useMemo(() => ({
+    onDrop,
+    accept: {
+      'model/gltf-binary': ['.glb'],
+      'model/collada+xml': ['.dae'],
+    },
+    maxFiles: 1,
+    multiple: false,
+  }), [onDrop])
+
+  // 使用 useMemo 缓存文件扩展名检查
+  const { isDaeFile, isGltfFile } = useMemo(() => ({
+    isDaeFile: state.selectedFile?.file.name.toLowerCase().endsWith('.dae') ?? false,
+    isGltfFile: state.selectedFile?.file.name.toLowerCase().endsWith('.gltf') ?? false
+  }), [state.selectedFile?.file.name])
+
+  // 使用 useCallback 优化事件处理函数
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: 'UPDATE_SELECTED_FILE',
+      payload: { name: e.target.value }
+    })
+  }, [])
+
+  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    dispatch({
+      type: 'UPDATE_SELECTED_FILE',
+      payload: { description: e.target.value }
+    })
+  }, [])
+
+  const handleIsPublicChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: 'UPDATE_SELECTED_FILE',
+      payload: { isPublic: e.target.checked }
+    })
+  }, [])
+
+  const handleCancel = useCallback(() => {
+    formRef.current?.reset()
+    dispatch({ type: 'RESET' })
+  }, [])
+
+  if (state.selectedFile) {
     return (
       <>
         {/* 相关文件区域 - 只在GLTF文件时显示 */}
@@ -347,9 +463,9 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
                 <h3 className="text-sm font-medium text-gray-700">{t('relatedFiles')}</h3>
               </div>
               <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-2">
-                {selectedFile?.fileTree ? (
+                {state.selectedFile?.fileTree ? (
                   <FileTreeView 
-                    node={selectedFile.fileTree}
+                    node={state.selectedFile.fileTree}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-gray-500">
@@ -373,11 +489,8 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
               </label>
               <input
                 type="text"
-                value={selectedFile.name}
-                onChange={(e) => setSelectedFile(selectedFile && {
-                  ...selectedFile,
-                  name: e.target.value
-                })}
+                value={state.selectedFile.name}
+                onChange={handleNameChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -388,11 +501,8 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
                 {t('description')}
               </label>
               <textarea
-                value={selectedFile.description}
-                onChange={(e) => setSelectedFile(selectedFile && {
-                  ...selectedFile,
-                  description: e.target.value
-                })}
+                value={state.selectedFile.description}
+                onChange={handleDescriptionChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={3}
               />
@@ -406,9 +516,9 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">{selectedFile.file.name}</p>
+                  <p className="text-sm font-medium text-gray-700">{state.selectedFile.file.name}</p>
                   <p className="text-xs text-gray-500">
-                    {formatFileSize(selectedFile.file.size)}
+                    {formatFileSize(state.selectedFile.file.size)}
                   </p>
                 </div>
               </div>
@@ -433,9 +543,9 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
                       hover:file:bg-blue-100"
                   />
                 </div>
-                {selectedFile.textures.length > 0 && (
+                {state.selectedFile.textures.length > 0 && (
                   <div className="space-y-2">
-                    {selectedFile.textures.map((texture: File, index: number) => (
+                    {state.selectedFile.textures.map((texture: File, index: number) => (
                       <div 
                         key={index}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
@@ -473,11 +583,8 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
               <input
                 type="checkbox"
                 id="isPublic"
-                checked={selectedFile.isPublic}
-                onChange={(e) => setSelectedFile(selectedFile && {
-                  ...selectedFile,
-                  isPublic: e.target.checked
-                })}
+                checked={state.selectedFile.isPublic}
+                onChange={handleIsPublicChange}
                 className="h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor="isPublic" className="ml-2 text-sm text-gray-700">
@@ -488,21 +595,18 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
             <div className="flex justify-end gap-4">
               <button
                 type="button"
-                onClick={() => {
-                  formRef.current?.reset()
-                  setSelectedFile(null)
-                }}
+                onClick={handleCancel}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                disabled={uploading}
+                disabled={state.uploading}
               >
                 {t('cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                disabled={uploading}
+                disabled={state.uploading}
               >
-                {uploading ? t('uploading') : t('upload')}
+                {state.uploading ? t('uploading') : t('upload')}
               </button>
             </div>
           </form>

@@ -9,20 +9,25 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import AuthProvider from '@/components/providers/AuthProvider'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
+import { getMessages, getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
+import { QueryProvider } from '@/components/providers/QueryProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: '魔抖',
-  description: '在线预览和分享3D模型',
-  icons: {
-    icon: '/metadata/icon.ico',
-    shortcut: '/metadata/icon.ico',
-    apple: '/metadata/apple-icon.png',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Metadata')
+  
+  return {
+    title: t('title'),
+    description: t('description'),
+    icons: {
+      icon: '/metadata/icon.ico',
+      shortcut: '/metadata/icon.ico',
+      apple: '/metadata/apple-icon.png',
+    },
+  }
 }
 
 export default async function RootLayout({
@@ -48,14 +53,16 @@ export default async function RootLayout({
       <body className={inter.className}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider session={session}>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-grow">
-                {children}
-              </main>
-              <Footer />
-            </div>
-            <Toaster />
+            <QueryProvider>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-grow">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <Toaster />
+            </QueryProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>
