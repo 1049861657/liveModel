@@ -40,5 +40,5 @@ next-env.d.ts
 .idea/ 
 
 # cursor
-.cursorrules
+.cursor/
 
