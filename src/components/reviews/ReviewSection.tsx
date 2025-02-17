@@ -152,13 +152,11 @@ ReviewForm.displayName = 'ReviewForm'
 
 // 1. 首先定义一个独立的回复框组件
 const ReplyBox = memo(({ 
-  reviewId, 
   onSubmit, 
   onCancel 
 }: { 
-  reviewId: string
   onSubmit: (content: string) => Promise<void>
-  onCancel: () => void
+  onCancel: () => void 
 }) => {
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -701,7 +699,6 @@ export default function ReviewSection({ modelId, onReviewChange }: ReviewSection
         <AnimatePresence>
           {activeReplyId === review.id && (
             <ReplyBox
-              reviewId={review.id}
               onSubmit={async (content) => {
                 await handleReplySubmit(review.id, content)
               }}

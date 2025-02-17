@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 
 // 添加或取消收藏
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -83,7 +83,7 @@ export async function POST(
 
 // 获取收藏状态
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {

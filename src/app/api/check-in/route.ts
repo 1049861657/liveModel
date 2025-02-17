@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getTodayStart, getUTCDayStart, createUTCDate } from '@/lib/date'
+import { getTodayStart, getUTCDayStart} from '@/lib/date'
 
 // 定义积分规则常量
 const POINTS_CONFIG = {
@@ -128,7 +128,7 @@ export async function POST() {
     const totalPoints = basePoints + monthlyBonus
 
     // 创建签到记录（使用UTC时间）
-    const checkIn = await prisma.checkIn.create({
+    await prisma.checkIn.create({
       data: {
         userId: session.user.id,
         points: totalPoints,

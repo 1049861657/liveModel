@@ -10,7 +10,7 @@ export const runtime = 'nodejs'
 export const maxDuration = 300 // 5分钟超时
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {

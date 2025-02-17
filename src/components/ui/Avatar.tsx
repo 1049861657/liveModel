@@ -34,6 +34,7 @@ function Avatar({ user, size = 'md', className }: AvatarProps) {
         setImageLoaded(false)
       }
     }
+    return () => {}
   }, [avatarUrl])
   
   if (avatarUrl) {

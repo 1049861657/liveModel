@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { type ExtendedModel } from '@/types/model'
 import ModelCard from '@/components/model/ModelCard'
 import { useSearchParams } from 'next/navigation'

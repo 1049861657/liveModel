@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'motion/react'
 import { toast } from 'react-hot-toast'
 import { useTranslations } from 'next-intl'
-import chatService, { ChatMessage } from '@/services/ChatService'
+import chatService, { type ChatMessage } from '@/services/ChatService'
 import Avatar from '@/components/ui/Avatar'
 import { formatMessageTime } from '@/lib/date'
 
@@ -19,7 +19,6 @@ export default function ChatPage() {
   const { data: session } = useSession()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
-  const [loading, setLoading] = useState(false)
   const [autoScroll, setAutoScroll] = useState(true)
   const [showWelcome, setShowWelcome] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -28,7 +27,7 @@ export default function ChatPage() {
   const t = useTranslations('ChatPage')
 
   // 检查是否可以发送消息
-  const canSendMessage = newMessage.trim().length > 0 && !loading;
+  const canSendMessage = newMessage.trim().length > 0;
 
   // 对消息进行时间分组
   const timeGroups = useMemo(() => {
@@ -311,7 +310,6 @@ export default function ChatPage() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder={t('input.placeholder')}
                     className="flex-1 rounded-xl border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-                    disabled={loading}
                   />
                   <button
                     type="submit"

@@ -3,7 +3,7 @@
 import { useCallback, useReducer, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
-import { useQuery, useMutation, UseQueryResult, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, type UseQueryResult, useQueryClient } from '@tanstack/react-query'
 import CheckInAnimation from './CheckInAnimation'
 import { useTranslations } from 'next-intl'
 
@@ -66,10 +66,6 @@ interface CheckInResponse {
   points: number
 }
 
-interface CheckInMutationResponse {
-  totalPoints: number
-  points: number
-}
 
 export default function CheckInButton({ onCheckIn }: CheckInButtonProps) {
   const { data: session } = useSession()
@@ -114,8 +110,6 @@ export default function CheckInButton({ onCheckIn }: CheckInButtonProps) {
   // 使用 react-query 管理签到操作
   const { 
     mutate, 
-    isSuccess: isMutationSuccess, 
-    data: mutationData, 
     error: mutationError, 
     isError: isMutationError,
     isPending: isMutationPending 

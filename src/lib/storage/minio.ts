@@ -1,5 +1,5 @@
 import { Client as MinioClient } from 'minio';
-import { StorageProvider, PutResult, ListOptions, ListResult } from './types';
+import { type StorageProvider, type PutResult, type ListOptions, type ListResult } from './types';
 
 interface MinioConfig {
   endPoint: string;

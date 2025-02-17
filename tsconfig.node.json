@@ -1,15 +1,32 @@
 {
+  "extends": "./tsconfig.json",  // 继承主项目配置
+  
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2017",
+    // 覆盖主项目的模块相关配置
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    
+    // 覆盖运行环境相关
     "lib": ["es2017"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    
+    // 覆盖输出相关（因为主项目是 noEmit: true）
+    "noEmit": false,
+    "outDir": "./dist",
+    "sourceMap": true,
+    
+    // 移除主项目的 Next.js 插件
+    "plugins": []
   },
-  "include": ["scripts/**/*"],
-  "exclude": ["node_modules"]
-} 
+  
+  // Node 脚本特定的文件范围
+  "include": [
+    "scripts/**/*",
+    "scripts/**/*.json"
+  ],
+  
+  // 保持简单的排除规则
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts"
+  ]
+}

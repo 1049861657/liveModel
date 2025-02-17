@@ -4,37 +4,6 @@ import PreviewGlbScene from '@/components/preview/PreviewGlbScene'
 import PreviewDaeScene from '@/components/preview/PreviewDaeScene'
 import PreviewGltfScene from '@/components/preview/PreviewGltfScene'
 
-async function getModelData(id: string) {
-  try {
-    const model = await prisma.model.findUnique({
-      where: { id },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            avatar: {
-              select: {
-                url: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    if (!model) {
-      return null
-    }
-
-    return model
-  } catch (error) {
-    console.error('获取模型数据失败:', error)
-    return null
-  }
-}
-
 export default async function PreviewPage({ 
   params,
   searchParams

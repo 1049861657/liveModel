@@ -1,4 +1,4 @@
-import { StorageProvider } from './storage/types';
+import { type StorageProvider } from './storage/types';
 import { AliyunStorage } from './storage/aliyun';
 import { MinioStorage } from './storage/minio';
 

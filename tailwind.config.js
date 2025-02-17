@@ -2,11 +2,12 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}', // 这一条就足够了，因为通常所有代码都在 src 下
   ],
+  future: {
+    hoverOnlyWhenSupported: true, // 优化移动端体验
+    respectDefaultRingColorOpacity: true, // 更好的 focus 样式
+  },
   theme: {
     extend: {
       animation: {

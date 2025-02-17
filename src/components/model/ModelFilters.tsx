@@ -42,7 +42,7 @@ export default function ModelFilters() {
   const searchParams = useSearchParams()
   const { data: session } = useSession()
   const t = useTranslations('ModelFilters')
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   // 本地状态管理
   const [localFilters, setLocalFilters] = useState<FilterState>({
@@ -137,10 +137,6 @@ export default function ModelFilters() {
   const handleOwnerChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     updateFilters({ owner: e.target.value })
   }, [updateFilters])
-
-  const toggleFavorites = useCallback(() => {
-    updateFilters({ favorites: !localFilters.favorites })
-  }, [updateFilters, localFilters.favorites])
 
   return (
     <div className="flex flex-col gap-4">

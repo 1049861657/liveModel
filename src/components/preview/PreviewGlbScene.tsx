@@ -1,20 +1,14 @@
 'use client'
 
-import React, { Suspense, useState, useRef, useCallback, useLayoutEffect, useEffect, useMemo } from 'react'
-import dynamic from 'next/dynamic'
+import { Suspense, useState, useRef, useCallback, useLayoutEffect, useEffect, useMemo } from 'react'
 import { OrbitControls, Environment, useGLTF, useAnimations } from '@react-three/drei'
 import { Group, AnimationClip, Box3, Vector3 } from 'three'
 import * as THREE from 'three'
-import { Link } from '@/i18n/routing';
+import { Link } from '@/i18n/routing'
 import * as Select from '@radix-ui/react-select'
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@radix-ui/react-icons'
 import { useTranslations } from 'next-intl'
-
-// 动态导入 Canvas 以避免 SSR 问题
-const Canvas = dynamic(
-  () => import('@react-three/fiber').then((mod) => mod.Canvas),
-  { ssr: false }
-)
+import { Canvas } from '@react-three/fiber'
 
 // 动画模型组件
 function AnimatedModel({ 

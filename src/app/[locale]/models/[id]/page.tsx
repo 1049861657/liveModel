@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
 import { motion } from 'motion/react'
 import ReviewSection from '@/components/reviews/ReviewSection'
 
@@ -25,7 +24,6 @@ interface ModelDetails {
 export default function ModelDetailPage({ params }: { params: { id: string } }) {
   const [model, setModel] = useState<ModelDetails | null>(null)
   const [activeTab, setActiveTab] = useState<'preview' | 'reviews'>('preview')
-  const { data: session } = useSession()
 
   useEffect(() => {
     fetchModelDetails()

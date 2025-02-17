@@ -85,6 +85,7 @@ export async function POST(request: Request) {
           fileSize: textureFile.size
         }
       }
+      return null // 如果不是 Blob 类型，返回 null
     })
 
     // 等待所有贴图上传完成
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
         const daeContent = await storageClient.get(daeFilePath)
         
         // 更新贴图引用
-        const updatedContent = await updateDaeTextureReferences(daeContent.content.toString('utf8'), textureInfos.filter(Boolean) as TextureInfo[], model.componentName)
+        const updatedContent = await updateDaeTextureReferences(daeContent.content.toString('utf8'), textureInfos.filter(Boolean) as TextureInfo[])
         
         // 将更新后的内容重新上传到存储服务
         await storageClient.put(daeFilePath, Buffer.from(updatedContent))
@@ -146,8 +147,7 @@ interface TextureInfo {
 // 更新DAE文件中的贴图引用
 async function updateDaeTextureReferences(
   daeContent: string, 
-  textures: TextureInfo[], 
-  componentName: string
+  textures: TextureInfo[]
 ): Promise<string> {
   try {
     // 为每个贴图创建映射关系
@@ -164,7 +164,7 @@ async function updateDaeTextureReferences(
     // 替换所有贴图引用
     return daeContent.replace(
       /<init_from>\.(\/)?([^<]+)<\/init_from>/g,
-      (match: string, slash: string | undefined, fileName: string) => {
+      (match: string, _: string | undefined, fileName: string) => {
         // 获取原始文件名
         const originalName = path.basename(fileName)
         // 查找新的路径

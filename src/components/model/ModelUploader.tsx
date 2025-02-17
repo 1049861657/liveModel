@@ -129,10 +129,34 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
     }
   })
 
+  // 使用 useMemo 缓存文件类型检查
+  const isValidFileType = useMemo(() => {
+    const validTypes = new Set(['.glb', '.dae', '.gltf', '.fbx', '.obj'])
+    return (fileName: string) => {
+      const ext = fileName.toLowerCase().slice(fileName.lastIndexOf('.'))
+      return validTypes.has(ext)
+    }
+  }, [])
+
+  // 使用 useMemo 缓存文件大小限制
+  const FILE_SIZE_LIMIT = useMemo(() => 1024 * 1024 * 100, []) // 100MB
+
+  // 使用 useMemo 缓存拖放配置
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return
     const file = acceptedFiles[0]
     
+    // 添加文件类型和大小验证
+    if (!isValidFileType(file.name)) {
+      toast.error(t('invalidFileType'))
+      return
+    }
+
+    if (file.size > FILE_SIZE_LIMIT) {
+      toast.error(t('fileTooLarge', { size: formatFileSize(FILE_SIZE_LIMIT) }))
+      return
+    }
+
     if (file.name.toLowerCase().endsWith('.gltf')) {
       toast.error(t('gltfUploadError'))
       return
@@ -148,7 +172,19 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
         textures: []
       }
     })
-  }, [t])
+  }, [t, isValidFileType, FILE_SIZE_LIMIT])
+
+  const dropzoneConfig = useMemo(() => ({
+    onDrop,
+    accept: {
+      'model/gltf-binary': ['.glb'],
+      'model/collada+xml': ['.dae'],
+    },
+    maxFiles: 1,
+    multiple: false,
+  }), [onDrop])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone(dropzoneConfig)
 
   const buildFileTree = (files: File[]): FileTreeNode => {
     const root: FileTreeNode = {
@@ -385,39 +421,6 @@ export default function ModelUploader({ onUploadSuccess }: ModelUploaderProps) {
 
     uploadMutation.mutate(formData)
   }
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'model/gltf-binary': ['.glb'],
-      'model/collada+xml': ['.dae'],
-    },
-    maxFiles: 1,
-    multiple: false,
-  })
-
-  // 使用 useMemo 缓存文件类型检查
-  const isValidFileType = useMemo(() => {
-    const validTypes = new Set(['.glb', '.dae', '.gltf', '.fbx', '.obj'])
-    return (fileName: string) => {
-      const ext = fileName.toLowerCase().slice(fileName.lastIndexOf('.'))
-      return validTypes.has(ext)
-    }
-  }, [])
-
-  // 使用 useMemo 缓存文件大小限制
-  const FILE_SIZE_LIMIT = useMemo(() => 1024 * 1024 * 100, []) // 100MB
-
-  // 使用 useMemo 缓存拖放配置
-  const dropzoneConfig = useMemo(() => ({
-    onDrop,
-    accept: {
-      'model/gltf-binary': ['.glb'],
-      'model/collada+xml': ['.dae'],
-    },
-    maxFiles: 1,
-    multiple: false,
-  }), [onDrop])
 
   // 使用 useMemo 缓存文件扩展名检查
   const { isDaeFile, isGltfFile } = useMemo(() => ({

@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useCallback, useLayoutEffect, useMemo } fr
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
-import { ColladaLoader,Collada } from 'three/examples/jsm/loaders/ColladaLoader.js'
-import smdParser, {AnimationInfo, BoneData, Frame } from '@/utils/smdParser'
+import { ColladaLoader,type Collada } from 'three/examples/jsm/loaders/ColladaLoader.js'
+import smdParser, {type AnimationInfo, type BoneData, type Frame } from '@/utils/smdParser'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { toast } from 'react-hot-toast'
 import { Link } from '@/i18n/routing';
@@ -92,20 +92,14 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [textureErrors, setTextureErrors] = useState<string[]>([])
 
-  // 添加新的状态
-  const [currentAnimation, setCurrentAnimation] = useState<string>('')
-  const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
-
   // 在加载模型时设置可用动画
   useEffect(() => {
     if (builtInAnimations.length > 0) {
-      const names = builtInAnimations.map(clip => clip.name)
-      setAvailableAnimations(names)
-      if (names.length > 0) {
-        setCurrentAnimation(names[0])
+      if (currentAction) {
+        currentAction.play()
       }
     }
-  }, [builtInAnimations])
+  }, [builtInAnimations, currentAction])
 
   // 初始化 LoadingManager
   useEffect(() => {
@@ -452,20 +446,6 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
       }
     }
   }, [model, selectedAnimation, builtInAnimations])
-
-  // 重置姿势
-  const resetPose = useCallback(() => {
-    if (!model) return
-
-    model.traverse((child) => {
-      if (child instanceof THREE.SkinnedMesh) {
-        child.skeleton.bones.forEach(bone => {
-          smdParser.resetBone(bone)
-        })
-        child.skeleton.pose()
-      }
-    })
-  }, [model])
 
   // 处理高亮效果
   useEffect(() => {

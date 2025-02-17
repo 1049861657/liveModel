@@ -6,6 +6,7 @@ import '@babylonjs/loaders'
 import { type ExtendedModel } from '@/types/model'
 import { formatFileSize } from '@/lib/format'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing';
 
 // 内联Spinner组件
 function Spinner() {
@@ -434,6 +435,8 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
         isInitializedRef.current = false
         engineRef.current = null
         sceneRef.current = null
+
+        return undefined
       }
     }
 
@@ -515,15 +518,15 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
     }
   }, [parts])
 
-  // 添加全选/全不选函数
-  const setAllPartsVisibility = (visible: boolean) => {
-    setParts(prevParts => 
-      prevParts.map(part => {
-        part.mesh.isVisible = visible
-        return { ...part, visible }
-      })
-    )
-  }
+  // // 添加全选/全不选函数
+  // const setAllPartsVisibility = (visible: boolean) => {
+  //   setParts(prevParts => 
+  //     prevParts.map(part => {
+  //       part.mesh.isVisible = visible
+  //       return { ...part, visible }
+  //     })
+  //   )
+  // }
 
   useEffect(() => {
     // 监听滚动事件
@@ -567,12 +570,12 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
                   {error.message}
                 </div>
                 <div className="mt-4 flex justify-center">
-                  <a
+                  <Link
                     href="/help?category=model&question=model-2"
                     className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
                   >
                     <span>{t('viewSolution')}</span>
-                  </a>
+                  </Link>
                   <div className="text-sm text-gray-500">{t('or')}</div>
                   <a 
                     href={`?engine=glb`}

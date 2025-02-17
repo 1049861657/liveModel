@@ -1,41 +1,75 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    // 改进编译目标和模块设置
+    "target": "es2017",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    
+    // 类型检查增强
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "allowUnreachableCode": false,
+    "verbatimModuleSyntax": true,
+    
+    // 现代特性支持
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+    
+    // 模块解析相关
     "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    
+    // React 相关
     "jsx": "preserve",
     "jsxImportSource": "react",
+    
+    // 增量编译
     "incremental": true,
+    
+    // 路径配置
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@types/*": ["./src/types/*"],
+      "@services/*": ["./src/services/*"]
+    },
+    
+    // Next.js 插件
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "baseUrl": "."
+    ]
   },
+  
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/types/**/*.d.ts"
+    "src/types/**/*.d.ts",
+    "src/**/*.json"
   ],
+  
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "build",
+    "dist",
+    ".next",
+    "coverage"
   ]
 }

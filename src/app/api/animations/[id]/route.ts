@@ -2,17 +2,35 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import path from 'path'
 import { storageClient } from '@/lib/oss'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    // 验证用户身份
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: '请先登录' },
+        { status: 401 }
+      )
+    }
+
     // 1. 获取动画信息
     const animation = await prisma.animation.findUnique({
       where: { id: params.id },
       include: {
-        model: true // 需要获取模型信息以构造正确的OSS路径
+        model: {
+          select: {
+            id: true,
+            userId: true,
+            format: true,
+            componentName: true
+          }
+        }
       }
     })
 
@@ -20,6 +38,14 @@ export async function DELETE(
       return NextResponse.json(
         { error: '动画不存在' },
         { status: 404 }
+      )
+    }
+
+    // 验证权限
+    if (!animation.model || animation.model.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: '无权限删除此动画' },
+        { status: 403 }
       )
     }
 

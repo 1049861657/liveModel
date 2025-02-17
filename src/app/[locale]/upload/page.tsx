@@ -1,11 +1,10 @@
 'use client'
 
-import { Suspense, useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import ModelUploader from '@/components/model/ModelUploader'
 import { formatTimeDistance } from '@/utils/format'
 import { toast } from 'react-hot-toast'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
-import { useRouter } from 'next/navigation'
 import ModelCard from '@/components/model/ModelCard'
 import TextureUploadModal from '@/components/modal/TextureUploadModal'
 import AnimationUploadModal from '@/components/modal/AnimationUploadModal'
@@ -42,7 +41,6 @@ function RecentUploads() {
   const [modelToDelete, setModelToDelete] = useState<Model | null>(null)
   const [selectedModel, setSelectedModel] = useState<string | null>(null)
   const requestMade = useRef(false)
-  const router = useRouter()
 
   // 将 fetchModels 移到 useEffect 外部
   const fetchModels = async () => {

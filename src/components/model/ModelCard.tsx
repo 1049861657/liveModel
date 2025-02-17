@@ -29,7 +29,7 @@ function ModelPreview({ model, isVisible }: { model: ExtendedModel; isVisible: b
   const locale = useLocale()
   
   // 使用 react-query 管理预览加载状态
-  const { isLoading, isError, error, refetch } = useQuery({
+  const { isLoading, isError, refetch } = useQuery({
     queryKey: ['modelPreview', model.id],
     queryFn: async () => {
       // 这里可以添加预览资源预加载的逻辑
@@ -163,7 +163,7 @@ export default function ModelCard({ model: initialModel, onDelete, defaultOpen, 
 
       return { previousModel }
     },
-    onError: (err, variables, context) => {
+    onError: (_err, _variables, context) => {
       if (context?.previousModel) {
         queryClient.setQueryData(['model', model.id], context.previousModel)
       }
@@ -222,7 +222,7 @@ export default function ModelCard({ model: initialModel, onDelete, defaultOpen, 
   })
 
   // 下载模型操作
-  const { mutate: downloadModel, isPending: isDownloading } = useMutation({
+  const { mutate: downloadModel } = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/models/${model.id}/download`)
       if (!response.ok) {

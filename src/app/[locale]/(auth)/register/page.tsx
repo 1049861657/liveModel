@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast'
 import AuthForm from '@/components/ui/AuthForm'
 import { motion } from 'motion/react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, PerspectiveCamera, Sphere } from '@react-three/drei'
+import { OrbitControls, PerspectiveCamera} from '@react-three/drei'
 import { useTranslations } from 'next-intl'
 
 export default function RegisterPage() {

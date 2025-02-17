@@ -29,11 +29,6 @@ interface TextureInfo {
   fileSize: number
 }
 
-interface ModelUploadResult {
-  url: string
-  textures: TextureInfo[]
-}
-
 interface UploadContext {
   componentName: string
   format: SupportedFormat
@@ -49,15 +44,6 @@ class UploadError extends Error {
     super(message)
     this.name = 'UploadError'
   }
-}
-
-// 工具函数
-function getFormatFromExt(ext: string): SupportedFormat {
-  const format = ext as SupportedFormat
-  if (!CONFIG.SUPPORTED_FORMATS.includes(format)) {
-    throw new UploadError('不支持的文件格式')
-  }
-  return format
 }
 
 function generateComponentName(baseName: string): string {
@@ -82,8 +68,7 @@ function validateModelFile(file: UploadedFile) {
 // 处理 DAE 文件中的贴图引用
 async function updateDaeTextureReferences(
   daeContent: string,
-  textures: TextureInfo[],
-  componentName: string
+  textures: TextureInfo[]
 ): Promise<string> {
   try {
     const textureMap = new Map<string, string>()
@@ -95,7 +80,7 @@ async function updateDaeTextureReferences(
 
     return daeContent.replace(
       /<init_from>\.(\/)?([^<]+)<\/init_from>/g,
-      (match, slash, fileName) => {
+      (match, _, fileName) => {
         const originalName = path.basename(fileName)
         const newPath = textureMap.get(originalName)
         return newPath ? `<init_from>./${newPath}</init_from>` : match
@@ -281,8 +266,7 @@ export async function POST(request: Request) {
       const daeContent = modelBuffer.toString('utf8')
       const updatedContent = await updateDaeTextureReferences(
         daeContent,
-        uploadedTextures,
-        componentName
+        uploadedTextures
       )
       const filename = `${componentName}${format}`
       const ossPath = `${CONFIG.STORAGE_BASE_PATH}/${format.slice(1)}/${componentName}/${filename}`

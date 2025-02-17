@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db'
 import { authOptions } from '@/lib/auth'
 
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: { id: string; reviewId: string } }
 ) {
   try {

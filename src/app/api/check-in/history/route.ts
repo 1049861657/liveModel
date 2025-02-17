@@ -4,11 +4,6 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getMonthRange, getTodayStart, getUTCDayStart } from '@/lib/date'
 
-interface CheckInRecord {
-  createdAt: Date
-  points: number
-}
-
 interface CheckInStats {
   totalDays: number
   currentStreak: number
@@ -28,10 +23,9 @@ function calculateStreaks(checkIns: Date[]): { currentStreak: number; maxStreak:
   
   let currentStreak = 0
   let maxStreak = 0
-  let tempStreak = 1
   
   // 使用UTC时间计算连续天数
-  const { maxStreak: calculatedMaxStreak, lastDate, lastStreak } = sortedDates.reduce(
+  const { maxStreak: calculatedMaxStreak, lastStreak } = sortedDates.reduce(
     (acc, curr, index) => {
       if (index === 0) return { ...acc, lastDate: curr, lastStreak: 1 }
       

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
-import { format, startOfMonth, endOfMonth, isSameMonth, isToday, isBefore } from 'date-fns'
+import { format, startOfMonth, endOfMonth, isSameMonth, isToday } from 'date-fns'
 import { eachDayOfInterval } from 'date-fns/eachDayOfInterval'
 import { getDay } from 'date-fns/getDay'
 import { motion, AnimatePresence } from 'motion/react'
@@ -78,14 +78,13 @@ export default function CheckInPage() {
 
   // 获取当月签到记录
   useEffect(() => {
-    if (session) {
-      const controller = new AbortController()
-      
-      fetchCheckInHistory(controller.signal)
-      
-      return () => {
-        controller.abort()
-      }
+    if (!session) return; // 如果没有 session，直接返回
+
+    const controller = new AbortController()
+    fetchCheckInHistory(controller.signal)
+    
+    return () => {
+      controller.abort()
     }
   }, [session, currentDate])
 
@@ -110,7 +109,7 @@ export default function CheckInPage() {
   }
 
   // 生成日历数据
-  const calendarDays = (() => {
+  const calendarDays = useMemo(() => {
     const firstDay = startOfMonth(currentDate)
     const lastDay = endOfMonth(currentDate)
     
@@ -153,7 +152,7 @@ export default function CheckInPage() {
 
     // 合并所有日期
     return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays]
-  })()
+  }, [currentDate])
 
   // 检查日期是否已签到
   const isCheckedIn = (date: Date) => {

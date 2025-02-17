@@ -5,12 +5,13 @@ import { prisma } from '@/lib/db'
 import { storageClient } from '@/lib/oss'
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
 
+    // 获取模型信息
     const model = await prisma.model.findUnique({
       where: {
         id: params.id,
@@ -52,18 +53,27 @@ export async function GET(
       )
     }
 
-    // 如果用户已登录，获取收藏状态
+    // 如果用户未登录或没有用户ID，则不获取收藏状态
     let isFavorited = false
-    if (session?.user?.id) {
+    const userId = session?.user?.id
+    if (userId) {
       const favorite = await prisma.favorite.findUnique({
         where: {
           userId_modelId: {
-            userId: session.user.id,
+            userId,
             modelId: params.id
           }
         }
       })
       isFavorited = !!favorite
+    }
+
+    // 如果模型不是公开的，且用户未登录或不是模型所有者，则返回403
+    if (!model.isPublic && (!userId || model.userId !== userId)) {
+      return NextResponse.json(
+        { error: '无权限访问此模型' },
+        { status: 403 }
+      )
     }
 
     return NextResponse.json({
@@ -80,7 +90,7 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
