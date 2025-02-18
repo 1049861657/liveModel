@@ -152,6 +152,7 @@
         "favorited": "Favorited",
         "openInScene": "Open in Scene",
         "downloadModel": "Download Model",
+        "downloading": "Downloading",
         "comments": "comments",
         "noComments": "No comments yet",
         "closeComments": "Close Comments"
@@ -180,7 +181,7 @@
         "comments": "Comments"
       },
       "success": {
-        "downloadStarted": "Download started",
+        "downloadSuccess": "Download successful",
         "updateSuccess": "Update successful"
       },
       "errors": {

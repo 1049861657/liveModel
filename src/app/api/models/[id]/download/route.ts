@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { storageClient } from '@/lib/oss'
-import JSZip from 'jszip'
 import type { ListResult } from '@/lib/storage/types'
 
 export const runtime = 'nodejs'
@@ -46,11 +45,6 @@ export async function GET(
       )
     }
 
-    // 创建 ZIP 文件
-    const zip = new JSZip()
-    const modelFolder = zip.folder(model.componentName)
-    if (!modelFolder) throw new Error('Failed to create zip folder')
-
     // 获取模型文件夹的路径前缀
     const folderPrefix = `models/${model.format}/${model.componentName}/`
 
@@ -70,41 +64,30 @@ export async function GET(
       throw new Error('No files found in the model folder')
     }
 
-    // 下载所有文件并添加到 ZIP
-    const downloadPromises = result.objects.map(async (obj) => {
-      const fileData = await storageClient.get(obj.name)
-      const relativePath = obj.name.replace(folderPrefix, '')
-      modelFolder.file(relativePath, fileData.content)
-    })
-
-    await Promise.all(downloadPromises)
-
-    // 生成 ZIP 文件
-    const zipBuffer = await zip.generateAsync({
-      type: 'nodebuffer',
-      compression: 'DEFLATE',
-      compressionOptions: {
-        level: 6
-      }
-    })
-
-    // 设置响应头
-    const headers = new Headers()
-    headers.set('Content-Type', 'application/zip')
-    headers.set(
-      'Content-Disposition',
-      `attachment; filename*=UTF-8''${encodeURIComponent(model.componentName)}.zip`
+    // 生成预签名URL
+    const files = await Promise.all(
+      result.objects.map(async (obj) => {
+        const url = await storageClient.getSignedUrl(obj.name, 3600) // 1小时有效期
+        return {
+          name: obj.name.replace(folderPrefix, ''),
+          url,
+          size: obj.size
+        }
+      })
     )
 
-    return new NextResponse(zipBuffer, {
-      status: 200,
-      headers
+    // 返回文件列表和模型信息
+    return NextResponse.json({
+      files,
+      model: {
+        name: model.componentName,
+        format: model.format
+      }
     })
-
   } catch (error) {
-    console.error('下载模型失败:', error)
+    console.error('获取下载信息失败:', error)
     return NextResponse.json(
-      { error: '下载失败' },
+      { error: '获取下载信息失败' },
       { status: 500 }
     )
   }

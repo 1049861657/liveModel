@@ -152,6 +152,7 @@
         "favorited": "已收藏",
         "openInScene": "在场景中打开",
         "downloadModel": "下载模型",
+        "downloading": "下载中",
         "comments": "条评论",
         "noComments": "还没有评论呢",
         "closeComments": "关闭评论"
@@ -180,7 +181,7 @@
         "comments": "评价"
       },
       "success": {
-        "downloadStarted": "开始下载",
+        "downloadSuccess": "下载成功",
         "updateSuccess": "更新成功"
       },
       "errors": {

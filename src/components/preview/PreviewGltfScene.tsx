@@ -518,16 +518,6 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
     }
   }, [parts])
 
-  // // 添加全选/全不选函数
-  // const setAllPartsVisibility = (visible: boolean) => {
-  //   setParts(prevParts => 
-  //     prevParts.map(part => {
-  //       part.mesh.isVisible = visible
-  //       return { ...part, visible }
-  //     })
-  //   )
-  // }
-
   useEffect(() => {
     // 监听滚动事件
     const handleScroll = () => {
@@ -576,22 +566,26 @@ export default function PreviewGltfScene({ initialModel }: PreviewGltfSceneProps
                   >
                     <span>{t('viewSolution')}</span>
                   </Link>
-                  <div className="text-sm text-gray-500">{t('or')}</div>
-                  <a 
-                    href={`?engine=glb`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const url = new URL(window.location.href);
-                      url.searchParams.set('engine', 'glb');
-                      window.location.href = url.toString();
-                    }}
-                    className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
-                  >
-                    <span>{t('switchToGLBEngine')}</span>
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </a>
+                  {!error.message.includes('.bin') && (
+                    <>
+                      <div className="text-sm text-gray-500 mx-2">{t('or')}</div>
+                      <a 
+                        href={`?engine=glb`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const url = new URL(window.location.href);
+                          url.searchParams.set('engine', 'glb');
+                          window.location.href = url.toString();
+                        }}
+                        className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
+                      >
+                        <span>{t('switchToGLBEngine')}</span>
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </a>
+                    </>
+                  )}
                 </div>
               </>
             ) : (

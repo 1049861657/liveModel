@@ -13,6 +13,7 @@ import Avatar from '@/components/ui/Avatar'
 import { formatFileSize } from '@/lib/format'
 import { useTranslations, useLocale } from 'next-intl'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { zip } from 'fflate'
 
 interface ModelCardProps {
   model: ExtendedModel
@@ -99,6 +100,14 @@ function ModelPreview({ model, isVisible }: { model: ExtendedModel; isVisible: b
   )
 }
 
+// 处理文件名，去除时间戳后缀
+const cleanFileName = (fileName: string): string => {
+  // 匹配以下模式：
+  // 1. _数字.扩展名
+  // 2. _数字 (没有扩展名的情况)
+  return fileName.replace(/(_\d+)(?=\.\w+$|$)/, '');
+};
+
 export default function ModelCard({ model: initialModel, onDelete, defaultOpen, id, onClose, modalOnly, size = 'large' }: ModelCardProps) {
   const [showDetails, setShowDetails] = useState(defaultOpen || false)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -118,6 +127,8 @@ export default function ModelCard({ model: initialModel, onDelete, defaultOpen, 
   const t = useTranslations('ModelCard')
   const locale = useLocale()
   const queryClient = useQueryClient()
+  const [downloadProgress, setDownloadProgress] = useState(0)
+  const [totalSize, setTotalSize] = useState(0)
 
   const { data: model = initialModel, isError } = useQuery({
     queryKey: ['model', initialModel.id],
@@ -221,45 +232,170 @@ export default function ModelCard({ model: initialModel, onDelete, defaultOpen, 
     }
   })
 
-  // 下载模型操作
-  const { mutate: downloadModel } = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/models/${model.id}/download`)
+  // 客户端打包下载操作  
+const { mutate: downloadModel, isPending: isDownloading } = useMutation({
+  mutationFn: async () => {
+    try {
+      // 1. 获取文件列表
+      const response = await fetch(`/api/models/${model.id}/download`);
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || t('errors.downloadFailed'))
+        const error = await response.json();
+        throw new Error(error.error || t('errors.downloadFailed'));
       }
-      return response
-    },
-    onSuccess: async (response) => {
-      // 获取文件名
-      const contentDisposition = response.headers.get('content-disposition')
-      let filename = `${model.name}.zip`
-      if (contentDisposition) {
-        const matches = /filename="([^"]*)"/.exec(contentDisposition)
-        if (matches?.[1]) {
-          filename = matches[1]
-        }
+      
+      const { files, model: modelInfo } = await response.json() as {
+        files: Array<{ name: string; url: string; size: number }>;
+        model: { name: string; format: string };
+      };
+      
+      setTotalSize(files.reduce((acc, file) => acc + file.size, 0));
+      
+      // 单文件下载
+      if (files.length === 1) {
+        await downloadSingleFile(files[0]);
+      } else {
+        // 多文件压缩下载
+        await downloadMultipleFiles(files, modelInfo);
       }
-
-      // 下载文件
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-
-      toast.success(t('success.downloadStarted'))
-    },
-    onError: (error) => {
-      console.error("下载失败", error)
-      toast.error(error instanceof Error ? error.message : t('errors.downloadFailed'))
+      
+      // 重置进度
+      resetDownloadState();
+      return true;
+    } catch (error) {
+      resetDownloadState();
+      throw error;
     }
-  })
+  },
+  onSuccess: () => {
+    toast.success(t('success.downloadSuccess'));
+  },
+  onError: (error) => {
+    console.error("下载失败", error);
+    toast.error(error instanceof Error ? error.message : t('errors.downloadFailed'));
+  }
+});
+
+// 下载单个文件的辅助函数
+const downloadSingleFile = async (file: { name: string; url: string; size: number }) => {
+  const blob = await fetchFileWithProgress(file.url, file.size, (downloaded) => {
+    // 确保进度不会超过100%
+    const progress = Math.min(Math.round((downloaded / file.size) * 100), 100);
+    setDownloadProgress(progress);
+  });
+  
+  // 使用清理后的文件名
+  triggerDownload(blob, cleanFileName(file.name));
+};
+
+// 下载多个文件的辅助函数
+const downloadMultipleFiles = async (
+  files: Array<{ name: string; url: string; size: number }>,
+  modelInfo: { name: string; format: string }
+) => {
+  const totalSize = files.reduce((acc, file) => acc + file.size, 0);
+  let downloadedSizes = new Map<string, number>();
+  
+  // 更新总体进度的函数
+  const updateOverallProgress = () => {
+    const totalDownloaded = Array.from(downloadedSizes.values()).reduce((acc, size) => acc + size, 0);
+    const progress = Math.round((totalDownloaded / totalSize) * 100);
+    setDownloadProgress(Math.min(progress, 99));
+  };
+
+  // 创建一个对象来存储所有文件数据
+  const zipObj: Record<string, Uint8Array> = {};
+
+  // 并行下载所有文件
+  await Promise.all(files.map(async (file) => {
+    try {
+      const blob = await fetchFileWithProgress(
+        file.url, 
+        file.size,
+        (downloaded) => {
+          downloadedSizes.set(file.name, downloaded);
+          updateOverallProgress();
+        }
+      );
+      
+      // 将 blob 转换为 Uint8Array
+      const arrayBuffer = await blob.arrayBuffer();
+      zipObj[cleanFileName(file.name)] = new Uint8Array(arrayBuffer);
+    } catch (error) {
+      console.error(`下载文件 ${file.name} 失败:`, error);
+      throw error;
+    }
+  }));
+  
+  setDownloadProgress(99);
+
+  // 使用 Promise 包装 zip 操作
+  const zipBlob = await new Promise<Blob>((resolve, reject) => {
+    // 使用 worker 进行压缩
+    zip(zipObj, {
+      level: 6,
+      consume: true, // 边压缩边释放内存
+      mem: 9, // 使用最大内存以提高性能
+    }, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        setDownloadProgress(100);
+        resolve(new Blob([data], { type: 'application/zip' }));
+      }
+    });
+  });
+
+  // 使用清理后的模型名称作为zip文件名
+  triggerDownload(zipBlob, `${cleanFileName(modelInfo.name)}.zip`);
+};
+
+// 带进度的文件获取
+const fetchFileWithProgress = async (
+  url: string,
+  fileSize: number,
+  onProgress: (downloaded: number) => void
+): Promise<Blob> => {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to download from ${url}`);
+  
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('Failed to get reader');
+  
+  const chunks: Uint8Array[] = [];
+  let receivedLength = 0;
+  
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    
+    chunks.push(value);
+    receivedLength += value.length;
+    // 确保不会发送超过文件大小的进度
+    onProgress(Math.min(receivedLength, fileSize));
+  }
+  
+  return new Blob(chunks);
+};
+
+// 触发下载
+const triggerDownload = (blob: Blob, filename: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.setAttribute('download', filename); // 支持 IDM 检测
+  
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+};
+
+// 重置下载状态
+const resetDownloadState = () => {
+  setDownloadProgress(0);
+  setTotalSize(0);
+};
 
   // 使用 useEffect 监听卡片可见性
   useEffect(() => {
@@ -305,17 +441,6 @@ export default function ModelCard({ model: initialModel, onDelete, defaultOpen, 
     setTimeout(() => {
       router.push(`/preview/${model.id}`)
     }, 500)
-  }
-
-  // 修改 handleDownload 函数
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (!session) {
-      toast.error(t('errors.loginRequired'))
-      router.push('/login')
-      return
-    }
-    downloadModel()
   }
 
   // 处理更新模型信息
@@ -378,6 +503,37 @@ export default function ModelCard({ model: initialModel, onDelete, defaultOpen, 
     // 使数据失效，触发重新获取
     queryClient.invalidateQueries({ queryKey: ['model', model.id] })
   }, [model.id, queryClient])
+
+  // 修改下载按钮部分
+  const downloadButton = (
+    <button
+      onClick={() => downloadModel()}
+      disabled={isDownloading}
+      className="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+    >
+      {isDownloading ? (
+        <>
+          <svg className="animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span className="flex items-center gap-2">
+            {t('actions.downloading')} {downloadProgress > 0 && `(${downloadProgress}%)`}
+            {totalSize > 0 && <span className="text-xs text-gray-500">
+              {formatFileSize(totalSize)}
+            </span>}
+          </span>
+        </>
+      ) : (
+        <>
+          <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          {t('actions.downloadModel')}
+        </>
+      )}
+    </button>
+  )
 
   return (
     <div ref={cardRef} id={id}>
@@ -771,15 +927,7 @@ export default function ModelCard({ model: initialModel, onDelete, defaultOpen, 
                         </svg>
                         {t('actions.openInScene')}
                       </button>
-                      <button
-                        onClick={handleDownload}
-                        className="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        {t('actions.downloadModel')}
-                      </button>
+                      {downloadButton}
                       <button
                         onClick={() => setShowReviews(prev => !prev)}
                         className="flex-1 inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg bg-white hover:bg-gray-50"

@@ -152,6 +152,7 @@
         "favorited": "お気に入り済み",
         "openInScene": "シーンで開く",
         "downloadModel": "モデルをダウンロード",
+        "downloading": "ダウンロード中",
         "comments": "コメント",
         "noComments": "コメントはまだありません",
         "closeComments": "コメントを閉じる"
@@ -180,7 +181,7 @@
         "comments": "コメント"
       },
       "success": {
-        "downloadStarted": "ダウンロードを開始しました",
+        "downloadSuccess": "ダウンロードが成功しました",
         "updateSuccess": "更新が成功しました"
       },
       "errors": {
