@@ -24,8 +24,6 @@ model User {
   avatarId  String?  @unique  // 头像图片ID
   avatar    Image?   @relation("UserAvatar", fields: [avatarId], references: [id])
   images    Image[]  @relation("UserImages")
-
-  @@index([avatarId])
 }
 
 model Model {
@@ -48,7 +46,7 @@ model Model {
   totalReviews  Int       @default(0)
   avgRating     Float?    
 
-  @@index([userId])
+  @@index([format, userId])
 }
 
 model Favorite {
@@ -60,7 +58,6 @@ model Favorite {
   model     Model    @relation(fields: [modelId], references: [id])
 
   @@unique([userId, modelId])
-  @@index([userId])
   @@index([modelId])
 } 
 

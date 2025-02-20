@@ -12,11 +12,7 @@ import { useTranslations } from 'next-intl'
 import { useQuery } from '@tanstack/react-query'
 
 interface ModelListProps {
-  initialModels: {
-    models: ExtendedModel[]
-    total: number
-    pages: number
-  }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 // 视图大小配置
@@ -129,62 +125,63 @@ function ModelGrid({
 }
 
 // 客户端列表组件
-export default function ModelListClient({ initialModels }: ModelListProps) {
-  const searchParams = useSearchParams()
+export default function ModelListClient({ searchParams }: ModelListProps) {
   const router = useRouter()
   const t = useTranslations('ModelList')
-  const highlightModelId = searchParams.get('highlight')
-  const currentPage = parseInt(searchParams.get('page') || '1')
-  const [viewSize, setViewSize] = useState<keyof typeof VIEW_SIZE_CONFIG>('large')
+  const searchParamsObj = useSearchParams()
+  const highlightModelId = searchParamsObj.get('highlight')
+  const currentPage = parseInt(searchParamsObj.get('page') || '1')
+  const [viewSize, setViewSize] = useState<keyof typeof VIEW_SIZE_CONFIG>(
+    (searchParams.viewSize as keyof typeof VIEW_SIZE_CONFIG) || 'large'
+  )
 
   // 使用 react-query 获取模型列表
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['models', searchParams.toString(), viewSize],
+    queryKey: ['models', searchParamsObj.toString(), viewSize],
     queryFn: async () => {
-      const params = new URLSearchParams(searchParams.toString())
+      const params = new URLSearchParams(searchParamsObj.toString())
       params.set('limit', VIEW_SIZE_CONFIG[viewSize].itemsPerPage.toString())
       const response = await fetch(`/api/models?${params.toString()}`)
       if (!response.ok) throw new Error(t('errors.fetchFailed'))
       return response.json()
     },
-    initialData: initialModels,
     staleTime: 1000 * 30 // 30秒内不重新获取
   })
 
   // 处理视图大小变化
   const handleViewSizeChange = useCallback((newSize: keyof typeof VIEW_SIZE_CONFIG) => {
     setViewSize(newSize)
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParamsObj.toString())
     params.set('limit', VIEW_SIZE_CONFIG[newSize].itemsPerPage.toString())
     params.set('page', '1') // 重置页码
     router.push(`/models?${params.toString()}`)
-  }, [router, searchParams])
+  }, [router, searchParamsObj])
 
   // 处理页码变化
   const handlePageChange = useCallback((page: number) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParamsObj.toString())
     params.set('page', page.toString())
     params.set('limit', VIEW_SIZE_CONFIG[viewSize].itemsPerPage.toString())
     router.push(`/models?${params.toString()}`)
-  }, [router, searchParams, viewSize])
+  }, [router, searchParamsObj, viewSize])
+
+  if (isLoading) {
+    return <ModelSkeleton viewSize={viewSize} count={VIEW_SIZE_CONFIG[viewSize].itemsPerPage} />
+  }
 
   return (
     <div className="space-y-6">
       <ViewSizeToggle viewSize={viewSize} onViewSizeChange={handleViewSizeChange} />
       
-      {isLoading && <ModelSkeleton viewSize={viewSize} count={VIEW_SIZE_CONFIG[viewSize].itemsPerPage} />}
+      <ModelGrid 
+        models={data?.models || []}
+        isLoading={isLoading}
+        viewSize={viewSize}
+        highlightModelId={highlightModelId}
+        onDelete={refetch}
+      />
 
-      {!isLoading && (
-        <ModelGrid 
-          models={data.models}
-          isLoading={isLoading}
-          viewSize={viewSize}
-          highlightModelId={highlightModelId}
-          onDelete={refetch}
-        />
-      )}
-
-      {data.pages > 1 && (
+      {data?.pages > 1 && (
         <Pagination
           currentPage={currentPage}
           totalPages={data.pages}
