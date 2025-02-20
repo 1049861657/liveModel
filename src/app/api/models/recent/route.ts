@@ -20,45 +20,18 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc'
       },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            avatar: {
-              select: {
-                url: true
-              }
-            }
-          }
-        },
-        _count: {
-          select: {
-            favorites: true,
-            reviews: true
-          }
-        }
-      }
-    })
-
-    const userFavorites = await prisma.favorite.findMany({
-      where: {
-        userId: session.user.id
-      },
       select: {
-        modelId: true
+        id: true,
+        name: true,
+        isPublic: true,
+        createdAt: true,
+        filePath: true,
+        format: true,
+        userId: true
       }
     })
 
-    const userFavoriteIds = new Set(userFavorites.map(f => f.modelId))
-
-    const processedModels = recentModels.map(model => ({
-      ...model,
-      isFavorited: userFavoriteIds.has(model.id)
-    }))
-
-    return NextResponse.json(processedModels)
+    return NextResponse.json(recentModels)
   } catch (error) {
     console.error('获取最近上传失败:', error)
     return NextResponse.json(

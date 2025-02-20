@@ -9,36 +9,15 @@ import ModelCard from '@/components/model/ModelCard'
 import TextureUploadModal from '@/components/modal/TextureUploadModal'
 import AnimationUploadModal from '@/components/modal/AnimationUploadModal'
 import { useTranslations } from 'next-intl'
-
-interface Model {
-  id: string
-  name: string
-  description: string | null
-  filePath: string
-  fileSize: number
-  format: string
-  componentName: string
-  isPublic: boolean
-  userId: string
-  createdAt: Date
-  updatedAt: Date
-  user?: {
-    id: string
-    name: string | null
-    email: string
-    avatar?: {
-      url: string
-    } | null
-  }
-}
+import { type ExtendedModel } from '@/types/model'
 
 function RecentUploads() {
   const t = useTranslations('UploadPage')
-  const [recentModels, setRecentModels] = useState<Model[]>([])
+  const [recentModels, setRecentModels] = useState<ExtendedModel[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [modelToDelete, setModelToDelete] = useState<Model | null>(null)
+  const [modelToDelete, setModelToDelete] = useState<ExtendedModel | null>(null)
   const [selectedModel, setSelectedModel] = useState<string | null>(null)
   const requestMade = useRef(false)
 
@@ -63,7 +42,7 @@ function RecentUploads() {
   }, [])
 
   // 修改删除处理流程
-  const handleDeleteClick = (model: Model) => {
+  const handleDeleteClick = (model: ExtendedModel) => {
     setModelToDelete(model)
     setShowConfirmDialog(true)
   }
