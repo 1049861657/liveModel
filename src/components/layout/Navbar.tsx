@@ -8,6 +8,13 @@ import { Link, useRouter, usePathname } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
 
+// 语言配置
+const languageConfig = {
+  zh: { label: '中文' },
+  en: { label: 'English' },
+  ja: { label: '日本語' }
+}
+
 export default function Navbar() {
   const { data: session } = useSession()
   const [showDropdown, setShowDropdown] = useState(false)
@@ -209,16 +216,23 @@ export default function Navbar() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setShowLangDropdown(!showLangDropdown)}
-                  className={`flex items-center space-x-1 p-2 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-2 p-2 rounded-lg transition-all ${
                     isScrolled
                       ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                       : 'text-white/90 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span>{locale === 'zh' ? '中文' : locale === 'ja' ? '日本語' : 'English'}</span>
+                  <img 
+                    src="/metadata/translating.svg" 
+                    alt="translate"
+                    className="w-5 h-5"
+                  />
+                  <span className="text-sm font-medium">
+                    {languageConfig[locale as keyof typeof languageConfig].label}
+                  </span>
                   <motion.svg
                     animate={{ rotate: showLangDropdown ? 180 : 0 }}
-                    className="w-4 h-4"
+                    className="w-4 h-4 opacity-60"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -234,26 +248,34 @@ export default function Navbar() {
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -10 }}
                       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                      className="absolute right-0 mt-2 w-32 rounded-xl bg-white shadow-xl border border-gray-100 py-1 origin-top"
+                      className="absolute right-0 mt-2 w-32 rounded-xl bg-white shadow-xl border border-gray-100 py-1 origin-top overflow-hidden"
                     >
-                      <button
-                        onClick={() => handleLanguageChange('zh')}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        中文
-                      </button>
-                      <button
-                        onClick={() => handleLanguageChange('en')}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        English
-                      </button>
-                      <button
-                        onClick={() => handleLanguageChange('ja')}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        日本語
-                      </button>
+                      {Object.entries(languageConfig).map(([key, { label }]) => (
+                        <motion.button
+                          key={key}
+                          onClick={() => handleLanguageChange(key)}
+                          className={`w-full px-4 py-2.5 text-left text-sm transition-all flex items-center justify-between ${
+                            locale === key 
+                              ? 'bg-indigo-50 text-indigo-600'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                          whileHover={{ x: 4 }}
+                        >
+                          <span>{label}</span>
+                          {locale === key && (
+                            <motion.svg
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="w-4 h-4 text-indigo-600"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </motion.svg>
+                          )}
+                        </motion.button>
+                      ))}
                     </motion.div>
                   )}
                 </AnimatePresence>

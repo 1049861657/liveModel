@@ -91,6 +91,9 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
   const [animationToDelete, setAnimationToDelete] = useState<{id: string, name: string} | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [textureErrors, setTextureErrors] = useState<string[]>([])
+  const [animationBindingError, setAnimationBindingError] = useState<boolean>(false)
+  const [showBindingError, setShowBindingError] = useState<boolean>(false)
+  const [showTextureErrors, setShowTextureErrors] = useState<boolean>(true)
 
   // 在加载模型时设置可用动画
   useEffect(() => {
@@ -240,6 +243,8 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
     }
 
     setIsLoadingAnimation(true)
+    setAnimationBindingError(false) // 重置绑定错误状态
+    setShowBindingError(false) // 重置显示状态
     console.log('Loading animation:', selectedAnimFile.filePath)
 
     fetch(selectedAnimFile.filePath)
@@ -264,6 +269,28 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
         const scale = 1
 
         console.log('Converting SMD bones:', data.bones)
+
+        // 检查骨骼名称是否匹配
+        let hasUnmatchedBone = false
+        const modelBoneNames = skinnedMesh.skeleton.bones.map(bone => bone.name)
+        
+        // 检查每个动画骨骼是否都能在模型中找到
+        for (const bone of data.bones) {
+          if (!modelBoneNames.includes(bone.name)) {
+            console.warn(`Unmatched bone: ${bone.name}`)
+            hasUnmatchedBone = true
+            break // 只要发现一个不匹配就停止检查
+          }
+        }
+
+        // 如果有任何不匹配的骨骼，就触发错误
+        if (hasUnmatchedBone) {
+          setAnimationBindingError(true)
+          setShowBindingError(true)
+          throw new Error('animation_binding_error')
+        }
+
+        // 如果所有骨骼都匹配，继续处理动画数据
         data.bones.forEach((bone: any, index: number) => {
           console.log(`Processing bone ${index}:`, bone)
           const times: number[] = []
@@ -339,7 +366,11 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
       })
       .catch(error => {
         console.error('Error loading SMD:', error)
-        setAnimationError(error.message)
+        if (error.message === 'animation_binding_error') {
+          setAnimationError(null) // 清除普通错误
+        } else {
+          setAnimationError(error.message)
+        }
       })
       .finally(() => {
         setIsLoadingAnimation(false)
@@ -869,55 +900,93 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
             </div>
           )}
 
-          {/* 加载状态或错误提示 */}
-          {(isLoadingAnimation || animationError) && (
-            <div className="transition-all duration-200">
-              {isLoadingAnimation && (
-                <div className="bg-blue-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>{t('loadingAnimation')}</span>
-                </div>
-              )}
-              {animationError && (
-                <div className="bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{animationError}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 贴图错误提示 */}
-          {textureErrors.length > 0 && (
-            <div className="bg-yellow-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl shadow-lg">
-              <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div className="space-y-1">
-                  <div className="font-medium">{t('textureLoadError')}：</div>
-                  <ul className="text-sm space-y-1">
-                    {textureErrors.map((error, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <span>• {error}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="text-sm mt-2">
-                    {t('textureUploadHint')}
-                    <Link href="/help?category=model&question=model-2" className="underline ml-1">
-                      {t('learnMore')}
-                    </Link>
+          {/* 错误提醒容器 - 使用 Flex 布局 */}
+          <div className="absolute left-0 w-[480px] flex flex-col gap-2" style={{ top: 'calc(100% + 0.5rem)' }}>
+            {/* 动画加载状态/错误 */}
+            {(isLoadingAnimation || animationError) && (
+              <div className="w-full transition-all duration-200">
+                {isLoadingAnimation && (
+                  <div className="bg-blue-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <span>{t('loadingAnimation')}</span>
                   </div>
+                )}
+                {animationError && (
+                  <div className="bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{animationError}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 动画绑定错误 */}
+            {animationBindingError && showBindingError && (
+              <div className="w-full bg-yellow-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl shadow-lg">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="flex-1 space-y-1">
+                    <div className="font-medium">{t('animationBindingError')}</div>
+                    <div className="text-sm">
+                      {t('animationBindingErrorHint')}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowBindingError(false)}
+                    className="p-1 hover:bg-yellow-600/50 rounded-lg transition-colors"
+                    title={t('close')}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* 贴图错误 */}
+            {textureErrors.length > 0 && showTextureErrors && (
+              <div className="w-full bg-yellow-500/90 backdrop-blur-sm text-white px-6 py-3 rounded-xl shadow-lg">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="flex-1 space-y-1">
+                    <div className="font-medium">{t('textureLoadError')}：</div>
+                    <ul className="text-sm space-y-1">
+                      {textureErrors.map((error, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <span>• {error}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="text-sm mt-2">
+                      {t('textureUploadHint')}
+                      <Link href="/help?category=model&question=model-2" className="underline ml-1">
+                        {t('learnMore')}
+                      </Link>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowTextureErrors(false)}
+                    className="p-1 hover:bg-yellow-600/50 rounded-lg transition-colors"
+                    title={t('close')}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 添加控制按钮组 - 修改定位逻辑 */}

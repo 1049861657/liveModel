@@ -451,7 +451,10 @@
       "needHelp": "需要帮助？",
       "uploadPage": "上传模型页面",
       "cancel": "取消",
-      "exitSmdAnimation": "退出 SMD 动画"
+      "exitSmdAnimation": "退出 SMD 动画",
+      "animationBindingError": "动画与模型不兼容",
+      "animationBindingErrorHint": "当前动画的骨骼结构与模型不匹配，请选择适配的动画文件",
+      "close": "关闭"
     },
     "PreviewGlbScene": {
       "materialWarningTitle": "材质警告",
@@ -481,6 +484,8 @@
       "title": "上传动画",
       "loading": "加载中...",
       "selectModel": "选择关联模型",
+      "selectModelPlaceholder": "请选择一个模型",
+      "close": "关闭",
       "selectAnimation": "选择动画",
       "clickToUpload": "点击上传",
       "supportFormat": "支持 SMD 格式",
@@ -501,6 +506,8 @@
       "title": "上传贴图",
       "loading": "加载中...",
       "selectModel": "选择关联模型",
+      "selectModelPlaceholder": "请选择一个模型",
+      "close": "关闭",
       "selectTexture": "选择贴图",
       "clickToUpload": "点击或拖放文件到此处上传",
       "supportFormat": "支持 PNG、JPG 格式",

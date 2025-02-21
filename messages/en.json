@@ -451,7 +451,10 @@
       "needHelp": "Need Help?",
       "uploadPage": "Upload Model page",
       "cancel": "Cancel",
-      "exitSmdAnimation": "Exit SMD Animation"
+      "exitSmdAnimation": "Exit SMD Animation",
+      "animationBindingError": "Animation Incompatible with Model",
+      "animationBindingErrorHint": "The bone structure of the current animation does not match the model. Please select a compatible animation file",
+      "close": "Close"
     },
     "PreviewGlbScene": {
       "materialWarningTitle": "Material Warning",
@@ -481,6 +484,8 @@
       "title": "Upload Animation",
       "loading": "Loading...",
       "selectModel": "Select Associated Model",
+      "selectModelPlaceholder": "Please select a model",
+      "close": "Close",
       "selectAnimation": "Select Animation",
       "clickToUpload": "Click to Upload",
       "supportFormat": "Supports SMD format",
@@ -501,6 +506,8 @@
       "title": "Upload Texture",
       "loading": "Loading...",
       "selectModel": "Select Associated Model",
+      "selectModelPlaceholder": "Please select a model",
+      "close": "Close",
       "selectTexture": "Select Texture",
       "clickToUpload": "Click or drag files here to upload",
       "supportFormat": "Supports PNG, JPG formats",

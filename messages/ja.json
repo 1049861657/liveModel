@@ -451,7 +451,10 @@
       "needHelp": "ヘルプが必要ですか？",
       "uploadPage": "モデルアップロードページ",
       "cancel": "キャンセル",
-      "exitSmdAnimation": "SMDアニメーションを終了"
+      "exitSmdAnimation": "SMDアニメーションを終了",
+      "animationBindingError": "アニメーションがモデルと互換性がありません",
+      "animationBindingErrorHint": "現在のアニメーションのボーン構造がモデルと一致しません。互換性のあるアニメーションファイルを選択してください",
+      "close": "閉じる"
     },
     "PreviewGlbScene": {
       "materialWarningTitle": "マテリアルの警告",
@@ -481,6 +484,8 @@
       "title": "アニメーションをアップロード",
       "loading": "読み込み中...",
       "selectModel": "関連モデルを選択",
+      "selectModelPlaceholder": "モデルを選択してください",
+      "close": "閉じる",
       "selectAnimation": "アニメーションを選択",
       "clickToUpload": "クリックしてアップロード",
       "supportFormat": "SMD形式に対応",
@@ -501,6 +506,8 @@
       "title": "テクスチャをアップロード",
       "loading": "読み込み中...",
       "selectModel": "関連モデルを選択",
+      "selectModelPlaceholder": "モデルを選択してください",
+      "close": "閉じる",
       "selectTexture": "テクスチャを選択",
       "clickToUpload": "クリックまたはファイルをドラッグしてアップロード",
       "supportFormat": "PNG、JPG形式に対応",
