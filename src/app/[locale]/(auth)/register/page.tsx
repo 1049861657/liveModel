@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import AuthForm from '@/components/ui/AuthForm'
 import { motion } from 'motion/react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera} from '@react-three/drei'
 import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/routing'
 
 export default function RegisterPage() {
   const router = useRouter()

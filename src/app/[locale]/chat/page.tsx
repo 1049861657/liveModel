@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import chatService, { type ChatMessage } from '@/services/ChatService'
 import Avatar from '@/components/ui/Avatar'
 import { formatMessageTime } from '@/lib/date'
+import { Link } from '@/i18n/routing'
 
 interface TimeGroup {
   id: string;
@@ -349,15 +350,14 @@ export default function ChatPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <a
-                    href={`/login?callbackUrl=chat`}
+                  <Link href={`/login?callbackUrl=${encodeURIComponent('/chat')}`}
                     className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 transition-all duration-200"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
                     {t('login.button')}
-                  </a>
+                  </Link>
                 </motion.div>
               </div>
             </div>

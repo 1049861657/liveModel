@@ -2,7 +2,7 @@
 
 import { useState, useRef, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import AuthForm from '@/components/ui/AuthForm'
 import { motion } from 'motion/react'
@@ -12,6 +12,7 @@ import * as THREE from 'three'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import type { RootState } from '@react-three/fiber/dist/declarations/src/core/store'
 import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/routing'
 
 // 动态粒子系统
 function ParticleRing() {

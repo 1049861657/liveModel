@@ -81,8 +81,8 @@ pnpm install
 4. 数据库初始化
 
 ```bash
-pnpm dlx prisma generate
-pnpm dlx prisma db push
+pnpm prisma generate
+pnpm prisma db push
 ```
 
 5. 启动开发服务器
@@ -98,6 +98,7 @@ pnpm dev
 使用 Rollup 打包以下第三方库，无需使用CDN下载依赖：
 - model-viewer：用于 GLB 模型预览
 - three.js：用于 DAE 模型预览
+- babylon.js：用于 GLTF 模型预览
 
 打包配置文件位于 `rollup.config.mjs`，生成文件位于/public/vendor。
 引用方式<script type="module" src="/vendor/model-viewer-bundle.js"></script>
@@ -113,7 +114,7 @@ pnpm dev
 1. 构建项目
 
 ```bash
-pnpm install; pnpm dlx prisma generate; pnpm build
+pnpm install; pnpm prisma generate; pnpm build
 ```
 
 2. 启动生产服务器
