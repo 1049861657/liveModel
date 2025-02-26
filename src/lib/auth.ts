@@ -57,10 +57,6 @@ export const authOptions: NextAuthOptions = {
     error: '/login',
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      const nextAuthUrl = process.env.NEXTAUTH_URL || baseUrl;
-      return url.startsWith(nextAuthUrl) ? url : nextAuthUrl;
-    },
     async jwt({ token, user, trigger, session }) {
       if (trigger === "update" && session?.user) {
         token.name = session.user.name
