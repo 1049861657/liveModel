@@ -24,7 +24,7 @@ export default function Home() {
                   {t('title')}
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed whitespace-nowrap overflow-hidden">
+              <p className="text-xl text-gray-600 max-w-5xl mx-auto leading-relaxed overflow-hidden">
                 {t('description')}
               </p>
               <div className="flex justify-center gap-4 mb-16 mt-12">

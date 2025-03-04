@@ -87,7 +87,7 @@ function uploadReducer(state: UploadState, action: UploadAction): UploadState {
     case 'SET_LOADING':
       return { ...state, loading: action.payload }
     case 'RESET':
-      return { ...initialState }
+      return initialState
     default:
       return state
   }
@@ -110,44 +110,52 @@ export default function AnimationUploadModal({
   const [state, dispatch] = useReducer(uploadReducer, initialState)
 
   // 使用 react-query 获取模型列表
-  const { refetch: refetchModels } = useQuery<DaeModelsQueryResult>({
+  const { data, isLoading, isError } = useQuery<DaeModelsQueryResult>({
     queryKey: ['daeModels'],
     queryFn: async () => {
       const response = await fetch('/api/models?format=dae&own=true')
       if (!response.ok) throw new Error(t('fetchError'))
-      return response.json()
+      const data = await response.json()
+      return data
     },
     enabled: isOpen,
     retry: false
   })
 
-  // 使用 useEffect 处理数据和错误
+  // 使用 useEffect 处理数据变化
   useEffect(() => {
-    if (isOpen) {
-      dispatch({ type: 'SET_LOADING', payload: true })
-      refetchModels()
-        .then(({ data }) => {
-          const models = Array.isArray(data?.models) ? data.models : []
-          if (models.length === 0) {
-            toast.error(t('noDaeModels'))
-            onClose()
-          } else {
-            dispatch({ type: 'SET_MODELS', payload: models })
-            dispatch({ type: 'SET_SELECTED_MODEL', payload: models[0] })
-          }
-        })
-        .catch((error: Error) => {
-          console.error(t('fetchError'), error)
-          toast.error(t('fetchError'))
-          onClose()
-        })
-        .finally(() => {
-          dispatch({ type: 'SET_LOADING', payload: false })
-        })
-    } else {
+    if (data) {
+      const models = Array.isArray(data.models) ? data.models : []
+      if (models.length === 0) {
+        toast.error(t('noDaeModels'))
+        onClose()
+      } else {
+        dispatch({ type: 'SET_MODELS', payload: models })
+        dispatch({ type: 'SET_SELECTED_MODEL', payload: models[0] })
+      }
+    }
+  }, [data, onClose, t])
+
+  // 使用 useEffect 处理错误
+  useEffect(() => {
+    if (isError) {
+      console.error(t('fetchError'))
+      toast.error(t('fetchError'))
+      onClose()
+    }
+  }, [isError, onClose, t])
+
+  // 使用 useEffect 处理加载状态
+  useEffect(() => {
+    dispatch({ type: 'SET_LOADING', payload: isLoading })
+  }, [isLoading])
+
+  // 当模态框关闭时重置状态
+  useEffect(() => {
+    if (!isOpen) {
       dispatch({ type: 'RESET' })
     }
-  }, [isOpen, refetchModels, t, onClose])
+  }, [isOpen])
 
   // 使用 react-query 管理上传操作
   const uploadMutation = useMutation({

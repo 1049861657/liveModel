@@ -19,7 +19,7 @@ function Banner() {
 
       <div className="relative container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="max-w-2xl">
+          <div className="max-w-4xl">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
               {t('title')}
             </h1>
