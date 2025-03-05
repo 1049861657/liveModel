@@ -460,7 +460,7 @@
       "materialWarningTitle": "Material Warning",
       "materialWarning": "The model uses KHR material extensions not supported by Three.js, textures will not be loaded.",
       "learnMore": "Learn More",
-      "switchToBabylon": "Switch to Babylon Preview",
+      "useGltfFix": "Use the glTF repair tool",
       "closeHint": "Close Hint",
       "resetView": "Reset View",
       "toggleAxes": "Toggle Axes",
@@ -647,5 +647,62 @@
     "Metadata": {
       "title": "LiveModel",
       "description": "Preview and share 3D models online"
+    },
+    "GltfFixPage": {
+      "title": "GLTF Repair Tool",
+      "viewDetails": "View Repair Details",
+      "fileUpload": "File Upload",
+      "dragDropHint": "Drag and drop GLTF file here, or click to select",
+      "dragActive": "Drop file here...",
+      "formatSupport": "Only .gltf format supported",
+      "removeFile": "Remove file",
+      "startRepair": "Start Repair",
+      "converting": "Converting...",
+      "downloadFile": "Download File",
+      "conversionFailed": "Conversion Failed",
+      "conversionSuccess": "Conversion Successful",
+      "fileReady": "File is ready for download",
+      "logName": "Logs",
+      "clearLogs": "Clear Logs",
+      "waitingOperation": "Waiting for operation...",
+      "details": {
+        "title": "--- GLTF Repair Tool Details ---",
+        "description": "This tool converts KHR_materials_pbrSpecularGlossiness extension (deprecated) in gltf files to standard pbrMetallicRoughness",
+        "process": "The conversion process includes:",
+        "step1": "1. Converting diffuse color to base color",
+        "step2": "2. Converting diffuse texture to base color texture",
+        "step3": "3. Converting glossiness to roughness",
+        "step4": "4. Setting metallic factor to 0.0 (non-metallic)",
+        "step5": "5. Removing deprecated extensions"
+      },
+      "logs": {
+        "fileUploaded": "File uploaded: {filename}",
+        "startConversion": "Starting conversion...",
+        "conversionSuccess": "Conversion successful",
+        "conversionError": "Conversion error: {error}",
+        "error": "Error: {message}",
+        "downloaded": "Downloaded converted file: {filename}"
+      }
+    },
+    "GltfFix": {
+      "onlyGltfSupported": "Only .gltf format is supported",
+      "fileInfo": "File: {name} ({size} KB)",
+      "initConversion": "Initializing conversion process",
+      "fileReadFailed": "File reading failed",
+      "readingFile": "Reading file data",
+      "parsingJson": "Parsing JSON structure",
+      "jsonParseComplete": "JSON parsing complete",
+      "jsonParseError": "JSON parsing error: {error}",
+      "invalidGltf": "Invalid GLTF: missing asset.version",
+      "detectingExtensions": "Detecting extensions: {extensions}",
+      "none": "none",
+      "specGlossFound": "SpecGloss extension detected, executing PBR conversion",
+      "convertingMaterial": "Converting material: {name}",
+      "unnamed": "unnamed",
+      "conversionComplete": "Conversion complete, preparing output",
+      "conversionSuccess": "Conversion successful: {size} KB",
+      "materialConversionFailed": "Material conversion failed: {error}",
+      "noSpecGlossFound": "No SpecGloss extension detected, no conversion needed",
+      "processingError": "Processing error: {error}"
     }
   }

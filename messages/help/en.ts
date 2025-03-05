@@ -59,7 +59,7 @@ export const helpItems: Category[] = [
       {
         id: 'model-4',
         q: 'GLTF showing material errors?',
-        a: 'Our GLB engine uses three.js for model loading, but newer versions of three have removed support for KHR material extensions. If your model uses KHR material extensions, textures cannot be loaded. You can use babylon for preview instead.'
+        a: 'This site uses three.js for model loading. However, newer versions of three.js have removed support for the KHR_materials_pbrSpecularGlossiness extension, so textures cannot be loaded if it is used. You can use the glTF repair tool and then re-upload.'
       }
     ]
   },

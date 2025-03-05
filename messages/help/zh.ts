@@ -59,7 +59,7 @@ export const helpItems: Category[] = [
       {
         id: 'model-4',
         q: 'gltf提示材质错误？',
-        a: '本站的glb引擎采用three.js进行模型加载，但是新版本的three移除了对KHR材质扩展的支持，所以如果模型使用了KHR材质扩展，则无法加载贴图。您可以使用babylon进行预览。'
+        a: '本站采用three.js进行模型加载，但是新版本的three移除了对KHR_materials_pbrSpecularGlossiness扩展的支持，如有使用则无法加载贴图。您可以使用gltf修复工具后重新上传。'
       }
     ]
   },

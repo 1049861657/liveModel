@@ -2,7 +2,6 @@ import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import PreviewGlbScene from '@/components/preview/PreviewGlbScene'
 import PreviewDaeScene from '@/components/preview/PreviewDaeScene'
-import PreviewGltfScene from '@/components/preview/PreviewGltfScene'
 
 export default async function PreviewPage({ 
   params,
@@ -60,11 +59,9 @@ export default async function PreviewPage({
     <div className="min-h-screen bg-gray-50">
       {engine === 'dae' ? (
         <PreviewDaeScene initialModel={model} />
-      ) : engine === 'gltf' ? (
-        <PreviewGltfScene initialModel={model} />
       ) : (
         <PreviewGlbScene initialModel={model} />
       )}
     </div>
-  )
+  );  
 } 

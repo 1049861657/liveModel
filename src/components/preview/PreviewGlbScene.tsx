@@ -395,13 +395,13 @@ export default function PreviewScene({ initialModel }: PreviewSceneProps) {
                     </Link>
                     <div className="relative group">
                       <Link 
-                        href={`/preview/${initialModel.id}?engine=gltf`} 
+                        href={`/utils/gltfFix`} 
                         className="flex items-center gap-1 text-white hover:text-white/90"
                       >
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
-                        <span>{t('switchToBabylon')}</span>
+                        <span>{t('useGltfFix')}</span>
                       </Link>
                     </div>
                   </div>

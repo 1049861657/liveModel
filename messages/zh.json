@@ -460,7 +460,7 @@
       "materialWarningTitle": "材质警告",
       "materialWarning": "模型使用了Three不支持的KHR材质扩展，贴图将不会被加载。",
       "learnMore": "了解更多",
-      "switchToBabylon": "换为 Babylon 预览",
+      "useGltfFix": "使用gltf修复工具",
       "closeHint": "关闭提示",
       "resetView": "重置视角",
       "toggleAxes": "显示/隐藏坐标轴",
@@ -647,5 +647,62 @@
     "Metadata": {
       "title": "魔抖",
       "description": "在线预览和分享3D模型"
+    },
+    "GltfFixPage": {
+      "title": "GLTF修复工具",
+      "viewDetails": "查看修复说明",
+      "fileUpload": "文件上传",
+      "dragDropHint": "拖放GLTF文件到这里，或点击选择文件",
+      "dragActive": "拖放文件到这里...",
+      "formatSupport": "仅支持.gltf格式",
+      "removeFile": "移除文件",
+      "startRepair": "开始修复",
+      "converting": "转换中...",
+      "downloadFile": "下载文件",
+      "conversionFailed": "转换失败",
+      "conversionSuccess": "转换成功",
+      "fileReady": "文件已准备好下载",
+      "logName": "日志",
+      "clearLogs": "清除日志",
+      "waitingOperation": "等待操作...",
+      "details": {
+        "title": "--- GLTF修复工具说明 ---",
+        "description": "此工具将gltf文件中的 KHR_materials_pbrSpecularGlossiness 扩展（已弃用）转换为pbrMetallicRoughness",
+        "process": "转换过程包括：",
+        "step1": "1. 将漫反射颜色转换为基础颜色",
+        "step2": "2. 将漫反射纹理转换为基础颜色纹理",
+        "step3": "3. 将光泽度转换为粗糙度",
+        "step4": "4. 设置金属度为0.0（非金属）",
+        "step5": "5. 移除旧扩展"
+      },
+      "logs": {
+        "fileUploaded": "已上传文件: {filename}",
+        "startConversion": "开始转换...",
+        "conversionSuccess": "转换成功",
+        "conversionError": "转换错误: {error}",
+        "error": "错误: {message}",
+        "downloaded": "已下载转换后的文件: {filename}"
+      }
+    },
+    "GltfFix": {
+      "onlyGltfSupported": "仅支持.gltf格式",
+      "fileInfo": "文件: {name} ({size} KB)",
+      "initConversion": "初始化转换流程",
+      "fileReadFailed": "文件读取失败",
+      "readingFile": "读取文件数据",
+      "parsingJson": "解析JSON结构",
+      "jsonParseComplete": "JSON解析完成",
+      "jsonParseError": "JSON解析错误: {error}",
+      "invalidGltf": "无效GLTF: 缺少asset.version",
+      "detectingExtensions": "检测扩展: {extensions}",
+      "none": "无",
+      "specGlossFound": "检测到SpecGloss扩展，执行PBR转换",
+      "convertingMaterial": "转换材质: {name}",
+      "unnamed": "未命名",
+      "conversionComplete": "转换完成，准备输出",
+      "conversionSuccess": "转换成功: {size} KB",
+      "materialConversionFailed": "材质转换失败: {error}",
+      "noSpecGlossFound": "未检测到SpecGloss扩展，无需转换",
+      "processingError": "处理异常: {error}"
     }
   }

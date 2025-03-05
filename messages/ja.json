@@ -1,8 +1,8 @@
 {
     "HomePage": {
       "platform": "オンライン3Dモデルプレビュープラットフォーム",
-      "title": "モードウ",
-      "description": "複数のフォーマット対応、リアルタイムレンダリング、高性能表示で3Dモデルを簡単にアップロード、プレビュー、共有できます。",
+      "title": "LiveModel",
+      "description": "複数のフォーマットに対応し、リアルタイムレンダリングと高性能表示で3Dモデルを簡単にアップロード、プレビュー、共有できます。",
       "browse": "モデルを閲覧",
       "upload": "モデルをアップロード",
       "stats": {
@@ -11,19 +11,19 @@
         "uptime": "稼働時間"
       },
       "features": {
-        "title": "パワフルな機能、シンプルな使用法",
+        "title": "強力な機能、簡単な使用法",
         "subtitle": "プロフェッショナルな3Dモデル管理とプレビューソリューション",
         "preview": {
           "title": "リアルタイムプレビュー",
-          "description": "複数の3Dファイル形式に対応し、スムーズな対話型体験を提供"
+          "description": "スムーズなインタラクティブ体験を備えた複数の3Dファイル形式のサポート"
         },
         "upload": {
           "title": "簡単アップロード",
-          "description": "ドラッグ＆ドロップでアップロード、一括処理と自動最適化機能付き"
+          "description": "バッチ処理と自動最適化を備えたドラッグアンドドロップアップロード"
         },
         "manage": {
           "title": "モデル管理",
-          "description": "便利なモデル管理と共有機能、チームコラボレーション対応"
+          "description": "チームコラボレーションによる便利なモデル管理と共有機能"
         }
       }
     },
@@ -58,7 +58,7 @@
       }
     },
     "Footer": {
-      "copyright": "© 2024-2025 モードウ. All rights reserved.",
+      "copyright": "© 2024-2025 LiveModel. All rights reserved.",
       "links": {
         "about": "会社概要",
         "privacy": "プライバシーポリシー",
@@ -204,7 +204,7 @@
     },
     "LoginPage": {
       "title": "おかえりなさい",
-      "subtitle": "モードウにサインインしてください",
+      "subtitle": "LiveModelにサインインしてください",
       "errors": {
         "invalidCredentials": "メールアドレスまたはパスワードが無効です",
         "loginFailed": "ログインに失敗しました。後でもう一度お試しください"
@@ -230,7 +230,7 @@
     },
     "RegisterPage": {
       "title": "アカウント作成",
-      "subtitle": "モードウに参加して、創造の旅を始めましょう",
+      "subtitle": "LiveModelに参加して、創造の旅を始めましょう",
       "errors": {
         "registerFailed": "登録に失敗しました。後でもう一度お試しください"
       },
@@ -460,7 +460,7 @@
       "materialWarningTitle": "マテリアルの警告",
       "materialWarning": "このモデルはThree.jsでサポートされていないKHRマテリアル拡張を使用しているため、テクスチャは読み込まれません。",
       "learnMore": "詳細を見る",
-      "switchToBabylon": "Babylonプレビューに切り替え",
+      "useGltfFix": "glTF修復ツールを使用する",
       "closeHint": "ヒントを閉じる",
       "resetView": "視点をリセット",
       "toggleAxes": "軸の表示切替",
@@ -645,7 +645,64 @@
     }
   },
   "Metadata": {
-    "title": "モードウ",
+    "title": "LiveModel",
     "description": "3Dモデルのオンラインプレビューと共有"
+  },
+  "GltfFixPage": {
+    "title": "GLTF修復ツール",
+    "viewDetails": "修復詳細を表示",
+    "fileUpload": "ファイルアップロード",
+    "dragDropHint": "GLTFファイルをここにドラッグ＆ドロップ、またはクリックして選択",
+    "dragActive": "ファイルをここにドロップ...",
+    "formatSupport": ".gltf形式のみ対応",
+    "removeFile": "ファイルを削除",
+    "startRepair": "修復開始",
+    "converting": "変換中...",
+    "downloadFile": "ファイルをダウンロード",
+    "conversionFailed": "変換失敗",
+    "conversionSuccess": "変換成功",
+    "fileReady": "ダウンロード準備完了",
+    "logName": "ログ",
+    "clearLogs": "ログをクリア",
+    "waitingOperation": "操作待機中...",
+    "details": {
+      "title": "--- GLTF修復ツール詳細 ---",
+      "description": "このツールはgltfファイル内のKHR_materials_pbrSpecularGlossiness拡張機能（非推奨）を標準のpbrMetallicRoughnessに変換します",
+      "process": "変換プロセスには以下が含まれます：",
+      "step1": "1. 拡散色をベースカラーに変換",
+      "step2": "2. 拡散テクスチャをベースカラーテクスチャに変換",
+      "step3": "3. 光沢度を粗さに変換",
+      "step4": "4. 金属度を0.0（非金属）に設定",
+      "step5": "5. 非推奨の拡張機能を削除"
+    },
+    "logs": {
+      "fileUploaded": "ファイルアップロード完了: {filename}",
+      "startConversion": "変換開始...",
+      "conversionSuccess": "変換成功",
+      "conversionError": "変換エラー: {error}",
+      "error": "エラー: {message}",
+      "downloaded": "変換ファイルをダウンロード: {filename}"
+    }
+  },
+  "GltfFix": {
+    "onlyGltfSupported": ".gltf形式のみサポートされています",
+    "fileInfo": "ファイル: {name} ({size} KB)",
+    "initConversion": "変換プロセスを初期化中",
+    "fileReadFailed": "ファイル読み込み失敗",
+    "readingFile": "ファイルデータを読み込み中",
+    "parsingJson": "JSON構造を解析中",
+    "jsonParseComplete": "JSON解析完了",
+    "jsonParseError": "JSON解析エラー: {error}",
+    "invalidGltf": "無効なGLTF: asset.versionがありません",
+    "detectingExtensions": "拡張機能を検出中: {extensions}",
+    "none": "なし",
+    "specGlossFound": "SpecGloss拡張機能が検出され、PBR変換を実行中",
+    "convertingMaterial": "マテリアル変換中: {name}",
+    "unnamed": "名前なし",
+    "conversionComplete": "変換完了、出力を準備中",
+    "conversionSuccess": "変換成功: {size} KB",
+    "materialConversionFailed": "マテリアル変換失敗: {error}",
+    "noSpecGlossFound": "SpecGloss拡張機能が検出されませんでした、変換は不要です",
+    "processingError": "処理エラー: {error}"
   }
 } 
