@@ -86,7 +86,7 @@ function ModelPreview({ model, isVisible }: { model: ExtendedModel; isVisible: b
       {/* iframe */}
       {isVisible && (
         <iframe
-          src={`/api/thumbnail/${model.format}?model=${model.filePath}&locale=${locale}`}
+          src={`/api/thumbnail/${model.format === 'glb' ? 'gltf' : model.format}?model=${model.filePath}&locale=${locale}`}
           className={clsx(
             'w-full h-full border-none transition-opacity duration-300',
             (isLoading || isError) ? 'opacity-0' : 'opacity-100'

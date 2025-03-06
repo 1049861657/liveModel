@@ -5,14 +5,14 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const modelPath = searchParams.get('model')
   const locale = searchParams.get('locale') || 'zh'
-  
+
   if (!modelPath) {
     return new NextResponse('缺少模型路径', { status: 400 })
   }
 
   const t = await getTranslations({locale, namespace: 'ModelPreview'});
 
-  // 使用Three.js渲染GLTF模型
+  // GLB 格式使用 Three.js 渲染，与GLTF保持一致
   const html = `
     <!DOCTYPE html>
     <html>
@@ -25,15 +25,14 @@ export async function GET(request: Request) {
           body { 
             margin: 0; 
             padding: 0; 
-            width: 100%; 
-            height: 100%; 
             overflow: hidden; 
             background-color: #f3f4f6; 
+            font-family: system-ui, -apple-system, sans-serif;
           }
-          canvas { 
-            display: block; 
+          #canvas { 
             width: 100%; 
-            height: 100%; 
+            height: 100vh; 
+            touch-action: none;
           }
           .loading {
             position: absolute;
@@ -96,7 +95,8 @@ export async function GET(request: Request) {
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <div style="margin-top: 8px;">${t('error.title')}</div>
-          <button class="reload-button" onclick="window.location.reload()">${t('error.reload')}</button>
+          <div id="error-message" style="margin-top: 8px; color: #ef4444; font-weight: bold;"></div>
+          <button id="reload-button" class="reload-button" onclick="window.location.reload()">${t('error.reload')}</button>
         </div>
         
         <canvas id="canvas"></canvas>
@@ -109,7 +109,53 @@ export async function GET(request: Request) {
             console.error('加载错误:', error);
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'flex';
-            window.parent.postMessage({ type: 'modelLoadError' }, '*');
+            
+            // 解析错误消息，识别缺失资源
+            let errorMessage = '';
+            let isResourceMissing = false;
+            const errorStr = error.toString();
+            
+            if (errorStr.includes('Failed to load buffer')) {
+              // 提取缺失的缓冲区文件名，例如："Failed to load buffer "CarbonFibre.bin""
+              const match = errorStr.match(/Failed to load buffer "([^"]+)"/);
+              if (match && match[1]) {
+                errorMessage = '缺失' + match[1];
+                isResourceMissing = true;
+              }
+            } else if (errorStr.includes('load texture image')) {
+              // 处理纹理加载错误
+              const match = errorStr.match(/load texture image ([^:]+)/);
+              if (match && match[1]) {
+                errorMessage = '缺失纹理' + match[1];
+                isResourceMissing = true;
+              }
+            } else if (errorStr.includes('Failed to load resource')) {
+              // 处理一般的资源加载错误
+              const match = errorStr.match(/Failed to load resource: (.*)/);
+              if (match && match[1]) {
+                errorMessage = '缺失资源：' + match[1];
+                isResourceMissing = true;
+              }
+            } else if (errorStr.includes('404') || errorStr.includes('Not Found')) {
+              // 处理404错误
+              errorMessage = '资源未找到，请检查模型完整性';
+              isResourceMissing = true;
+            } else if (errorStr.includes('加载超时')) {
+              errorMessage = '加载超时';
+            } else {
+              // 其他类型的错误
+              errorMessage = '加载失败';
+            }
+            
+            // 显示错误信息
+            document.getElementById('error-message').textContent = errorMessage;
+            
+            // 如果是资源缺失错误，隐藏重新加载按钮
+            if (isResourceMissing) {
+              document.getElementById('reload-button').style.display = 'none';
+            }
+            
+            window.parent.postMessage({ type: 'modelLoadError', message: errorMessage }, '*');
           }
 
           // 创建超时处理
@@ -124,60 +170,61 @@ export async function GET(request: Request) {
           });
 
           try {
-            // 创建场景
+            // 初始化场景
+            const canvas = document.getElementById('canvas');
             const scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf3f4f6);
-
-            // 添加环境光和定向光
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(1, 2, 3);
-            scene.add(directionalLight);
-
-            const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            backLight.position.set(-1, 1, -1);
-            scene.add(backLight);
-            
-            // 设置相机
+            // 初始化相机
             const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 0, 5);
             
-            // 创建渲染器
+            // 初始化渲染器
             const renderer = new THREE.WebGLRenderer({ 
-              canvas: document.getElementById('canvas'),
-              antialias: true 
+              canvas, 
+              antialias: true,
+              alpha: true,
+              powerPreference: "high-performance" 
             });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.0;
-            renderer.shadowMap.enabled = true;
             
-            // 添加HDR环境映射
+            // 初始化控制器
+            const controls = new OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2;
+            controls.enablePan = false;
+            controls.minDistance = 2;
+            controls.maxDistance = 10;
+            
+            // 添加环境光照
             const pmremGenerator = new THREE.PMREMGenerator(renderer);
             pmremGenerator.compileEquirectangularShader();
-
+            
             new RGBELoader()
               .load('/hdr/buikslotermeerplein_1k.hdr', function(texture) {
                 const envMap = pmremGenerator.fromEquirectangular(texture).texture;
                 scene.environment = envMap;
+                
                 texture.dispose();
                 pmremGenerator.dispose();
               });
             
-            // 创建控制器
-            const controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 1.0;
-            controls.enableZoom = true;
-            controls.enablePan = false;
-            controls.minDistance = 2;
-            controls.maxDistance = 10;
+            // 添加场景光源
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
             
             // 创建GLTF加载器
             const loadingManager = new THREE.LoadingManager();
@@ -189,7 +236,7 @@ export async function GET(request: Request) {
             const gltfLoader = new GLTFLoader(loadingManager);
             gltfLoader.setDRACOLoader(dracoLoader);
             
-            // 加载GLTF模型
+            // 加载GLB模型(GLB和GLTF使用相同的加载器)
             gltfLoader.load(
               '${modelPath}', 
               (gltf) => {
@@ -233,24 +280,14 @@ export async function GET(request: Request) {
                 // 隐藏加载指示器
                 document.getElementById('loading').style.display = 'none';
                 
-                // 通知父窗口加载完成
                 window.parent.postMessage({ type: 'modelLoadSuccess' }, '*');
               },
-              (progress) => {
-                // 可以显示加载进度
-              },
+              undefined,
               (error) => {
                 clearTimeout(timeout);
                 showError(error);
               }
             );
-            
-            // 调整窗口大小事件
-            window.addEventListener('resize', () => {
-              camera.aspect = window.innerWidth / window.innerHeight;
-              camera.updateProjectionMatrix();
-              renderer.setSize(window.innerWidth, window.innerHeight);
-            });
             
             // 动画循环
             function animate() {
@@ -258,8 +295,16 @@ export async function GET(request: Request) {
               controls.update();
               renderer.render(scene, camera);
             }
-            
             animate();
+            
+            // 窗口大小调整处理
+            window.addEventListener('resize', () => {
+              camera.aspect = window.innerWidth / window.innerHeight;
+              camera.updateProjectionMatrix();
+              renderer.setSize(window.innerWidth, window.innerHeight);
+              renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            });
+            
           } catch (error) {
             clearTimeout(timeout);
             showError(error);
