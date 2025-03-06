@@ -3,11 +3,11 @@ import {getTranslations} from 'next-intl/server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  let modelPath = searchParams.get('model')
+  const modelPath = searchParams.get('model')
   const locale = searchParams.get('locale') || 'zh'
 
   if (!modelPath) {
-    return new NextResponse('Missing model path', { status: 400 })
+    return new NextResponse('缺少模型路径', { status: 400 })
   }
 
   const t = await getTranslations({locale, namespace: 'ModelPreview'});
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
         <canvas id="canvas"></canvas>
 
         <script type="module">
-          import { THREE, ColladaLoader, OrbitControls } from '/vendor/three-bundle.js';
+          import { THREE, ColladaLoader, OrbitControls, RGBELoader } from '/vendor/three-bundle.js';
 
           try {
             const canvas = document.getElementById('canvas');
@@ -142,15 +142,16 @@ export async function GET(request: Request) {
             const pmremGenerator = new THREE.PMREMGenerator(renderer);
             pmremGenerator.compileEquirectangularShader();
 
-            new THREE.TextureLoader().load(
-              '/hdr/buikslotermeerplein_1k.hdr',
-              function (texture) {
-                const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-                scene.environment = envMap;
-                texture.dispose();
-                pmremGenerator.dispose();
-              }
-            );
+            new RGBELoader()
+              .load(
+                '/hdr/buikslotermeerplein_1k.hdr',
+                function (texture) {
+                  const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                  scene.environment = envMap;
+                  texture.dispose();
+                  pmremGenerator.dispose();
+                }
+              );
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
@@ -194,24 +195,27 @@ export async function GET(request: Request) {
                 const center = box.getCenter(new THREE.Vector3());
 
                 model.position.sub(center);
-                model.position.y -= size.y * 0.3;
+                model.position.y -= size.y * 0.1;
 
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = camera.fov * (Math.PI / 180);
-                const distance = (maxDim / (2 * Math.tan(fov / 2))) * 1.3;
+                let distance = (maxDim / (2 * Math.tan(fov / 2))) * 1.2;
+                
+                distance = Math.max(distance, maxDim * 1.5);
+                distance = Math.min(distance, maxDim * 4);
 
                 camera.position.set(
-                  distance * Math.cos(Math.PI / 4),
-                  distance * 0.3,
-                  distance * Math.sin(Math.PI / 4)
+                  distance * 0.8,
+                  distance * 0.6,
+                  distance
                 );
 
-                camera.lookAt(0, -size.y * 0.1, 0);
-                controls.target.set(0, -size.y * 0.1, 0);
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+                controls.target.set(0, 0, 0);
 
                 controls.minDistance = distance * 0.5;
-                controls.maxDistance = distance * 1.5;
-                controls.maxPolarAngle = Math.PI * 0.55;
+                controls.maxDistance = distance * 2;
+                controls.maxPolarAngle = Math.PI * 0.75;
                 controls.minPolarAngle = Math.PI * 0.25;
 
                 camera.near = distance * 0.01;

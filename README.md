@@ -56,7 +56,7 @@
 
 ### 存储
 - OSS 对象存储(阿里云/minio)
-- prisma数据库(mysql/mariadb)
+- prisma数据库
 
 ## 🚀 快速开始
 
@@ -96,12 +96,10 @@ pnpm dev
 ### Rollup 配置说明
 
 使用 Rollup 打包以下第三方库，无需使用CDN下载依赖：
-- model-viewer：用于 GLB 模型预览
-- three.js：用于 DAE 模型预览
-- babylon.js：用于 GLTF 模型预览
+- three.js：用于模型预览
 
 打包配置文件位于 `rollup.config.mjs`，生成文件位于/public/vendor。
-引用方式<script type="module" src="/vendor/model-viewer-bundle.js"></script>
+引用方式<script type="module" src="/vendor/three-bundle.js"></script>
 
 如果修改了相关依赖，需要重新运行 `pnpm rollup` 更新打包文件。
 

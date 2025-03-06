@@ -7,21 +7,33 @@ export async function GET(request: Request) {
   const locale = searchParams.get('locale') || 'zh'
 
   if (!modelPath) {
-    return new NextResponse('Missing model path', { status: 400 })
+    return new NextResponse('缺少模型路径', { status: 400 })
   }
 
   const t = await getTranslations({locale, namespace: 'ModelPreview'});
 
-  // GLB 格式使用 model-viewer
+  // GLB 格式使用 Three.js 渲染，与GLTF保持一致
   const html = `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script type="module" src="/vendor/model-viewer-bundle.js"></script>
+        <!-- 使用本地打包的Three.js组件 -->
+        <script type="module" src="/vendor/three-bundle.js"></script>
         <style>
-          body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #f3f4f6; }
+          body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #f3f4f6; 
+            font-family: system-ui, -apple-system, sans-serif;
+          }
+          #canvas { 
+            width: 100%; 
+            height: 100vh; 
+            touch-action: none;
+          }
           .loading {
             position: absolute;
             inset: 0;
@@ -57,23 +69,6 @@ export async function GET(request: Request) {
           .reload-button:hover {
             background-color: #2563eb;
           }
-          model-viewer {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            border: none;
-            background-color: transparent;
-            z-index: 10;
-          }
-          model-viewer::part(default-progress-bar) {
-            display: none;
-          }
-          model-viewer::part(default-ar-button) {
-            display: none;
-          }
-          
           .spinner {
             width: 40px;
             height: 40px;
@@ -103,66 +98,170 @@ export async function GET(request: Request) {
           <button class="reload-button" onclick="window.location.reload()">${t('error.reload')}</button>
         </div>
         
-        <model-viewer
-          id="viewer"
-          src="${modelPath}"
-          environment-image="/hdr/buikslotermeerplein_1k.hdr"
-          exposure="1"
-          shadow-intensity="1"
-          auto-rotate
-          camera-controls
-          touch-action="pan-y"
-          interaction-prompt="none"
-          camera-orbit="-45deg 60deg auto"
-          min-camera-orbit="auto auto auto"
-          max-camera-orbit="auto auto auto"
-          camera-target="0m 0m 0m"
-          auto-rotate-delay="0"
-          rotation-per-second="30deg"
-          field-of-view="30deg"
-          bounds="tight"
-          interpolation-decay="200"
-        ></model-viewer>
+        <canvas id="canvas"></canvas>
 
         <script type="module">
-          const timeout = setTimeout(() => {
+          import { THREE, GLTFLoader, OrbitControls, DRACOLoader, RGBELoader } from '/vendor/three-bundle.js';
+
+          // 错误处理函数
+          function showError(error) {
+            console.error('加载错误:', error);
             document.getElementById('loading').style.display = 'none';
             document.getElementById('error').style.display = 'flex';
             window.parent.postMessage({ type: 'modelLoadError' }, '*');
+          }
+
+          // 创建超时处理
+          const timeout = setTimeout(() => {
+            showError('加载超时');
           }, 20000);
 
-          window.addEventListener('error', () => {
+          // 捕获全局错误
+          window.addEventListener('error', (event) => {
             clearTimeout(timeout);
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'flex';
-            window.parent.postMessage({ type: 'modelLoadError' }, '*');
+            showError(event.error || '未知错误');
           });
 
-          await customElements.whenDefined('model-viewer');
-          const viewer = document.querySelector('model-viewer');
-
-          viewer.addEventListener('load', () => {
-            clearTimeout(timeout);
-            document.getElementById('loading').style.display = 'none';
+          try {
+            // 初始化场景
+            const canvas = document.getElementById('canvas');
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf3f4f6);
             
-            const boundingBox = viewer.getBoundingBoxCenter();
-            const size = viewer.getDimensions();
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const distance = maxDim * 2;
+            // 初始化相机
+            const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000);
             
-            viewer.cameraOrbit = \`-45deg 60deg \${distance}m\`;
-            viewer.fieldOfView = '30deg';
-            viewer.cameraTarget = \`\${boundingBox.x}m \${boundingBox.y}m \${boundingBox.z}m\`;
-
-            window.parent.postMessage({ type: 'modelLoadSuccess' }, '*');
-          });
-
-          viewer.addEventListener('error', () => {
+            // 初始化渲染器
+            const renderer = new THREE.WebGLRenderer({ 
+              canvas, 
+              antialias: true,
+              alpha: true,
+              powerPreference: "high-performance" 
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            
+            // 初始化控制器
+            const controls = new OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2;
+            controls.enablePan = false;
+            controls.minDistance = 2;
+            controls.maxDistance = 10;
+            
+            // 添加环境光照
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            pmremGenerator.compileEquirectangularShader();
+            
+            new RGBELoader()
+              .load('/hdr/buikslotermeerplein_1k.hdr', function(texture) {
+                const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                scene.environment = envMap;
+                
+                texture.dispose();
+                pmremGenerator.dispose();
+              });
+            
+            // 添加场景光源
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // 创建GLTF加载器
+            const loadingManager = new THREE.LoadingManager();
+            
+            const dracoLoader = new DRACOLoader(loadingManager);
+            // 设置DRACO解码器路径
+            dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/libs/draco/');
+            
+            const gltfLoader = new GLTFLoader(loadingManager);
+            gltfLoader.setDRACOLoader(dracoLoader);
+            
+            // 加载GLB模型(GLB和GLTF使用相同的加载器)
+            gltfLoader.load(
+              '${modelPath}', 
+              (gltf) => {
+                clearTimeout(timeout);
+                
+                const model = gltf.scene;
+                scene.add(model);
+                
+                // 计算模型边界框并调整相机位置
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                
+                // 改进的相机距离计算
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = camera.fov * (Math.PI / 180); // 将视场角转换为弧度
+                let distance = (maxDim / (2 * Math.tan(fov / 2))) * 1.2; // 基于视场角的距离计算
+                
+                // 设置最小和最大距离阈值
+                distance = Math.max(distance, maxDim * 1.5); // 确保最小距离
+                distance = Math.min(distance, maxDim * 4); // 限制最大距离
+                
+                // 重置模型位置，使其居中
+                model.position.sub(center);
+                
+                // 根据模型尺寸调整相机
+                camera.position.set(distance * 0.8, distance * 0.6, distance);
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+                
+                // 调整相机的近剪裁面和远剪裁面
+                camera.near = distance * 0.01;
+                camera.far = distance * 10;
+                camera.updateProjectionMatrix();
+                
+                // 调整控制器
+                controls.target.set(0, 0, 0);
+                controls.minDistance = distance * 0.5;
+                controls.maxDistance = distance * 2;
+                controls.update();
+                
+                // 隐藏加载指示器
+                document.getElementById('loading').style.display = 'none';
+                
+                window.parent.postMessage({ type: 'modelLoadSuccess' }, '*');
+              },
+              undefined,
+              (error) => {
+                clearTimeout(timeout);
+                showError(error);
+              }
+            );
+            
+            // 动画循环
+            function animate() {
+              requestAnimationFrame(animate);
+              controls.update();
+              renderer.render(scene, camera);
+            }
+            animate();
+            
+            // 窗口大小调整处理
+            window.addEventListener('resize', () => {
+              camera.aspect = window.innerWidth / window.innerHeight;
+              camera.updateProjectionMatrix();
+              renderer.setSize(window.innerWidth, window.innerHeight);
+              renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            });
+            
+          } catch (error) {
             clearTimeout(timeout);
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'flex';
-            window.parent.postMessage({ type: 'modelLoadError' }, '*');
-          });
+            showError(error);
+          }
         </script>
       </body>
     </html>

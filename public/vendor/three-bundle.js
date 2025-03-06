@@ -3,7 +3,7 @@
  * Copyright 2010-2025 Three.js Authors
  * SPDX-License-Identifier: MIT
  */
-const REVISION = '173';
+const REVISION = '174';
 
 const MOUSE = { LEFT: 0, MIDDLE: 1, RIGHT: 2, ROTATE: 0, DOLLY: 1, PAN: 2 };
 const TOUCH = { ROTATE: 0, PAN: 1, DOLLY_PAN: 2, DOLLY_ROTATE: 3 };
@@ -221,11 +221,35 @@ const TimestampQuery = {
 };
 
 /**
- * https://github.com/mrdoob/eventdispatcher.js/
+ * This modules allows to dispatch event objects on custom JavaScript objects.
+ *
+ * Main repository: [eventdispatcher.js]{@link https://github.com/mrdoob/eventdispatcher.js/}
+ *
+ * Code Example:
+ * ```js
+ * class Car extends EventDispatcher {
+ * 	start() {
+ *		this.dispatchEvent( { type: 'start', message: 'vroom vroom!' } );
+ *	}
+ *};
+ *
+ * // Using events with the custom object
+ * const car = new Car();
+ * car.addEventListener( 'start', function ( event ) {
+ * 	alert( event.message );
+ * } );
+ *
+ * car.start();
+ * ```
  */
-
 class EventDispatcher {
 
+	/**
+	 * Adds the given event listener to the given event type.
+	 *
+	 * @param {string} type - The type of event to listen to.
+	 * @param {Function} listener - The function that gets called when the event is fired.
+	 */
 	addEventListener( type, listener ) {
 
 		if ( this._listeners === undefined ) this._listeners = {};
@@ -246,6 +270,13 @@ class EventDispatcher {
 
 	}
 
+	/**
+	 * Returns `true` if the given event listener has been added to the given event type.
+	 *
+	 * @param {string} type - The type of event.
+	 * @param {Function} listener - The listener to check.
+	 * @return {boolean} Whether the given event listener has been added to the given event type.
+	 */
 	hasEventListener( type, listener ) {
 
 		const listeners = this._listeners;
@@ -256,6 +287,12 @@ class EventDispatcher {
 
 	}
 
+	/**
+	 * Removes the given event listener from the given event type.
+	 *
+	 * @param {string} type - The type of event.
+	 * @param {Function} listener - The listener to remove.
+	 */
 	removeEventListener( type, listener ) {
 
 		const listeners = this._listeners;
@@ -278,6 +315,11 @@ class EventDispatcher {
 
 	}
 
+	/**
+	 * Dispatches an event object.
+	 *
+	 * @param {Object} event - The event that gets fired.
+	 */
 	dispatchEvent( event ) {
 
 		const listeners = this._listeners;
@@ -315,8 +357,15 @@ let _seed = 1234567;
 const DEG2RAD = Math.PI / 180;
 const RAD2DEG = 180 / Math.PI;
 
-// http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
+/**
+ * Generate a [UUID]{@link https://en.wikipedia.org/wiki/Universally_unique_identifier}
+ * (universally unique identifier).
+ *
+ * @return {string} The UUID.
+ */
 function generateUUID() {
+
+	// http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
 
 	const d0 = Math.random() * 0xffffffff | 0;
 	const d1 = Math.random() * 0xffffffff | 0;
@@ -332,29 +381,65 @@ function generateUUID() {
 
 }
 
+/**
+ * Clamps the given value between min and max.
+ *
+ * @param {number} value - The value to clamp.
+ * @param {number} min - The min value.
+ * @param {number} max - The max value.
+ * @return {number} The clamped value.
+ */
 function clamp( value, min, max ) {
 
 	return Math.max( min, Math.min( max, value ) );
 
 }
 
-// compute euclidean modulo of m % n
-// https://en.wikipedia.org/wiki/Modulo_operation
+/**
+ * Computes the Euclidean modulo of the given parameters that
+ * is `( ( n % m ) + m ) % m`.
+ *
+ * @param {number} n - The first parameter.
+ * @param {number} m - The second parameter.
+ * @return {number} The Euclidean modulo.
+ */
 function euclideanModulo( n, m ) {
+
+	// https://en.wikipedia.org/wiki/Modulo_operation
 
 	return ( ( n % m ) + m ) % m;
 
 }
 
-// Linear mapping from range <a1, a2> to range <b1, b2>
+/**
+ * Performs a linear mapping from range `<a1, a2>` to range `<b1, b2>`
+ * for the given value.
+ *
+ * @param {number} x - The value to be mapped.
+ * @param {number} a1 - Minimum value for range A.
+ * @param {number} a2 - Maximum value for range A.
+ * @param {number} b1 - Minimum value for range B.
+ * @param {number} b2 - Maximum value for range B.
+ * @return {number} The mapped value.
+ */
 function mapLinear( x, a1, a2, b1, b2 ) {
 
 	return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );
 
 }
 
-// https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/inverse-lerp-a-super-useful-yet-often-overlooked-function-r5230/
+/**
+ * Returns the percentage in the closed interval `[0, 1]` of the given value
+ * between the start and end point.
+ *
+ * @param {number} x - The start point
+ * @param {number} y - The end point.
+ * @param {number} value - A value between start and end.
+ * @return {number} The interpolation factor.
+ */
 function inverseLerp( x, y, value ) {
+
+	// https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/inverse-lerp-a-super-useful-yet-often-overlooked-function-r5230/
 
 	if ( x !== y ) {
 
@@ -368,28 +453,66 @@ function inverseLerp( x, y, value ) {
 
 }
 
-// https://en.wikipedia.org/wiki/Linear_interpolation
+/**
+ * Returns a value linearly interpolated from two known points based on the given interval -
+ * `t = 0` will return `x` and `t = 1` will return `y`.
+ *
+ * @param {number} x - The start point
+ * @param {number} y - The end point.
+ * @param {number} t - The interpolation factor in the closed interval `[0, 1]`.
+ * @return {number} The interpolated value.
+ */
 function lerp( x, y, t ) {
 
 	return ( 1 - t ) * x + t * y;
 
 }
 
-// http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
+/**
+ * Smoothly interpolate a number from `x` to `y` in  a spring-like manner using a delta
+ * time to maintain frame rate independent movement. For details, see
+ * [Frame rate independent damping using lerp]{@link http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/}.
+ *
+ * @param {number} x - The current point.
+ * @param {number} y - The target point.
+ * @param {number} lambda - A higher lambda value will make the movement more sudden,
+ * and a lower value will make the movement more gradual.
+ * @param {number} dt - Delta time in seconds.
+ * @return {number} The interpolated value.
+ */
 function damp( x, y, lambda, dt ) {
 
 	return lerp( x, y, 1 - Math.exp( - lambda * dt ) );
 
 }
 
-// https://www.desmos.com/calculator/vcsjnyz7x4
+/**
+ * Returns a value that alternates between `0` and the given `length` parameter.
+ *
+ * @param {number} x - The value to pingpong.
+ * @param {number} [length=1] - The positive value the function will pingpong to.
+ * @return {number} The alternated value.
+ */
 function pingpong( x, length = 1 ) {
+
+	// https://www.desmos.com/calculator/vcsjnyz7x4
 
 	return length - Math.abs( euclideanModulo( x, length * 2 ) - length );
 
 }
 
-// http://en.wikipedia.org/wiki/Smoothstep
+/**
+ * Returns a value in the range `[0,1]` that represents the percentage that `x` has
+ * moved between `min` and `max`, but smoothed or slowed down the closer `x` is to
+ * the `min` and `max`.
+ *
+ * See [Smoothstep]{@link http://en.wikipedia.org/wiki/Smoothstep} for more details.
+ *
+ * @param {number} x - The value to evaluate based on its position between min and max.
+ * @param {number} min - The min value. Any x value below min will be `0`.
+ * @param {number} max - The max value. Any x value above max will be `1`.
+ * @return {number} The alternated value.
+ */
 function smoothstep( x, min, max ) {
 
 	if ( x <= min ) return 0;
@@ -401,6 +524,15 @@ function smoothstep( x, min, max ) {
 
 }
 
+/**
+ * A [variation on smoothstep]{@link https://en.wikipedia.org/wiki/Smoothstep#Variations}
+ * that has zero 1st and 2nd order derivatives at x=0 and x=1.
+ *
+ * @param {number} x - The value to evaluate based on its position between min and max.
+ * @param {number} min - The min value. Any x value below min will be `0`.
+ * @param {number} max - The max value. Any x value above max will be `1`.
+ * @return {number} The alternated value.
+ */
 function smootherstep( x, min, max ) {
 
 	if ( x <= min ) return 0;
@@ -412,28 +544,50 @@ function smootherstep( x, min, max ) {
 
 }
 
-// Random integer from <low, high> interval
+/**
+ * Returns a random integer from `<low, high>` interval.
+ *
+ * @param {number} low - The lower value boundary.
+ * @param {number} high - The upper value boundary
+ * @return {number} A random integer.
+ */
 function randInt( low, high ) {
 
 	return low + Math.floor( Math.random() * ( high - low + 1 ) );
 
 }
 
-// Random float from <low, high> interval
+/**
+ * Returns a random float from `<low, high>` interval.
+ *
+ * @param {number} low - The lower value boundary.
+ * @param {number} high - The upper value boundary
+ * @return {number} A random float.
+ */
 function randFloat( low, high ) {
 
 	return low + Math.random() * ( high - low );
 
 }
 
-// Random float from <-range/2, range/2> interval
+/**
+ * Returns a random integer from `<-range/2, range/2>` interval.
+ *
+ * @param {number} range - Defines the value range.
+ * @return {number} A random float.
+ */
 function randFloatSpread( range ) {
 
 	return range * ( 0.5 - Math.random() );
 
 }
 
-// Deterministic pseudo-random float in the interval [ 0, 1 ]
+/**
+ * Returns a deterministic pseudo-random float in the interval `[0, 1]`.
+ *
+ * @param {number} [s] - The integer seed.
+ * @return {number} A random float.
+ */
 function seededRandom( s ) {
 
 	if ( s !== undefined ) _seed = s;
@@ -450,43 +604,80 @@ function seededRandom( s ) {
 
 }
 
+/**
+ * Converts degrees to radians.
+ *
+ * @param {number} degrees - A value in degrees.
+ * @return {number} The converted value in radians.
+ */
 function degToRad( degrees ) {
 
 	return degrees * DEG2RAD;
 
 }
 
+/**
+ * Converts radians to degrees.
+ *
+ * @param {number} radians - A value in radians.
+ * @return {number} The converted value in degrees.
+ */
 function radToDeg( radians ) {
 
 	return radians * RAD2DEG;
 
 }
 
+/**
+ * Returns `true` if the given number is a power of two.
+ *
+ * @param {number} value - The value to check.
+ * @return {boolean} Whether the given number is a power of two or not.
+ */
 function isPowerOfTwo( value ) {
 
 	return ( value & ( value - 1 ) ) === 0 && value !== 0;
 
 }
 
+/**
+ * Returns the smallest power of two that is greater than or equal to the given number.
+ *
+ * @param {number} value - The value to find a POT for.
+ * @return {number} The smallest power of two that is greater than or equal to the given number.
+ */
 function ceilPowerOfTwo( value ) {
 
 	return Math.pow( 2, Math.ceil( Math.log( value ) / Math.LN2 ) );
 
 }
 
+/**
+ * Returns the largest power of two that is less than or equal to the given number.
+ *
+ * @param {number} value - The value to find a POT for.
+ * @return {number} The largest power of two that is less than or equal to the given number.
+ */
 function floorPowerOfTwo( value ) {
 
 	return Math.pow( 2, Math.floor( Math.log( value ) / Math.LN2 ) );
 
 }
 
+/**
+ * Sets the given quaternion from the [Intrinsic Proper Euler Angles]{@link https://en.wikipedia.org/wiki/Euler_angles}
+ * defined by the given angles and order.
+ *
+ * Rotations are applied to the axes in the order specified by order:
+ * rotation by angle `a` is applied first, then by angle `b`, then by angle `c`.
+ *
+ * @param {Quaternion} q - The quaternion to set.
+ * @param {number} a - The rotation applied to the first axis, in radians.
+ * @param {number} b - The rotation applied to the second axis, in radians.
+ * @param {number} c - The rotation applied to the third axis, in radians.
+ * @param {('XYX'|'XZX'|'YXY'|'YZY'|'ZXZ'|'ZYZ')} order - A string specifying the axes order.
+ */
 function setQuaternionFromProperEuler( q, a, b, c, order ) {
-
-	// Intrinsic Proper Euler Angles - see https://en.wikipedia.org/wiki/Euler_angles
-
-	// rotations are applied to the axes in the order specified by 'order'
-	// rotation by angle 'a' is applied first, then by angle 'b', then by angle 'c'
-	// angles are in radians
 
 	const cos = Math.cos;
 	const sin = Math.sin;
@@ -536,6 +727,13 @@ function setQuaternionFromProperEuler( q, a, b, c, order ) {
 
 }
 
+/**
+ * Denormalizes the given value according to the given typed array.
+ *
+ * @param {number} value - The value to denormalize.
+ * @param {TypedArray} array - The typed array that defines the data type of the value.
+ * @return {number} The denormalize (float) value in the range `[0,1]`.
+ */
 function denormalize( value, array ) {
 
 	switch ( array.constructor ) {
@@ -576,6 +774,13 @@ function denormalize( value, array ) {
 
 }
 
+/**
+ * Normalizes the given value according to the given typed array.
+ *
+ * @param {number} value - The float value in the range `[0,1]` to normalize.
+ * @param {TypedArray} array - The typed array that defines the data type of the value.
+ * @return {number} The normalize value.
+ */
 function normalize( value, array ) {
 
 	switch ( array.constructor ) {
@@ -643,17 +848,71 @@ const MathUtils = {
 	denormalize: denormalize
 };
 
+/**
+ * Class representing a 2D vector. A 2D vector is an ordered pair of numbers
+ * (labeled x and y), which can be used to represent a number of things, such as:
+ *
+ * - A point in 2D space (i.e. a position on a plane).
+ * - A direction and length across a plane. In three.js the length will
+ * always be the Euclidean distance(straight-line distance) from `(0, 0)` to `(x, y)`
+ * and the direction is also measured from `(0, 0)` towards `(x, y)`.
+ * - Any arbitrary ordered pair of numbers.
+ *
+ * There are other things a 2D vector can be used to represent, such as
+ * momentum vectors, complex numbers and so on, however these are the most
+ * common uses in three.js.
+ *
+ * Iterating through a vector instance will yield its components `(x, y)` in
+ * the corresponding order.
+ * ```js
+ * const a = new THREE.Vector2( 0, 1 );
+ *
+ * //no arguments; will be initialised to (0, 0)
+ * const b = new THREE.Vector2( );
+ *
+ * const d = a.distanceTo( b );
+ * ```
+ */
 class Vector2 {
 
+	/**
+	 * Constructs a new 2D vector.
+	 *
+	 * @param {number} [x=0] - The x value of this vector.
+	 * @param {number} [y=0] - The y value of this vector.
+	 */
 	constructor( x = 0, y = 0 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		Vector2.prototype.isVector2 = true;
 
+		/**
+		 * The x value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.x = x;
+
+		/**
+		 * The y value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.y = y;
 
 	}
 
+	/**
+	 * Alias for {@link Vector2#x}.
+	 *
+	 * @type {number}
+	 */
 	get width() {
 
 		return this.x;
@@ -666,6 +925,11 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Alias for {@link Vector2#y}.
+	 *
+	 * @type {number}
+	 */
 	get height() {
 
 		return this.y;
@@ -678,6 +942,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Sets the vector components.
+	 *
+	 * @param {number} x - The value of the x component.
+	 * @param {number} y - The value of the y component.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	set( x, y ) {
 
 		this.x = x;
@@ -687,6 +958,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Sets the vector components to the same value.
+	 *
+	 * @param {number} scalar - The value to set for all vector components.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	setScalar( scalar ) {
 
 		this.x = scalar;
@@ -696,6 +973,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Sets the vector's x component to the given value
+	 *
+	 * @param {number} x - The value to set.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	setX( x ) {
 
 		this.x = x;
@@ -704,6 +987,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Sets the vector's y component to the given value
+	 *
+	 * @param {number} y - The value to set.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	setY( y ) {
 
 		this.y = y;
@@ -712,6 +1001,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Allows to set a vector component with an index.
+	 *
+	 * @param {number} index - The component index. `0` equals to x, `1` equals to y.
+	 * @param {number} value - The value to set.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	setComponent( index, value ) {
 
 		switch ( index ) {
@@ -726,6 +1022,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Returns the value of the vector component which matches the given index.
+	 *
+	 * @param {number} index - The component index. `0` equals to x, `1` equals to y.
+	 * @return {number} A vector component value.
+	 */
 	getComponent( index ) {
 
 		switch ( index ) {
@@ -738,12 +1040,23 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Returns a new vector with copied values from this instance.
+	 *
+	 * @return {Vector2} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor( this.x, this.y );
 
 	}
 
+	/**
+	 * Copies the values of the given vector to this instance.
+	 *
+	 * @param {Vector2} v - The vector to copy.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	copy( v ) {
 
 		this.x = v.x;
@@ -753,6 +1066,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Adds the given vector to this instance.
+	 *
+	 * @param {Vector2} v - The vector to add.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	add( v ) {
 
 		this.x += v.x;
@@ -762,6 +1081,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Adds the given scalar value to all components of this instance.
+	 *
+	 * @param {number} s - The scalar to add.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	addScalar( s ) {
 
 		this.x += s;
@@ -771,6 +1096,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Adds the given vectors and stores the result in this instance.
+	 *
+	 * @param {Vector2} a - The first vector.
+	 * @param {Vector2} b - The second vector.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	addVectors( a, b ) {
 
 		this.x = a.x + b.x;
@@ -780,6 +1112,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Adds the given vector scaled by the given factor to this instance.
+	 *
+	 * @param {Vector2} v - The vector.
+	 * @param {number} s - The factor that scales `v`.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	addScaledVector( v, s ) {
 
 		this.x += v.x * s;
@@ -789,6 +1128,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Subtracts the given vector from this instance.
+	 *
+	 * @param {Vector2} v - The vector to subtract.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	sub( v ) {
 
 		this.x -= v.x;
@@ -798,6 +1143,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Subtracts the given scalar value from all components of this instance.
+	 *
+	 * @param {number} s - The scalar to subtract.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	subScalar( s ) {
 
 		this.x -= s;
@@ -807,6 +1158,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Subtracts the given vectors and stores the result in this instance.
+	 *
+	 * @param {Vector2} a - The first vector.
+	 * @param {Vector2} b - The second vector.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	subVectors( a, b ) {
 
 		this.x = a.x - b.x;
@@ -816,6 +1174,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Multiplies the given vector with this instance.
+	 *
+	 * @param {Vector2} v - The vector to multiply.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	multiply( v ) {
 
 		this.x *= v.x;
@@ -825,6 +1189,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Multiplies the given scalar value with all components of this instance.
+	 *
+	 * @param {number} scalar - The scalar to multiply.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	multiplyScalar( scalar ) {
 
 		this.x *= scalar;
@@ -834,6 +1204,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Divides this instance by the given vector.
+	 *
+	 * @param {Vector2} v - The vector to divide.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	divide( v ) {
 
 		this.x /= v.x;
@@ -843,12 +1219,25 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Divides this vector by the given scalar.
+	 *
+	 * @param {number} scalar - The scalar to divide.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	divideScalar( scalar ) {
 
 		return this.multiplyScalar( 1 / scalar );
 
 	}
 
+	/**
+	 * Multiplies this vector (with an implicit 1 as the 3rd component) by
+	 * the given 3x3 matrix.
+	 *
+	 * @param {Matrix3} m - The matrix to apply.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	applyMatrix3( m ) {
 
 		const x = this.x, y = this.y;
@@ -861,6 +1250,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * If this vector's x or y value is greater than the given vector's x or y
+	 * value, replace that value with the corresponding min value.
+	 *
+	 * @param {Vector2} v - The vector.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	min( v ) {
 
 		this.x = Math.min( this.x, v.x );
@@ -870,6 +1266,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * If this vector's x or y value is less than the given vector's x or y
+	 * value, replace that value with the corresponding max value.
+	 *
+	 * @param {Vector2} v - The vector.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	max( v ) {
 
 		this.x = Math.max( this.x, v.x );
@@ -879,6 +1282,16 @@ class Vector2 {
 
 	}
 
+	/**
+	 * If this vector's x or y value is greater than the max vector's x or y
+	 * value, it is replaced by the corresponding value.
+	 * If this vector's x or y value is less than the min vector's x or y value,
+	 * it is replaced by the corresponding value.
+	 *
+	 * @param {Vector2} min - The minimum x and y values.
+	 * @param {Vector2} max - The maximum x and y values in the desired range.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	clamp( min, max ) {
 
 		// assumes min < max, componentwise
@@ -890,6 +1303,16 @@ class Vector2 {
 
 	}
 
+	/**
+	 * If this vector's x or y values are greater than the max value, they are
+	 * replaced by the max value.
+	 * If this vector's x or y values are less than the min value, they are
+	 * replaced by the min value.
+	 *
+	 * @param {number} minVal - The minimum value the components will be clamped to.
+	 * @param {number} maxVal - The maximum value the components will be clamped to.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	clampScalar( minVal, maxVal ) {
 
 		this.x = clamp( this.x, minVal, maxVal );
@@ -899,6 +1322,16 @@ class Vector2 {
 
 	}
 
+	/**
+	 * If this vector's length is greater than the max value, it is replaced by
+	 * the max value.
+	 * If this vector's length is less than the min value, it is replaced by the
+	 * min value.
+	 *
+	 * @param {number} min - The minimum value the vector length will be clamped to.
+	 * @param {number} max - The maximum value the vector length will be clamped to.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	clampLength( min, max ) {
 
 		const length = this.length();
@@ -907,6 +1340,11 @@ class Vector2 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded down to the nearest integer value.
+	 *
+	 * @return {Vector2} A reference to this vector.
+	 */
 	floor() {
 
 		this.x = Math.floor( this.x );
@@ -916,6 +1354,11 @@ class Vector2 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded up to the nearest integer value.
+	 *
+	 * @return {Vector2} A reference to this vector.
+	 */
 	ceil() {
 
 		this.x = Math.ceil( this.x );
@@ -925,6 +1368,11 @@ class Vector2 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded to the nearest integer value
+	 *
+	 * @return {Vector2} A reference to this vector.
+	 */
 	round() {
 
 		this.x = Math.round( this.x );
@@ -934,6 +1382,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded towards zero (up if negative,
+	 * down if positive) to an integer value.
+	 *
+	 * @return {Vector2} A reference to this vector.
+	 */
 	roundToZero() {
 
 		this.x = Math.trunc( this.x );
@@ -943,6 +1397,11 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Inverts this vector - i.e. sets x = -x and y = -y.
+	 *
+	 * @return {Vector2} A reference to this vector.
+	 */
 	negate() {
 
 		this.x = - this.x;
@@ -952,45 +1411,83 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Calculates the dot product of the given vector with this instance.
+	 *
+	 * @param {Vector2} v - The vector to compute the dot product with.
+	 * @return {number} The result of the dot product.
+	 */
 	dot( v ) {
 
 		return this.x * v.x + this.y * v.y;
 
 	}
 
+	/**
+	 * Calculates the cross product of the given vector with this instance.
+	 *
+	 * @param {Vector2} v - The vector to compute the cross product with.
+	 * @return {number} The result of the cross product.
+	 */
 	cross( v ) {
 
 		return this.x * v.y - this.y * v.x;
 
 	}
 
+	/**
+	 * Computes the square of the Euclidean length (straight-line length) from
+	 * (0, 0) to (x, y). If you are comparing the lengths of vectors, you should
+	 * compare the length squared instead as it is slightly more efficient to calculate.
+	 *
+	 * @return {number} The square length of this vector.
+	 */
 	lengthSq() {
 
 		return this.x * this.x + this.y * this.y;
 
 	}
 
+	/**
+	 * Computes the  Euclidean length (straight-line length) from (0, 0) to (x, y).
+	 *
+	 * @return {number} The length of this vector.
+	 */
 	length() {
 
 		return Math.sqrt( this.x * this.x + this.y * this.y );
 
 	}
 
+	/**
+	 * Computes the Manhattan length of this vector.
+	 *
+	 * @return {number} The length of this vector.
+	 */
 	manhattanLength() {
 
 		return Math.abs( this.x ) + Math.abs( this.y );
 
 	}
 
+	/**
+	 * Converts this vector to a unit vector - that is, sets it equal to a vector
+	 * with the same direction as this one, but with a vector length of `1`.
+	 *
+	 * @return {Vector2} A reference to this vector.
+	 */
 	normalize() {
 
 		return this.divideScalar( this.length() || 1 );
 
 	}
 
+	/**
+	 * Computes the angle in radians of this vector with respect to the positive x-axis.
+	 *
+	 * @return {number} The angle in radians.
+	 */
 	angle() {
-
-		// computes the angle in radians with respect to the positive x-axis
 
 		const angle = Math.atan2( - this.y, - this.x ) + Math.PI;
 
@@ -998,6 +1495,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Returns the angle between the given vector and this instance in radians.
+	 *
+	 * @param {Vector2} v - The vector to compute the angle with.
+	 * @return {number} The angle in radians.
+	 */
 	angleTo( v ) {
 
 		const denominator = Math.sqrt( this.lengthSq() * v.lengthSq() );
@@ -1012,12 +1515,26 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Computes the distance from the given vector to this instance.
+	 *
+	 * @param {Vector2} v - The vector to compute the distance to.
+	 * @return {number} The distance.
+	 */
 	distanceTo( v ) {
 
 		return Math.sqrt( this.distanceToSquared( v ) );
 
 	}
 
+	/**
+	 * Computes the squared distance from the given vector to this instance.
+	 * If you are just comparing the distance with another distance, you should compare
+	 * the distance squared instead as it is slightly more efficient to calculate.
+	 *
+	 * @param {Vector2} v - The vector to compute the squared distance to.
+	 * @return {number} The squared distance.
+	 */
 	distanceToSquared( v ) {
 
 		const dx = this.x - v.x, dy = this.y - v.y;
@@ -1025,18 +1542,40 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Computes the Manhattan distance from the given vector to this instance.
+	 *
+	 * @param {Vector2} v - The vector to compute the Manhattan distance to.
+	 * @return {number} The Manhattan distance.
+	 */
 	manhattanDistanceTo( v ) {
 
 		return Math.abs( this.x - v.x ) + Math.abs( this.y - v.y );
 
 	}
 
+	/**
+	 * Sets this vector to a vector with the same direction as this one, but
+	 * with the specified length.
+	 *
+	 * @param {number} length - The new length of this vector.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	setLength( length ) {
 
 		return this.normalize().multiplyScalar( length );
 
 	}
 
+	/**
+	 * Linearly interpolates between the given vector and this instance, where
+	 * alpha is the percent distance along the line - alpha = 0 will be this
+	 * vector, and alpha = 1 will be the given one.
+	 *
+	 * @param {Vector2} v - The vector to interpolate towards.
+	 * @param {number} alpha - The interpolation factor, typically in the closed interval `[0, 1]`.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	lerp( v, alpha ) {
 
 		this.x += ( v.x - this.x ) * alpha;
@@ -1046,6 +1585,16 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Linearly interpolates between the given vectors, where alpha is the percent
+	 * distance along the line - alpha = 0 will be first vector, and alpha = 1 will
+	 * be the second one. The result is stored in this instance.
+	 *
+	 * @param {Vector2} v1 - The first vector.
+	 * @param {Vector2} v2 - The second vector.
+	 * @param {number} alpha - The interpolation factor, typically in the closed interval `[0, 1]`.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	lerpVectors( v1, v2, alpha ) {
 
 		this.x = v1.x + ( v2.x - v1.x ) * alpha;
@@ -1055,12 +1604,26 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Returns `true` if this vector is equal with the given one.
+	 *
+	 * @param {Vector2} v - The vector to test for equality.
+	 * @return {boolean} Whether this vector is equal with the given one.
+	 */
 	equals( v ) {
 
 		return ( ( v.x === this.x ) && ( v.y === this.y ) );
 
 	}
 
+	/**
+	 * Sets this vector's x value to be `array[ offset ]` and y
+	 * value to be `array[ offset + 1 ]`.
+	 *
+	 * @param {Array<number>} array - An array holding the vector component values.
+	 * @param {number} [offset=0] - The offset into the array.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		this.x = array[ offset ];
@@ -1070,6 +1633,14 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Writes the components of this vector to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array holding the vector components.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number>} The vector components.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		array[ offset ] = this.x;
@@ -1079,6 +1650,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Sets the components of this vector from the given buffer attribute.
+	 *
+	 * @param {BufferAttribute} attribute - The buffer attribute holding vector data.
+	 * @param {number} index - The index into the attribute.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	fromBufferAttribute( attribute, index ) {
 
 		this.x = attribute.getX( index );
@@ -1088,6 +1666,13 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Rotates this vector around the given center by the given angle.
+	 *
+	 * @param {Vector2} center - The point around which to rotate.
+	 * @param {number} angle - The angle to rotate, in radians.
+	 * @return {Vector2} A reference to this vector.
+	 */
 	rotateAround( center, angle ) {
 
 		const c = Math.cos( angle ), s = Math.sin( angle );
@@ -1102,6 +1687,12 @@ class Vector2 {
 
 	}
 
+	/**
+	 * Sets each component of this vector to a pseudo-random value between `0` and
+	 * `1`, excluding `1`.
+	 *
+	 * @return {Vector2} A reference to this vector.
+	 */
 	random() {
 
 		this.x = Math.random();
@@ -1120,12 +1711,67 @@ class Vector2 {
 
 }
 
+/**
+ * Represents a 3x3 matrix.
+ *
+ * A Note on Row-Major and Column-Major Ordering:
+ *
+ * The constructor and {@link Matrix3#set} method take arguments in
+ * [row-major]{@link https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order}
+ * order, while internally they are stored in the {@link Matrix3#elements} array in column-major order.
+ * This means that calling:
+ * ```js
+ * const m = new THREE.Matrix();
+ * m.set( 11, 12, 13,
+ *        21, 22, 23,
+ *        31, 32, 33 );
+ * ```
+ * will result in the elements array containing:
+ * ```js
+ * m.elements = [ 11, 21, 31,
+ *                12, 22, 32,
+ *                13, 23, 33 ];
+ * ```
+ * and internally all calculations are performed using column-major ordering.
+ * However, as the actual ordering makes no difference mathematically and
+ * most people are used to thinking about matrices in row-major order, the
+ * three.js documentation shows matrices in row-major order. Just bear in
+ * mind that if you are reading the source code, you'll have to take the
+ * transpose of any matrices outlined here to make sense of the calculations.
+ */
 class Matrix3 {
 
+	/**
+	 * Constructs a new 3x3 matrix. The arguments are supposed to be
+	 * in row-major order. If no arguments are provided, the constructor
+	 * initializes the matrix as an identity matrix.
+	 *
+	 * @param {number} [n11] - 1-1 matrix element.
+	 * @param {number} [n12] - 1-2 matrix element.
+	 * @param {number} [n13] - 1-3 matrix element.
+	 * @param {number} [n21] - 2-1 matrix element.
+	 * @param {number} [n22] - 2-2 matrix element.
+	 * @param {number} [n23] - 2-3 matrix element.
+	 * @param {number} [n31] - 3-1 matrix element.
+	 * @param {number} [n32] - 3-2 matrix element.
+	 * @param {number} [n33] - 3-3 matrix element.
+	 */
 	constructor( n11, n12, n13, n21, n22, n23, n31, n32, n33 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		Matrix3.prototype.isMatrix3 = true;
 
+		/**
+		 * A column-major list of matrix values.
+		 *
+		 * @type {Array<number>}
+		 */
 		this.elements = [
 
 			1, 0, 0,
@@ -1142,6 +1788,21 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Sets the elements of the matrix.The arguments are supposed to be
+	 * in row-major order.
+	 *
+	 * @param {number} [n11] - 1-1 matrix element.
+	 * @param {number} [n12] - 1-2 matrix element.
+	 * @param {number} [n13] - 1-3 matrix element.
+	 * @param {number} [n21] - 2-1 matrix element.
+	 * @param {number} [n22] - 2-2 matrix element.
+	 * @param {number} [n23] - 2-3 matrix element.
+	 * @param {number} [n31] - 3-1 matrix element.
+	 * @param {number} [n32] - 3-2 matrix element.
+	 * @param {number} [n33] - 3-3 matrix element.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	set( n11, n12, n13, n21, n22, n23, n31, n32, n33 ) {
 
 		const te = this.elements;
@@ -1154,6 +1815,11 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Sets this matrix to the 3x3 identity matrix.
+	 *
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	identity() {
 
 		this.set(
@@ -1168,6 +1834,12 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Copies the values of the given matrix to this instance.
+	 *
+	 * @param {Matrix3} m - The matrix to copy.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	copy( m ) {
 
 		const te = this.elements;
@@ -1181,6 +1853,14 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Extracts the basis of this matrix into the three axis vectors provided.
+	 *
+	 * @param {Vector3} xAxis - The basis's x axis.
+	 * @param {Vector3} yAxis - The basis's y axis.
+	 * @param {Vector3} zAxis - The basis's z axis.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	extractBasis( xAxis, yAxis, zAxis ) {
 
 		xAxis.setFromMatrix3Column( this, 0 );
@@ -1191,6 +1871,12 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Set this matrix to the upper 3x3 matrix of the given 4x4 matrix.
+	 *
+	 * @param {Matrix4} m - The 4x4 matrix.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	setFromMatrix4( m ) {
 
 		const me = m.elements;
@@ -1207,18 +1893,38 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Post-multiplies this matrix by the given 3x3 matrix.
+	 *
+	 * @param {Matrix3} m - The matrix to multiply with.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	multiply( m ) {
 
 		return this.multiplyMatrices( this, m );
 
 	}
 
+	/**
+	 * Pre-multiplies this matrix by the given 3x3 matrix.
+	 *
+	 * @param {Matrix3} m - The matrix to multiply with.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	premultiply( m ) {
 
 		return this.multiplyMatrices( m, this );
 
 	}
 
+	/**
+	 * Multiples the given 3x3 matrices and stores the result
+	 * in this matrix.
+	 *
+	 * @param {Matrix3} a - The first matrix.
+	 * @param {Matrix3} b - The second matrix.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	multiplyMatrices( a, b ) {
 
 		const ae = a.elements;
@@ -1249,6 +1955,12 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Multiplies every component of the matrix by the given scalar.
+	 *
+	 * @param {number} s - The scalar.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	multiplyScalar( s ) {
 
 		const te = this.elements;
@@ -1261,6 +1973,11 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Computes and returns the determinant of this matrix.
+	 *
+	 * @return {number} The determinant.
+	 */
 	determinant() {
 
 		const te = this.elements;
@@ -1273,6 +1990,13 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Inverts this matrix, using the [analytic method]{@link https://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution}.
+	 * You can not invert with a determinant of zero. If you attempt this, the method produces
+	 * a zero matrix instead.
+	 *
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	invert() {
 
 		const te = this.elements,
@@ -1307,6 +2031,11 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Transposes this matrix in place.
+	 *
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	transpose() {
 
 		let tmp;
@@ -1320,12 +2049,25 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Computes the normal matrix which is the inverse transpose of the upper
+	 * left 3x3 portion of the given 4x4 matrix.
+	 *
+	 * @param {Matrix4} matrix4 - The 4x4 matrix.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	getNormalMatrix( matrix4 ) {
 
 		return this.setFromMatrix4( matrix4 ).invert().transpose();
 
 	}
 
+	/**
+	 * Transposes this matrix into the supplied array, and returns itself unchanged.
+	 *
+	 * @param {Array<number>} r - An array to store the transposed matrix elements.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	transposeIntoArray( r ) {
 
 		const m = this.elements;
@@ -1344,6 +2086,18 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Sets the UV transform matrix from offset, repeat, rotation, and center.
+	 *
+	 * @param {number} tx - Offset x.
+	 * @param {number} ty - Offset y.
+	 * @param {number} sx - Repeat x.
+	 * @param {number} sy - Repeat y.
+	 * @param {number} rotation - Rotation, in radians. Positive values rotate counterclockwise.
+	 * @param {number} cx - Center x of rotation.
+	 * @param {number} cy - Center y of rotation
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	setUvTransform( tx, ty, sx, sy, rotation, cx, cy ) {
 
 		const c = Math.cos( rotation );
@@ -1359,8 +2113,13 @@ class Matrix3 {
 
 	}
 
-	//
-
+	/**
+	 * Scales this matrix with the given scalar values.
+	 *
+	 * @param {number} sx - The amount to scale in the X axis.
+	 * @param {number} sy - The amount to scale in the Y axis.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	scale( sx, sy ) {
 
 		this.premultiply( _m3.makeScale( sx, sy ) );
@@ -1369,6 +2128,12 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Rotates this matrix by the given angle.
+	 *
+	 * @param {number} theta - The rotation in radians.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	rotate( theta ) {
 
 		this.premultiply( _m3.makeRotation( - theta ) );
@@ -1377,6 +2142,13 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Translates this matrix by the given scalar values.
+	 *
+	 * @param {number} tx - The amount to translate in the X axis.
+	 * @param {number} ty - The amount to translate in the Y axis.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	translate( tx, ty ) {
 
 		this.premultiply( _m3.makeTranslation( tx, ty ) );
@@ -1387,6 +2159,13 @@ class Matrix3 {
 
 	// for 2D Transforms
 
+	/**
+	 * Sets this matrix as a 2D translation transform.
+	 *
+	 * @param {number|Vector2} x - The amount to translate in the X axis or alternatively a translation vector.
+	 * @param {number} y - The amount to translate in the Y axis.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	makeTranslation( x, y ) {
 
 		if ( x.isVector2 ) {
@@ -1415,6 +2194,12 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Sets this matrix as a 2D rotational transformation.
+	 *
+	 * @param {number} theta - The rotation in radians.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	makeRotation( theta ) {
 
 		// counterclockwise
@@ -1434,6 +2219,13 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Sets this matrix as a 2D scale transform.
+	 *
+	 * @param {number} x - The amount to scale in the X axis.
+	 * @param {number} y - The amount to scale in the Y axis.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	makeScale( x, y ) {
 
 		this.set(
@@ -1448,8 +2240,12 @@ class Matrix3 {
 
 	}
 
-	//
-
+	/**
+	 * Returns `true` if this matrix is equal with the given one.
+	 *
+	 * @param {Matrix3} matrix - The matrix to test for equality.
+	 * @return {boolean} Whether this matrix is equal with the given one.
+	 */
 	equals( matrix ) {
 
 		const te = this.elements;
@@ -1465,6 +2261,13 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Sets the elements of the matrix from the given array.
+	 *
+	 * @param {Array<number>} array - The matrix elements in column-major order.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Matrix3} A reference to this matrix.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -1477,6 +2280,14 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Writes the elements of this matrix to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array holding the matrix elements in column-major order.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number>} The matrix elements in column-major order.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		const te = this.elements;
@@ -1497,6 +2308,11 @@ class Matrix3 {
 
 	}
 
+	/**
+	 * Returns a matrix with copied values from this instance.
+	 *
+	 * @return {Matrix3} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().fromArray( this.elements );
@@ -1816,8 +2632,19 @@ function LinearToSRGB( c ) {
 
 let _canvas;
 
+/**
+ * A class containing utility functions for images.
+ *
+ * @hideconstructor
+ */
 class ImageUtils {
 
+	/**
+	 * Returns a data URI containing a representation of the given image.
+	 *
+	 * @param {(HTMLImageElement|HTMLCanvasElement)} image - The image object.
+	 * @return {string} The data URI.
+	 */
 	static getDataURL( image ) {
 
 		if ( /^data:/i.test( image.src ) ) {
@@ -1865,6 +2692,12 @@ class ImageUtils {
 
 	}
 
+	/**
+	 * Converts the given sRGB image data to linear color space.
+	 *
+	 * @param {(HTMLImageElement|HTMLCanvasElement|ImageBitmap|Object)} image - The image object.
+	 * @return {HTMLCanvasElement|Object} The converted image.
+	 */
 	static sRGBToLinear( image ) {
 
 		if ( ( typeof HTMLImageElement !== 'undefined' && image instanceof HTMLImageElement ) ||
@@ -2055,64 +2888,343 @@ function serializeImage( image ) {
 
 let _textureId = 0;
 
+/**
+ * Base class for all textures.
+ *
+ * Note: After the initial use of a texture, its dimensions, format, and type
+ * cannot be changed. Instead, call {@link Texture#dispose} on the texture and instantiate a new one.
+ *
+ * @augments EventDispatcher
+ */
 class Texture extends EventDispatcher {
 
+	/**
+	 * Constructs a new texture.
+	 *
+	 * @param {?Object} [image=Texture.DEFAULT_IMAGE] - The image holding the texture data.
+	 * @param {number} [mapping=Texture.DEFAULT_MAPPING] - The texture mapping.
+	 * @param {number} [wrapS=ClampToEdgeWrapping] - The wrapS value.
+	 * @param {number} [wrapT=ClampToEdgeWrapping] - The wrapT value.
+	 * @param {number} [magFilter=LinearFilter] - The mag filter value.
+	 * @param {number} [minFilter=LinearFilter] - The min filter value.
+	 * @param {number} [format=RGBAFormat] - The min filter value.
+	 * @param {number} [type=UnsignedByteType] - The min filter value.
+	 * @param {number} [anisotropy=Texture.DEFAULT_ANISOTROPY] - The min filter value.
+	 * @param {string} [colorSpace=NoColorSpace] - The min filter value.
+	 */
 	constructor( image = Texture.DEFAULT_IMAGE, mapping = Texture.DEFAULT_MAPPING, wrapS = ClampToEdgeWrapping, wrapT = ClampToEdgeWrapping, magFilter = LinearFilter, minFilter = LinearMipmapLinearFilter, format = RGBAFormat, type = UnsignedByteType, anisotropy = Texture.DEFAULT_ANISOTROPY, colorSpace = NoColorSpace ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isTexture = true;
 
+		/**
+		 * The ID of the texture.
+		 *
+		 * @name Texture#id
+		 * @type {number}
+		 * @readonly
+		 */
 		Object.defineProperty( this, 'id', { value: _textureId ++ } );
 
+		/**
+		 * The UUID of the material.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.uuid = generateUUID();
 
+		/**
+		 * The name of the material.
+		 *
+		 * @type {string}
+		 */
 		this.name = '';
 
+		/**
+		 * The data definition of a texture. A reference to the data source can be
+		 * shared across textures. This is often useful in context of spritesheets
+		 * where multiple textures render the same data but with different texture
+		 * transformations.
+		 *
+		 * @type {Source}
+		 */
 		this.source = new Source( image );
+
+		/**
+		 * An array holding user-defined mipmaps.
+		 *
+		 * @type {Array<Object>}
+		 */
 		this.mipmaps = [];
 
+		/**
+		 * How the texture is applied to the object. The value `UVMapping`
+		 * is the default, where texture or uv coordinates are used to apply the map.
+		 *
+		 * @type {(UVMapping|CubeReflectionMapping|CubeRefractionMapping|EquirectangularReflectionMapping|EquirectangularRefractionMapping|CubeUVReflectionMapping)}
+		 * @default UVMapping
+		*/
 		this.mapping = mapping;
+
+		/**
+		 * Lets you select the uv attribute to map the texture to. `0` for `uv`,
+		 * `1` for `uv1`, `2` for `uv2` and `3` for `uv3`.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.channel = 0;
 
+		/**
+		 * This defines how the texture is wrapped horizontally and corresponds to
+		 * *U* in UV mapping.
+		 *
+		 * @type {(RepeatWrapping|ClampToEdgeWrapping|MirroredRepeatWrapping)}
+		 * @default ClampToEdgeWrapping
+		 */
 		this.wrapS = wrapS;
+
+		/**
+		 * This defines how the texture is wrapped horizontally and corresponds to
+		 * *V* in UV mapping.
+		 *
+		 * @type {(RepeatWrapping|ClampToEdgeWrapping|MirroredRepeatWrapping)}
+		 * @default ClampToEdgeWrapping
+		 */
 		this.wrapT = wrapT;
 
+		/**
+		 * How the texture is sampled when a texel covers more than one pixel.
+		 *
+		 * @type {(NearestFilter|NearestMipmapNearestFilter|NearestMipmapLinearFilter|LinearFilter|LinearMipmapNearestFilter|LinearMipmapLinearFilter)}
+		 * @default LinearFilter
+		 */
 		this.magFilter = magFilter;
+
+		/**
+		 * How the texture is sampled when a texel covers less than one pixel.
+		 *
+		 * @type {(NearestFilter|NearestMipmapNearestFilter|NearestMipmapLinearFilter|LinearFilter|LinearMipmapNearestFilter|LinearMipmapLinearFilter)}
+		 * @default LinearMipmapLinearFilter
+		 */
 		this.minFilter = minFilter;
 
+		/**
+		 * The number of samples taken along the axis through the pixel that has the
+		 * highest density of texels. By default, this value is `1`. A higher value
+		 * gives a less blurry result than a basic mipmap, at the cost of more
+		 * texture samples being used.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.anisotropy = anisotropy;
 
+		/**
+		 * The format of the texture.
+		 *
+		 * @type {number}
+		 * @default RGBAFormat
+		 */
 		this.format = format;
+
+		/**
+		 * The default internal format is derived from {@link Texture#format} and {@link Texture#type} and
+		 * defines how the texture data is going to be stored on the GPU.
+		 *
+		 * This property allows to overwrite the default format.
+		 *
+		 * @type {?string}
+		 * @default null
+		 */
 		this.internalFormat = null;
+
+		/**
+		 * The data type of the texture.
+		 *
+		 * @type {number}
+		 * @default UnsignedByteType
+		 */
 		this.type = type;
 
+		/**
+		 * How much a single repetition of the texture is offset from the beginning,
+		 * in each direction U and V. Typical range is `0.0` to `1.0`.
+		 *
+		 * @type {Vector2}
+		 * @default (0,0)
+		 */
 		this.offset = new Vector2( 0, 0 );
+
+		/**
+		 * How many times the texture is repeated across the surface, in each
+		 * direction U and V. If repeat is set greater than `1` in either direction,
+		 * the corresponding wrap parameter should also be set to `RepeatWrapping`
+		 * or `MirroredRepeatWrapping` to achieve the desired tiling effect.
+		 *
+		 * @type {Vector2}
+		 * @default (1,1)
+		 */
 		this.repeat = new Vector2( 1, 1 );
+
+		/**
+		 * The point around which rotation occurs. A value of `(0.5, 0.5)` corresponds
+		 * to the center of the texture. Default is `(0, 0)`, the lower left.
+		 *
+		 * @type {Vector2}
+		 * @default (0,0)
+		 */
 		this.center = new Vector2( 0, 0 );
+
+		/**
+		 * How much the texture is rotated around the center point, in radians.
+		 * Positive values are counter-clockwise.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.rotation = 0;
 
+		/**
+		 * Whether to update the texture's uv-transformation {@link Texture#matrix}
+		 * from the properties {@link Texture#offset}, {@link Texture#repeat},
+		 * {@link Texture#rotation}, and {@link Texture#center}.
+		 *
+		 * Set this to `false` if you are specifying the uv-transform matrix directly.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.matrixAutoUpdate = true;
+
+		/**
+		 * The uv-transformation matrix of the texture.
+		 *
+		 * @type {Matrix3}
+		 */
 		this.matrix = new Matrix3();
 
+		/**
+		 * Whether to generate mipmaps (if possible) for a texture.
+		 *
+		 * Set this to `false` if you are creating mipmaps manually.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.generateMipmaps = true;
+
+		/**
+		 * If set to `true`, the alpha channel, if present, is multiplied into the
+		 * color channels when the texture is uploaded to the GPU.
+		 *
+		 * Note that this property has no effect when using `ImageBitmap`. You need to
+		 * configure premultiply alpha on bitmap creation instead.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.premultiplyAlpha = false;
+
+		/**
+		 * If set to `true`, the texture is flipped along the vertical axis when
+		 * uploaded to the GPU.
+		 *
+		 * Note that this property has no effect when using `ImageBitmap`. You need to
+		 * configure the flip on bitmap creation instead.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.flipY = true;
+
+		/**
+		 * Specifies the alignment requirements for the start of each pixel row in memory.
+		 * The allowable values are `1` (byte-alignment), `2` (rows aligned to even-numbered bytes),
+		 * `4` (word-alignment), and `8` (rows start on double-word boundaries).
+		 *
+		 * @type {number}
+		 * @default 4
+		 */
 		this.unpackAlignment = 4;	// valid values: 1, 2, 4, 8 (see http://www.khronos.org/opengles/sdk/docs/man/xhtml/glPixelStorei.xml)
 
+		/**
+		 * Textures containing color data should be annotated with `SRGBColorSpace` or `LinearSRGBColorSpace`.
+		 *
+		 * @type {string}
+		 * @default NoColorSpace
+		 */
 		this.colorSpace = colorSpace;
 
+		/**
+		 * An object that can be used to store custom data about the texture. It
+		 * should not hold references to functions as these will not be cloned.
+		 *
+		 * @type {Object}
+		 */
 		this.userData = {};
 
+		/**
+		 * This starts at `0` and counts how many times {@link Texture#needsUpdate} is set to `true`.
+		 *
+		 * @type {number}
+		 * @readonly
+		 * @default 0
+		 */
 		this.version = 0;
+
+		/**
+		 * A callback function, called when the texture is updated (e.g., when
+		 * {@link Texture#needsUpdate} has been set to true and then the texture is used).
+		 *
+		 * @type {?Function}
+		 * @default null
+		 */
 		this.onUpdate = null;
 
-		this.renderTarget = null; // assign texture to a render target
-		this.isRenderTargetTexture = false; // indicates whether a texture belongs to a render target or not
-		this.pmremVersion = 0; // indicates whether this texture should be processed by PMREMGenerator or not (only relevant for render target textures)
+		/**
+		 * An optional back reference to the textures render target.
+		 *
+		 * @type {?(RenderTarget|WebGLRenderTarget)}
+		 * @default null
+		 */
+		this.renderTarget = null;
+
+		/**
+		 * Indicates whether a texture belongs to a render target or not.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default false
+		 */
+		this.isRenderTargetTexture = false;
+
+		/**
+		 * Indicates whether this texture should be processed by `PMREMGenerator` or not
+		 * (only relevant for render target textures).
+		 *
+		 * @type {number}
+		 * @readonly
+		 * @default 0
+		 */
+		this.pmremVersion = 0;
 
 	}
 
+	/**
+	 * The image object holding the texture data.
+	 *
+	 * @type {?Object}
+	 */
 	get image() {
 
 		return this.source.data;
@@ -2125,18 +3237,33 @@ class Texture extends EventDispatcher {
 
 	}
 
+	/**
+	 * Updates the texture transformation matrix from the from the properties {@link Texture#offset},
+	 * {@link Texture#repeat}, {@link Texture#rotation}, and {@link Texture#center}.
+	 */
 	updateMatrix() {
 
 		this.matrix.setUvTransform( this.offset.x, this.offset.y, this.repeat.x, this.repeat.y, this.rotation, this.center.x, this.center.y );
 
 	}
 
+	/**
+	 * Returns a new texture with copied values from this instance.
+	 *
+	 * @return {Texture} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Copies the values of the given texture to this instance.
+	 *
+	 * @param {Texture} source - The texture to copy.
+	 * @return {Texture} A reference to this instance.
+	 */
 	copy( source ) {
 
 		this.name = source.name;
@@ -2184,6 +3311,13 @@ class Texture extends EventDispatcher {
 
 	}
 
+	/**
+	 * Serializes the texture into JSON.
+	 *
+	 * @param {?(Object|string)} meta - An optional value holding meta information about the serialization.
+	 * @return {Object} A JSON object representing the serialized texture.
+	 * @see {@link ObjectLoader#parse}
+	 */
 	toJSON( meta ) {
 
 		const isRootObject = ( meta === undefined || typeof meta === 'string' );
@@ -2246,12 +3380,30 @@ class Texture extends EventDispatcher {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 *
+	 * @fires Texture#dispose
+	 */
 	dispose() {
 
+		/**
+		 * Fires when the texture has been disposed of.
+		 *
+		 * @event Texture#dispose
+		 * @type {Object}
+		 */
 		this.dispatchEvent( { type: 'dispose' } );
 
 	}
 
+	/**
+	 * Transforms the given uv vector with the textures uv transformation matrix.
+	 *
+	 * @param {Vector2} uv - The uv vector.
+	 * @return {Vector2} The transformed uv vector.
+	 */
 	transformUv( uv ) {
 
 		if ( this.mapping !== UVMapping ) return uv;
@@ -2332,6 +3484,15 @@ class Texture extends EventDispatcher {
 
 	}
 
+	/**
+	 * Setting this property to `true` indicates the engine the texture
+	 * must be updated in the next render. This triggers a texture upload
+	 * to the GPU and ensures correct texture parameter configuration.
+	 *
+	 * @type {boolean}
+	 * @default false
+	 * @param {boolean} value
+	 */
 	set needsUpdate( value ) {
 
 		if ( value === true ) {
@@ -2343,6 +3504,14 @@ class Texture extends EventDispatcher {
 
 	}
 
+	/**
+	 * Setting this property to `true` indicates the engine the PMREM
+	 * must be regenerated.
+	 *
+	 * @type {boolean}
+	 * @default false
+	 * @param {boolean} value
+	 */
 	set needsPMREMUpdate( value ) {
 
 		if ( value === true ) {
@@ -2355,23 +3524,113 @@ class Texture extends EventDispatcher {
 
 }
 
+/**
+ * The default image for all textures.
+ *
+ * @static
+ * @type {?Image}
+ * @default null
+ */
 Texture.DEFAULT_IMAGE = null;
+
+/**
+ * The default mapping for all textures.
+ *
+ * @static
+ * @type {number}
+ * @default UVMapping
+ */
 Texture.DEFAULT_MAPPING = UVMapping;
+
+/**
+ * The default anisotropy value for all textures.
+ *
+ * @static
+ * @type {number}
+ * @default 1
+ */
 Texture.DEFAULT_ANISOTROPY = 1;
 
+/**
+ * Class representing a 4D vector. A 4D vector is an ordered quadruplet of numbers
+ * (labeled x, y, z and w), which can be used to represent a number of things, such as:
+ *
+ * - A point in 4D space.
+ * - A direction and length in 4D space. In three.js the length will
+ * always be the Euclidean distance(straight-line distance) from `(0, 0, 0, 0)` to `(x, y, z, w)`
+ * and the direction is also measured from `(0, 0, 0, 0)` towards `(x, y, z, w)`.
+ * - Any arbitrary ordered quadruplet of numbers.
+ *
+ * There are other things a 4D vector can be used to represent, however these
+ * are the most common uses in *three.js*.
+ *
+ * Iterating through a vector instance will yield its components `(x, y, z, w)` in
+ * the corresponding order.
+ * ```js
+ * const a = new THREE.Vector4( 0, 1, 0, 0 );
+ *
+ * //no arguments; will be initialised to (0, 0, 0, 1)
+ * const b = new THREE.Vector4( );
+ *
+ * const d = a.dot( b );
+ * ```
+ */
 class Vector4 {
 
+	/**
+	 * Constructs a new 4D vector.
+	 *
+	 * @param {number} [x=0] - The x value of this vector.
+	 * @param {number} [y=0] - The y value of this vector.
+	 * @param {number} [z=0] - The z value of this vector.
+	 * @param {number} [w=1] - The w value of this vector.
+	 */
 	constructor( x = 0, y = 0, z = 0, w = 1 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		Vector4.prototype.isVector4 = true;
 
+		/**
+		 * The x value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.x = x;
+
+		/**
+		 * The y value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.y = y;
+
+		/**
+		 * The z value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.z = z;
+
+		/**
+		 * The w value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.w = w;
 
 	}
 
+	/**
+	 * Alias for {@link Vector4#z}.
+	 *
+	 * @type {number}
+	 */
 	get width() {
 
 		return this.z;
@@ -2384,6 +3643,11 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Alias for {@link Vector4#w}.
+	 *
+	 * @type {number}
+	 */
 	get height() {
 
 		return this.w;
@@ -2396,6 +3660,15 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the vector components.
+	 *
+	 * @param {number} x - The value of the x component.
+	 * @param {number} y - The value of the y component.
+	 * @param {number} z - The value of the z component.
+	 * @param {number} w - The value of the w component.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	set( x, y, z, w ) {
 
 		this.x = x;
@@ -2407,6 +3680,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the vector components to the same value.
+	 *
+	 * @param {number} scalar - The value to set for all vector components.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setScalar( scalar ) {
 
 		this.x = scalar;
@@ -2418,6 +3697,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the vector's x component to the given value
+	 *
+	 * @param {number} x - The value to set.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setX( x ) {
 
 		this.x = x;
@@ -2426,6 +3711,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the vector's y component to the given value
+	 *
+	 * @param {number} y - The value to set.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setY( y ) {
 
 		this.y = y;
@@ -2434,6 +3725,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the vector's z component to the given value
+	 *
+	 * @param {number} z - The value to set.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setZ( z ) {
 
 		this.z = z;
@@ -2442,6 +3739,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the vector's w component to the given value
+	 *
+	 * @param {number} w - The value to set.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setW( w ) {
 
 		this.w = w;
@@ -2450,6 +3753,14 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Allows to set a vector component with an index.
+	 *
+	 * @param {number} index - The component index. `0` equals to x, `1` equals to y,
+	 * `2` equals to z, `3` equals to w.
+	 * @param {number} value - The value to set.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setComponent( index, value ) {
 
 		switch ( index ) {
@@ -2466,6 +3777,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Returns the value of the vector component which matches the given index.
+	 *
+	 * @param {number} index - The component index. `0` equals to x, `1` equals to y,
+	 * `2` equals to z, `3` equals to w.
+	 * @return {number} A vector component value.
+	 */
 	getComponent( index ) {
 
 		switch ( index ) {
@@ -2480,12 +3798,23 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Returns a new vector with copied values from this instance.
+	 *
+	 * @return {Vector4} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor( this.x, this.y, this.z, this.w );
 
 	}
 
+	/**
+	 * Copies the values of the given vector to this instance.
+	 *
+	 * @param {Vector3|Vector4} v - The vector to copy.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	copy( v ) {
 
 		this.x = v.x;
@@ -2497,6 +3826,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Adds the given vector to this instance.
+	 *
+	 * @param {Vector4} v - The vector to add.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	add( v ) {
 
 		this.x += v.x;
@@ -2508,6 +3843,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Adds the given scalar value to all components of this instance.
+	 *
+	 * @param {number} s - The scalar to add.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	addScalar( s ) {
 
 		this.x += s;
@@ -2519,6 +3860,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Adds the given vectors and stores the result in this instance.
+	 *
+	 * @param {Vector4} a - The first vector.
+	 * @param {Vector4} b - The second vector.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	addVectors( a, b ) {
 
 		this.x = a.x + b.x;
@@ -2530,6 +3878,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Adds the given vector scaled by the given factor to this instance.
+	 *
+	 * @param {Vector4} v - The vector.
+	 * @param {number} s - The factor that scales `v`.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	addScaledVector( v, s ) {
 
 		this.x += v.x * s;
@@ -2541,6 +3896,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Subtracts the given vector from this instance.
+	 *
+	 * @param {Vector4} v - The vector to subtract.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	sub( v ) {
 
 		this.x -= v.x;
@@ -2552,6 +3913,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Subtracts the given scalar value from all components of this instance.
+	 *
+	 * @param {number} s - The scalar to subtract.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	subScalar( s ) {
 
 		this.x -= s;
@@ -2563,6 +3930,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Subtracts the given vectors and stores the result in this instance.
+	 *
+	 * @param {Vector4} a - The first vector.
+	 * @param {Vector4} b - The second vector.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	subVectors( a, b ) {
 
 		this.x = a.x - b.x;
@@ -2574,6 +3948,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Multiplies the given vector with this instance.
+	 *
+	 * @param {Vector4} v - The vector to multiply.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	multiply( v ) {
 
 		this.x *= v.x;
@@ -2585,6 +3965,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Multiplies the given scalar value with all components of this instance.
+	 *
+	 * @param {number} scalar - The scalar to multiply.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	multiplyScalar( scalar ) {
 
 		this.x *= scalar;
@@ -2596,6 +3982,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Multiplies this vector with the given 4x4 matrix.
+	 *
+	 * @param {Matrix4} m - The 4x4 matrix.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	applyMatrix4( m ) {
 
 		const x = this.x, y = this.y, z = this.z, w = this.w;
@@ -2610,6 +4002,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Divides this instance by the given vector.
+	 *
+	 * @param {Vector4} v - The vector to divide.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	divide( v ) {
 
 		this.x /= v.x;
@@ -2621,12 +4019,25 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Divides this vector by the given scalar.
+	 *
+	 * @param {number} scalar - The scalar to divide.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	divideScalar( scalar ) {
 
 		return this.multiplyScalar( 1 / scalar );
 
 	}
 
+	/**
+	 * Sets the x, y and z components of this
+	 * vector to the quaternion's axis and w to the angle.
+	 *
+	 * @param {Quaternion} q - The Quaternion to set.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setAxisAngleFromQuaternion( q ) {
 
 		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/index.htm
@@ -2655,6 +4066,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the x, y and z components of this
+	 * vector to the axis of rotation and w to the angle.
+	 *
+	 * @param {Matrix4} m - A 4x4 matrix of which the upper left 3x3 matrix is a pure rotation matrix.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setAxisAngleFromRotationMatrix( m ) {
 
 		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/index.htm
@@ -2785,6 +4203,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the vector components to the position elements of the
+	 * given transformation matrix.
+	 *
+	 * @param {Matrix4} m - The 4x4 matrix.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setFromMatrixPosition( m ) {
 
 		const e = m.elements;
@@ -2798,6 +4223,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * If this vector's x, y, z or w value is greater than the given vector's x, y, z or w
+	 * value, replace that value with the corresponding min value.
+	 *
+	 * @param {Vector4} v - The vector.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	min( v ) {
 
 		this.x = Math.min( this.x, v.x );
@@ -2809,6 +4241,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * If this vector's x, y, z or w value is less than the given vector's x, y, z or w
+	 * value, replace that value with the corresponding max value.
+	 *
+	 * @param {Vector4} v - The vector.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	max( v ) {
 
 		this.x = Math.max( this.x, v.x );
@@ -2820,6 +4259,16 @@ class Vector4 {
 
 	}
 
+	/**
+	 * If this vector's x, y, z or w value is greater than the max vector's x, y, z or w
+	 * value, it is replaced by the corresponding value.
+	 * If this vector's x, y, z or w value is less than the min vector's x, y, z or w value,
+	 * it is replaced by the corresponding value.
+	 *
+	 * @param {Vector4} min - The minimum x, y and z values.
+	 * @param {Vector4} max - The maximum x, y and z values in the desired range.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	clamp( min, max ) {
 
 		// assumes min < max, componentwise
@@ -2833,6 +4282,16 @@ class Vector4 {
 
 	}
 
+	/**
+	 * If this vector's x, y, z or w values are greater than the max value, they are
+	 * replaced by the max value.
+	 * If this vector's x, y, z or w values are less than the min value, they are
+	 * replaced by the min value.
+	 *
+	 * @param {number} minVal - The minimum value the components will be clamped to.
+	 * @param {number} maxVal - The maximum value the components will be clamped to.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	clampScalar( minVal, maxVal ) {
 
 		this.x = clamp( this.x, minVal, maxVal );
@@ -2844,6 +4303,16 @@ class Vector4 {
 
 	}
 
+	/**
+	 * If this vector's length is greater than the max value, it is replaced by
+	 * the max value.
+	 * If this vector's length is less than the min value, it is replaced by the
+	 * min value.
+	 *
+	 * @param {number} min - The minimum value the vector length will be clamped to.
+	 * @param {number} max - The maximum value the vector length will be clamped to.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	clampLength( min, max ) {
 
 		const length = this.length();
@@ -2852,6 +4321,11 @@ class Vector4 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded down to the nearest integer value.
+	 *
+	 * @return {Vector4} A reference to this vector.
+	 */
 	floor() {
 
 		this.x = Math.floor( this.x );
@@ -2863,6 +4337,11 @@ class Vector4 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded up to the nearest integer value.
+	 *
+	 * @return {Vector4} A reference to this vector.
+	 */
 	ceil() {
 
 		this.x = Math.ceil( this.x );
@@ -2874,6 +4353,11 @@ class Vector4 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded to the nearest integer value
+	 *
+	 * @return {Vector4} A reference to this vector.
+	 */
 	round() {
 
 		this.x = Math.round( this.x );
@@ -2885,6 +4369,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded towards zero (up if negative,
+	 * down if positive) to an integer value.
+	 *
+	 * @return {Vector4} A reference to this vector.
+	 */
 	roundToZero() {
 
 		this.x = Math.trunc( this.x );
@@ -2896,6 +4386,11 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Inverts this vector - i.e. sets x = -x, y = -y, z = -z, w = -w.
+	 *
+	 * @return {Vector4} A reference to this vector.
+	 */
 	negate() {
 
 		this.x = - this.x;
@@ -2907,42 +4402,87 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Calculates the dot product of the given vector with this instance.
+	 *
+	 * @param {Vector4} v - The vector to compute the dot product with.
+	 * @return {number} The result of the dot product.
+	 */
 	dot( v ) {
 
 		return this.x * v.x + this.y * v.y + this.z * v.z + this.w * v.w;
 
 	}
 
+	/**
+	 * Computes the square of the Euclidean length (straight-line length) from
+	 * (0, 0, 0, 0) to (x, y, z, w). If you are comparing the lengths of vectors, you should
+	 * compare the length squared instead as it is slightly more efficient to calculate.
+	 *
+	 * @return {number} The square length of this vector.
+	 */
 	lengthSq() {
 
 		return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
 
 	}
 
+	/**
+	 * Computes the  Euclidean length (straight-line length) from (0, 0, 0, 0) to (x, y, z, w).
+	 *
+	 * @return {number} The length of this vector.
+	 */
 	length() {
 
 		return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w );
 
 	}
 
+	/**
+	 * Computes the Manhattan length of this vector.
+	 *
+	 * @return {number} The length of this vector.
+	 */
 	manhattanLength() {
 
 		return Math.abs( this.x ) + Math.abs( this.y ) + Math.abs( this.z ) + Math.abs( this.w );
 
 	}
 
+	/**
+	 * Converts this vector to a unit vector - that is, sets it equal to a vector
+	 * with the same direction as this one, but with a vector length of `1`.
+	 *
+	 * @return {Vector4} A reference to this vector.
+	 */
 	normalize() {
 
 		return this.divideScalar( this.length() || 1 );
 
 	}
 
+	/**
+	 * Sets this vector to a vector with the same direction as this one, but
+	 * with the specified length.
+	 *
+	 * @param {number} length - The new length of this vector.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	setLength( length ) {
 
 		return this.normalize().multiplyScalar( length );
 
 	}
 
+	/**
+	 * Linearly interpolates between the given vector and this instance, where
+	 * alpha is the percent distance along the line - alpha = 0 will be this
+	 * vector, and alpha = 1 will be the given one.
+	 *
+	 * @param {Vector4} v - The vector to interpolate towards.
+	 * @param {number} alpha - The interpolation factor, typically in the closed interval `[0, 1]`.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	lerp( v, alpha ) {
 
 		this.x += ( v.x - this.x ) * alpha;
@@ -2954,6 +4494,16 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Linearly interpolates between the given vectors, where alpha is the percent
+	 * distance along the line - alpha = 0 will be first vector, and alpha = 1 will
+	 * be the second one. The result is stored in this instance.
+	 *
+	 * @param {Vector4} v1 - The first vector.
+	 * @param {Vector4} v2 - The second vector.
+	 * @param {number} alpha - The interpolation factor, typically in the closed interval `[0, 1]`.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	lerpVectors( v1, v2, alpha ) {
 
 		this.x = v1.x + ( v2.x - v1.x ) * alpha;
@@ -2965,12 +4515,26 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Returns `true` if this vector is equal with the given one.
+	 *
+	 * @param {Vector4} v - The vector to test for equality.
+	 * @return {boolean} Whether this vector is equal with the given one.
+	 */
 	equals( v ) {
 
 		return ( ( v.x === this.x ) && ( v.y === this.y ) && ( v.z === this.z ) && ( v.w === this.w ) );
 
 	}
 
+	/**
+	 * Sets this vector's x value to be `array[ offset ]`, y value to be `array[ offset + 1 ]`,
+	 * z value to be `array[ offset + 2 ]`, w value to be `array[ offset + 3 ]`.
+	 *
+	 * @param {Array<number>} array - An array holding the vector component values.
+	 * @param {number} [offset=0] - The offset into the array.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		this.x = array[ offset ];
@@ -2982,6 +4546,14 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Writes the components of this vector to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array holding the vector components.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number>} The vector components.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		array[ offset ] = this.x;
@@ -2993,6 +4565,13 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets the components of this vector from the given buffer attribute.
+	 *
+	 * @param {BufferAttribute} attribute - The buffer attribute holding vector data.
+	 * @param {number} index - The index into the attribute.
+	 * @return {Vector4} A reference to this vector.
+	 */
 	fromBufferAttribute( attribute, index ) {
 
 		this.x = attribute.getX( index );
@@ -3004,6 +4583,12 @@ class Vector4 {
 
 	}
 
+	/**
+	 * Sets each component of this vector to a pseudo-random value between `0` and
+	 * `1`, excluding `1`.
+	 *
+	 * @return {Vector4} A reference to this vector.
+	 */
 	random() {
 
 		this.x = Math.random();
@@ -3170,12 +4755,12 @@ class RenderTarget extends EventDispatcher {
 			this.textures[ i ].isRenderTargetTexture = true;
 			this.textures[ i ].renderTarget = this;
 
+			// ensure image object is not shared, see #20328
+
+			const image = Object.assign( {}, source.textures[ i ].image );
+			this.textures[ i ].source = new Source( image );
+
 		}
-
-		// ensure image object is not shared, see #20328
-
-		const image = Object.assign( {}, source.texture.image );
-		this.texture.source = new Source( image );
 
 		this.depthBuffer = source.depthBuffer;
 		this.stencilBuffer = source.stencilBuffer;
@@ -3315,10 +4900,40 @@ class WebGL3DRenderTarget extends WebGLRenderTarget {
 
 }
 
+/**
+ * Class for representing a Quaternion. Quaternions are used in three.js to represent rotations.
+ *
+ * Iterating through a vector instance will yield its components `(x, y, z, w)` in
+ * the corresponding order.
+ *
+ * Note that three.js expects Quaternions to be normalized.
+ * ```js
+ * const quaternion = new THREE.Quaternion();
+ * quaternion.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ), Math.PI / 2 );
+ *
+ * const vector = new THREE.Vector3( 1, 0, 0 );
+ * vector.applyQuaternion( quaternion );
+ * ```
+ */
 class Quaternion {
 
+	/**
+	 * Constructs a new quaternion.
+	 *
+	 * @param {number} [x=0] - The x value of this quaternion.
+	 * @param {number} [y=0] - The y value of this quaternion.
+	 * @param {number} [z=0] - The z value of this quaternion.
+	 * @param {number} [w=1] - The w value of this quaternion.
+	 */
 	constructor( x = 0, y = 0, z = 0, w = 1 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isQuaternion = true;
 
 		this._x = x;
@@ -3328,6 +4943,19 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Interpolates between two quaternions via SLERP. This implementation assumes the
+	 * quaternion data are managed  in flat arrays.
+	 *
+	 * @param {Array<number>} dst - The destination array.
+	 * @param {number} dstOffset - An offset into the destination array.
+	 * @param {Array<number>} src0 - The source array of the first quaternion.
+	 * @param {number} srcOffset0 - An offset into the first source array.
+	 * @param {Array<number>} src1 -  The source array of the second quaternion.
+	 * @param {number} srcOffset1 - An offset into the second source array.
+	 * @param {number} t - The interpolation factor in the range `[0,1]`.
+	 * @see {@link Quaternion#slerp}
+	 */
 	static slerpFlat( dst, dstOffset, src0, srcOffset0, src1, srcOffset1, t ) {
 
 		// fuzz-free, array-based Quaternion SLERP operation
@@ -3408,6 +5036,19 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Multiplies two quaternions. This implementation assumes the quaternion data are managed
+	 * in flat arrays.
+	 *
+	 * @param {Array<number>} dst - The destination array.
+	 * @param {number} dstOffset - An offset into the destination array.
+	 * @param {Array<number>} src0 - The source array of the first quaternion.
+	 * @param {number} srcOffset0 - An offset into the first source array.
+	 * @param {Array<number>} src1 -  The source array of the second quaternion.
+	 * @param {number} srcOffset1 - An offset into the second source array.
+	 * @return {Array<number>} The destination array.
+	 * @see {@link Quaternion#multiplyQuaternions}.
+	 */
 	static multiplyQuaternionsFlat( dst, dstOffset, src0, srcOffset0, src1, srcOffset1 ) {
 
 		const x0 = src0[ srcOffset0 ];
@@ -3429,6 +5070,12 @@ class Quaternion {
 
 	}
 
+	/**
+	 * The x value of this quaternion.
+	 *
+	 * @type {number}
+	 * @default 0
+	 */
 	get x() {
 
 		return this._x;
@@ -3442,6 +5089,12 @@ class Quaternion {
 
 	}
 
+	/**
+	 * The y value of this quaternion.
+	 *
+	 * @type {number}
+	 * @default 0
+	 */
 	get y() {
 
 		return this._y;
@@ -3455,6 +5108,12 @@ class Quaternion {
 
 	}
 
+	/**
+	 * The z value of this quaternion.
+	 *
+	 * @type {number}
+	 * @default 0
+	 */
 	get z() {
 
 		return this._z;
@@ -3468,6 +5127,12 @@ class Quaternion {
 
 	}
 
+	/**
+	 * The w value of this quaternion.
+	 *
+	 * @type {number}
+	 * @default 1
+	 */
 	get w() {
 
 		return this._w;
@@ -3481,6 +5146,15 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Sets the quaternion components.
+	 *
+	 * @param {number} x - The x value of this quaternion.
+	 * @param {number} y - The y value of this quaternion.
+	 * @param {number} z - The z value of this quaternion.
+	 * @param {number} w - The w value of this quaternion.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	set( x, y, z, w ) {
 
 		this._x = x;
@@ -3494,12 +5168,23 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Returns a new quaternion with copied values from this instance.
+	 *
+	 * @return {Quaternion} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor( this._x, this._y, this._z, this._w );
 
 	}
 
+	/**
+	 * Copies the values of the given quaternion to this instance.
+	 *
+	 * @param {Quaternion} quaternion - The quaternion to copy.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	copy( quaternion ) {
 
 		this._x = quaternion.x;
@@ -3513,6 +5198,14 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Sets this quaternion from the rotation specified by the given
+	 * Euler angles.
+	 *
+	 * @param {Euler} euler - The Euler angles.
+	 * @param {boolean} [update=true] - Whether the internal `onChange` callback should be executed or not.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	setFromEuler( euler, update = true ) {
 
 		const x = euler._x, y = euler._y, z = euler._z, order = euler._order;
@@ -3587,11 +5280,16 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Sets this quaternion from the given axis and angle.
+	 *
+	 * @param {Vector3} axis - The normalized axis.
+	 * @param {number} angle - The angle in radians.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	setFromAxisAngle( axis, angle ) {
 
 		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
-
-		// assumes axis is normalized
 
 		const halfAngle = angle / 2, s = Math.sin( halfAngle );
 
@@ -3606,6 +5304,12 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Sets this quaternion from the given rotation matrix.
+	 *
+	 * @param {Matrix4} m - A 4x4 matrix of which the upper 3x3 of matrix is a pure rotation matrix (i.e. unscaled).
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	setFromRotationMatrix( m ) {
 
 		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
@@ -3664,6 +5368,14 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Sets this quaternion to the rotation required to rotate the direction vector
+	 * `vFrom` to the direction vector `vTo`.
+	 *
+	 * @param {Vector3} vFrom - The first (normalized) direction vector.
+	 * @param {Vector3} vTo - The second (normalized) direction vector.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	setFromUnitVectors( vFrom, vTo ) {
 
 		// assumes direction vectors vFrom and vTo are normalized
@@ -3707,12 +5419,26 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Returns the angle between this quaternion and the given one in radians.
+	 *
+	 * @param {Quaternion} q - The quaternion to compute the angle with.
+	 * @return {number} The angle in radians.
+	 */
 	angleTo( q ) {
 
 		return 2 * Math.acos( Math.abs( clamp( this.dot( q ), -1, 1 ) ) );
 
 	}
 
+	/**
+	 * Rotates this quaternion by a given angular step to the given quaternion.
+	 * The method ensures that the final quaternion will not overshoot `q`.
+	 *
+	 * @param {Quaternion} q - The target quaternion.
+	 * @param {number} step - The angular step in radians.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	rotateTowards( q, step ) {
 
 		const angle = this.angleTo( q );
@@ -3727,20 +5453,37 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Sets this quaternion to the identity quaternion; that is, to the
+	 * quaternion that represents "no rotation".
+	 *
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	identity() {
 
 		return this.set( 0, 0, 0, 1 );
 
 	}
 
+	/**
+	 * Inverts this quaternion via {@link Quaternion#conjugate}. The
+	 * quaternion is assumed to have unit length.
+	 *
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	invert() {
-
-		// quaternion is assumed to have unit length
 
 		return this.conjugate();
 
 	}
 
+	/**
+	 * Returns the rotational conjugate of this quaternion. The conjugate of a
+	 * quaternion represents the same rotation in the opposite direction about
+	 * the rotational axis.
+	 *
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	conjugate() {
 
 		this._x *= -1;
@@ -3753,24 +5496,50 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Calculates the dot product of this quaternion and the given one.
+	 *
+	 * @param {Quaternion} v - The quaternion to compute the dot product with.
+	 * @return {number} The result of the dot product.
+	 */
 	dot( v ) {
 
 		return this._x * v._x + this._y * v._y + this._z * v._z + this._w * v._w;
 
 	}
 
+	/**
+	 * Computes the squared Euclidean length (straight-line length) of this quaternion,
+	 * considered as a 4 dimensional vector. This can be useful if you are comparing the
+	 * lengths of two quaternions, as this is a slightly more efficient calculation than
+	 * {@link Quaternion#length}.
+	 *
+	 * @return {number} The squared Euclidean length.
+	 */
 	lengthSq() {
 
 		return this._x * this._x + this._y * this._y + this._z * this._z + this._w * this._w;
 
 	}
 
+	/**
+	 * Computes the Euclidean length (straight-line length) of this quaternion,
+	 * considered as a 4 dimensional vector.
+	 *
+	 * @return {number} The Euclidean length.
+	 */
 	length() {
 
 		return Math.sqrt( this._x * this._x + this._y * this._y + this._z * this._z + this._w * this._w );
 
 	}
 
+	/**
+	 * Normalizes this quaternion - that is, calculated the quaternion that performs
+	 * the same rotation as this one, but has a length equal to `1`.
+	 *
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	normalize() {
 
 		let l = this.length();
@@ -3799,18 +5568,37 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Multiplies this quaternion by the given one.
+	 *
+	 * @param {Quaternion} q - The quaternion.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	multiply( q ) {
 
 		return this.multiplyQuaternions( this, q );
 
 	}
 
+	/**
+	 * Pre-multiplies this quaternion by the given one.
+	 *
+	 * @param {Quaternion} q - The quaternion.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	premultiply( q ) {
 
 		return this.multiplyQuaternions( q, this );
 
 	}
 
+	/**
+	 * Multiplies the given quaternions and stores the result in this instance.
+	 *
+	 * @param {Quaternion} a - The first quaternion.
+	 * @param {Quaternion} b - The second quaternion.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	multiplyQuaternions( a, b ) {
 
 		// from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
@@ -3829,6 +5617,13 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Performs a spherical linear interpolation between quaternions.
+	 *
+	 * @param {Quaternion} qb - The target quaternion.
+	 * @param {number} t - The interpolation factor in the closed interval `[0, 1]`.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	slerp( qb, t ) {
 
 		if ( t === 0 ) return this;
@@ -3898,15 +5693,27 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Performs a spherical linear interpolation between the given quaternions
+	 * and stores the result in this quaternion.
+	 *
+	 * @param {Quaternion} qa - The source quaternion.
+	 * @param {Quaternion} qb - The target quaternion.
+	 * @param {number} t - The interpolation factor in the closed interval `[0, 1]`.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	slerpQuaternions( qa, qb, t ) {
 
 		return this.copy( qa ).slerp( qb, t );
 
 	}
 
+	/**
+	 * Sets this quaternion to a uniformly random, normalized quaternion.
+	 *
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	random() {
-
-		// sets this quaternion to a uniform random unit quaternnion
 
 		// Ken Shoemake
 		// Uniform random rotations
@@ -3928,12 +5735,25 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Returns `true` if this quaternion is equal with the given one.
+	 *
+	 * @param {Quaternion} quaternion - The quaternion to test for equality.
+	 * @return {boolean} Whether this quaternion is equal with the given one.
+	 */
 	equals( quaternion ) {
 
 		return ( quaternion._x === this._x ) && ( quaternion._y === this._y ) && ( quaternion._z === this._z ) && ( quaternion._w === this._w );
 
 	}
 
+	/**
+	 * Sets this quaternion's components from the given array.
+	 *
+	 * @param {Array<number>} array - An array holding the quaternion component values.
+	 * @param {number} [offset=0] - The offset into the array.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		this._x = array[ offset ];
@@ -3947,6 +5767,14 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Writes the components of this quaternion to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array holding the quaternion components.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number>} The quaternion components.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		array[ offset ] = this._x;
@@ -3958,6 +5786,13 @@ class Quaternion {
 
 	}
 
+	/**
+	 * Sets the components of this quaternion from the given buffer attribute.
+	 *
+	 * @param {BufferAttribute} attribute - The buffer attribute holding quaternion data.
+	 * @param {number} index - The index into the attribute.
+	 * @return {Quaternion} A reference to this quaternion.
+	 */
 	fromBufferAttribute( attribute, index ) {
 
 		this._x = attribute.getX( index );
@@ -3971,6 +5806,12 @@ class Quaternion {
 
 	}
 
+	/**
+	 * This methods defines the serialization result of this class. Returns the
+	 * numerical elements of this quaternion in an array of format `[x, y, z, w]`.
+	 *
+	 * @return {Array<number>} The serialized quaternion.
+	 */
 	toJSON() {
 
 		return this.toArray();
@@ -3998,18 +5839,82 @@ class Quaternion {
 
 }
 
+/**
+ * Class representing a 3D vector. A 3D vector is an ordered triplet of numbers
+ * (labeled x, y and z), which can be used to represent a number of things, such as:
+ *
+ * - A point in 3D space.
+ * - A direction and length in 3D space. In three.js the length will
+ * always be the Euclidean distance(straight-line distance) from `(0, 0, 0)` to `(x, y, z)`
+ * and the direction is also measured from `(0, 0, 0)` towards `(x, y, z)`.
+ * - Any arbitrary ordered triplet of numbers.
+ *
+ * There are other things a 3D vector can be used to represent, such as
+ * momentum vectors and so on, however these are the most
+ * common uses in three.js.
+ *
+ * Iterating through a vector instance will yield its components `(x, y, z)` in
+ * the corresponding order.
+ * ```js
+ * const a = new THREE.Vector3( 0, 1, 0 );
+ *
+ * //no arguments; will be initialised to (0, 0, 0)
+ * const b = new THREE.Vector3( );
+ *
+ * const d = a.distanceTo( b );
+ * ```
+ */
 class Vector3 {
 
+	/**
+	 * Constructs a new 3D vector.
+	 *
+	 * @param {number} [x=0] - The x value of this vector.
+	 * @param {number} [y=0] - The y value of this vector.
+	 * @param {number} [z=0] - The z value of this vector.
+	 */
 	constructor( x = 0, y = 0, z = 0 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		Vector3.prototype.isVector3 = true;
 
+		/**
+		 * The x value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.x = x;
+
+		/**
+		 * The y value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.y = y;
+
+		/**
+		 * The z value of this vector.
+		 *
+		 * @type {number}
+		 */
 		this.z = z;
 
 	}
 
+	/**
+	 * Sets the vector components.
+	 *
+	 * @param {number} x - The value of the x component.
+	 * @param {number} y - The value of the y component.
+	 * @param {number} z - The value of the z component.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	set( x, y, z ) {
 
 		if ( z === undefined ) z = this.z; // sprite.scale.set(x,y)
@@ -4022,6 +5927,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector components to the same value.
+	 *
+	 * @param {number} scalar - The value to set for all vector components.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setScalar( scalar ) {
 
 		this.x = scalar;
@@ -4032,6 +5943,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector's x component to the given value
+	 *
+	 * @param {number} x - The value to set.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setX( x ) {
 
 		this.x = x;
@@ -4040,6 +5957,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector's y component to the given value
+	 *
+	 * @param {number} y - The value to set.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setY( y ) {
 
 		this.y = y;
@@ -4048,6 +5971,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector's z component to the given value
+	 *
+	 * @param {number} z - The value to set.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setZ( z ) {
 
 		this.z = z;
@@ -4056,6 +5985,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Allows to set a vector component with an index.
+	 *
+	 * @param {number} index - The component index. `0` equals to x, `1` equals to y, `2` equals to z.
+	 * @param {number} value - The value to set.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setComponent( index, value ) {
 
 		switch ( index ) {
@@ -4071,6 +6007,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Returns the value of the vector component which matches the given index.
+	 *
+	 * @param {number} index - The component index. `0` equals to x, `1` equals to y, `2` equals to z.
+	 * @return {number} A vector component value.
+	 */
 	getComponent( index ) {
 
 		switch ( index ) {
@@ -4084,12 +6026,23 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Returns a new vector with copied values from this instance.
+	 *
+	 * @return {Vector3} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor( this.x, this.y, this.z );
 
 	}
 
+	/**
+	 * Copies the values of the given vector to this instance.
+	 *
+	 * @param {Vector3} v - The vector to copy.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	copy( v ) {
 
 		this.x = v.x;
@@ -4100,6 +6053,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Adds the given vector to this instance.
+	 *
+	 * @param {Vector3} v - The vector to add.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	add( v ) {
 
 		this.x += v.x;
@@ -4110,6 +6069,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Adds the given scalar value to all components of this instance.
+	 *
+	 * @param {number} s - The scalar to add.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	addScalar( s ) {
 
 		this.x += s;
@@ -4120,6 +6085,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Adds the given vectors and stores the result in this instance.
+	 *
+	 * @param {Vector3} a - The first vector.
+	 * @param {Vector3} b - The second vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	addVectors( a, b ) {
 
 		this.x = a.x + b.x;
@@ -4130,6 +6102,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Adds the given vector scaled by the given factor to this instance.
+	 *
+	 * @param {Vector3|Vector4} v - The vector.
+	 * @param {number} s - The factor that scales `v`.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	addScaledVector( v, s ) {
 
 		this.x += v.x * s;
@@ -4140,6 +6119,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Subtracts the given vector from this instance.
+	 *
+	 * @param {Vector3} v - The vector to subtract.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	sub( v ) {
 
 		this.x -= v.x;
@@ -4150,6 +6135,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Subtracts the given scalar value from all components of this instance.
+	 *
+	 * @param {number} s - The scalar to subtract.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	subScalar( s ) {
 
 		this.x -= s;
@@ -4160,6 +6151,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Subtracts the given vectors and stores the result in this instance.
+	 *
+	 * @param {Vector3} a - The first vector.
+	 * @param {Vector3} b - The second vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	subVectors( a, b ) {
 
 		this.x = a.x - b.x;
@@ -4170,6 +6168,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Multiplies the given vector with this instance.
+	 *
+	 * @param {Vector3} v - The vector to multiply.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	multiply( v ) {
 
 		this.x *= v.x;
@@ -4180,6 +6184,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Multiplies the given scalar value with all components of this instance.
+	 *
+	 * @param {number} scalar - The scalar to multiply.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	multiplyScalar( scalar ) {
 
 		this.x *= scalar;
@@ -4190,6 +6200,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Multiplies the given vectors and stores the result in this instance.
+	 *
+	 * @param {Vector3} a - The first vector.
+	 * @param {Vector3} b - The second vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	multiplyVectors( a, b ) {
 
 		this.x = a.x * b.x;
@@ -4200,18 +6217,37 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Applies the given Euler rotation to this vector.
+	 *
+	 * @param {Euler} euler - The Euler angles.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	applyEuler( euler ) {
 
 		return this.applyQuaternion( _quaternion$4.setFromEuler( euler ) );
 
 	}
 
+	/**
+	 * Applies a rotation specified by an axis and an angle to this vector.
+	 *
+	 * @param {Vector3} axis - A normalized vector representing the rotation axis.
+	 * @param {number} angle - The angle in radians.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	applyAxisAngle( axis, angle ) {
 
 		return this.applyQuaternion( _quaternion$4.setFromAxisAngle( axis, angle ) );
 
 	}
 
+	/**
+	 * Multiplies this vector with the given 3x3 matrix.
+	 *
+	 * @param {Matrix3} m - The 3x3 matrix.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	applyMatrix3( m ) {
 
 		const x = this.x, y = this.y, z = this.z;
@@ -4225,12 +6261,26 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Multiplies this vector by the given normal matrix and normalizes
+	 * the result.
+	 *
+	 * @param {Matrix3} m - The normal matrix.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	applyNormalMatrix( m ) {
 
 		return this.applyMatrix3( m ).normalize();
 
 	}
 
+	/**
+	 * Multiplies this vector (with an implicit 1 in the 4th dimension) by m, and
+	 * divides by perspective.
+	 *
+	 * @param {Matrix4} m - The matrix to apply.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	applyMatrix4( m ) {
 
 		const x = this.x, y = this.y, z = this.z;
@@ -4246,6 +6296,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Applies the given Quaternion to this vector.
+	 *
+	 * @param {Quaternion} q - The Quaternion.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	applyQuaternion( q ) {
 
 		// quaternion q is assumed to have unit length
@@ -4267,18 +6323,39 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Projects this vector from world space into the camera's normalized
+	 * device coordinate (NDC) space.
+	 *
+	 * @param {Camera} camera - The camera.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	project( camera ) {
 
 		return this.applyMatrix4( camera.matrixWorldInverse ).applyMatrix4( camera.projectionMatrix );
 
 	}
 
+	/**
+	 * Unprojects this vector from the camera's normalized device coordinate (NDC)
+	 * space into world space.
+	 *
+	 * @param {Camera} camera - The camera.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	unproject( camera ) {
 
 		return this.applyMatrix4( camera.projectionMatrixInverse ).applyMatrix4( camera.matrixWorld );
 
 	}
 
+	/**
+	 * Transforms the direction of this vector by a matrix (the upper left 3 x 3
+	 * subset of the given 4x4 matrix and then normalizes the result.
+	 *
+	 * @param {Matrix4} m - The matrix.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	transformDirection( m ) {
 
 		// input: THREE.Matrix4 affine matrix
@@ -4295,6 +6372,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Divides this instance by the given vector.
+	 *
+	 * @param {Vector3} v - The vector to divide.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	divide( v ) {
 
 		this.x /= v.x;
@@ -4305,12 +6388,25 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Divides this vector by the given scalar.
+	 *
+	 * @param {number} scalar - The scalar to divide.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	divideScalar( scalar ) {
 
 		return this.multiplyScalar( 1 / scalar );
 
 	}
 
+	/**
+	 * If this vector's x, y or z value is greater than the given vector's x, y or z
+	 * value, replace that value with the corresponding min value.
+	 *
+	 * @param {Vector3} v - The vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	min( v ) {
 
 		this.x = Math.min( this.x, v.x );
@@ -4321,6 +6417,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * If this vector's x, y or z value is less than the given vector's x, y or z
+	 * value, replace that value with the corresponding max value.
+	 *
+	 * @param {Vector3} v - The vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	max( v ) {
 
 		this.x = Math.max( this.x, v.x );
@@ -4331,6 +6434,16 @@ class Vector3 {
 
 	}
 
+	/**
+	 * If this vector's x, y or z value is greater than the max vector's x, y or z
+	 * value, it is replaced by the corresponding value.
+	 * If this vector's x, y or z value is less than the min vector's x, y or z value,
+	 * it is replaced by the corresponding value.
+	 *
+	 * @param {Vector3} min - The minimum x, y and z values.
+	 * @param {Vector3} max - The maximum x, y and z values in the desired range.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	clamp( min, max ) {
 
 		// assumes min < max, componentwise
@@ -4343,6 +6456,16 @@ class Vector3 {
 
 	}
 
+	/**
+	 * If this vector's x, y or z values are greater than the max value, they are
+	 * replaced by the max value.
+	 * If this vector's x, y or z values are less than the min value, they are
+	 * replaced by the min value.
+	 *
+	 * @param {number} minVal - The minimum value the components will be clamped to.
+	 * @param {number} maxVal - The maximum value the components will be clamped to.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	clampScalar( minVal, maxVal ) {
 
 		this.x = clamp( this.x, minVal, maxVal );
@@ -4353,6 +6476,16 @@ class Vector3 {
 
 	}
 
+	/**
+	 * If this vector's length is greater than the max value, it is replaced by
+	 * the max value.
+	 * If this vector's length is less than the min value, it is replaced by the
+	 * min value.
+	 *
+	 * @param {number} min - The minimum value the vector length will be clamped to.
+	 * @param {number} max - The maximum value the vector length will be clamped to.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	clampLength( min, max ) {
 
 		const length = this.length();
@@ -4361,6 +6494,11 @@ class Vector3 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded down to the nearest integer value.
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	floor() {
 
 		this.x = Math.floor( this.x );
@@ -4371,6 +6509,11 @@ class Vector3 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded up to the nearest integer value.
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	ceil() {
 
 		this.x = Math.ceil( this.x );
@@ -4381,6 +6524,11 @@ class Vector3 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded to the nearest integer value
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	round() {
 
 		this.x = Math.round( this.x );
@@ -4391,6 +6539,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * The components of this vector are rounded towards zero (up if negative,
+	 * down if positive) to an integer value.
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	roundToZero() {
 
 		this.x = Math.trunc( this.x );
@@ -4401,6 +6555,11 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Inverts this vector - i.e. sets x = -x, y = -y and z = -z.
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	negate() {
 
 		this.x = - this.x;
@@ -4411,6 +6570,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Calculates the dot product of the given vector with this instance.
+	 *
+	 * @param {Vector3} v - The vector to compute the dot product with.
+	 * @return {number} The result of the dot product.
+	 */
 	dot( v ) {
 
 		return this.x * v.x + this.y * v.y + this.z * v.z;
@@ -4419,36 +6584,75 @@ class Vector3 {
 
 	// TODO lengthSquared?
 
+	/**
+	 * Computes the square of the Euclidean length (straight-line length) from
+	 * (0, 0, 0) to (x, y, z). If you are comparing the lengths of vectors, you should
+	 * compare the length squared instead as it is slightly more efficient to calculate.
+	 *
+	 * @return {number} The square length of this vector.
+	 */
 	lengthSq() {
 
 		return this.x * this.x + this.y * this.y + this.z * this.z;
 
 	}
 
+	/**
+	 * Computes the  Euclidean length (straight-line length) from (0, 0, 0) to (x, y, z).
+	 *
+	 * @return {number} The length of this vector.
+	 */
 	length() {
 
 		return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z );
 
 	}
 
+	/**
+	 * Computes the Manhattan length of this vector.
+	 *
+	 * @return {number} The length of this vector.
+	 */
 	manhattanLength() {
 
 		return Math.abs( this.x ) + Math.abs( this.y ) + Math.abs( this.z );
 
 	}
 
+	/**
+	 * Converts this vector to a unit vector - that is, sets it equal to a vector
+	 * with the same direction as this one, but with a vector length of `1`.
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	normalize() {
 
 		return this.divideScalar( this.length() || 1 );
 
 	}
 
+	/**
+	 * Sets this vector to a vector with the same direction as this one, but
+	 * with the specified length.
+	 *
+	 * @param {number} length - The new length of this vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setLength( length ) {
 
 		return this.normalize().multiplyScalar( length );
 
 	}
 
+	/**
+	 * Linearly interpolates between the given vector and this instance, where
+	 * alpha is the percent distance along the line - alpha = 0 will be this
+	 * vector, and alpha = 1 will be the given one.
+	 *
+	 * @param {Vector3} v - The vector to interpolate towards.
+	 * @param {number} alpha - The interpolation factor, typically in the closed interval `[0, 1]`.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	lerp( v, alpha ) {
 
 		this.x += ( v.x - this.x ) * alpha;
@@ -4459,6 +6663,16 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Linearly interpolates between the given vectors, where alpha is the percent
+	 * distance along the line - alpha = 0 will be first vector, and alpha = 1 will
+	 * be the second one. The result is stored in this instance.
+	 *
+	 * @param {Vector3} v1 - The first vector.
+	 * @param {Vector3} v2 - The second vector.
+	 * @param {number} alpha - The interpolation factor, typically in the closed interval `[0, 1]`.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	lerpVectors( v1, v2, alpha ) {
 
 		this.x = v1.x + ( v2.x - v1.x ) * alpha;
@@ -4469,12 +6683,26 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Calculates the cross product of the given vector with this instance.
+	 *
+	 * @param {Vector3} v - The vector to compute the cross product with.
+	 * @return {Vector3} The result of the cross product.
+	 */
 	cross( v ) {
 
 		return this.crossVectors( this, v );
 
 	}
 
+	/**
+	 * Calculates the cross product of the given vectors and stores the result
+	 * in this instance.
+	 *
+	 * @param {Vector3} a - The first vector.
+	 * @param {Vector3} b - The second vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	crossVectors( a, b ) {
 
 		const ax = a.x, ay = a.y, az = a.z;
@@ -4488,6 +6716,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Projects this vector onto the given one.
+	 *
+	 * @param {Vector3} v - The vector to project to.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	projectOnVector( v ) {
 
 		const denominator = v.lengthSq();
@@ -4500,6 +6734,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Projects this vector onto a plane by subtracting this
+	 * vector projected onto the plane's normal from this vector.
+	 *
+	 * @param {Vector3} planeNormal - The plane normal.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	projectOnPlane( planeNormal ) {
 
 		_vector$c.copy( this ).projectOnVector( planeNormal );
@@ -4508,15 +6749,23 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Reflects this vector off a plane orthogonal to the given normal vector.
+	 *
+	 * @param {Vector3} normal - The (normalized) normal vector.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	reflect( normal ) {
-
-		// reflect incident vector off plane orthogonal to normal
-		// normal is assumed to have unit length
 
 		return this.sub( _vector$c.copy( normal ).multiplyScalar( 2 * this.dot( normal ) ) );
 
 	}
-
+	/**
+	 * Returns the angle between the given vector and this instance in radians.
+	 *
+	 * @param {Vector3} v - The vector to compute the angle with.
+	 * @return {number} The angle in radians.
+	 */
 	angleTo( v ) {
 
 		const denominator = Math.sqrt( this.lengthSq() * v.lengthSq() );
@@ -4531,12 +6780,26 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Computes the distance from the given vector to this instance.
+	 *
+	 * @param {Vector3} v - The vector to compute the distance to.
+	 * @return {number} The distance.
+	 */
 	distanceTo( v ) {
 
 		return Math.sqrt( this.distanceToSquared( v ) );
 
 	}
 
+	/**
+	 * Computes the squared distance from the given vector to this instance.
+	 * If you are just comparing the distance with another distance, you should compare
+	 * the distance squared instead as it is slightly more efficient to calculate.
+	 *
+	 * @param {Vector3} v - The vector to compute the squared distance to.
+	 * @return {number} The squared distance.
+	 */
 	distanceToSquared( v ) {
 
 		const dx = this.x - v.x, dy = this.y - v.y, dz = this.z - v.z;
@@ -4545,18 +6808,38 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Computes the Manhattan distance from the given vector to this instance.
+	 *
+	 * @param {Vector3} v - The vector to compute the Manhattan distance to.
+	 * @return {number} The Manhattan distance.
+	 */
 	manhattanDistanceTo( v ) {
 
 		return Math.abs( this.x - v.x ) + Math.abs( this.y - v.y ) + Math.abs( this.z - v.z );
 
 	}
 
+	/**
+	 * Sets the vector components from the given spherical coordinates.
+	 *
+	 * @param {Spherical} s - The spherical coordinates.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromSpherical( s ) {
 
 		return this.setFromSphericalCoords( s.radius, s.phi, s.theta );
 
 	}
 
+	/**
+	 * Sets the vector components from the given spherical coordinates.
+	 *
+	 * @param {number} radius - The radius.
+	 * @param {number} phi - The phi angle in radians.
+	 * @param {number} theta - The theta angle in radians.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromSphericalCoords( radius, phi, theta ) {
 
 		const sinPhiRadius = Math.sin( phi ) * radius;
@@ -4569,12 +6852,26 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector components from the given cylindrical coordinates.
+	 *
+	 * @param {Cylindrical} c - The cylindrical coordinates.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromCylindrical( c ) {
 
 		return this.setFromCylindricalCoords( c.radius, c.theta, c.y );
 
 	}
 
+	/**
+	 * Sets the vector components from the given cylindrical coordinates.
+	 *
+	 * @param {number} radius - The radius.
+	 * @param {number} theta - The theta angle in radians.
+	 * @param {number} y - The y value.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromCylindricalCoords( radius, theta, y ) {
 
 		this.x = radius * Math.sin( theta );
@@ -4585,6 +6882,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector components to the position elements of the
+	 * given transformation matrix.
+	 *
+	 * @param {Matrix4} m - The 4x4 matrix.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromMatrixPosition( m ) {
 
 		const e = m.elements;
@@ -4597,6 +6901,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector components to the scale elements of the
+	 * given transformation matrix.
+	 *
+	 * @param {Matrix4} m - The 4x4 matrix.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromMatrixScale( m ) {
 
 		const sx = this.setFromMatrixColumn( m, 0 ).length();
@@ -4611,18 +6922,38 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector components from the specified matrix column.
+	 *
+	 * @param {Matrix4} m - The 4x4 matrix.
+	 * @param {number} index - The column index.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromMatrixColumn( m, index ) {
 
 		return this.fromArray( m.elements, index * 4 );
 
 	}
 
+	/**
+	 * Sets the vector components from the specified matrix column.
+	 *
+	 * @param {Matrix3} m - The 3x3 matrix.
+	 * @param {number} index - The column index.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromMatrix3Column( m, index ) {
 
 		return this.fromArray( m.elements, index * 3 );
 
 	}
 
+	/**
+	 * Sets the vector components from the given Euler angles.
+	 *
+	 * @param {Euler} e - The Euler angles to set.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromEuler( e ) {
 
 		this.x = e._x;
@@ -4633,6 +6964,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the vector components from the RGB components of the
+	 * given color.
+	 *
+	 * @param {Color} c - The color to set.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	setFromColor( c ) {
 
 		this.x = c.r;
@@ -4643,12 +6981,26 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Returns `true` if this vector is equal with the given one.
+	 *
+	 * @param {Vector3} v - The vector to test for equality.
+	 * @return {boolean} Whether this vector is equal with the given one.
+	 */
 	equals( v ) {
 
 		return ( ( v.x === this.x ) && ( v.y === this.y ) && ( v.z === this.z ) );
 
 	}
 
+	/**
+	 * Sets this vector's x value to be `array[ offset ]`, y value to be `array[ offset + 1 ]`
+	 * and z value to be `array[ offset + 2 ]`.
+	 *
+	 * @param {Array<number>} array - An array holding the vector component values.
+	 * @param {number} [offset=0] - The offset into the array.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		this.x = array[ offset ];
@@ -4659,6 +7011,14 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Writes the components of this vector to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array holding the vector components.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number>} The vector components.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		array[ offset ] = this.x;
@@ -4669,6 +7029,13 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets the components of this vector from the given buffer attribute.
+	 *
+	 * @param {BufferAttribute} attribute - The buffer attribute holding vector data.
+	 * @param {number} index - The index into the attribute.
+	 * @return {Vector3} A reference to this vector.
+	 */
 	fromBufferAttribute( attribute, index ) {
 
 		this.x = attribute.getX( index );
@@ -4679,6 +7046,12 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets each component of this vector to a pseudo-random value between `0` and
+	 * `1`, excluding `1`.
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	random() {
 
 		this.x = Math.random();
@@ -4689,6 +7062,11 @@ class Vector3 {
 
 	}
 
+	/**
+	 * Sets this vector to a uniformly random point on a unit sphere.
+	 *
+	 * @return {Vector3} A reference to this vector.
+	 */
 	randomDirection() {
 
 		// https://mathworld.wolfram.com/SpherePointPicking.html
@@ -4718,17 +7096,52 @@ class Vector3 {
 const _vector$c = /*@__PURE__*/ new Vector3();
 const _quaternion$4 = /*@__PURE__*/ new Quaternion();
 
+/**
+ * Represents an axis-aligned bounding box (AABB) in 3D space.
+ */
 class Box3 {
 
+	/**
+	 * Constructs a new bounding box.
+	 *
+	 * @param {Vector3} [min=(Infinity,Infinity,Infinity)] - A vector representing the lower boundary of the box.
+	 * @param {Vector3} [max=(-Infinity,-Infinity,-Infinity)] - A vector representing the upper boundary of the box.
+	 */
 	constructor( min = new Vector3( + Infinity, + Infinity, + Infinity ), max = new Vector3( - Infinity, - Infinity, - Infinity ) ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isBox3 = true;
 
+		/**
+		 * The lower boundary of the box.
+		 *
+		 * @type {Vector3}
+		 */
 		this.min = min;
+
+		/**
+		 * The upper boundary of the box.
+		 *
+		 * @type {Vector3}
+		 */
 		this.max = max;
 
 	}
 
+	/**
+	 * Sets the lower and upper boundaries of this box.
+	 * Please note that this method only copies the values from the given objects.
+	 *
+	 * @param {Vector3} min - The lower boundary of the box.
+	 * @param {Vector3} max - The upper boundary of the box.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	set( min, max ) {
 
 		this.min.copy( min );
@@ -4738,6 +7151,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Sets the upper and lower bounds of this box so it encloses the position data
+	 * in the given array.
+	 *
+	 * @param {Array<number>} array - An array holding 3D position data.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	setFromArray( array ) {
 
 		this.makeEmpty();
@@ -4752,6 +7172,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Sets the upper and lower bounds of this box so it encloses the position data
+	 * in the given buffer attribute.
+	 *
+	 * @param {BufferAttribute} attribute - A buffer attribute holding 3D position data.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	setFromBufferAttribute( attribute ) {
 
 		this.makeEmpty();
@@ -4766,6 +7193,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Sets the upper and lower bounds of this box so it encloses the position data
+	 * in the given array.
+	 *
+	 * @param {Array<Vector3>} points - An array holding 3D position data as instances of {@link Vector3}.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	setFromPoints( points ) {
 
 		this.makeEmpty();
@@ -4780,6 +7214,14 @@ class Box3 {
 
 	}
 
+	/**
+	 * Centers this box on the given center vector and sets this box's width, height and
+	 * depth to the given size values.
+	 *
+	 * @param {Vector3} center - The center of the box.
+	 * @param {Vector3} size - The x, y and z dimensions of the box.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	setFromCenterAndSize( center, size ) {
 
 		const halfSize = _vector$b.copy( size ).multiplyScalar( 0.5 );
@@ -4791,6 +7233,16 @@ class Box3 {
 
 	}
 
+	/**
+	 * Computes the world-axis-aligned bounding box for the given 3D object
+	 * (including its children), accounting for the object's, and children's,
+	 * world transforms. The function may result in a larger box than strictly necessary.
+	 *
+	 * @param {Object3D} object - The 3D object to compute the bounding box for.
+	 * @param {boolean} [precise=false] - If set to `true`, the method computes the smallest
+	 * world-axis-aligned bounding box at the expense of more computation.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	setFromObject( object, precise = false ) {
 
 		this.makeEmpty();
@@ -4799,12 +7251,23 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns a new box with copied values from this instance.
+	 *
+	 * @return {Box3} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Copies the values of the given box to this instance.
+	 *
+	 * @param {Box3} box - The box to copy.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	copy( box ) {
 
 		this.min.copy( box.min );
@@ -4814,6 +7277,11 @@ class Box3 {
 
 	}
 
+	/**
+	 * Makes this box empty which means in encloses a zero space in 3D.
+	 *
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	makeEmpty() {
 
 		this.min.x = this.min.y = this.min.z = + Infinity;
@@ -4823,6 +7291,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns true if this box includes zero points within its bounds.
+	 * Note that a box with equal lower and upper bounds still includes one
+	 * point, the one both bounds share.
+	 *
+	 * @return {boolean} Whether this box is empty or not.
+	 */
 	isEmpty() {
 
 		// this is a more robust check for empty than ( volume <= 0 ) because volume can get positive with two negative axes
@@ -4831,18 +7306,36 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns the center point of this box.
+	 *
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The center point.
+	 */
 	getCenter( target ) {
 
 		return this.isEmpty() ? target.set( 0, 0, 0 ) : target.addVectors( this.min, this.max ).multiplyScalar( 0.5 );
 
 	}
 
+	/**
+	 * Returns the dimensions of this box.
+	 *
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The size.
+	 */
 	getSize( target ) {
 
 		return this.isEmpty() ? target.set( 0, 0, 0 ) : target.subVectors( this.max, this.min );
 
 	}
 
+	/**
+	 * Expands the boundaries of this box to include the given point.
+	 *
+	 * @param {Vector3} point - The point that should be included by the bounding box.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	expandByPoint( point ) {
 
 		this.min.min( point );
@@ -4852,6 +7345,16 @@ class Box3 {
 
 	}
 
+	/**
+	 * Expands this box equilaterally by the given vector. The width of this
+	 * box will be expanded by the x component of the vector in both
+	 * directions. The height of this box will be expanded by the y component of
+	 * the vector in both directions. The depth of this box will be
+	 * expanded by the z component of the vector in both directions.
+	 *
+	 * @param {Vector3} vector - The vector that should expand the bounding box.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	expandByVector( vector ) {
 
 		this.min.sub( vector );
@@ -4861,6 +7364,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Expands each dimension of the box by the given scalar. If negative, the
+	 * dimensions of the box will be contracted.
+	 *
+	 * @param {number} scalar - The scalar value that should expand the bounding box.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	expandByScalar( scalar ) {
 
 		this.min.addScalar( - scalar );
@@ -4870,6 +7380,17 @@ class Box3 {
 
 	}
 
+	/**
+	 * Expands the boundaries of this box to include the given 3D object and
+	 * its children, accounting for the object's, and children's, world
+	 * transforms. The function may result in a larger box than strictly
+	 * necessary (unless the precise parameter is set to true).
+	 *
+	 * @param {Object3D} object - The 3D object that should expand the bounding box.
+	 * @param {boolean} precise - If set to `true`, the method expands the bounding box
+	 * as little as necessary at the expense of more computation.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	expandByObject( object, precise = false ) {
 
 		// Computes the world-axis-aligned bounding box of an object (including its children),
@@ -4954,6 +7475,12 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns `true` if the given point lies within or on the boundaries of this box.
+	 *
+	 * @param {Vector3} point - The point to test.
+	 * @return {boolean} Whether the bounding box contains the given point or not.
+	 */
 	containsPoint( point ) {
 
 		return point.x >= this.min.x && point.x <= this.max.x &&
@@ -4962,6 +7489,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns `true` if this bounding box includes the entirety of the given bounding box.
+	 * If this box and the given one are identical, this function also returns `true`.
+	 *
+	 * @param {Box3} box - The bounding box to test.
+	 * @return {boolean} Whether the bounding box contains the given bounding box or not.
+	 */
 	containsBox( box ) {
 
 		return this.min.x <= box.min.x && box.max.x <= this.max.x &&
@@ -4970,6 +7504,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns a point as a proportion of this box's width, height and depth.
+	 *
+	 * @param {Vector3} point - A point in 3D space.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} A point as a proportion of this box's width, height and depth.
+	 */
 	getParameter( point, target ) {
 
 		// This can potentially have a divide by zero if the box
@@ -4983,6 +7524,12 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns `true` if the given bounding box intersects with this bounding box.
+	 *
+	 * @param {Box3} box - The bounding box to test.
+	 * @return {boolean} Whether the given bounding box intersects with this bounding box.
+	 */
 	intersectsBox( box ) {
 
 		// using 6 splitting planes to rule out intersections.
@@ -4992,6 +7539,12 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns `true` if the given bounding sphere intersects with this bounding box.
+	 *
+	 * @param {Sphere} sphere - The bounding sphere to test.
+	 * @return {boolean} Whether the given bounding sphere intersects with this bounding box.
+	 */
 	intersectsSphere( sphere ) {
 
 		// Find the point on the AABB closest to the sphere center.
@@ -5002,6 +7555,12 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns `true` if the given plane intersects with this bounding box.
+	 *
+	 * @param {Plane} plane - The plane to test.
+	 * @return {boolean} Whether the given plane intersects with this bounding box.
+	 */
 	intersectsPlane( plane ) {
 
 		// We compute the minimum and maximum dot product values. If those values
@@ -5049,6 +7608,12 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns `true` if the given triangle intersects with this bounding box.
+	 *
+	 * @param {Triangle} triangle - The triangle to test.
+	 * @return {boolean} Whether the given triangle intersects with this bounding box.
+	 */
 	intersectsTriangle( triangle ) {
 
 		if ( this.isEmpty() ) {
@@ -5102,18 +7667,38 @@ class Box3 {
 
 	}
 
+	/**
+	 * Clamps the given point within the bounds of this box.
+	 *
+	 * @param {Vector3} point - The point to clamp.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The clamped point.
+	 */
 	clampPoint( point, target ) {
 
 		return target.copy( point ).clamp( this.min, this.max );
 
 	}
 
+	/**
+	 * Returns the euclidean distance from any edge of this box to the specified point. If
+	 * the given point lies inside of this box, the distance will be `0`.
+	 *
+	 * @param {Vector3} point - The point to compute the distance to.
+	 * @return {number} The euclidean distance.
+	 */
 	distanceToPoint( point ) {
 
 		return this.clampPoint( point, _vector$b ).distanceTo( point );
 
 	}
 
+	/**
+	 * Returns a bounding sphere that encloses this bounding box.
+	 *
+	 * @param {Sphere} target - The target sphere that is used to store the method's result.
+	 * @return {Sphere} The bounding sphere that encloses this bounding box.
+	 */
 	getBoundingSphere( target ) {
 
 		if ( this.isEmpty() ) {
@@ -5132,6 +7717,15 @@ class Box3 {
 
 	}
 
+	/**
+	 * Computes the intersection of this bounding box and the given one, setting the upper
+	 * bound of this box to the lesser of the two boxes' upper bounds and the
+	 * lower bound of this box to the greater of the two boxes' lower bounds. If
+	 * there's no overlap, makes this box empty.
+	 *
+	 * @param {Box3} box - The bounding box to intersect with.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	intersect( box ) {
 
 		this.min.max( box.min );
@@ -5144,6 +7738,14 @@ class Box3 {
 
 	}
 
+	/**
+	 * Computes the union of this box and another and the given one, setting the upper
+	 * bound of this box to the greater of the two boxes' upper bounds and the
+	 * lower bound of this box to the lesser of the two boxes' lower bounds.
+	 *
+	 * @param {Box3} box - The bounding box that will be unioned with this instance.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	union( box ) {
 
 		this.min.min( box.min );
@@ -5153,6 +7755,12 @@ class Box3 {
 
 	}
 
+	/**
+	 * Transforms this bounding box by the given 4x4 transformation matrix.
+	 *
+	 * @param {Matrix4} matrix - The transformation matrix.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	applyMatrix4( matrix ) {
 
 		// transform of empty box is an empty box.
@@ -5174,6 +7782,13 @@ class Box3 {
 
 	}
 
+	/**
+	 * Adds the given offset to both the upper and lower bounds of this bounding box,
+	 * effectively moving it in 3D space.
+	 *
+	 * @param {Vector3} offset - The offset that should be used to translate the bounding box.
+	 * @return {Box3} A reference to this bounding box.
+	 */
 	translate( offset ) {
 
 		this.min.add( offset );
@@ -5183,6 +7798,12 @@ class Box3 {
 
 	}
 
+	/**
+	 * Returns `true` if this bounding box is equal with the given one.
+	 *
+	 * @param {Box3} box - The box to test for equality.
+	 * @return {boolean} Whether this bounding box is equal with the given one.
+	 */
 	equals( box ) {
 
 		return box.min.equals( this.min ) && box.max.equals( this.max );
@@ -5253,17 +7874,52 @@ const _box$3 = /*@__PURE__*/ new Box3();
 const _v1$6 = /*@__PURE__*/ new Vector3();
 const _v2$3 = /*@__PURE__*/ new Vector3();
 
+/**
+ * An analytical 3D sphere defined by a center and radius. This class is mainly
+ * used as a Bounding Sphere for 3D objects.
+ */
 class Sphere {
 
+	/**
+	 * Constructs a new sphere.
+	 *
+	 * @param {Vector3} [center=(0,0,0)] - The center of the sphere
+	 * @param {number} [radius=-1] - The radius of the sphere.
+	 */
 	constructor( center = new Vector3(), radius = -1 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSphere = true;
 
+		/**
+		 * The center of the sphere
+		 *
+		 * @type {Vector3}
+		 */
 		this.center = center;
+
+		/**
+		 * The radius of the sphere.
+		 *
+		 * @type {number}
+		 */
 		this.radius = radius;
 
 	}
 
+	/**
+	 * Sets the sphere's components by copying the given values.
+	 *
+	 * @param {Vector3} center - The center.
+	 * @param {number} radius - The radius.
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	set( center, radius ) {
 
 		this.center.copy( center );
@@ -5273,6 +7929,16 @@ class Sphere {
 
 	}
 
+	/**
+	 * Computes the minimum bounding sphere for list of points.
+	 * If the optional center point is given, it is used as the sphere's
+	 * center. Otherwise, the center of the axis-aligned bounding box
+	 * encompassing the points is calculated.
+	 *
+	 * @param {Array<Vector3>} points - A list of points in 3D space.
+	 * @param {Vector3} [optionalCenter] - The center of the sphere.
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	setFromPoints( points, optionalCenter ) {
 
 		const center = this.center;
@@ -5301,6 +7967,12 @@ class Sphere {
 
 	}
 
+	/**
+	 * Copies the values of the given sphere to this instance.
+	 *
+	 * @param {Sphere} sphere - The sphere to copy.
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	copy( sphere ) {
 
 		this.center.copy( sphere.center );
@@ -5310,12 +7982,25 @@ class Sphere {
 
 	}
 
+	/**
+	 * Returns `true` if the sphere is empty (the radius set to a negative number).
+	 *
+	 * Spheres with a radius of `0` contain only their center point and are not
+	 * considered to be empty.
+	 *
+	 * @return {boolean} Whether this sphere is empty or not.
+	 */
 	isEmpty() {
 
 		return ( this.radius < 0 );
 
 	}
 
+	/**
+	 * Makes this sphere empty which means in encloses a zero space in 3D.
+	 *
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	makeEmpty() {
 
 		this.center.set( 0, 0, 0 );
@@ -5325,18 +8010,39 @@ class Sphere {
 
 	}
 
+	/**
+	 * Returns `true` if this sphere contains the given point inclusive of
+	 * the surface of the sphere.
+	 *
+	 * @param {Vector3} point - The point to check.
+	 * @return {boolean} Whether this sphere contains the given point or not.
+	 */
 	containsPoint( point ) {
 
 		return ( point.distanceToSquared( this.center ) <= ( this.radius * this.radius ) );
 
 	}
 
+	/**
+	 * Returns the closest distance from the boundary of the sphere to the
+	 * given point. If the sphere contains the point, the distance will
+	 * be negative.
+	 *
+	 * @param {Vector3} point - The point to compute the distance to.
+	 * @return {number} The distance to the point.
+	 */
 	distanceToPoint( point ) {
 
 		return ( point.distanceTo( this.center ) - this.radius );
 
 	}
 
+	/**
+	 * Returns `true` if this sphere intersects with the given one.
+	 *
+	 * @param {Sphere} sphere - The sphere to test.
+	 * @return {boolean} Whether this sphere intersects with the given one or not.
+	 */
 	intersectsSphere( sphere ) {
 
 		const radiusSum = this.radius + sphere.radius;
@@ -5345,18 +8051,39 @@ class Sphere {
 
 	}
 
+	/**
+	 * Returns `true` if this sphere intersects with the given box.
+	 *
+	 * @param {Box3} box - The box to test.
+	 * @return {boolean} Whether this sphere intersects with the given box or not.
+	 */
 	intersectsBox( box ) {
 
 		return box.intersectsSphere( this );
 
 	}
 
+	/**
+	 * Returns `true` if this sphere intersects with the given plane.
+	 *
+	 * @param {Plane} plane - The plane to test.
+	 * @return {boolean} Whether this sphere intersects with the given plane or not.
+	 */
 	intersectsPlane( plane ) {
 
 		return Math.abs( plane.distanceToPoint( this.center ) ) <= this.radius;
 
 	}
 
+	/**
+	 * Clamps a point within the sphere. If the point is outside the sphere, it
+	 * will clamp it to the closest point on the edge of the sphere. Points
+	 * already inside the sphere will not be affected.
+	 *
+	 * @param {Vector3} point - The plane to clamp.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The clamped point.
+	 */
 	clampPoint( point, target ) {
 
 		const deltaLengthSq = this.center.distanceToSquared( point );
@@ -5374,6 +8101,12 @@ class Sphere {
 
 	}
 
+	/**
+	 * Returns a bounding box that encloses this sphere.
+	 *
+	 * @param {Box3} target - The target box that is used to store the method's result.
+	 * @return {Box3} The bounding box that encloses this sphere.
+	 */
 	getBoundingBox( target ) {
 
 		if ( this.isEmpty() ) {
@@ -5391,6 +8124,12 @@ class Sphere {
 
 	}
 
+	/**
+	 * Transforms this sphere with the given 4x4 transformation matrix.
+	 *
+	 * @param {Matrix4} matrix - The transformation matrix.
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	applyMatrix4( matrix ) {
 
 		this.center.applyMatrix4( matrix );
@@ -5400,6 +8139,12 @@ class Sphere {
 
 	}
 
+	/**
+	 * Translates the sphere's center by the given offset.
+	 *
+	 * @param {Vector3} offset - The offset.
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	translate( offset ) {
 
 		this.center.add( offset );
@@ -5408,6 +8153,12 @@ class Sphere {
 
 	}
 
+	/**
+	 * Expands the boundaries of this sphere to include the given point.
+	 *
+	 * @param {Vector3} point - The point to include.
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	expandByPoint( point ) {
 
 		if ( this.isEmpty() ) {
@@ -5442,6 +8193,12 @@ class Sphere {
 
 	}
 
+	/**
+	 * Expands this sphere to enclose both the original sphere and the given sphere.
+	 *
+	 * @param {Sphere} sphere - The sphere to include.
+	 * @return {Sphere} A reference to this sphere.
+	 */
 	union( sphere ) {
 
 		if ( sphere.isEmpty() ) {
@@ -5476,12 +8233,23 @@ class Sphere {
 
 	}
 
+	/**
+	 * Returns `true` if this sphere is equal with the given one.
+	 *
+	 * @param {Sphere} sphere - The sphere to test for equality.
+	 * @return {boolean} Whether this bounding sphere is equal with the given one.
+	 */
 	equals( sphere ) {
 
 		return sphere.center.equals( this.center ) && ( sphere.radius === this.radius );
 
 	}
 
+	/**
+	 * Returns a new sphere with copied values from this instance.
+	 *
+	 * @return {Sphere} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -5499,15 +8267,45 @@ const _edge1 = /*@__PURE__*/ new Vector3();
 const _edge2 = /*@__PURE__*/ new Vector3();
 const _normal$1 = /*@__PURE__*/ new Vector3();
 
+/**
+ * A ray that emits from an origin in a certain direction. The class is used by
+ * {@link Raycaster} to assist with raycasting. Raycasting is used for
+ * mouse picking (working out what objects in the 3D space the mouse is over)
+ * amongst other things.
+ */
 class Ray {
 
+	/**
+	 * Constructs a new ray.
+	 *
+	 * @param {Vector3} [origin=(0,0,0)] - The origin of the ray.
+	 * @param {Vector3} [direction=(0,0,-1)] - The (normalized) direction of the ray.
+	 */
 	constructor( origin = new Vector3(), direction = new Vector3( 0, 0, -1 ) ) {
 
+		/**
+		 * The origin of the ray.
+		 *
+		 * @type {Vector3}
+		 */
 		this.origin = origin;
+
+		/**
+		 * The (normalized) direction of the ray.
+		 *
+		 * @type {Vector3}
+		 */
 		this.direction = direction;
 
 	}
 
+	/**
+	 * Sets the ray's components by copying the given values.
+	 *
+	 * @param {Vector3} origin - The origin.
+	 * @param {Vector3} direction - The direction.
+	 * @return {Ray} A reference to this ray.
+	 */
 	set( origin, direction ) {
 
 		this.origin.copy( origin );
@@ -5517,6 +8315,12 @@ class Ray {
 
 	}
 
+	/**
+	 * Copies the values of the given ray to this instance.
+	 *
+	 * @param {Ray} ray - The ray to copy.
+	 * @return {Ray} A reference to this ray.
+	 */
 	copy( ray ) {
 
 		this.origin.copy( ray.origin );
@@ -5526,12 +8330,25 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns a vector that is located at a given distance along this ray.
+	 *
+	 * @param {number} t - The distance along the ray to retrieve a position for.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} A position on the ray.
+	 */
 	at( t, target ) {
 
 		return target.copy( this.origin ).addScaledVector( this.direction, t );
 
 	}
 
+	/**
+	 * Adjusts the direction of the ray to point at the given vector in world space.
+	 *
+	 * @param {Vector3} v - The target position.
+	 * @return {Ray} A reference to this ray.
+	 */
 	lookAt( v ) {
 
 		this.direction.copy( v ).sub( this.origin ).normalize();
@@ -5540,6 +8357,12 @@ class Ray {
 
 	}
 
+	/**
+	 * Shift the origin of this ray along its direction by the given distance.
+	 *
+	 * @param {number} t - The distance along the ray to interpolate.
+	 * @return {Ray} A reference to this ray.
+	 */
 	recast( t ) {
 
 		this.origin.copy( this.at( t, _vector$a ) );
@@ -5548,6 +8371,13 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns the point along this ray that is closest to the given point.
+	 *
+	 * @param {Vector3} point - A point in 3D space to get the closet location on the ray for.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The closest point on this ray.
+	 */
 	closestPointToPoint( point, target ) {
 
 		target.subVectors( point, this.origin );
@@ -5564,12 +8394,24 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns the distance of the closest approach between this ray and the given point.
+	 *
+	 * @param {Vector3} point - A point in 3D space to compute the distance to.
+	 * @return {number} The distance.
+	 */
 	distanceToPoint( point ) {
 
 		return Math.sqrt( this.distanceSqToPoint( point ) );
 
 	}
 
+	/**
+	 * Returns the squared distance of the closest approach between this ray and the given point.
+	 *
+	 * @param {Vector3} point - A point in 3D space to compute the distance to.
+	 * @return {number} The squared distance.
+	 */
 	distanceSqToPoint( point ) {
 
 		const directionDistance = _vector$a.subVectors( point, this.origin ).dot( this.direction );
@@ -5588,6 +8430,15 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns the squared distance between this ray and the given line segment.
+	 *
+	 * @param {Vector3} v0 - The start point of the line segment.
+	 * @param {Vector3} v1 - The end point of the line segment.
+	 * @param {Vector3} [optionalPointOnRay] - When provided, it receives the point on this ray that is closest to the segment.
+	 * @param {Vector3} [optionalPointOnSegment] - When provided, it receives the point on the line segment that is closest to this ray.
+	 * @return {number} The squared distance.
+	 */
 	distanceSqToSegment( v0, v1, optionalPointOnRay, optionalPointOnSegment ) {
 
 		// from https://github.com/pmjoniak/GeometricTools/blob/master/GTEngine/Include/Mathematics/GteDistRaySegment.h
@@ -5707,6 +8558,14 @@ class Ray {
 
 	}
 
+	/**
+	 * Intersects this ray with the given sphere, returning the intersection
+	 * point or `null` if there is no intersection.
+	 *
+	 * @param {Sphere} sphere - The sphere to intersect.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The intersection point.
+	 */
 	intersectSphere( sphere, target ) {
 
 		_vector$a.subVectors( sphere.center, this.origin );
@@ -5737,12 +8596,25 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns `true` if this ray intersects with the given sphere.
+	 *
+	 * @param {Sphere} sphere - The sphere to intersect.
+	 * @return {boolean} Whether this ray intersects with the given sphere or not.
+	 */
 	intersectsSphere( sphere ) {
 
 		return this.distanceSqToPoint( sphere.center ) <= ( sphere.radius * sphere.radius );
 
 	}
 
+	/**
+	 * Computes the distance from the ray's origin to the given plane. Returns `null` if the ray
+	 * does not intersect with the plane.
+	 *
+	 * @param {Plane} plane - The plane to compute the distance to.
+	 * @return {?number} Whether this ray intersects with the given sphere or not.
+	 */
 	distanceToPlane( plane ) {
 
 		const denominator = plane.normal.dot( this.direction );
@@ -5770,6 +8642,14 @@ class Ray {
 
 	}
 
+	/**
+	 * Intersects this ray with the given plane, returning the intersection
+	 * point or `null` if there is no intersection.
+	 *
+	 * @param {Plane} plane - The plane to intersect.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The intersection point.
+	 */
 	intersectPlane( plane, target ) {
 
 		const t = this.distanceToPlane( plane );
@@ -5784,6 +8664,12 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns `true` if this ray intersects with the given plane.
+	 *
+	 * @param {Plane} plane - The plane to intersect.
+	 * @return {boolean} Whether this ray intersects with the given plane or not.
+	 */
 	intersectsPlane( plane ) {
 
 		// check if the ray lies on the plane first
@@ -5810,6 +8696,14 @@ class Ray {
 
 	}
 
+	/**
+	 * Intersects this ray with the given bounding box, returning the intersection
+	 * point or `null` if there is no intersection.
+	 *
+	 * @param {Box3} box - The box to intersect.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The intersection point.
+	 */
 	intersectBox( box, target ) {
 
 		let tmin, tmax, tymin, tymax, tzmin, tzmax;
@@ -5876,12 +8770,29 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns `true` if this ray intersects with the given box.
+	 *
+	 * @param {Box3} box - The box to intersect.
+	 * @return {boolean} Whether this ray intersects with the given box or not.
+	 */
 	intersectsBox( box ) {
 
 		return this.intersectBox( box, _vector$a ) !== null;
 
 	}
 
+	/**
+	 * Intersects this ray with the given triangle, returning the intersection
+	 * point or `null` if there is no intersection.
+	 *
+	 * @param {Vector3} a - The first vertex of the triangle.
+	 * @param {Vector3} b - The second vertex of the triangle.
+	 * @param {Vector3} c - The third vertex of the triangle.
+	 * @param {boolean} backfaceCulling - Whether to use backface culling or not.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The intersection point.
+	 */
 	intersectTriangle( a, b, c, backfaceCulling, target ) {
 
 		// Compute the offset origin, edges, and normal.
@@ -5957,6 +8868,12 @@ class Ray {
 
 	}
 
+	/**
+	 * Transforms this ray with the given 4x4 transformation matrix.
+	 *
+	 * @param {Matrix4} matrix4 - The transformation matrix.
+	 * @return {Ray} A reference to this ray.
+	 */
 	applyMatrix4( matrix4 ) {
 
 		this.origin.applyMatrix4( matrix4 );
@@ -5966,12 +8883,23 @@ class Ray {
 
 	}
 
+	/**
+	 * Returns `true` if this ray is equal with the given one.
+	 *
+	 * @param {Ray} ray - The ray to test for equality.
+	 * @return {boolean} Whether this ray is equal with the given one.
+	 */
 	equals( ray ) {
 
 		return ray.origin.equals( this.origin ) && ray.direction.equals( this.direction );
 
 	}
 
+	/**
+	 * Returns a new ray with copied values from this instance.
+	 *
+	 * @return {Ray} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -5980,12 +8908,84 @@ class Ray {
 
 }
 
+/**
+ * Represents a 4x4 matrix.
+ *
+ * The most common use of a 4x4 matrix in 3D computer graphics is as a transformation matrix.
+ * For an introduction to transformation matrices as used in WebGL, check out [this tutorial]{@link https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices}
+ *
+ * This allows a 3D vector representing a point in 3D space to undergo
+ * transformations such as translation, rotation, shear, scale, reflection,
+ * orthogonal or perspective projection and so on, by being multiplied by the
+ * matrix. This is known as `applying` the matrix to the vector.
+ *
+ * A Note on Row-Major and Column-Major Ordering:
+ *
+ * The constructor and {@link Matrix3#set} method take arguments in
+ * [row-major]{@link https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order}
+ * order, while internally they are stored in the {@link Matrix3#elements} array in column-major order.
+ * This means that calling:
+ * ```js
+ * const m = new THREE.Matrix4();
+ * m.set( 11, 12, 13, 14,
+ *        21, 22, 23, 24,
+ *        31, 32, 33, 34,
+ *        41, 42, 43, 44 );
+ * ```
+ * will result in the elements array containing:
+ * ```js
+ * m.elements = [ 11, 21, 31, 41,
+ *                12, 22, 32, 42,
+ *                13, 23, 33, 43,
+ *                14, 24, 34, 44 ];
+ * ```
+ * and internally all calculations are performed using column-major ordering.
+ * However, as the actual ordering makes no difference mathematically and
+ * most people are used to thinking about matrices in row-major order, the
+ * three.js documentation shows matrices in row-major order. Just bear in
+ * mind that if you are reading the source code, you'll have to take the
+ * transpose of any matrices outlined here to make sense of the calculations.
+ */
 class Matrix4 {
 
+	/**
+	 * Constructs a new 4x4 matrix. The arguments are supposed to be
+	 * in row-major order. If no arguments are provided, the constructor
+	 * initializes the matrix as an identity matrix.
+	 *
+	 * @param {number} [n11] - 1-1 matrix element.
+	 * @param {number} [n12] - 1-2 matrix element.
+	 * @param {number} [n13] - 1-3 matrix element.
+	 * @param {number} [n14] - 1-4 matrix element.
+	 * @param {number} [n21] - 2-1 matrix element.
+	 * @param {number} [n22] - 2-2 matrix element.
+	 * @param {number} [n23] - 2-3 matrix element.
+	 * @param {number} [n24] - 2-4 matrix element.
+	 * @param {number} [n31] - 3-1 matrix element.
+	 * @param {number} [n32] - 3-2 matrix element.
+	 * @param {number} [n33] - 3-3 matrix element.
+	 * @param {number} [n34] - 3-4 matrix element.
+	 * @param {number} [n41] - 4-1 matrix element.
+	 * @param {number} [n42] - 4-2 matrix element.
+	 * @param {number} [n43] - 4-3 matrix element.
+	 * @param {number} [n44] - 4-4 matrix element.
+	 */
 	constructor( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		Matrix4.prototype.isMatrix4 = true;
 
+		/**
+		 * A column-major list of matrix values.
+		 *
+		 * @type {Array<number>}
+		 */
 		this.elements = [
 
 			1, 0, 0, 0,
@@ -6003,6 +9003,28 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets the elements of the matrix.The arguments are supposed to be
+	 * in row-major order.
+	 *
+	 * @param {number} [n11] - 1-1 matrix element.
+	 * @param {number} [n12] - 1-2 matrix element.
+	 * @param {number} [n13] - 1-3 matrix element.
+	 * @param {number} [n14] - 1-4 matrix element.
+	 * @param {number} [n21] - 2-1 matrix element.
+	 * @param {number} [n22] - 2-2 matrix element.
+	 * @param {number} [n23] - 2-3 matrix element.
+	 * @param {number} [n24] - 2-4 matrix element.
+	 * @param {number} [n31] - 3-1 matrix element.
+	 * @param {number} [n32] - 3-2 matrix element.
+	 * @param {number} [n33] - 3-3 matrix element.
+	 * @param {number} [n34] - 3-4 matrix element.
+	 * @param {number} [n41] - 4-1 matrix element.
+	 * @param {number} [n42] - 4-2 matrix element.
+	 * @param {number} [n43] - 4-3 matrix element.
+	 * @param {number} [n44] - 4-4 matrix element.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	set( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 ) {
 
 		const te = this.elements;
@@ -6016,6 +9038,11 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix to the 4x4 identity matrix.
+	 *
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	identity() {
 
 		this.set(
@@ -6031,12 +9058,23 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Returns a matrix with copied values from this instance.
+	 *
+	 * @return {Matrix4} A clone of this instance.
+	 */
 	clone() {
 
 		return new Matrix4().fromArray( this.elements );
 
 	}
 
+	/**
+	 * Copies the values of the given matrix to this instance.
+	 *
+	 * @param {Matrix4} m - The matrix to copy.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	copy( m ) {
 
 		const te = this.elements;
@@ -6051,6 +9089,13 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Copies the translation component of the given matrix
+	 * into this matrix's translation component.
+	 *
+	 * @param {Matrix4} m - The matrix to copy the translation component.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	copyPosition( m ) {
 
 		const te = this.elements, me = m.elements;
@@ -6063,6 +9108,12 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Set the upper 3x3 elements of this matrix to the values of given 3x3 matrix.
+	 *
+	 * @param {Matrix3} m - The 3x3 matrix.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	setFromMatrix3( m ) {
 
 		const me = m.elements;
@@ -6080,6 +9131,14 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Extracts the basis of this matrix into the three axis vectors provided.
+	 *
+	 * @param {Vector3} xAxis - The basis's x axis.
+	 * @param {Vector3} yAxis - The basis's y axis.
+	 * @param {Vector3} zAxis - The basis's z axis.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	extractBasis( xAxis, yAxis, zAxis ) {
 
 		xAxis.setFromMatrixColumn( this, 0 );
@@ -6090,6 +9149,14 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets the given basis vectors to this matrix.
+	 *
+	 * @param {Vector3} xAxis - The basis's x axis.
+	 * @param {Vector3} yAxis - The basis's y axis.
+	 * @param {Vector3} zAxis - The basis's z axis.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeBasis( xAxis, yAxis, zAxis ) {
 
 		this.set(
@@ -6103,9 +9170,16 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Extracts the rotation component of the given matrix
+	 * into this matrix's rotation component.
+	 *
+	 * Note: This method does not support reflection matrices.
+	 *
+	 * @param {Matrix4} m - The matrix.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	extractRotation( m ) {
-
-		// this method does not support reflection matrices
 
 		const te = this.elements;
 		const me = m.elements;
@@ -6138,6 +9212,16 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets the rotation component (the upper left 3x3 matrix) of this matrix to
+	 * the rotation specified by the given Euler angles. The rest of
+	 * the matrix is set to the identity. Depending on the {@link Euler#order},
+	 * there are six possible outcomes. See [this page]{@link https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix}
+	 * for a complete list.
+	 *
+	 * @param {Euler} euler - The Euler angles.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeRotationFromEuler( euler ) {
 
 		const te = this.elements;
@@ -6260,12 +9344,29 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets the rotation component of this matrix to the rotation specified by
+	 * the given Quaternion as outlined [here]{@link https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion}
+	 * The rest of the matrix is set to the identity.
+	 *
+	 * @param {Quaternion} q - The Quaternion.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeRotationFromQuaternion( q ) {
 
 		return this.compose( _zero, q, _one );
 
 	}
 
+	/**
+	 * Sets the rotation component of the transformation matrix, looking from `eye` towards
+	 * `target`, and oriented by the up-direction.
+	 *
+	 * @param {Vector3} eye - The eye vector.
+	 * @param {Vector3} target - The target vector.
+	 * @param {Vector3} up - The up vector.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	lookAt( eye, target, up ) {
 
 		const te = this.elements;
@@ -6313,18 +9414,38 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Post-multiplies this matrix by the given 4x4 matrix.
+	 *
+	 * @param {Matrix4} m - The matrix to multiply with.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	multiply( m ) {
 
 		return this.multiplyMatrices( this, m );
 
 	}
 
+	/**
+	 * Pre-multiplies this matrix by the given 4x4 matrix.
+	 *
+	 * @param {Matrix4} m - The matrix to multiply with.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	premultiply( m ) {
 
 		return this.multiplyMatrices( m, this );
 
 	}
 
+	/**
+	 * Multiples the given 4x4 matrices and stores the result
+	 * in this matrix.
+	 *
+	 * @param {Matrix4} a - The first matrix.
+	 * @param {Matrix4} b - The second matrix.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	multiplyMatrices( a, b ) {
 
 		const ae = a.elements;
@@ -6365,6 +9486,12 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Multiplies every component of the matrix by the given scalar.
+	 *
+	 * @param {number} s - The scalar.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	multiplyScalar( s ) {
 
 		const te = this.elements;
@@ -6378,6 +9505,13 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Computes and returns the determinant of this matrix.
+	 *
+	 * Based on the method outlined [here]{@link http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.html}.
+	 *
+	 * @return {number} The determinant.
+	 */
 	determinant() {
 
 		const te = this.elements;
@@ -6388,7 +9522,6 @@ class Matrix4 {
 		const n41 = te[ 3 ], n42 = te[ 7 ], n43 = te[ 11 ], n44 = te[ 15 ];
 
 		//TODO: make this more efficient
-		//( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
 
 		return (
 			n41 * (
@@ -6428,6 +9561,11 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Transposes this matrix in place.
+	 *
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	transpose() {
 
 		const te = this.elements;
@@ -6445,6 +9583,15 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets the position component for this matrix from the given vector,
+	 * without affecting the rest of the matrix.
+	 *
+	 * @param {number|Vector3} x - The x component of the vector or alternatively the vector object.
+	 * @param {number} y - The y component of the vector.
+	 * @param {number} z - The z component of the vector.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	setPosition( x, y, z ) {
 
 		const te = this.elements;
@@ -6467,6 +9614,13 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Inverts this matrix, using the [analytic method]{@link https://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution}.
+	 * You can not invert with a determinant of zero. If you attempt this, the method produces
+	 * a zero matrix instead.
+	 *
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	invert() {
 
 		// based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
@@ -6512,6 +9666,12 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Multiplies the columns of this matrix by the given vector.
+	 *
+	 * @param {Vector3} v - The scale vector.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	scale( v ) {
 
 		const te = this.elements;
@@ -6526,6 +9686,11 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Gets the maximum scale value of the three axes.
+	 *
+	 * @return {number} The maximum scale.
+	 */
 	getMaxScaleOnAxis() {
 
 		const te = this.elements;
@@ -6538,6 +9703,14 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix as a translation transform from the given vector.
+	 *
+	 * @param {number|Vector3} x - The amount to translate in the X axis or alternatively a translation vector.
+	 * @param {number} y - The amount to translate in the Y axis.
+	 * @param {number} z - The amount to translate in the z axis.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeTranslation( x, y, z ) {
 
 		if ( x.isVector3 ) {
@@ -6568,6 +9741,13 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix as a rotational transformation around the X axis by
+	 * the given angle.
+	 *
+	 * @param {number} theta - The rotation in radians.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeRotationX( theta ) {
 
 		const c = Math.cos( theta ), s = Math.sin( theta );
@@ -6585,6 +9765,13 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix as a rotational transformation around the Y axis by
+	 * the given angle.
+	 *
+	 * @param {number} theta - The rotation in radians.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeRotationY( theta ) {
 
 		const c = Math.cos( theta ), s = Math.sin( theta );
@@ -6602,6 +9789,13 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix as a rotational transformation around the Z axis by
+	 * the given angle.
+	 *
+	 * @param {number} theta - The rotation in radians.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeRotationZ( theta ) {
 
 		const c = Math.cos( theta ), s = Math.sin( theta );
@@ -6619,6 +9813,17 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix as a rotational transformation around the given axis by
+	 * the given angle.
+	 *
+	 * This is a somewhat controversial but mathematically sound alternative to
+	 * rotating via Quaternions. See the discussion [here]{@link https://www.gamedev.net/articles/programming/math-and-physics/do-we-really-need-quaternions-r1199}.
+	 *
+	 * @param {Vector3} axis - The normalized rotation axis.
+	 * @param {number} angle - The rotation in radians.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeRotationAxis( axis, angle ) {
 
 		// Based on http://www.gamedev.net/reference/articles/article1199.asp
@@ -6642,6 +9847,14 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix as a scale transformation.
+	 *
+	 * @param {number} x - The amount to scale in the X axis.
+	 * @param {number} y - The amount to scale in the Y axis.
+	 * @param {number} z - The amount to scale in the Z axis.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeScale( x, y, z ) {
 
 		this.set(
@@ -6657,6 +9870,17 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix as a shear transformation.
+	 *
+	 * @param {number} xy - The amount to shear X by Y.
+	 * @param {number} xz - The amount to shear X by Z.
+	 * @param {number} yx - The amount to shear Y by X.
+	 * @param {number} yz - The amount to shear Y by Z.
+	 * @param {number} zx - The amount to shear Z by X.
+	 * @param {number} zy - The amount to shear Z by Y.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeShear( xy, xz, yx, yz, zx, zy ) {
 
 		this.set(
@@ -6672,6 +9896,15 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets this matrix to the transformation composed of the given position,
+	 * rotation (Quaternion) and scale.
+	 *
+	 * @param {Vector3} position - The position vector.
+	 * @param {Quaternion} quaternion - The rotation as a Quaternion.
+	 * @param {Vector3} scale - The scale vector.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	compose( position, quaternion, scale ) {
 
 		const te = this.elements;
@@ -6708,6 +9941,19 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Decomposes this matrix into its position, rotation and scale components
+	 * and provides the result in the given objects.
+	 *
+	 * Note: Not all matrices are decomposable in this way. For example, if an
+	 * object has a non-uniformly scaled parent, then the object's world matrix
+	 * may not be decomposable, and this method may not be appropriate.
+	 *
+	 * @param {Vector3} position - The position vector.
+	 * @param {Quaternion} quaternion - The rotation as a Quaternion.
+	 * @param {Vector3} scale - The scale vector.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	decompose( position, quaternion, scale ) {
 
 		const te = this.elements;
@@ -6753,6 +9999,19 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Creates a perspective projection matrix. This is used internally by
+	 * {@link PerspectiveCamera#updateProjectionMatrix}.
+
+	 * @param {number} left - Left boundary of the viewing frustum at the near plane.
+	 * @param {number} right - Right boundary of the viewing frustum at the near plane.
+	 * @param {number} top - Top boundary of the viewing frustum at the near plane.
+	 * @param {number} bottom - Bottom boundary of the viewing frustum at the near plane.
+	 * @param {number} near - The distance from the camera to the near plane.
+	 * @param {number} far - The distance from the camera to the far plane.
+	 * @param {(WebGLCoordinateSystem|WebGPUCoordinateSystem)} [coordinateSystem=WebGLCoordinateSystem] - The coordinate system.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makePerspective( left, right, top, bottom, near, far, coordinateSystem = WebGLCoordinateSystem ) {
 
 		const te = this.elements;
@@ -6789,6 +10048,19 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Creates a orthographic projection matrix. This is used internally by
+	 * {@link OrthographicCamera#updateProjectionMatrix}.
+
+	 * @param {number} left - Left boundary of the viewing frustum at the near plane.
+	 * @param {number} right - Right boundary of the viewing frustum at the near plane.
+	 * @param {number} top - Top boundary of the viewing frustum at the near plane.
+	 * @param {number} bottom - Bottom boundary of the viewing frustum at the near plane.
+	 * @param {number} near - The distance from the camera to the near plane.
+	 * @param {number} far - The distance from the camera to the far plane.
+	 * @param {(WebGLCoordinateSystem|WebGPUCoordinateSystem)} [coordinateSystem=WebGLCoordinateSystem] - The coordinate system.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	makeOrthographic( left, right, top, bottom, near, far, coordinateSystem = WebGLCoordinateSystem ) {
 
 		const te = this.elements;
@@ -6826,6 +10098,12 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Returns `true` if this matrix is equal with the given one.
+	 *
+	 * @param {Matrix4} matrix - The matrix to test for equality.
+	 * @return {boolean} Whether this matrix is equal with the given one.
+	 */
 	equals( matrix ) {
 
 		const te = this.elements;
@@ -6841,6 +10119,13 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Sets the elements of the matrix from the given array.
+	 *
+	 * @param {Array<number>} array - The matrix elements in column-major order.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Matrix4} A reference to this matrix.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		for ( let i = 0; i < 16; i ++ ) {
@@ -6853,6 +10138,14 @@ class Matrix4 {
 
 	}
 
+	/**
+	 * Writes the elements of this matrix to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array holding the matrix elements in column-major order.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number>} The matrix elements in column-major order.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		const te = this.elements;
@@ -6894,10 +10187,41 @@ const _z = /*@__PURE__*/ new Vector3();
 const _matrix$2 = /*@__PURE__*/ new Matrix4();
 const _quaternion$3 = /*@__PURE__*/ new Quaternion();
 
+/**
+ * A class representing Euler angles.
+ *
+ * Euler angles describe a rotational transformation by rotating an object on
+ * its various axes in specified amounts per axis, and a specified axis
+ * order.
+ *
+ * Iterating through an instance will yield its components (x, y, z,
+ * order) in the corresponding order.
+ *
+ * ```js
+ * const a = new THREE.Euler( 0, 1, 1.57, 'XYZ' );
+ * const b = new THREE.Vector3( 1, 0, 1 );
+ * b.applyEuler(a);
+ * ```
+ */
 class Euler {
 
+	/**
+	 * Constructs a new euler instance.
+	 *
+	 * @param {number} [x=0] - The angle of the x axis in radians.
+	 * @param {number} [y=0] - The angle of the y axis in radians.
+	 * @param {number} [z=0] - The angle of the z axis in radians.
+	 * @param {string} [order=Euler.DEFAULT_ORDER] - A string representing the order that the rotations are applied.
+	 */
 	constructor( x = 0, y = 0, z = 0, order = Euler.DEFAULT_ORDER ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isEuler = true;
 
 		this._x = x;
@@ -6907,6 +10231,12 @@ class Euler {
 
 	}
 
+	/**
+	 * The angle of the x axis in radians.
+	 *
+	 * @type {number}
+	 * @default 0
+	 */
 	get x() {
 
 		return this._x;
@@ -6920,6 +10250,12 @@ class Euler {
 
 	}
 
+	/**
+	 * The angle of the y axis in radians.
+	 *
+	 * @type {number}
+	 * @default 0
+	 */
 	get y() {
 
 		return this._y;
@@ -6933,6 +10269,12 @@ class Euler {
 
 	}
 
+	/**
+	 * The angle of the z axis in radians.
+	 *
+	 * @type {number}
+	 * @default 0
+	 */
 	get z() {
 
 		return this._z;
@@ -6946,6 +10288,12 @@ class Euler {
 
 	}
 
+	/**
+	 * A string representing the order that the rotations are applied.
+	 *
+	 * @type {string}
+	 * @default 'XYZ'
+	 */
 	get order() {
 
 		return this._order;
@@ -6959,6 +10307,15 @@ class Euler {
 
 	}
 
+	/**
+	 * Sets the Euler components.
+	 *
+	 * @param {number} x - The angle of the x axis in radians.
+	 * @param {number} y - The angle of the y axis in radians.
+	 * @param {number} z - The angle of the z axis in radians.
+	 * @param {string} [order] - A string representing the order that the rotations are applied.
+	 * @return {Euler} A reference to this Euler instance.
+	 */
 	set( x, y, z, order = this._order ) {
 
 		this._x = x;
@@ -6972,12 +10329,23 @@ class Euler {
 
 	}
 
+	/**
+	 * Returns a new Euler instance with copied values from this instance.
+	 *
+	 * @return {Euler} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor( this._x, this._y, this._z, this._order );
 
 	}
 
+	/**
+	 * Copies the values of the given Euler instance to this instance.
+	 *
+	 * @param {Euler} euler - The Euler instance to copy.
+	 * @return {Euler} A reference to this Euler instance.
+	 */
 	copy( euler ) {
 
 		this._x = euler._x;
@@ -6991,9 +10359,15 @@ class Euler {
 
 	}
 
+	/**
+	 * Sets the angles of this Euler instance from a pure rotation matrix.
+	 *
+	 * @param {Matrix4} m - A 4x4 matrix of which the upper 3x3 of matrix is a pure rotation matrix (i.e. unscaled).
+	 * @param {string} [order] - A string representing the order that the rotations are applied.
+	 * @param {boolean} [update=true] - Whether the internal `onChange` callback should be executed or not.
+	 * @return {Euler} A reference to this Euler instance.
+	 */
 	setFromRotationMatrix( m, order = this._order, update = true ) {
-
-		// assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
 
 		const te = m.elements;
 		const m11 = te[ 0 ], m12 = te[ 4 ], m13 = te[ 8 ];
@@ -7124,6 +10498,14 @@ class Euler {
 
 	}
 
+	/**
+	 * Sets the angles of this Euler instance from a normalized quaternion.
+	 *
+	 * @param {Quaternion} q - A normalized Quaternion.
+	 * @param {string} [order] - A string representing the order that the rotations are applied.
+	 * @param {boolean} [update=true] - Whether the internal `onChange` callback should be executed or not.
+	 * @return {Euler} A reference to this Euler instance.
+	 */
 	setFromQuaternion( q, order, update ) {
 
 		_matrix$2.makeRotationFromQuaternion( q );
@@ -7132,15 +10514,30 @@ class Euler {
 
 	}
 
+	/**
+	 * Sets the angles of this Euler instance from the given vector.
+	 *
+	 * @param {Vector3} v - The vector.
+	 * @param {string} [order] - A string representing the order that the rotations are applied.
+	 * @return {Euler} A reference to this Euler instance.
+	 */
 	setFromVector3( v, order = this._order ) {
 
 		return this.set( v.x, v.y, v.z, order );
 
 	}
 
+	/**
+	 * Resets the euler angle with a new order by creating a quaternion from this
+	 * euler angle and then setting this euler angle with the quaternion and the
+	 * new order.
+	 *
+	 * Warning: This discards revolution information.
+	 *
+	 * @param {string} [newOrder] - A string representing the new order that the rotations are applied.
+	 * @return {Euler} A reference to this Euler instance.
+	 */
 	reorder( newOrder ) {
-
-		// WARNING: this discards revolution information -bhouston
 
 		_quaternion$3.setFromEuler( this );
 
@@ -7148,12 +10545,26 @@ class Euler {
 
 	}
 
+	/**
+	 * Returns `true` if this Euler instance is equal with the given one.
+	 *
+	 * @param {Euler} euler - The Euler instance to test for equality.
+	 * @return {boolean} Whether this Euler instance is equal with the given one.
+	 */
 	equals( euler ) {
 
 		return ( euler._x === this._x ) && ( euler._y === this._y ) && ( euler._z === this._z ) && ( euler._order === this._order );
 
 	}
 
+	/**
+	 * Sets this Euler instance's components to values from the given array. The first three
+	 * entries of the array are assign to the x,y and z components. An optional fourth entry
+	 * defines the Euler order.
+	 *
+	 * @param {Array<number,number,number,?string>} array - An array holding the Euler component values.
+	 * @return {Euler} A reference to this Euler instance.
+	 */
 	fromArray( array ) {
 
 		this._x = array[ 0 ];
@@ -7167,6 +10578,14 @@ class Euler {
 
 	}
 
+	/**
+	 * Writes the components of this Euler instance to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number,number,number,string>} [array=[]] - The target array holding the Euler components.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number,number,number,string>} The Euler components.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		array[ offset ] = this._x;
@@ -7199,6 +10618,13 @@ class Euler {
 
 }
 
+/**
+ * The default Euler angle order.
+ *
+ * @static
+ * @type {string}
+ * @default 'XYZ'
+ */
 Euler.DEFAULT_ORDER = 'XYZ';
 
 class Layers {
@@ -7274,30 +10700,118 @@ const _xAxis = /*@__PURE__*/ new Vector3( 1, 0, 0 );
 const _yAxis = /*@__PURE__*/ new Vector3( 0, 1, 0 );
 const _zAxis = /*@__PURE__*/ new Vector3( 0, 0, 1 );
 
+/**
+ * Fires when the object has been added to its parent object.
+ *
+ * @event Object3D#added
+ * @type {Object}
+ */
 const _addedEvent = { type: 'added' };
+
+/**
+ * Fires when the object has been removed from its parent object.
+ *
+ * @event Object3D#removed
+ * @type {Object}
+ */
 const _removedEvent = { type: 'removed' };
 
+/**
+ * Fires when a new child object has been added.
+ *
+ * @event Object3D#childadded
+ * @type {Object}
+ */
 const _childaddedEvent = { type: 'childadded', child: null };
+
+/**
+ * Fires when a new child object has been added.
+ *
+ * @event Object3D#childremoved
+ * @type {Object}
+ */
 const _childremovedEvent = { type: 'childremoved', child: null };
 
+/**
+ * This is the base class for most objects in three.js and provides a set of
+ * properties and methods for manipulating objects in 3D space.
+ *
+ * @augments EventDispatcher
+ */
 class Object3D extends EventDispatcher {
 
+	/**
+	 * Constructs a new 3D object.
+	 */
 	constructor() {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isObject3D = true;
 
+		/**
+		 * The ID of the 3D object.
+		 *
+		 * @name Object3D#id
+		 * @type {number}
+		 * @readonly
+		 */
 		Object.defineProperty( this, 'id', { value: _object3DId ++ } );
 
+		/**
+		 * The UUID of the 3D object.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.uuid = generateUUID();
 
+		/**
+		 * The name of the 3D object.
+		 *
+		 * @type {string}
+		 */
 		this.name = '';
+
+		/**
+		 * The type property is used for detecting the object type
+		 * in context of serialization/deserialization.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.type = 'Object3D';
 
+		/**
+		 * A reference to the parent object.
+		 *
+		 * @type {?Object3D}
+		 * @default null
+		 */
 		this.parent = null;
+
+		/**
+		 * An array holding the child 3D objects of this instance.
+		 *
+		 * @type {Array<Object3D>}
+		 */
 		this.children = [];
 
+		/**
+		 * Defines the `up` direction of the 3D object which influences
+		 * the orientation via methods like {@link Object3D#lookAt}.
+		 *
+		 * The default values for all 3D objects is defined by `Object3D.DEFAULT_UP`.
+		 *
+		 * @type {Vector3}
+		 */
 		this.up = Object3D.DEFAULT_UP.clone();
 
 		const position = new Vector3();
@@ -7321,65 +10835,245 @@ class Object3D extends EventDispatcher {
 		quaternion._onChange( onQuaternionChange );
 
 		Object.defineProperties( this, {
+			/**
+			 * Represents the object's local position.
+			 *
+			 * @name Object3D#position
+			 * @type {Vector3}
+			 * @default (0,0,0)
+			 */
 			position: {
 				configurable: true,
 				enumerable: true,
 				value: position
 			},
+			/**
+			 * Represents the object's local rotation as Euler angles, in radians.
+			 *
+			 * @name Object3D#rotation
+			 * @type {Euler}
+			 * @default (0,0,0)
+			 */
 			rotation: {
 				configurable: true,
 				enumerable: true,
 				value: rotation
 			},
+			/**
+			 * Represents the object's local rotation as Quaternions.
+			 *
+			 * @name Object3D#quaternion
+			 * @type {Quaternion}
+			 */
 			quaternion: {
 				configurable: true,
 				enumerable: true,
 				value: quaternion
 			},
+			/**
+			 * Represents the object's local scale.
+			 *
+			 * @name Object3D#scale
+			 * @type {Vector3}
+			 * @default (1,1,1)
+			 */
 			scale: {
 				configurable: true,
 				enumerable: true,
 				value: scale
 			},
+			/**
+			 * Represents the object's model-view matrix.
+			 *
+			 * @name Object3D#modelViewMatrix
+			 * @type {Matrix4}
+			 */
 			modelViewMatrix: {
 				value: new Matrix4()
 			},
+			/**
+			 * Represents the object's normal matrix.
+			 *
+			 * @name Object3D#normalMatrix
+			 * @type {Matrix3}
+			 */
 			normalMatrix: {
 				value: new Matrix3()
 			}
 		} );
 
+		/**
+		 * Represents the object's transformation matrix in local space.
+		 *
+		 * @type {Matrix4}
+		 */
 		this.matrix = new Matrix4();
+
+		/**
+		 * Represents the object's transformation matrix in world space.
+		 * If the 3D object has no parent, then it's identical to the local transformation matrix
+		 *
+		 * @type {Matrix4}
+		 */
 		this.matrixWorld = new Matrix4();
 
+		/**
+		 * When set to `true`, the engine automatically computes the local matrix from position,
+		 * rotation and scale every frame.
+		 *
+		 * The default values for all 3D objects is defined by `Object3D.DEFAULT_MATRIX_AUTO_UPDATE`.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.matrixAutoUpdate = Object3D.DEFAULT_MATRIX_AUTO_UPDATE;
 
+		/**
+		 * When set to `true`, the engine automatically computes the world matrix from the current local
+		 * matrix and the object's transformation hierarchy.
+		 *
+		 * The default values for all 3D objects is defined by `Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE`.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.matrixWorldAutoUpdate = Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE; // checked by the renderer
+
+		/**
+		 * When set to `true`, it calculates the world matrix in that frame and resets this property
+		 * to `false`.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.matrixWorldNeedsUpdate = false;
 
+		/**
+		 * The layer membership of the 3D object. The 3D object is only visible if it has
+		 * at least one layer in common with the camera in use. This property can also be
+		 * used to filter out unwanted objects in ray-intersection tests when using {@link Raycaster}.
+		 *
+		 * @type {Layers}
+		 */
 		this.layers = new Layers();
+
+		/**
+		 * When set to `true`, the 3D object gets rendered.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.visible = true;
 
+		/**
+		 * When set to `true`, the 3D object gets rendered into shadow maps.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.castShadow = false;
+
+		/**
+		 * When set to `true`, the 3D object is affected by shadows in the scene.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.receiveShadow = false;
 
+		/**
+		 * When set to `true`, the 3D object is honored by view frustum culling.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.frustumCulled = true;
+
+		/**
+		 * This value allows the default rendering order of scene graph objects to be
+		 * overridden although opaque and transparent objects remain sorted independently.
+		 * When this property is set for an instance of {@link Group},all descendants
+		 * objects will be sorted and rendered together. Sorting is from lowest to highest
+		 * render order.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.renderOrder = 0;
 
+		/**
+		 * An array holding the animation clips of the 3D object.
+		 *
+		 * @type {Array<AnimationClip>}
+		 */
 		this.animations = [];
 
+		/**
+		 * An object that can be used to store custom data about the 3D object. It
+		 * should not hold references to functions as these will not be cloned.
+		 *
+		 * @type {Object}
+		 */
 		this.userData = {};
 
 	}
 
+	/**
+	 * A callback that is executed immediately before a 3D object is rendered to a shadow map.
+	 *
+	 * @param {Renderer|WebGLRenderer} renderer - The renderer.
+	 * @param {Object3D} object - The 3D object.
+	 * @param {Camera} camera - The camera that is used to render the scene.
+	 * @param {Camera} shadowCamera - The shadow camera.
+	 * @param {BufferGeometry} geometry - The 3D object's geometry.
+	 * @param {Material} depthMaterial - The depth material.
+	 * @param {Object} group - The geometry group data.
+	 */
 	onBeforeShadow( /* renderer, object, camera, shadowCamera, geometry, depthMaterial, group */ ) {}
 
+	/**
+	 * A callback that is executed immediately after a 3D object is rendered to a shadow map.
+	 *
+	 * @param {Renderer|WebGLRenderer} renderer - The renderer.
+	 * @param {Object3D} object - The 3D object.
+	 * @param {Camera} camera - The camera that is used to render the scene.
+	 * @param {Camera} shadowCamera - The shadow camera.
+	 * @param {BufferGeometry} geometry - The 3D object's geometry.
+	 * @param {Material} depthMaterial - The depth material.
+	 * @param {Object} group - The geometry group data.
+	 */
 	onAfterShadow( /* renderer, object, camera, shadowCamera, geometry, depthMaterial, group */ ) {}
 
+	/**
+	 * A callback that is executed immediately before a 3D object is rendered.
+	 *
+	 * @param {Renderer|WebGLRenderer} renderer - The renderer.
+	 * @param {Object3D} object - The 3D object.
+	 * @param {Camera} camera - The camera that is used to render the scene.
+	 * @param {BufferGeometry} geometry - The 3D object's geometry.
+	 * @param {Material} material - The 3D object's material.
+	 * @param {Object} group - The geometry group data.
+	 */
 	onBeforeRender( /* renderer, scene, camera, geometry, material, group */ ) {}
 
+	/**
+	 * A callback that is executed immediately after a 3D object is rendered.
+	 *
+	 * @param {Renderer|WebGLRenderer} renderer - The renderer.
+	 * @param {Object3D} object - The 3D object.
+	 * @param {Camera} camera - The camera that is used to render the scene.
+	 * @param {BufferGeometry} geometry - The 3D object's geometry.
+	 * @param {Material} material - The 3D object's material.
+	 * @param {Object} group - The geometry group data.
+	 */
 	onAfterRender( /* renderer, scene, camera, geometry, material, group */ ) {}
 
+	/**
+	 * Applies the given transformation matrix to the object and updates the object's position,
+	 * rotation and scale.
+	 *
+	 * @param {Matrix4} matrix - The transformation matrix.
+	 */
 	applyMatrix4( matrix ) {
 
 		if ( this.matrixAutoUpdate ) this.updateMatrix();
@@ -7390,6 +11084,12 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Applies a rotation represented by given the quaternion to the 3D object.
+	 *
+	 * @param {Quaternion} q - The quaternion.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	applyQuaternion( q ) {
 
 		this.quaternion.premultiply( q );
@@ -7398,6 +11098,12 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Sets the given rotation represented as an axis/angle couple to the 3D object.
+	 *
+	 * @param {Vector3} axis - The (normalized) axis vector.
+	 * @param {number} angle - The angle in radians.
+	 */
 	setRotationFromAxisAngle( axis, angle ) {
 
 		// assumes axis is normalized
@@ -7406,12 +11112,23 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Sets the given rotation represented as Euler angles to the 3D object.
+	 *
+	 * @param {Euler} euler - The Euler angles.
+	 */
 	setRotationFromEuler( euler ) {
 
 		this.quaternion.setFromEuler( euler, true );
 
 	}
 
+	/**
+	 * Sets the given rotation represented as rotation matrix to the 3D object.
+	 *
+	 * @param {Matrix4} m - Although a 4x4 matrix is expected, the upper 3x3 portion must be
+	 * a pure rotation matrix (i.e, unscaled).
+	 */
 	setRotationFromMatrix( m ) {
 
 		// assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
@@ -7420,6 +11137,11 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Sets the given rotation represented as a Quaternion to the 3D object.
+	 *
+	 * @param {Quaternion} q - The Quaternion
+	 */
 	setRotationFromQuaternion( q ) {
 
 		// assumes q is normalized
@@ -7428,6 +11150,13 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Rotates the 3D object along an axis in local space.
+	 *
+	 * @param {Vector3} axis - The (normalized) axis vector.
+	 * @param {number} angle - The angle in radians.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	rotateOnAxis( axis, angle ) {
 
 		// rotate object on axis in object space
@@ -7441,6 +11170,13 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Rotates the 3D object along an axis in world space.
+	 *
+	 * @param {Vector3} axis - The (normalized) axis vector.
+	 * @param {number} angle - The angle in radians.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	rotateOnWorldAxis( axis, angle ) {
 
 		// rotate object on axis in world space
@@ -7455,24 +11191,49 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Rotates the 3D object around its X axis in local space.
+	 *
+	 * @param {number} angle - The angle in radians.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	rotateX( angle ) {
 
 		return this.rotateOnAxis( _xAxis, angle );
 
 	}
 
+	/**
+	 * Rotates the 3D object around its Y axis in local space.
+	 *
+	 * @param {number} angle - The angle in radians.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	rotateY( angle ) {
 
 		return this.rotateOnAxis( _yAxis, angle );
 
 	}
 
+	/**
+	 * Rotates the 3D object around its Z axis in local space.
+	 *
+	 * @param {number} angle - The angle in radians.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	rotateZ( angle ) {
 
 		return this.rotateOnAxis( _zAxis, angle );
 
 	}
 
+	/**
+	 * Translate the 3D object by a distance along the given axis in local space.
+	 *
+	 * @param {Vector3} axis - The (normalized) axis vector.
+	 * @param {number} distance - The distance in world units.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	translateOnAxis( axis, distance ) {
 
 		// translate object by distance along axis in object space
@@ -7486,24 +11247,48 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Translate the 3D object by a distance along its X-axis in local space.
+	 *
+	 * @param {number} distance - The distance in world units.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	translateX( distance ) {
 
 		return this.translateOnAxis( _xAxis, distance );
 
 	}
 
+	/**
+	 * Translate the 3D object by a distance along its Y-axis in local space.
+	 *
+	 * @param {number} distance - The distance in world units.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	translateY( distance ) {
 
 		return this.translateOnAxis( _yAxis, distance );
 
 	}
 
+	/**
+	 * Translate the 3D object by a distance along its Z-axis in local space.
+	 *
+	 * @param {number} distance - The distance in world units.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	translateZ( distance ) {
 
 		return this.translateOnAxis( _zAxis, distance );
 
 	}
 
+	/**
+	 * Converts the given vector from this 3D object's local space to world space.
+	 *
+	 * @param {Vector3} vector - The vector to convert.
+	 * @return {Vector3} The converted vector.
+	 */
 	localToWorld( vector ) {
 
 		this.updateWorldMatrix( true, false );
@@ -7512,6 +11297,12 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Converts the given vector from this 3D object's word space to local space.
+	 *
+	 * @param {Vector3} vector - The vector to convert.
+	 * @return {Vector3} The converted vector.
+	 */
 	worldToLocal( vector ) {
 
 		this.updateWorldMatrix( true, false );
@@ -7520,6 +11311,15 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Rotates the object to face a point in world space.
+	 *
+	 * This method does not support objects having non-uniformly-scaled parent(s).
+	 *
+	 * @param {number|Vector3} x - The x coordinate in world space. Alternatively, a vector representing a position in world space
+	 * @param {number} [y] - The y coordinate in world space.
+	 * @param {number} [z] - The z coordinate in world space.
+	 */
 	lookAt( x, y, z ) {
 
 		// This method does not support objects having non-uniformly-scaled parent(s)
@@ -7562,6 +11362,16 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Adds the given 3D object as a child to this 3D object. An arbitrary number of
+	 * objects may be added. Any current parent on an object passed in here will be
+	 * removed, since an object can have at most one parent.
+	 *
+	 * @fires Object3D#added
+	 * @fires Object3D#childadded
+	 * @param {Object3D} object - The 3D object to add.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	add( object ) {
 
 		if ( arguments.length > 1 ) {
@@ -7605,6 +11415,15 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Removes the given 3D object as child from this 3D object.
+	 * An arbitrary number of objects may be removed.
+	 *
+	 * @fires Object3D#removed
+	 * @fires Object3D#childremoved
+	 * @param {Object3D} object - The 3D object to remove.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	remove( object ) {
 
 		if ( arguments.length > 1 ) {
@@ -7638,6 +11457,13 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Removes this 3D object from its current parent.
+	 *
+	 * @fires Object3D#removed
+	 * @fires Object3D#childremoved
+	 * @return {Object3D} A reference to this instance.
+	 */
 	removeFromParent() {
 
 		const parent = this.parent;
@@ -7652,12 +11478,28 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Removes all child objects.
+	 *
+	 * @fires Object3D#removed
+	 * @fires Object3D#childremoved
+	 * @return {Object3D} A reference to this instance.
+	 */
 	clear() {
 
 		return this.remove( ... this.children );
 
 	}
 
+	/**
+	 * Adds the given 3D object as a child of this 3D object, while maintaining the object's world
+	 * transform. This method does not support scene graphs having non-uniformly-scaled nodes(s).
+	 *
+	 * @fires Object3D#added
+	 * @fires Object3D#childadded
+	 * @param {Object3D} object - The 3D object to attach.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	attach( object ) {
 
 		// adds object as a child of this, while maintaining the object's world transform
@@ -7694,18 +11536,40 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Searches through the 3D object and its children, starting with the 3D object
+	 * itself, and returns the first with a matching ID.
+	 *
+	 * @param {number} id - The id.
+	 * @return {Object3D|undefined} The found 3D object. Returns `undefined` if no 3D object has been found.
+	 */
 	getObjectById( id ) {
 
 		return this.getObjectByProperty( 'id', id );
 
 	}
 
+	/**
+	 * Searches through the 3D object and its children, starting with the 3D object
+	 * itself, and returns the first with a matching name.
+	 *
+	 * @param {string} name - The name.
+	 * @return {Object3D|undefined} The found 3D object. Returns `undefined` if no 3D object has been found.
+	 */
 	getObjectByName( name ) {
 
 		return this.getObjectByProperty( 'name', name );
 
 	}
 
+	/**
+	 * Searches through the 3D object and its children, starting with the 3D object
+	 * itself, and returns the first with a matching property value.
+	 *
+	 * @param {string} name - The name of the property.
+	 * @param {any} value - The value.
+	 * @return {Object3D|undefined} The found 3D object. Returns `undefined` if no 3D object has been found.
+	 */
 	getObjectByProperty( name, value ) {
 
 		if ( this[ name ] === value ) return this;
@@ -7727,6 +11591,15 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Searches through the 3D object and its children, starting with the 3D object
+	 * itself, and returns all 3D objects with a matching property value.
+	 *
+	 * @param {string} name - The name of the property.
+	 * @param {any} value - The value.
+	 * @param {Array<Object3D>} result - The method stores the result in this array.
+	 * @return {Array<Object3D>} The found 3D objects.
+	 */
 	getObjectsByProperty( name, value, result = [] ) {
 
 		if ( this[ name ] === value ) result.push( this );
@@ -7743,6 +11616,12 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Returns a vector representing the position of the 3D object in world space.
+	 *
+	 * @param {Vector3} target - The target vector the result is stored to.
+	 * @return {Vector3} The 3D object's position in world space.
+	 */
 	getWorldPosition( target ) {
 
 		this.updateWorldMatrix( true, false );
@@ -7751,6 +11630,12 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Returns a Quaternion representing the position of the 3D object in world space.
+	 *
+	 * @param {Quaternion} target - The target Quaternion the result is stored to.
+	 * @return {Quaternion} The 3D object's rotation in world space.
+	 */
 	getWorldQuaternion( target ) {
 
 		this.updateWorldMatrix( true, false );
@@ -7761,6 +11646,12 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Returns a vector representing the scale of the 3D object in world space.
+	 *
+	 * @param {Vector3} target - The target vector the result is stored to.
+	 * @return {Vector3} The 3D object's scale in world space.
+	 */
 	getWorldScale( target ) {
 
 		this.updateWorldMatrix( true, false );
@@ -7771,6 +11662,12 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Returns a vector representing the ("look") direction of the 3D object in world space.
+	 *
+	 * @param {Vector3} target - The target vector the result is stored to.
+	 * @return {Vector3} The 3D object's direction in world space.
+	 */
 	getWorldDirection( target ) {
 
 		this.updateWorldMatrix( true, false );
@@ -7781,8 +11678,24 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Abstract method to get intersections between a casted ray and this
+	 * 3D object. Renderable 3D objects such as {@link Mesh}, {@link Line} or {@link Points}
+	 * implement this method in order to use raycasting.
+	 *
+	 * @abstract
+	 * @param {Raycaster} raycaster - The raycaster.
+	 * @param {Array<Object>} intersects - An array holding the result of the method.
+	 */
 	raycast( /* raycaster, intersects */ ) {}
 
+	/**
+	 * Executes the callback on this 3D object and all descendants.
+	 *
+	 * Note: Modifying the scene graph inside the callback is discouraged.
+	 *
+	 * @param {Function} callback - A callback function that allows to process the current 3D object.
+	 */
 	traverse( callback ) {
 
 		callback( this );
@@ -7797,6 +11710,14 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Like {@link Object3D#traverse}, but the callback will only be executed for visible 3D objects.
+	 * Descendants of invisible 3D objects are not traversed.
+	 *
+	 * Note: Modifying the scene graph inside the callback is discouraged.
+	 *
+	 * @param {Function} callback - A callback function that allows to process the current 3D object.
+	 */
 	traverseVisible( callback ) {
 
 		if ( this.visible === false ) return;
@@ -7813,6 +11734,13 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Like {@link Object3D#traverse}, but the callback will only be executed for all ancestors.
+	 *
+	 * Note: Modifying the scene graph inside the callback is discouraged.
+	 *
+	 * @param {Function} callback - A callback function that allows to process the current 3D object.
+	 */
 	traverseAncestors( callback ) {
 
 		const parent = this.parent;
@@ -7827,6 +11755,10 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Updates the transformation matrix in local space by computing it from the current
+	 * position, rotation and scale values.
+	 */
 	updateMatrix() {
 
 		this.matrix.compose( this.position, this.quaternion, this.scale );
@@ -7835,6 +11767,17 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Updates the transformation matrix in world space of this 3D objects and its descendants.
+	 *
+	 * To ensure correct results, this method also recomputes the 3D object's transformation matrix in
+	 * local space. The computation of the local and world matrix can be controlled with the
+	 * {@link Object3D#matrixAutoUpdate} and {@link Object3D#matrixWorldAutoUpdate} flags which are both
+	 * `true` by default.  Set these flags to `false` if you need more control over the update matrix process.
+	 *
+	 * @param {boolean} [force=false] - When set to `true`, a recomputation of world matrices is forced even
+	 * when {@link Object3D#matrixWorldAutoUpdate} is set to `false`.
+	 */
 	updateMatrixWorld( force ) {
 
 		if ( this.matrixAutoUpdate ) this.updateMatrix();
@@ -7875,6 +11818,13 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * An alternative version of {@link Object3D#updateMatrixWorld} with more control over the
+	 * update of ancestor and descendant nodes.
+	 *
+	 * @param {boolean} [updateParents=false] Whether ancestor nodes should be updated or not.
+	 * @param {boolean} [updateChildren=false] Whether descendant nodes should be updated or not.
+	 */
 	updateWorldMatrix( updateParents, updateChildren ) {
 
 		const parent = this.parent;
@@ -7919,6 +11869,13 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Serializes the 3D object into JSON.
+	 *
+	 * @param {?(Object|string)} meta - An optional value holding meta information about the serialization.
+	 * @return {Object} A JSON object representing the serialized 3D object.
+	 * @see {@link ObjectLoader#parse}
+	 */
 	toJSON( meta ) {
 
 		// meta is a string when called from JSON.stringify
@@ -8214,12 +12171,25 @@ class Object3D extends EventDispatcher {
 
 	}
 
+	/**
+	 * Returns a new 3D object with copied values from this instance.
+	 *
+	 * @param {boolean} [recursive=true] - When set to `true`, descendants of the 3D object are also cloned.
+	 * @return {Object3D} A clone of this instance.
+	 */
 	clone( recursive ) {
 
 		return new this.constructor().copy( this, recursive );
 
 	}
 
+	/**
+	 * Copies the values of the given 3D object to this instance.
+	 *
+	 * @param {Object3D} source - The 3D object to copy.
+	 * @param {boolean} [recursive=true] - When set to `true`, descendants of the 3D object are cloned.
+	 * @return {Object3D} A reference to this instance.
+	 */
 	copy( source, recursive = true ) {
 
 		this.name = source.name;
@@ -8269,8 +12239,34 @@ class Object3D extends EventDispatcher {
 
 }
 
+/**
+ * The default up direction for objects, also used as the default
+ * position for {@link DirectionalLight} and {@link HemisphereLight}.
+ *
+ * @static
+ * @type {Vector3}
+ * @default (0,1,0)
+ */
 Object3D.DEFAULT_UP = /*@__PURE__*/ new Vector3( 0, 1, 0 );
+
+/**
+ * The default setting for {@link Object3D#matrixAutoUpdate} for
+ * newly created 3D objects.
+ *
+ * @static
+ * @type {boolean}
+ * @default true
+ */
 Object3D.DEFAULT_MATRIX_AUTO_UPDATE = true;
+
+/**
+ * The default setting for {@link Object3D#matrixWorldAutoUpdate} for
+ * newly created 3D objects.
+ *
+ * @static
+ * @type {boolean}
+ * @default true
+ */
 Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true;
 
 const _v0$1 = /*@__PURE__*/ new Vector3();
@@ -8289,16 +12285,52 @@ const _v40 = /*@__PURE__*/ new Vector4();
 const _v41 = /*@__PURE__*/ new Vector4();
 const _v42 = /*@__PURE__*/ new Vector4();
 
+/**
+ * A geometric triangle as defined by three vectors representing its three corners.
+ */
 class Triangle {
 
+	/**
+	 * Constructs a new triangle.
+	 *
+	 * @param {Vector3} [a=(0,0,0)] - The first corner of the triangle.
+	 * @param {Vector3} [b=(0,0,0)] - The second corner of the triangle.
+	 * @param {Vector3} [c=(0,0,0)] - The third corner of the triangle.
+	 */
 	constructor( a = new Vector3(), b = new Vector3(), c = new Vector3() ) {
 
+		/**
+		 * The first corner of the triangle.
+		 *
+		 * @type {Vector3}
+		 */
 		this.a = a;
+
+		/**
+		 * The second corner of the triangle.
+		 *
+		 * @type {Vector3}
+		 */
 		this.b = b;
+
+		/**
+		 * The third corner of the triangle.
+		 *
+		 * @type {Vector3}
+		 */
 		this.c = c;
 
 	}
 
+	/**
+	 * Computes the normal vector of a triangle.
+	 *
+	 * @param {Vector3} a - The first corner of the triangle.
+	 * @param {Vector3} b - The second corner of the triangle.
+	 * @param {Vector3} c - The third corner of the triangle.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The triangle's normal.
+	 */
 	static getNormal( a, b, c, target ) {
 
 		target.subVectors( c, b );
@@ -8316,9 +12348,20 @@ class Triangle {
 
 	}
 
-	// static/instance method to calculate barycentric coordinates
-	// based on: http://www.blackpawn.com/texts/pointinpoly/default.html
+	/**
+	 * Computes a barycentric coordinates from the given vector.
+	 * Returns `null` if the triangle is degenerate.
+	 *
+	 * @param {Vector3} point - A point in 3D space.
+	 * @param {Vector3} a - The first corner of the triangle.
+	 * @param {Vector3} b - The second corner of the triangle.
+	 * @param {Vector3} c - The third corner of the triangle.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The barycentric coordinates for the given point
+	 */
 	static getBarycoord( point, a, b, c, target ) {
+
+		// based on: http://www.blackpawn.com/texts/pointinpoly/default.html
 
 		_v0$1.subVectors( c, a );
 		_v1$3.subVectors( b, a );
@@ -8349,6 +12392,17 @@ class Triangle {
 
 	}
 
+	/**
+	 * Returns `true` if the given point, when projected onto the plane of the
+	 * triangle, lies within the triangle.
+	 *
+	 * @param {Vector3} point - The point in 3D space to test.
+	 * @param {Vector3} a - The first corner of the triangle.
+	 * @param {Vector3} b - The second corner of the triangle.
+	 * @param {Vector3} c - The third corner of the triangle.
+	 * @return {boolean} Whether the given point, when projected onto the plane of the
+	 * triangle, lies within the triangle or not.
+	 */
 	static containsPoint( point, a, b, c ) {
 
 		// if the triangle is degenerate then we can't contain a point
@@ -8362,6 +12416,20 @@ class Triangle {
 
 	}
 
+	/**
+	 * Computes the value barycentrically interpolated for the given point on the
+	 * triangle. Returns `null` if the triangle is degenerate.
+	 *
+	 * @param {Vector3} point - Position of interpolated point.
+	 * @param {Vector3} p1 - The first corner of the triangle.
+	 * @param {Vector3} p2 - The second corner of the triangle.
+	 * @param {Vector3} p3 - The third corner of the triangle.
+	 * @param {Vector3} v1 - Value to interpolate of first vertex.
+	 * @param {Vector3} v2 - Value to interpolate of second vertex.
+	 * @param {Vector3} v3 - Value to interpolate of third vertex.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The interpolated value.
+	 */
 	static getInterpolation( point, p1, p2, p3, v1, v2, v3, target ) {
 
 		if ( this.getBarycoord( point, p1, p2, p3, _v3$2 ) === null ) {
@@ -8383,6 +12451,17 @@ class Triangle {
 
 	}
 
+	/**
+	 * Computes the value barycentrically interpolated for the given attribute and indices.
+	 *
+	 * @param {BufferAttribute} attr - The attribute to interpolate.
+	 * @param {number} i1 - Index of first vertex.
+	 * @param {number} i2 - Index of second vertex.
+	 * @param {number} i3 - Index of third vertex.
+	 * @param {Vector3} barycoord - The barycoordinate value to use to interpolate.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The interpolated attribute value.
+	 */
 	static getInterpolatedAttribute( attr, i1, i2, i3, barycoord, target ) {
 
 		_v40.setScalar( 0 );
@@ -8402,6 +12481,15 @@ class Triangle {
 
 	}
 
+	/**
+	 * Returns `true` if the triangle is oriented towards the given direction.
+	 *
+	 * @param {Vector3} a - The first corner of the triangle.
+	 * @param {Vector3} b - The second corner of the triangle.
+	 * @param {Vector3} c - The third corner of the triangle.
+	 * @param {Vector3} direction - The (normalized) direction vector.
+	 * @return {boolean} Whether the triangle is oriented towards the given direction or not.
+	 */
 	static isFrontFacing( a, b, c, direction ) {
 
 		_v0$1.subVectors( c, b );
@@ -8412,6 +12500,14 @@ class Triangle {
 
 	}
 
+	/**
+	 * Sets the triangle's vertices by copying the given values.
+	 *
+	 * @param {Vector3} a - The first corner of the triangle.
+	 * @param {Vector3} b - The second corner of the triangle.
+	 * @param {Vector3} c - The third corner of the triangle.
+	 * @return {Triangle} A reference to this triangle.
+	 */
 	set( a, b, c ) {
 
 		this.a.copy( a );
@@ -8422,6 +12518,15 @@ class Triangle {
 
 	}
 
+	/**
+	 * Sets the triangle's vertices by copying the given array values.
+	 *
+	 * @param {Array<Vector3>} points - An array with 3D points.
+	 * @param {number} i0 - The array index representing the first corner of the triangle.
+	 * @param {number} i1 - The array index representing the second corner of the triangle.
+	 * @param {number} i2 - The array index representing the third corner of the triangle.
+	 * @return {Triangle} A reference to this triangle.
+	 */
 	setFromPointsAndIndices( points, i0, i1, i2 ) {
 
 		this.a.copy( points[ i0 ] );
@@ -8432,6 +12537,15 @@ class Triangle {
 
 	}
 
+	/**
+	 * Sets the triangle's vertices by copying the given attribute values.
+	 *
+	 * @param {BufferAttribute} attribute - A buffer attribute with 3D points data.
+	 * @param {number} i0 - The attribute index representing the first corner of the triangle.
+	 * @param {number} i1 - The attribute index representing the second corner of the triangle.
+	 * @param {number} i2 - The attribute index representing the third corner of the triangle.
+	 * @return {Triangle} A reference to this triangle.
+	 */
 	setFromAttributeAndIndices( attribute, i0, i1, i2 ) {
 
 		this.a.fromBufferAttribute( attribute, i0 );
@@ -8442,12 +12556,23 @@ class Triangle {
 
 	}
 
+	/**
+	 * Returns a new triangle with copied values from this instance.
+	 *
+	 * @return {Triangle} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Copies the values of the given triangle to this instance.
+	 *
+	 * @param {Triangle} triangle - The triangle to copy.
+	 * @return {Triangle} A reference to this triangle.
+	 */
 	copy( triangle ) {
 
 		this.a.copy( triangle.a );
@@ -8458,6 +12583,11 @@ class Triangle {
 
 	}
 
+	/**
+	 * Computes the area of the triangle.
+	 *
+	 * @return {number} The triangle's area.
+	 */
 	getArea() {
 
 		_v0$1.subVectors( this.c, this.b );
@@ -8467,54 +12597,118 @@ class Triangle {
 
 	}
 
+	/**
+	 * Computes the midpoint of the triangle.
+	 *
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The triangle's midpoint.
+	 */
 	getMidpoint( target ) {
 
 		return target.addVectors( this.a, this.b ).add( this.c ).multiplyScalar( 1 / 3 );
 
 	}
 
+	/**
+	 * Computes the normal of the triangle.
+	 *
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The triangle's normal.
+	 */
 	getNormal( target ) {
 
 		return Triangle.getNormal( this.a, this.b, this.c, target );
 
 	}
 
+	/**
+	 * Computes a plane the triangle lies within.
+	 *
+	 * @param {Plane} target - The target vector that is used to store the method's result.
+	 * @return {Plane} The plane the triangle lies within.
+	 */
 	getPlane( target ) {
 
 		return target.setFromCoplanarPoints( this.a, this.b, this.c );
 
 	}
 
+	/**
+	 * Computes a barycentric coordinates from the given vector.
+	 * Returns `null` if the triangle is degenerate.
+	 *
+	 * @param {Vector3} point - A point in 3D space.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The barycentric coordinates for the given point
+	 */
 	getBarycoord( point, target ) {
 
 		return Triangle.getBarycoord( point, this.a, this.b, this.c, target );
 
 	}
 
+	/**
+	 * Computes the value barycentrically interpolated for the given point on the
+	 * triangle. Returns `null` if the triangle is degenerate.
+	 *
+	 * @param {Vector3} point - Position of interpolated point.
+	 * @param {Vector3} v1 - Value to interpolate of first vertex.
+	 * @param {Vector3} v2 - Value to interpolate of second vertex.
+	 * @param {Vector3} v3 - Value to interpolate of third vertex.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The interpolated value.
+	 */
 	getInterpolation( point, v1, v2, v3, target ) {
 
 		return Triangle.getInterpolation( point, this.a, this.b, this.c, v1, v2, v3, target );
 
 	}
 
+	/**
+	 * Returns `true` if the given point, when projected onto the plane of the
+	 * triangle, lies within the triangle.
+	 *
+	 * @param {Vector3} point - The point in 3D space to test.
+	 * @return {boolean} Whether the given point, when projected onto the plane of the
+	 * triangle, lies within the triangle or not.
+	 */
 	containsPoint( point ) {
 
 		return Triangle.containsPoint( point, this.a, this.b, this.c );
 
 	}
 
+	/**
+	 * Returns `true` if the triangle is oriented towards the given direction.
+	 *
+	 * @param {Vector3} direction - The (normalized) direction vector.
+	 * @return {boolean} Whether the triangle is oriented towards the given direction or not.
+	 */
 	isFrontFacing( direction ) {
 
 		return Triangle.isFrontFacing( this.a, this.b, this.c, direction );
 
 	}
 
+	/**
+	 * Returns `true` if this triangle intersects with the given box.
+	 *
+	 * @param {Box3} box - The box to intersect.
+	 * @return {boolean} Whether this triangle intersects with the given box or not.
+	 */
 	intersectsBox( box ) {
 
 		return box.intersectsTriangle( this );
 
 	}
 
+	/**
+	 * Returns the closest point on the triangle to the given point.
+	 *
+	 * @param {Vector3} p - The point to compute the closest point for.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The closest point on the triangle.
+	 */
 	closestPointToPoint( p, target ) {
 
 		const a = this.a, b = this.b, c = this.c;
@@ -8596,6 +12790,12 @@ class Triangle {
 
 	}
 
+	/**
+	 * Returns `true` if this triangle is equal with the given one.
+	 *
+	 * @param {Triangle} triangle - The triangle to test for equality.
+	 * @return {boolean} Whether this triangle is equal with the given one.
+	 */
 	equals( triangle ) {
 
 		return triangle.a.equals( this.a ) && triangle.b.equals( this.b ) && triangle.c.equals( this.c );
@@ -8643,20 +12843,110 @@ function hue2rgb( p, q, t ) {
 
 }
 
+/**
+ * A Color instance is represented by RGB components in the linear <i>working
+ * color space</i>, which defaults to `LinearSRGBColorSpace`. Inputs
+ * conventionally using `SRGBColorSpace` (such as hexadecimals and CSS
+ * strings) are converted to the working color space automatically.
+ *
+ * ```js
+ * // converted automatically from SRGBColorSpace to LinearSRGBColorSpace
+ * const color = new THREE.Color().setHex( 0x112233 );
+ * ```
+ * Source color spaces may be specified explicitly, to ensure correct conversions.
+ * ```js
+ * // assumed already LinearSRGBColorSpace; no conversion
+ * const color = new THREE.Color().setRGB( 0.5, 0.5, 0.5 );
+ *
+ * // converted explicitly from SRGBColorSpace to LinearSRGBColorSpace
+ * const color = new THREE.Color().setRGB( 0.5, 0.5, 0.5, SRGBColorSpace );
+ * ```
+ * If THREE.ColorManagement is disabled, no conversions occur. For details,
+ * see <i>Color management</i>. Iterating through a Color instance will yield
+ * its components (r, g, b) in the corresponding order. A Color can be initialised
+ * in any of the following ways:
+ * ```js
+ * //empty constructor - will default white
+ * const color1 = new THREE.Color();
+ *
+ * //Hexadecimal color (recommended)
+ * const color2 = new THREE.Color( 0xff0000 );
+ *
+ * //RGB string
+ * const color3 = new THREE.Color("rgb(255, 0, 0)");
+ * const color4 = new THREE.Color("rgb(100%, 0%, 0%)");
+ *
+ * //X11 color name - all 140 color names are supported.
+ * //Note the lack of CamelCase in the name
+ * const color5 = new THREE.Color( 'skyblue' );
+ * //HSL string
+ * const color6 = new THREE.Color("hsl(0, 100%, 50%)");
+ *
+ * //Separate RGB values between 0 and 1
+ * const color7 = new THREE.Color( 1, 0, 0 );
+ * ```
+ */
 class Color {
 
+	/**
+	 * Constructs a new color.
+	 *
+	 * Note that standard method of specifying color in three.js is with a hexadecimal triplet,
+	 * and that method is used throughout the rest of the documentation.
+	 *
+	 * @param {(number|string|Color)} [r] - The red component of the color. If `g` and `b` are
+	 * not provided, it can be hexadecimal triplet, a CSS-style string or another `Color` instance.
+	 * @param {number} [g] - The green component.
+	 * @param {number} [b] - The blue component.
+	 */
 	constructor( r, g, b ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isColor = true;
 
+		/**
+		 * The red component.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.r = 1;
+
+		/**
+		 * The green component.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.g = 1;
+
+		/**
+		 * The blue component.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.b = 1;
 
 		return this.set( r, g, b );
 
 	}
 
+	/**
+	 * Sets the colors's components from the given values.
+	 *
+	 * @param {(number|string|Color)} [r] - The red component of the color. If `g` and `b` are
+	 * not provided, it can be hexadecimal triplet, a CSS-style string or another `Color` instance.
+	 * @param {number} [g] - The green component.
+	 * @param {number} [b] - The blue component.
+	 * @return {Color} A reference to this color.
+	 */
 	set( r, g, b ) {
 
 		if ( g === undefined && b === undefined ) {
@@ -8689,6 +12979,12 @@ class Color {
 
 	}
 
+	/**
+	 * Sets the colors's components to the given scalar value.
+	 *
+	 * @param {number} scalar - The scalar value.
+	 * @return {Color} A reference to this color.
+	 */
 	setScalar( scalar ) {
 
 		this.r = scalar;
@@ -8699,6 +12995,13 @@ class Color {
 
 	}
 
+	/**
+	 * Sets this color from a hexadecimal value.
+	 *
+	 * @param {number} hex - The hexadecimal value.
+	 * @param {string} [colorSpace=SRGBColorSpace] - The color space.
+	 * @return {Color} A reference to this color.
+	 */
 	setHex( hex, colorSpace = SRGBColorSpace ) {
 
 		hex = Math.floor( hex );
@@ -8713,6 +13016,15 @@ class Color {
 
 	}
 
+	/**
+	 * Sets this color from RGB values.
+	 *
+	 * @param {number} r - Red channel value between `0.0` and `1.0`.
+	 * @param {number} g - Green channel value between `0.0` and `1.0`.
+	 * @param {number} b - Blue channel value between `0.0` and `1.0`.
+	 * @param {string} [colorSpace=ColorManagement.workingColorSpace] - The color space.
+	 * @return {Color} A reference to this color.
+	 */
 	setRGB( r, g, b, colorSpace = ColorManagement.workingColorSpace ) {
 
 		this.r = r;
@@ -8725,6 +13037,15 @@ class Color {
 
 	}
 
+	/**
+	 * Sets this color from RGB values.
+	 *
+	 * @param {number} h - Hue value between `0.0` and `1.0`.
+	 * @param {number} s - Saturation value between `0.0` and `1.0`.
+	 * @param {number} l - Lightness value between `0.0` and `1.0`.
+	 * @param {string} [colorSpace=ColorManagement.workingColorSpace] - The color space.
+	 * @return {Color} A reference to this color.
+	 */
 	setHSL( h, s, l, colorSpace = ColorManagement.workingColorSpace ) {
 
 		// h,s,l ranges are in 0.0 - 1.0
@@ -8753,6 +13074,16 @@ class Color {
 
 	}
 
+	/**
+	 * Sets this color from a CSS-style string. For example, `rgb(250, 0,0)`,
+	 * `rgb(100%, 0%, 0%)`, `hsl(0, 100%, 50%)`, `#ff0000`, `#f00`, or `red` ( or
+	 * any [X11 color name]{@link https://en.wikipedia.org/wiki/X11_color_names#Color_name_chart} -
+	 * all 140 color names are supported).
+	 *
+	 * @param {string} style - Color as a CSS-style string.
+	 * @param {string} [colorSpace=SRGBColorSpace] - The color space.
+	 * @return {Color} A reference to this color.
+	 */
 	setStyle( style, colorSpace = SRGBColorSpace ) {
 
 		function handleAlpha( string ) {
@@ -8879,6 +13210,19 @@ class Color {
 
 	}
 
+	/**
+	 * Sets this color from a color name. Faster than {@link Color#setStyle} if
+	 * you don't need the other CSS-style formats.
+	 *
+	 * For convenience, the list of names is exposed in `Color.NAMES` as a hash.
+	 * ```js
+	 * Color.NAMES.aliceblue // returns 0xF0F8FF
+	 * ```
+	 *
+	 * @param {string} style - The color name.
+	 * @param {string} [colorSpace=SRGBColorSpace] - The color space.
+	 * @return {Color} A reference to this color.
+	 */
 	setColorName( style, colorSpace = SRGBColorSpace ) {
 
 		// color keywords
@@ -8900,12 +13244,23 @@ class Color {
 
 	}
 
+	/**
+	 * Returns a new color with copied values from this instance.
+	 *
+	 * @return {Color} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor( this.r, this.g, this.b );
 
 	}
 
+	/**
+	 * Copies the values of the given color to this instance.
+	 *
+	 * @param {Color} color - The color to copy.
+	 * @return {Color} A reference to this color.
+	 */
 	copy( color ) {
 
 		this.r = color.r;
@@ -8916,6 +13271,13 @@ class Color {
 
 	}
 
+	/**
+	 * Copies the given color into this color, and then converts this color from
+	 * `SRGBColorSpace` to `LinearSRGBColorSpace`.
+	 *
+	 * @param {Color} color - The color to copy/convert.
+	 * @return {Color} A reference to this color.
+	 */
 	copySRGBToLinear( color ) {
 
 		this.r = SRGBToLinear( color.r );
@@ -8926,6 +13288,13 @@ class Color {
 
 	}
 
+	/**
+	 * Copies the given color into this color, and then converts this color from
+	 * `LinearSRGBColorSpace` to `SRGBColorSpace`.
+	 *
+	 * @param {Color} color - The color to copy/convert.
+	 * @return {Color} A reference to this color.
+	 */
 	copyLinearToSRGB( color ) {
 
 		this.r = LinearToSRGB( color.r );
@@ -8936,6 +13305,11 @@ class Color {
 
 	}
 
+	/**
+	 * Converts this color from `SRGBColorSpace` to `LinearSRGBColorSpace`.
+	 *
+	 * @return {Color} A reference to this color.
+	 */
 	convertSRGBToLinear() {
 
 		this.copySRGBToLinear( this );
@@ -8944,6 +13318,11 @@ class Color {
 
 	}
 
+	/**
+	 * Converts this color from `LinearSRGBColorSpace` to `SRGBColorSpace`.
+	 *
+	 * @return {Color} A reference to this color.
+	 */
 	convertLinearToSRGB() {
 
 		this.copyLinearToSRGB( this );
@@ -8952,6 +13331,12 @@ class Color {
 
 	}
 
+	/**
+	 * Returns the hexadecimal value of this color.
+	 *
+	 * @param {string} [colorSpace=SRGBColorSpace] - The color space.
+	 * @return {number} The hexadecimal value.
+	 */
 	getHex( colorSpace = SRGBColorSpace ) {
 
 		ColorManagement.fromWorkingColorSpace( _color.copy( this ), colorSpace );
@@ -8960,12 +13345,26 @@ class Color {
 
 	}
 
+	/**
+	 * Returns the hexadecimal value of this color as a string (for example, 'FFFFFF').
+	 *
+	 * @param {string} [colorSpace=SRGBColorSpace] - The color space.
+	 * @return {string} The hexadecimal value as a string.
+	 */
 	getHexString( colorSpace = SRGBColorSpace ) {
 
 		return ( '000000' + this.getHex( colorSpace ).toString( 16 ) ).slice( -6 );
 
 	}
 
+	/**
+	 * Converts the colors RGB values into the HSL format and stores them into the
+	 * given target object.
+	 *
+	 * @param {{h:0,s:0,l:0}} target - The target object that is used to store the method's result.
+	 * @param {string} [colorSpace=ColorManagement.workingColorSpace] - The color space.
+	 * @return {{h:number,s:number,l:number}} The HSL representation of this color.
+	 */
 	getHSL( target, colorSpace = ColorManagement.workingColorSpace ) {
 
 		// h,s,l ranges are in 0.0 - 1.0
@@ -9011,6 +13410,13 @@ class Color {
 
 	}
 
+	/**
+	 * Returns the RGB values of this color and stores them into the given target object.
+	 *
+	 * @param {Color} target - The target color that is used to store the method's result.
+	 * @param {string} [colorSpace=ColorManagement.workingColorSpace] - The color space.
+	 * @return {Color} The RGB representation of this color.
+	 */
 	getRGB( target, colorSpace = ColorManagement.workingColorSpace ) {
 
 		ColorManagement.fromWorkingColorSpace( _color.copy( this ), colorSpace );
@@ -9023,6 +13429,12 @@ class Color {
 
 	}
 
+	/**
+	 * Returns the value of this color as a CSS style string. Example: `rgb(255,0,0)`.
+	 *
+	 * @param {string} [colorSpace=SRGBColorSpace] - The color space.
+	 * @return {string} The CSS representation of this color.
+	 */
 	getStyle( colorSpace = SRGBColorSpace ) {
 
 		ColorManagement.fromWorkingColorSpace( _color.copy( this ), colorSpace );
@@ -9040,6 +13452,16 @@ class Color {
 
 	}
 
+	/**
+	 * Adds the given HSL values to this color's values.
+	 * Internally, this converts the color's RGB values to HSL, adds HSL
+	 * and then converts the color back to RGB.
+	 *
+	 * @param {number} h - Hue value between `0.0` and `1.0`.
+	 * @param {number} s - Saturation value between `0.0` and `1.0`.
+	 * @param {number} l - Lightness value between `0.0` and `1.0`.
+	 * @return {Color} A reference to this color.
+	 */
 	offsetHSL( h, s, l ) {
 
 		this.getHSL( _hslA );
@@ -9048,6 +13470,12 @@ class Color {
 
 	}
 
+	/**
+	 * Adds the RGB values of the given color to the RGB values of this color.
+	 *
+	 * @param {Color} color - The color to add.
+	 * @return {Color} A reference to this color.
+	 */
 	add( color ) {
 
 		this.r += color.r;
@@ -9058,6 +13486,13 @@ class Color {
 
 	}
 
+	/**
+	 * Adds the RGB values of the given colors and stores the result in this instance.
+	 *
+	 * @param {Color} color1 - The first color.
+	 * @param {Color} color2 - The second color.
+	 * @return {Color} A reference to this color.
+	 */
 	addColors( color1, color2 ) {
 
 		this.r = color1.r + color2.r;
@@ -9068,6 +13503,12 @@ class Color {
 
 	}
 
+	/**
+	 * Adds the given scalar value to the RGB values of this color.
+	 *
+	 * @param {number} s - The scalar to add.
+	 * @return {Color} A reference to this color.
+	 */
 	addScalar( s ) {
 
 		this.r += s;
@@ -9078,6 +13519,12 @@ class Color {
 
 	}
 
+	/**
+	 * Subtracts the RGB values of the given color from the RGB values of this color.
+	 *
+	 * @param {Color} color - The color to subtract.
+	 * @return {Color} A reference to this color.
+	 */
 	sub( color ) {
 
 		this.r = Math.max( 0, this.r - color.r );
@@ -9088,6 +13535,12 @@ class Color {
 
 	}
 
+	/**
+	 * Multiplies the RGB values of the given color with the RGB values of this color.
+	 *
+	 * @param {Color} color - The color to multiply.
+	 * @return {Color} A reference to this color.
+	 */
 	multiply( color ) {
 
 		this.r *= color.r;
@@ -9098,6 +13551,12 @@ class Color {
 
 	}
 
+	/**
+	 * Multiplies the given scalar value with the RGB values of this color.
+	 *
+	 * @param {number} s - The scalar to multiply.
+	 * @return {Color} A reference to this color.
+	 */
 	multiplyScalar( s ) {
 
 		this.r *= s;
@@ -9108,6 +13567,15 @@ class Color {
 
 	}
 
+	/**
+	 * Linearly interpolates this color's RGB values toward the RGB values of the
+	 * given color. The alpha argument can be thought of as the ratio between
+	 * the two colors, where `0.0` is this color and `1.0` is the first argument.
+	 *
+	 * @param {Color} color - The color to converge on.
+	 * @param {number} alpha - The interpolation factor in the closed interval `[0,1]`.
+	 * @return {Color} A reference to this color.
+	 */
 	lerp( color, alpha ) {
 
 		this.r += ( color.r - this.r ) * alpha;
@@ -9118,6 +13586,16 @@ class Color {
 
 	}
 
+	/**
+	 * Linearly interpolates between the given colors and stores the result in this instance.
+	 * The alpha argument can be thought of as the ratio between the two colors, where `0.0`
+	 * is the first and `1.0` is the second color.
+	 *
+	 * @param {Color} color1 - The first color.
+	 * @param {Color} color2 - The second color.
+	 * @param {number} alpha - The interpolation factor in the closed interval `[0,1]`.
+	 * @return {Color} A reference to this color.
+	 */
 	lerpColors( color1, color2, alpha ) {
 
 		this.r = color1.r + ( color2.r - color1.r ) * alpha;
@@ -9128,6 +13606,17 @@ class Color {
 
 	}
 
+	/**
+	 * Linearly interpolates this color's HSL values toward the HSL values of the
+	 * given color. It differs from {@link Color#lerp} by not interpolating straight
+	 * from one color to the other, but instead going through all the hues in between
+	 * those two colors. The alpha argument can be thought of as the ratio between
+	 * the two colors, where 0.0 is this color and 1.0 is the first argument.
+	 *
+	 * @param {Color} color - The color to converge on.
+	 * @param {number} alpha - The interpolation factor in the closed interval `[0,1]`.
+	 * @return {Color} A reference to this color.
+	 */
 	lerpHSL( color, alpha ) {
 
 		this.getHSL( _hslA );
@@ -9143,6 +13632,12 @@ class Color {
 
 	}
 
+	/**
+	 * Sets the color's RGB components from the given 3D vector.
+	 *
+	 * @param {Vector3} v - The vector to set.
+	 * @return {Color} A reference to this color.
+	 */
 	setFromVector3( v ) {
 
 		this.r = v.x;
@@ -9153,6 +13648,12 @@ class Color {
 
 	}
 
+	/**
+	 * Transforms this color with the given 3x3 matrix.
+	 *
+	 * @param {Matrix3} m - The matrix.
+	 * @return {Color} A reference to this color.
+	 */
 	applyMatrix3( m ) {
 
 		const r = this.r, g = this.g, b = this.b;
@@ -9166,12 +13667,25 @@ class Color {
 
 	}
 
+	/**
+	 * Returns `true` if this color is equal with the given one.
+	 *
+	 * @param {Color} c - The color to test for equality.
+	 * @return {boolean} Whether this bounding color is equal with the given one.
+	 */
 	equals( c ) {
 
 		return ( c.r === this.r ) && ( c.g === this.g ) && ( c.b === this.b );
 
 	}
 
+	/**
+	 * Sets this color's RGB components from the given array.
+	 *
+	 * @param {Array<number>} array - An array holding the RGB values.
+	 * @param {number} [offset=0] - The offset into the array.
+	 * @return {Color} A reference to this color.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		this.r = array[ offset ];
@@ -9182,6 +13696,14 @@ class Color {
 
 	}
 
+	/**
+	 * Writes the RGB components of this color to the given array. If no array is provided,
+	 * the method returns a new instance.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array holding the color components.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Array<number>} The color components.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		array[ offset ] = this.r;
@@ -9192,6 +13714,13 @@ class Color {
 
 	}
 
+	/**
+	 * Sets the components of this color from the given buffer attribute.
+	 *
+	 * @param {BufferAttribute} attribute - The buffer attribute holding color data.
+	 * @param {number} index - The index into the attribute.
+	 * @return {Color} A reference to this color.
+	 */
 	fromBufferAttribute( attribute, index ) {
 
 		this.r = attribute.getX( index );
@@ -9202,6 +13731,12 @@ class Color {
 
 	}
 
+	/**
+	 * This methods defines the serialization result of this class. Returns the color
+	 * as a hexadecimal value.
+	 *
+	 * @return {number} The hexadecimal value.
+	 */
 	toJSON() {
 
 		return this.getHex();
@@ -9220,87 +13755,488 @@ class Color {
 
 const _color = /*@__PURE__*/ new Color();
 
+/**
+ * A dictionary with X11 color names.
+ *
+ * Note that multiple words such as Dark Orange become the string 'darkorange'.
+ *
+ * @static
+ * @type {Object}
+ */
 Color.NAMES = _colorKeywords;
 
 let _materialId = 0;
 
+/**
+ * Abstract base class for materials.
+ *
+ * Materials define the appearance of renderable 3D objects.
+ *
+ * @abstract
+ * @augments EventDispatcher
+ */
 class Material extends EventDispatcher {
 
+	/**
+	 * Constructs a new material.
+	 */
 	constructor() {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isMaterial = true;
 
+		/**
+		 * The ID of the material.
+		 *
+		 * @name Material#id
+		 * @type {number}
+		 * @readonly
+		 */
 		Object.defineProperty( this, 'id', { value: _materialId ++ } );
 
+		/**
+		 * The UUID of the material.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.uuid = generateUUID();
 
+		/**
+		 * The name of the material.
+		 *
+		 * @type {string}
+		 */
 		this.name = '';
+
+		/**
+		 * The type property is used for detecting the object type
+		 * in context of serialization/deserialization.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.type = 'Material';
 
+		/**
+		 * Defines the blending type of the material.
+		 *
+		 * It must be set to `CustomBlending` if custom blending properties like
+		 * {@link Material#blendSrc}, {@link Material#blendDst} or {@link Material#blendEquation}
+		 * should have any effect.
+		 *
+		 * @type {(NoBlending|NormalBlending|AdditiveBlending|SubtractiveBlending|MultiplyBlending|CustomBlending)}
+		 * @default NormalBlending
+		 */
 		this.blending = NormalBlending;
+
+		/**
+		 * Defines which side of faces will be rendered - front, back or both.
+		 *
+		 * @type {(FrontSide|BackSide|DoubleSide)}
+		 * @default FrontSide
+		 */
 		this.side = FrontSide;
+
+		/**
+		 * If set to `true`, vertex colors should be used.
+		 *
+		 * The engine supports RGB and RGBA vertex colors depending on whether a three (RGB) or
+		 * four (RGBA) component color buffer attribute is used.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.vertexColors = false;
 
+		/**
+		 * Defines how transparent the material is.
+		 * A value of `0.0` indicates fully transparent, `1.0` is fully opaque.
+		 *
+		 * If the {@link Material#transparent} is not set to `true`,
+		 * the material will remain fully opaque and this value will only affect its color.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.opacity = 1;
+
+		/**
+		 * Defines whether this material is transparent. This has an effect on
+		 * rendering as transparent objects need special treatment and are rendered
+		 * after non-transparent objects.
+		 *
+		 * When set to true, the extent to which the material is transparent is
+		 * controlled by {@link Material#opacity}.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.transparent = false;
+
+		/**
+		 * Enables alpha hashed transparency, an alternative to {@link Material#transparent} or
+		 * {@link Material#alphaTest}. The material will not be rendered if opacity is lower than
+		 * a random threshold. Randomization introduces some grain or noise, but approximates alpha
+		 * blending without the associated problems of sorting. Using TAA can reduce the resulting noise.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.alphaHash = false;
 
+		/**
+		 * Defines the blending source factor.
+		 *
+		 * @type {(ZeroFactor|OneFactor|SrcColorFactor|OneMinusSrcColorFactor|SrcAlphaFactor|OneMinusSrcAlphaFactor|DstAlphaFactor|OneMinusDstAlphaFactor|DstColorFactor|OneMinusDstColorFactor|SrcAlphaSaturateFactor|ConstantColorFactor|OneMinusConstantColorFactor|ConstantAlphaFactor|OneMinusConstantAlphaFactor)}
+		 * @default SrcAlphaFactor
+		 */
 		this.blendSrc = SrcAlphaFactor;
+
+		/**
+		 * Defines the blending destination factor.
+		 *
+		 * @type {(ZeroFactor|OneFactor|SrcColorFactor|OneMinusSrcColorFactor|SrcAlphaFactor|OneMinusSrcAlphaFactor|DstAlphaFactor|OneMinusDstAlphaFactor|DstColorFactor|OneMinusDstColorFactor|SrcAlphaSaturateFactor|ConstantColorFactor|OneMinusConstantColorFactor|ConstantAlphaFactor|OneMinusConstantAlphaFactor)}
+		 * @default OneMinusSrcAlphaFactor
+		 */
 		this.blendDst = OneMinusSrcAlphaFactor;
+
+		/**
+		 * Defines the blending equation.
+		 *
+		 * @type {(AddEquation|SubtractEquation|ReverseSubtractEquation|MinEquation|MaxEquation)}
+		 * @default OneMinusSrcAlphaFactor
+		 */
 		this.blendEquation = AddEquation;
+
+		/**
+		 * Defines the blending source alpha factor.
+		 *
+		 * @type {?(ZeroFactor|OneFactor|SrcColorFactor|OneMinusSrcColorFactor|SrcAlphaFactor|OneMinusSrcAlphaFactor|DstAlphaFactor|OneMinusDstAlphaFactor|DstColorFactor|OneMinusDstColorFactor|SrcAlphaSaturateFactor|ConstantColorFactor|OneMinusConstantColorFactor|ConstantAlphaFactor|OneMinusConstantAlphaFactor)}
+		 * @default null
+		 */
 		this.blendSrcAlpha = null;
+
+		/**
+		 * Defines the blending destination alpha factor.
+		 *
+		 * @type {?(ZeroFactor|OneFactor|SrcColorFactor|OneMinusSrcColorFactor|SrcAlphaFactor|OneMinusSrcAlphaFactor|DstAlphaFactor|OneMinusDstAlphaFactor|DstColorFactor|OneMinusDstColorFactor|SrcAlphaSaturateFactor|ConstantColorFactor|OneMinusConstantColorFactor|ConstantAlphaFactor|OneMinusConstantAlphaFactor)}
+		 * @default null
+		 */
 		this.blendDstAlpha = null;
+
+		/**
+		 * Defines the blending equation of the alpha channel.
+		 *
+		 * @type {(AddEquation|SubtractEquation|ReverseSubtractEquation|MinEquation|MaxEquation)}
+		 * @default OneMinusSrcAlphaFactor
+		 */
 		this.blendEquationAlpha = null;
+
+		/**
+		 * Represents the RGB values of the constant blend color.
+		 *
+		 * This property has only an effect when using custom blending with `ConstantColor` or `OneMinusConstantColor`.
+		 *
+		 * @type {Color}
+		 * @default (0,0,0)
+		 */
 		this.blendColor = new Color( 0, 0, 0 );
+
+		/**
+		 * Represents the alpha value of the constant blend color.
+		 *
+		 * This property has only an effect when using custom blending with `ConstantAlpha` or `OneMinusConstantAlpha`.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.blendAlpha = 0;
 
+		/**
+		 * Defines the depth function.
+		 *
+		 * @type {(NeverDepth|AlwaysDepth|LessDepth|LessEqualDepth|EqualDepth|GreaterEqualDepth|GreaterDepth|NotEqualDepth)}
+		 * @default LessEqualDepth
+		 */
 		this.depthFunc = LessEqualDepth;
+
+		/**
+		 * Whether to have depth test enabled when rendering this material.
+		 * When the depth test is disabled, the depth write will also be implicitly disabled.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.depthTest = true;
+
+		/**
+		 * Whether rendering this material has any effect on the depth buffer.
+		 *
+		 * When drawing 2D overlays it can be useful to disable the depth writing in
+		 * order to layer several things together without creating z-index artifacts.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.depthWrite = true;
 
+		/**
+		 * The bit mask to use when writing to the stencil buffer.
+		 *
+		 * @type {number}
+		 * @default 0xff
+		 */
 		this.stencilWriteMask = 0xff;
+
+		/**
+		 * The stencil comparison function to use.
+		 *
+		 * @type {NeverStencilFunc|LessStencilFunc|EqualStencilFunc|LessEqualStencilFunc|GreaterStencilFunc|NotEqualStencilFunc|GreaterEqualStencilFunc|AlwaysStencilFunc}
+		 * @default AlwaysStencilFunc
+		 */
 		this.stencilFunc = AlwaysStencilFunc;
+
+		/**
+		 * The value to use when performing stencil comparisons or stencil operations.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.stencilRef = 0;
+
+		/**
+		 * The bit mask to use when comparing against the stencil buffer.
+		 *
+		 * @type {number}
+		 * @default 0xff
+		 */
 		this.stencilFuncMask = 0xff;
+
+		/**
+		 * Which stencil operation to perform when the comparison function returns `false`.
+		 *
+		 * @type {ZeroStencilOp|KeepStencilOp|ReplaceStencilOp|IncrementStencilOp|DecrementStencilOp|IncrementWrapStencilOp|DecrementWrapStencilOp|InvertStencilOp}
+		 * @default KeepStencilOp
+		 */
 		this.stencilFail = KeepStencilOp;
+
+		/**
+		 * Which stencil operation to perform when the comparison function returns
+		 * `true` but the depth test fails.
+		 *
+		 * @type {ZeroStencilOp|KeepStencilOp|ReplaceStencilOp|IncrementStencilOp|DecrementStencilOp|IncrementWrapStencilOp|DecrementWrapStencilOp|InvertStencilOp}
+		 * @default KeepStencilOp
+		 */
 		this.stencilZFail = KeepStencilOp;
+
+		/**
+		 * Which stencil operation to perform when the comparison function returns
+		 * `true` and the depth test passes.
+		 *
+		 * @type {ZeroStencilOp|KeepStencilOp|ReplaceStencilOp|IncrementStencilOp|DecrementStencilOp|IncrementWrapStencilOp|DecrementWrapStencilOp|InvertStencilOp}
+		 * @default KeepStencilOp
+		 */
 		this.stencilZPass = KeepStencilOp;
+
+		/**
+		 * Whether stencil operations are performed against the stencil buffer. In
+		 * order to perform writes or comparisons against the stencil buffer this
+		 * value must be `true`.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.stencilWrite = false;
 
+		/**
+		 * User-defined clipping planes specified as THREE.Plane objects in world
+		 * space. These planes apply to the objects this material is attached to.
+		 * Points in space whose signed distance to the plane is negative are clipped
+		 * (not rendered). This requires {@link WebGLRenderer#localClippingEnabled} to
+		 * be `true`.
+		 *
+		 * @type {?Array<Plane>}
+		 * @default null
+		 */
 		this.clippingPlanes = null;
+
+		/**
+		 * Changes the behavior of clipping planes so that only their intersection is
+		 * clipped, rather than their union.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.clipIntersection = false;
+
+		/**
+		 * Defines whether to clip shadows according to the clipping planes specified
+		 * on this material.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.clipShadows = false;
 
+		/**
+		 * Defines which side of faces cast shadows. If `null`, the side casting shadows
+		 * is determined as follows:
+		 *
+		 * - When {@link Material#side} is set to `FrontSide`, the back side cast shadows.
+		 * - When {@link Material#side} is set to `BackSide`, the front side cast shadows.
+		 * - When {@link Material#side} is set to `DoubleSide`, both sides cast shadows.
+		 *
+		 * @type {?(FrontSide|BackSide|DoubleSide)}
+		 * @default null
+		 */
 		this.shadowSide = null;
 
+		/**
+		 * Whether to render the material's color.
+		 *
+		 * This can be used in conjunction with {@link Object3D#renderOder} to create invisible
+		 * objects that occlude other objects.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.colorWrite = true;
 
-		this.precision = null; // override the renderer's default precision for this material
+		/**
+		 * Override the renderer's default precision for this material.
+		 *
+		 * @type {?('highp'|'mediump'|'lowp')}
+		 * @default null
+		 */
+		this.precision = null;
 
+		/**
+		 * Whether to use polygon offset or not. When enabled, each fragment's depth value will
+		 * be offset after it is interpolated from the depth values of the appropriate vertices.
+		 * The offset is added before the depth test is performed and before the value is written
+		 * into the depth buffer.
+		 *
+		 * Can be useful for rendering hidden-line images, for applying decals to surfaces, and for
+		 * rendering solids with highlighted edges.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.polygonOffset = false;
+
+		/**
+		 * Specifies a scale factor that is used to create a variable depth offset for each polygon.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.polygonOffsetFactor = 0;
+
+		/**
+		 * Is multiplied by an implementation-specific value to create a constant depth offset.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.polygonOffsetUnits = 0;
 
+		/**
+		 * Whether to apply dithering to the color to remove the appearance of banding.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.dithering = false;
 
+		/**
+		 * Whether alpha to coverage should be enabled or not. Can only be used with MSAA-enabled contexts
+		 * (meaning when the renderer was created with *antialias* parameter set to `true`). Enabling this
+		 * will smooth aliasing on clip plane edges and alphaTest-clipped edges.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.alphaToCoverage = false;
+
+		/**
+		 * Whether to premultiply the alpha (transparency) value.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.premultipliedAlpha = false;
+
+		/**
+		 * Whether double-sided, transparent objects should be rendered with a single pass or not.
+		 *
+		 * The engine renders double-sided, transparent objects with two draw calls (back faces first,
+		 * then front faces) to mitigate transparency artifacts. There are scenarios however where this
+		 * approach produces no quality gains but still doubles draw calls e.g. when rendering flat
+		 * vegetation like grass sprites. In these cases, set the `forceSinglePass` flag to `true` to
+		 * disable the two pass rendering to avoid performance issues.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.forceSinglePass = false;
 
+		/**
+		 * Defines whether 3D objects using this material are visible.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.visible = true;
 
+		/**
+		 * Defines whether this material is tone mapped according to the renderer's tone mapping setting.
+		 *
+		 * It is ignored when rendering to a render target or using post processing or when using
+		 * `WebGPURenderer`. In all these cases, all materials are honored by tone mapping.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.toneMapped = true;
 
+		/**
+		 * An object that can be used to store custom data about the Material. It
+		 * should not hold references to functions as these will not be cloned.
+		 *
+		 * @type {Object}
+		 */
 		this.userData = {};
 
+		/**
+		 * This starts at `0` and counts how many times {@link Material#needsUpdate} is set to `true`.
+		 *
+		 * @type {number}
+		 * @readonly
+		 * @default 0
+		 */
 		this.version = 0;
 
 		this._alphaTest = 0;
 
 	}
 
+	/**
+	 * Sets the alpha value to be used when running an alpha test. The material
+	 * will not be rendered if the opacity is lower than this value.
+	 *
+	 * @type {number}
+	 * @readonly
+	 * @default 0
+	 */
 	get alphaTest() {
 
 		return this._alphaTest;
@@ -9319,12 +14255,43 @@ class Material extends EventDispatcher {
 
 	}
 
-	// onBeforeRender and onBeforeCompile only supported in WebGLRenderer
-
+	/**
+	 * An optional callback that is executed immediately before the material is used to render a 3D object.
+	 *
+	 * This method can only be used when rendering with {@link WebGLRenderer}.
+	 *
+	 * @param {WebGLRenderer} renderer - The renderer.
+	 * @param {Scene} scene - The scene.
+	 * @param {Camera} camera - The camera that is used to render the scene.
+	 * @param {BufferGeometry} geometry - The 3D object's geometry.
+	 * @param {Object3D} object - The 3D object.
+	 * @param {Object} group - The geometry group data.
+	 */
 	onBeforeRender( /* renderer, scene, camera, geometry, object, group */ ) {}
 
+	/**
+	 * An optional callback that is executed immediately before the shader
+	 * program is compiled. This function is called with the shader source code
+	 * as a parameter. Useful for the modification of built-in materials.
+	 *
+	 * This method can only be used when rendering with {@link WebGLRenderer}. The
+	 * recommended approach when customizing materials is to use `WebGPURenderer` with the new
+	 * Node Material system and [TSL]{@link https://github.com/mrdoob/three.js/wiki/Three.js-Shading-Language}.
+	 *
+	 * @param {{vertexShader:string,fragmentShader:string,uniforms:Object}} shaderobject - The object holds the uniforms and the vertex and fragment shader source.
+	 * @param {WebGLRenderer} renderer - A reference to the renderer.
+	 */
 	onBeforeCompile( /* shaderobject, renderer */ ) {}
 
+	/**
+	 * In case {@link Material#onBeforeCompile} is used, this callback can be used to identify
+	 * values of settings used in `onBeforeCompile()`, so three.js can reuse a cached
+	 * shader or recompile the shader for this material as needed.
+	 *
+	 * This method can only be used when rendering with {@link WebGLRenderer}.
+	 *
+	 * @return {string} The custom program cache key.
+	 */
 	customProgramCacheKey() {
 
 		return this.onBeforeCompile.toString();
@@ -9373,6 +14340,13 @@ class Material extends EventDispatcher {
 
 	}
 
+	/**
+	 * Serializes the material into JSON.
+	 *
+	 * @param {?(Object|string)} meta - An optional value holding meta information about the serialization.
+	 * @return {Object} A JSON object representing the serialized material.
+	 * @see {@link ObjectLoader#parse}
+	 */
 	toJSON( meta ) {
 
 		const isRootObject = ( meta === undefined || typeof meta === 'string' );
@@ -9640,12 +14614,23 @@ class Material extends EventDispatcher {
 
 	}
 
+	/**
+	 * Returns a new material with copied values from this instance.
+	 *
+	 * @return {Material} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Copies the values of the given material to this instance.
+	 *
+	 * @param {Material} source - The material to copy.
+	 * @return {Material} A reference to this instance.
+	 */
 	copy( source ) {
 
 		this.name = source.name;
@@ -9727,12 +14712,32 @@ class Material extends EventDispatcher {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 *
+	 * @fires Material#dispose
+	 */
 	dispose() {
 
+		/**
+		 * Fires when the material has been disposed of.
+		 *
+		 * @event Material#dispose
+		 * @type {Object}
+		 */
 		this.dispatchEvent( { type: 'dispose' } );
 
 	}
 
+	/**
+	 * Setting this property to `true` indicates the engine the material
+	 * needs to be recompiled.
+	 *
+	 * @type {boolean}
+	 * @default false
+	 * @param {boolean} value
+	 */
 	set needsUpdate( value ) {
 
 		if ( value === true ) this.version ++;
@@ -9964,8 +14969,13 @@ function _generateTables() {
 
 }
 
-// float32 to float16
-
+/**
+ * Returns a half precision floating point value (FP16) from the given single
+ * precision floating point value (FP32).
+ *
+ * @param {number} val - A single precision floating point value.
+ * @return {number} The FP16 value.
+ */
 function toHalfFloat( val ) {
 
 	if ( Math.abs( val ) > 65504 ) console.warn( 'THREE.DataUtils.toHalfFloat(): Value out of range.' );
@@ -9979,8 +14989,13 @@ function toHalfFloat( val ) {
 
 }
 
-// float16 to float32
-
+/**
+ * Returns a single precision floating point value (FP32) from the given half
+ * precision floating point value (FP16).
+ *
+ * @param {number} val - A half precision floating point value.
+ * @return {number} The FP32 value.
+ */
 function fromHalfFloat( val ) {
 
 	const m = val >> 10;
@@ -9989,10 +15004,40 @@ function fromHalfFloat( val ) {
 
 }
 
-const DataUtils = {
-	toHalfFloat: toHalfFloat,
-	fromHalfFloat: fromHalfFloat,
-};
+/**
+ * A class containing utility functions for data.
+ *
+ * @hideconstructor
+ */
+class DataUtils {
+
+	/**
+	 * Returns a half precision floating point value (FP16) from the given single
+	 * precision floating point value (FP32).
+	 *
+	 * @param {number} val - A single precision floating point value.
+	 * @return {number} The FP16 value.
+	 */
+	static toHalfFloat( val ) {
+
+		return toHalfFloat( val );
+
+	}
+
+	/**
+	 * Returns a single precision floating point value (FP32) from the given half
+	 * precision floating point value (FP16).
+	 *
+	 * @param {number} val - A half precision floating point value.
+	 * @return {number} The FP32 value.
+	 */
+	static fromHalfFloat( val ) {
+
+		return fromHalfFloat( val );
+
+	}
+
+}
 
 const _vector$9 = /*@__PURE__*/ new Vector3();
 const _vector2$1 = /*@__PURE__*/ new Vector2();
@@ -11723,18 +16768,75 @@ const _morphA = /*@__PURE__*/ new Vector3();
 const _intersectionPoint = /*@__PURE__*/ new Vector3();
 const _intersectionPointWorld = /*@__PURE__*/ new Vector3();
 
+/**
+ * Class representing triangular polygon mesh based objects.
+ *
+ * ```js
+ * const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const mesh = new THREE.Mesh( geometry, material );
+ * scene.add( mesh );
+ * ```
+ *
+ * @augments Object3D
+ */
 class Mesh extends Object3D {
 
+	/**
+	 * Constructs a new mesh.
+	 *
+	 * @param {BufferGeometry} [geometry] - The mesh geometry.
+	 * @param {Material|Array<Material>} [material] - The mesh material.
+	 */
 	constructor( geometry = new BufferGeometry(), material = new MeshBasicMaterial() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isMesh = true;
 
 		this.type = 'Mesh';
 
+		/**
+		 * The mesh geometry.
+		 *
+		 * @type {BufferGeometry}
+		 */
 		this.geometry = geometry;
+
+		/**
+		 * The mesh material.
+		 *
+		 * @type {Material|Array<Material>}
+		 * @default MeshBasicMaterial
+		 */
 		this.material = material;
+
+		/**
+		 * A dictionary representing the morph targets in the geometry. The key is the
+		 * morph targets name, the value its attribute index. This member is `undefined`
+		 * by default and only set when morph targets are detected in the geometry.
+		 *
+		 * @type {Object<String,number>|undefined}
+		 * @default undefined
+		 */
+		this.morphTargetDictionary = undefined;
+
+		/**
+		 * An array of weights typically in the range `[0,1]` that specify how much of the morph
+		 * is applied. This member is `undefined` by default and only set when morph targets are
+		 * detected in the geometry.
+		 *
+		 * @type {Array<number>|undefined}
+		 * @default undefined
+		 */
+		this.morphTargetInfluences = undefined;
 
 		this.updateMorphTargets();
 
@@ -11763,6 +16865,10 @@ class Mesh extends Object3D {
 
 	}
 
+	/**
+	 * Sets the values of {@link Mesh#morphTargetDictionary} and {@link Mesh#morphTargetInfluences}
+	 * to make sure existing morph targets can influence this 3D object.
+	 */
 	updateMorphTargets() {
 
 		const geometry = this.geometry;
@@ -11794,6 +16900,14 @@ class Mesh extends Object3D {
 
 	}
 
+	/**
+	 * Returns the local-space position of the vertex at the given index, taking into
+	 * account the current animation state of both morph targets and skinning.
+	 *
+	 * @param {number} index - The vertex index.
+	 * @param {Vector3} target - The target object that is used to store the method's result.
+	 * @return {Vector3} The vertex position in local space.
+	 */
 	getVertexPosition( index, target ) {
 
 		const geometry = this.geometry;
@@ -11838,6 +16952,12 @@ class Mesh extends Object3D {
 
 	}
 
+	/**
+	 * Computes intersection points between a casted ray and this line.
+	 *
+	 * @param {Raycaster} raycaster - The raycaster.
+	 * @param {Array<Object>} intersects - The target array that holds the intersection points.
+	 */
 	raycast( raycaster, intersects ) {
 
 		const geometry = this.geometry;
@@ -12108,14 +17228,45 @@ function checkGeometryIntersection( object, material, raycaster, ray, uv, uv1, n
 
 }
 
+/**
+ * A geometry class for a rectangular cuboid with a given width, height, and depth.
+ * On creation, the cuboid is centred on the origin, with each edge parallel to one
+ * of the axes.
+ *
+ * ```js
+ * const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+ * const cube = new THREE.Mesh( geometry, material );
+ * scene.add( cube );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class BoxGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new box geometry.
+	 *
+	 * @param {number} [width=1] - The width. That is, the length of the edges parallel to the X axis.
+	 * @param {number} [height=1] - The height. That is, the length of the edges parallel to the Y axis.
+	 * @param {number} [depth=1] - The depth. That is, the length of the edges parallel to the Z axis.
+	 * @param {number} [widthSegments=1] - Number of segmented rectangular faces along the width of the sides.
+	 * @param {number} [heightSegments=1] - Number of segmented rectangular faces along the height of the sides.
+	 * @param {number} [depthSegments=1] - Number of segmented rectangular faces along the depth of the sides.
+	 */
 	constructor( width = 1, height = 1, depth = 1, widthSegments = 1, heightSegments = 1, depthSegments = 1 ) {
 
 		super();
 
 		this.type = 'BoxGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			width: width,
 			height: height,
@@ -12275,6 +17426,13 @@ class BoxGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {BoxGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new BoxGeometry( data.width, data.height, data.depth, data.widthSegments, data.heightSegments, data.depthSegments );
@@ -12575,21 +17733,59 @@ class ShaderMaterial extends Material {
 
 }
 
+/**
+ * Abstract base class for cameras. This class should always be inherited
+ * when you build a new camera.
+ *
+ * @abstract
+ * @augments Object3D
+ */
 class Camera extends Object3D {
 
+	/**
+	 * Constructs a new camera.
+	 */
 	constructor() {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isCamera = true;
 
 		this.type = 'Camera';
 
+		/**
+		 * The inverse of the camera's world matrix.
+		 *
+		 * @type {Matrix4}
+		 */
 		this.matrixWorldInverse = new Matrix4();
 
+		/**
+		 * The camera's projection matrix.
+		 *
+		 * @type {Matrix4}
+		 */
 		this.projectionMatrix = new Matrix4();
+
+		/**
+		 * The inverse of the camera's projection matrix.
+		 *
+		 * @type {Matrix4}
+		 */
 		this.projectionMatrixInverse = new Matrix4();
 
+		/**
+		 * The coordinate system in which the camera is used.
+		 *
+		 * @type {(WebGLCoordinateSystem|WebGPUCoordinateSystem)}
+		 */
 		this.coordinateSystem = WebGLCoordinateSystem;
 
 	}
@@ -12609,6 +17805,15 @@ class Camera extends Object3D {
 
 	}
 
+	/**
+	 * Returns a vector representing the ("look") direction of the 3D object in world space.
+	 *
+	 * This method is overwritten since cameras have a different forward vector compared to other
+	 * 3D objects. A camera looks down its local, negative z-axis by default.
+	 *
+	 * @param {Vector3} target - The target vector the result is stored to.
+	 * @return {Vector3} The 3D object's direction in world space.
+	 */
 	getWorldDirection( target ) {
 
 		return super.getWorldDirection( target ).negate();
@@ -12643,29 +17848,126 @@ const _v3$1 = /*@__PURE__*/ new Vector3();
 const _minTarget = /*@__PURE__*/ new Vector2();
 const _maxTarget = /*@__PURE__*/ new Vector2();
 
-
+/**
+ * Camera that uses [perspective projection]{@link https://en.wikipedia.org/wiki/Perspective_(graphical)}.
+ *
+ * This projection mode is designed to mimic the way the human eye sees. It
+ * is the most common projection mode used for rendering a 3D scene.
+ *
+ * ```js
+ * const camera = new THREE.PerspectiveCamera( 45, width / height, 1, 1000 );
+ * scene.add( camera );
+ * ```
+ *
+ * @augments Camera
+ */
 class PerspectiveCamera extends Camera {
 
+	/**
+	 * Constructs a new perspective camera.
+	 *
+	 * @param {number} [fov=50] - The vertical field of view.
+	 * @param {number} [aspect=1] - The aspect ratio.
+	 * @param {number} [near=0.1] - The camera's near plane.
+	 * @param {number} [far=2000] - The camera's far plane.
+	 */
 	constructor( fov = 50, aspect = 1, near = 0.1, far = 2000 ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isPerspectiveCamera = true;
 
 		this.type = 'PerspectiveCamera';
 
+		/**
+		 * The vertical field of view, from bottom to top of view,
+		 * in degrees.
+		 *
+		 * @type {number}
+		 * @default 50
+		 */
 		this.fov = fov;
+
+		/**
+		 * The zoom factor of the camera.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.zoom = 1;
 
+		/**
+		 * The camera's near plane. The valid range is greater than `0`
+		 * and less than the current value of {@link PerspectiveCamera#far}.
+		 *
+		 * Note that, unlike for the {@link OrthographicCamera}, `0` is <em>not</em> a
+		 * valid value for a perspective camera's near plane.
+		 *
+		 * @type {number}
+		 * @default 0.1
+		 */
 		this.near = near;
+
+		/**
+		 * The camera's far plane. Must be greater than the
+		 * current value of {@link PerspectiveCamera#near}.
+		 *
+		 * @type {number}
+		 * @default 2000
+		 */
 		this.far = far;
+
+		/**
+		 * Object distance used for stereoscopy and depth-of-field effects. This
+		 * parameter does not influence the projection matrix unless a
+		 * {@link StereoCamera} is being used.
+		 *
+		 * @type {number}
+		 * @default 10
+		 */
 		this.focus = 10;
 
+		/**
+		 * The aspect ratio, usually the canvas width / canvas height.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.aspect = aspect;
+
+		/**
+		 * Represents the frustum window specification. This property should not be edited
+		 * directly but via {@link PerspectiveCamera#setViewOffset} and {@link PerspectiveCamera#clearViewOffset}.
+		 *
+		 * @type {?Object}
+		 * @default null
+		 */
 		this.view = null;
 
-		this.filmGauge = 35;	// width of the film (default in millimeters)
-		this.filmOffset = 0;	// horizontal film offset (same unit as gauge)
+		/**
+		 * Film size used for the larger axis. Default is `35` (millimeters). This
+		 * parameter does not influence the projection matrix unless {@link PerspectiveCamera#filmOffset}
+		 * is set to a nonzero value.
+		 *
+		 * @type {number}
+		 * @default 35
+		 */
+		this.filmGauge = 35;
+
+		/**
+		 * Horizontal off-center offset in the same unit as {@link PerspectiveCamera#filmGauge}.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
+		this.filmOffset = 0;
 
 		this.updateProjectionMatrix();
 
@@ -12693,7 +17995,7 @@ class PerspectiveCamera extends Camera {
 	}
 
 	/**
-	 * Sets the FOV by focal length in respect to the current .filmGauge.
+	 * Sets the FOV by focal length in respect to the current {@link PerspectiveCamera#filmGauge}.
 	 *
 	 * The default film gauge is 35, so that the focal length can be specified for
 	 * a 35mm (full frame) camera.
@@ -12711,9 +18013,10 @@ class PerspectiveCamera extends Camera {
 	}
 
 	/**
-	 * Calculates the focal length from the current .fov and .filmGauge.
+	 * Returns the focal length from the current {@link PerspectiveCamera#fov} and
+	 * {@link PerspectiveCamera#filmGauge}.
 	 *
-	 * @returns {number}
+	 * @return {number} The computed focal length.
 	 */
 	getFocalLength() {
 
@@ -12723,6 +18026,11 @@ class PerspectiveCamera extends Camera {
 
 	}
 
+	/**
+	 * Returns the current vertical field of view angle in degrees considering {@link PerspectiveCamera#zoom}.
+	 *
+	 * @return {number} The effective FOV.
+	 */
 	getEffectiveFOV() {
 
 		return RAD2DEG * 2 * Math.atan(
@@ -12730,6 +18038,12 @@ class PerspectiveCamera extends Camera {
 
 	}
 
+	/**
+	 * Returns the width of the image on the film. If {@link PerspectiveCamera#aspect} is greater than or
+	 * equal to one (landscape format), the result equals {@link PerspectiveCamera#filmGauge}.
+	 *
+	 * @return {number} The film width.
+	 */
 	getFilmWidth() {
 
 		// film not completely covered in portrait format (aspect < 1)
@@ -12737,6 +18051,12 @@ class PerspectiveCamera extends Camera {
 
 	}
 
+	/**
+	 * Returns the height of the image on the film. If {@link PerspectiveCamera#aspect} is greater than or
+	 * equal to one (landscape format), the result equals {@link PerspectiveCamera#filmGauge}.
+	 *
+	 * @return {number} The film width.
+	 */
 	getFilmHeight() {
 
 		// film not completely covered in landscape format (aspect > 1)
@@ -12746,11 +18066,11 @@ class PerspectiveCamera extends Camera {
 
 	/**
 	 * Computes the 2D bounds of the camera's viewable rectangle at a given distance along the viewing direction.
-	 * Sets minTarget and maxTarget to the coordinates of the lower-left and upper-right corners of the view rectangle.
+	 * Sets `minTarget` and `maxTarget` to the coordinates of the lower-left and upper-right corners of the view rectangle.
 	 *
-	 * @param {number} distance
-	 * @param {Vector2} minTarget
-	 * @param {Vector2} maxTarget
+	 * @param {number} distance - The viewing distance.
+	 * @param {Vector2} minTarget - The lower-left corner of the view rectangle is written into this vector.
+	 * @param {Vector2} maxTarget - The upper-right corner of the view rectangle is written into this vector.
 	 */
 	getViewBounds( distance, minTarget, maxTarget ) {
 
@@ -12767,9 +18087,9 @@ class PerspectiveCamera extends Camera {
 	/**
 	 * Computes the width and height of the camera's viewable rectangle at a given distance along the viewing direction.
 	 *
-	 * @param {number} distance
-	 * @param {Vector2} target - Vector2 target used to store result where x is width and y is height.
-	 * @returns {Vector2}
+	 * @param {number} distance - The viewing distance.
+	 * @param {Vector2} target - The target vector that is used to store result where x is width and y is height.
+	 * @returns {Vector2} The view size.
 	 */
 	getViewSize( distance, target ) {
 
@@ -12785,41 +18105,42 @@ class PerspectiveCamera extends Camera {
 	 *
 	 * For example, if you have 3x2 monitors and each monitor is 1920x1080 and
 	 * the monitors are in grid like this
-	 *
+	 *```
 	 *   +---+---+---+
 	 *   | A | B | C |
 	 *   +---+---+---+
 	 *   | D | E | F |
 	 *   +---+---+---+
+	 *```
+	 * then for each monitor you would call it like this:
+	 *```js
+	 * const w = 1920;
+	 * const h = 1080;
+	 * const fullWidth = w * 3;
+	 * const fullHeight = h * 2;
 	 *
-	 * then for each monitor you would call it like this
+	 * // --A--
+	 * camera.setViewOffset( fullWidth, fullHeight, w * 0, h * 0, w, h );
+	 * // --B--
+	 * camera.setViewOffset( fullWidth, fullHeight, w * 1, h * 0, w, h );
+	 * // --C--
+	 * camera.setViewOffset( fullWidth, fullHeight, w * 2, h * 0, w, h );
+	 * // --D--
+	 * camera.setViewOffset( fullWidth, fullHeight, w * 0, h * 1, w, h );
+	 * // --E--
+	 * camera.setViewOffset( fullWidth, fullHeight, w * 1, h * 1, w, h );
+	 * // --F--
+	 * camera.setViewOffset( fullWidth, fullHeight, w * 2, h * 1, w, h );
+	 * ```
 	 *
-	 *   const w = 1920;
-	 *   const h = 1080;
-	 *   const fullWidth = w * 3;
-	 *   const fullHeight = h * 2;
+	 * Note there is no reason monitors have to be the same size or in a grid.
 	 *
-	 *   --A--
-	 *   camera.setViewOffset( fullWidth, fullHeight, w * 0, h * 0, w, h );
-	 *   --B--
-	 *   camera.setViewOffset( fullWidth, fullHeight, w * 1, h * 0, w, h );
-	 *   --C--
-	 *   camera.setViewOffset( fullWidth, fullHeight, w * 2, h * 0, w, h );
-	 *   --D--
-	 *   camera.setViewOffset( fullWidth, fullHeight, w * 0, h * 1, w, h );
-	 *   --E--
-	 *   camera.setViewOffset( fullWidth, fullHeight, w * 1, h * 1, w, h );
-	 *   --F--
-	 *   camera.setViewOffset( fullWidth, fullHeight, w * 2, h * 1, w, h );
-	 *
-	 *   Note there is no reason monitors have to be the same size or in a grid.
-	 *
-	 * @param {number} fullWidth
-	 * @param {number} fullHeight
-	 * @param {number} x
-	 * @param {number} y
-	 * @param {number} width
-	 * @param {number} height
+	 * @param {number} fullWidth - The full width of multiview setup.
+	 * @param {number} fullHeight - The full height of multiview setup.
+	 * @param {number} x - The horizontal offset of the subcamera.
+	 * @param {number} y - The vertical offset of the subcamera.
+	 * @param {number} width - The width of subcamera.
+	 * @param {number} height - The height of subcamera.
 	 */
 	setViewOffset( fullWidth, fullHeight, x, y, width, height ) {
 
@@ -12851,6 +18172,9 @@ class PerspectiveCamera extends Camera {
 
 	}
 
+	/**
+	 * Removes the view offset from the projection matrix.
+	 */
 	clearViewOffset() {
 
 		if ( this.view !== null ) {
@@ -12863,6 +18187,10 @@ class PerspectiveCamera extends Camera {
 
 	}
 
+	/**
+	 * Updates the camera's projection matrix. Must be called after any change of
+	 * camera properties.
+	 */
 	updateProjectionMatrix() {
 
 		const near = this.near;
@@ -12920,16 +18248,72 @@ class PerspectiveCamera extends Camera {
 const fov = -90; // negative fov is not an error
 const aspect = 1;
 
+/**
+ * A special type of camera that is positioned in 3D space to render its surroundings into a
+ * cube render target. The render target can then be used as an environment map for rendering
+ * realtime reflections in your scene.
+ *
+ * ```js
+ * // Create cube render target
+ * const cubeRenderTarget = new THREE.WebGLCubeRenderTarget( 256, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter } );
+ *
+ * // Create cube camera
+ * const cubeCamera = new THREE.CubeCamera( 1, 100000, cubeRenderTarget );
+ * scene.add( cubeCamera );
+ *
+ * // Create car
+ * const chromeMaterial = new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: cubeRenderTarget.texture } );
+ * const car = new THREE.Mesh( carGeometry, chromeMaterial );
+ * scene.add( car );
+ *
+ * // Update the render target cube
+ * car.visible = false;
+ * cubeCamera.position.copy( car.position );
+ * cubeCamera.update( renderer, scene );
+ *
+ * // Render the scene
+ * car.visible = true;
+ * renderer.render( scene, camera );
+ * ```
+ *
+ * @augments Object3D
+ */
 class CubeCamera extends Object3D {
 
+	/**
+	 * Constructs a new cube camera.
+	 *
+	 * @param {number} near - The camera's near plane.
+	 * @param {number} far - The camera's far plane.
+	 * @param {WebGLCubeRenderTarget} renderTarget - The cube render target.
+	 */
 	constructor( near, far, renderTarget ) {
 
 		super();
 
 		this.type = 'CubeCamera';
 
+		/**
+		 * A reference to the cube render target.
+		 *
+		 * @type {WebGLCubeRenderTarget}
+		 */
 		this.renderTarget = renderTarget;
+
+		/**
+		 * The current active coordinate system.
+		 *
+		 * @type {?(WebGLCoordinateSystem|WebGPUCoordinateSystem)}
+		 * @default null
+		 */
 		this.coordinateSystem = null;
+
+		/**
+		 * The current active mipmap level
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.activeMipmapLevel = 0;
 
 		const cameraPX = new PerspectiveCamera( fov, aspect, near, far );
@@ -12958,6 +18342,9 @@ class CubeCamera extends Object3D {
 
 	}
 
+	/**
+	 * Must be called when the coordinate system of the cube camera is changed.
+	 */
 	updateCoordinateSystem() {
 
 		const coordinateSystem = this.coordinateSystem;
@@ -13024,6 +18411,13 @@ class CubeCamera extends Object3D {
 
 	}
 
+	/**
+	 * Calling this method will render the given scene with the given renderer
+	 * into the cube render target of the camera.
+	 *
+	 * @param {(Renderer|WebGLRenderer)} renderer - The renderer.
+	 * @param {Scene} scene - The scene to render.
+	 */
 	update( renderer, scene ) {
 
 		if ( this.parent === null ) this.updateMatrixWorld();
@@ -13250,12 +18644,36 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
 
 }
 
+/**
+ * This is almost identical to an {@link Object3D}. Its purpose is to
+ * make working with groups of objects syntactically clearer.
+ *
+ * ```js
+ * // Create a group and add the two cubes.
+ * // These cubes can now be rotated / scaled etc as a group.
+ * const group = new THREE.Group();
+ *
+ * group.add( meshA );
+ * group.add( meshB );
+ *
+ * scene.add( group );
+ * ```
+ *
+ * @augments Object3D
+ */
 class Group extends Object3D {
 
 	constructor() {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isGroup = true;
 
 		this.type = 'Group';
@@ -13602,25 +19020,76 @@ class WebXRController {
 
 }
 
+/**
+ * This class can be used to define an exponential squared fog,
+ * which gives a clear view near the camera and a faster than exponentially
+ * densening fog farther from the camera.
+ *
+ * ```js
+ * const scene = new THREE.Scene();
+ * scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+ * ```
+ */
 class FogExp2 {
 
+	/**
+	 * Constructs a new fog.
+	 *
+	 * @param {number|Color} color - The fog's color.
+	 * @param {number} [density=0.00025] - Defines how fast the fog will grow dense.
+	 */
 	constructor( color, density = 0.00025 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isFogExp2 = true;
 
+		/**
+		 * The name of the fog.
+		 *
+		 * @type {string}
+		 */
 		this.name = '';
 
+		/**
+		 * The fog's color.
+		 *
+		 * @type {Color}
+		 */
 		this.color = new Color( color );
+
+		/**
+		 *  Defines how fast the fog will grow dense.
+		 *
+		 * @type {number}
+		 * @default 0.00025
+		 */
 		this.density = density;
 
 	}
 
+	/**
+	 * Returns a new fog with copied values from this instance.
+	 *
+	 * @return {FogExp2} A clone of this instance.
+	 */
 	clone() {
 
 		return new FogExp2( this.color, this.density );
 
 	}
 
+	/**
+	 * Serializes the fog into JSON.
+	 *
+	 * @param {?(Object|string)} meta - An optional value holding meta information about the serialization.
+	 * @return {Object} A JSON object representing the serialized fog
+	 */
 	toJSON( /* meta */ ) {
 
 		return {
@@ -13634,27 +19103,87 @@ class FogExp2 {
 
 }
 
+/**
+ * This class can be used to define a linear fog that grows linearly denser
+ * with the distance.
+ *
+ * ```js
+ * const scene = new THREE.Scene();
+ * scene.fog = new THREE.Fog( 0xcccccc, 10, 15 );
+ * ```
+ */
 class Fog {
 
+	/**
+	 * Constructs a new fog.
+	 *
+	 * @param {number|Color} color - The fog's color.
+	 * @param {number} [near=1] - The minimum distance to start applying fog.
+	 * @param {number} [far=1000] - The maximum distance at which fog stops being calculated and applied.
+	 */
 	constructor( color, near = 1, far = 1000 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isFog = true;
 
+		/**
+		 * The name of the fog.
+		 *
+		 * @type {string}
+		 */
 		this.name = '';
 
+		/**
+		 * The fog's color.
+		 *
+		 * @type {Color}
+		 */
 		this.color = new Color( color );
 
+		/**
+		 * The minimum distance to start applying fog. Objects that are less than
+		 * `near` units from the active camera won't be affected by fog.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.near = near;
+
+		/**
+		 * The maximum distance at which fog stops being calculated and applied.
+		 * Objects that are more than `far` units away from the active camera won't
+		 * be affected by fog.
+		 *
+		 * @type {number}
+		 * @default 1000
+		 */
 		this.far = far;
 
 	}
 
+	/**
+	 * Returns a new fog with copied values from this instance.
+	 *
+	 * @return {Fog} A clone of this instance.
+	 */
 	clone() {
 
 		return new Fog( this.color, this.near, this.far );
 
 	}
 
+	/**
+	 * Serializes the fog into JSON.
+	 *
+	 * @param {?(Object|string)} meta - An optional value holding meta information about the serialization.
+	 * @return {Object} A JSON object representing the serialized fog
+	 */
 	toJSON( /* meta */ ) {
 
 		return {
@@ -13669,27 +19198,114 @@ class Fog {
 
 }
 
+/**
+ * Scenes allow you to set up what is to be rendered and where by three.js.
+ * This is where you place 3D objects like meshes, lines or lights.
+ *
+ * @augments Object3D
+ */
 class Scene extends Object3D {
 
+	/**
+	 * Constructs a new scene.
+	 */
 	constructor() {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isScene = true;
 
 		this.type = 'Scene';
 
+		/**
+		 * Defines the background of the scene. Valid inputs are:
+		 *
+		 * - A color for defining a uniform colored background.
+		 * - A texture for defining a (flat) textured background.
+		 * - Cube textures or equirectangular textures for defining a skybox.
+		 *
+		 * @type {?(Color|Texture)}
+		 * @default null
+		 */
 		this.background = null;
+
+		/**
+		 * Sets the environment map for all physical materials in the scene. However,
+		 * it's not possible to overwrite an existing texture assigned to the `envMap`
+		 * material property.
+		 *
+		 * @type {?Texture}
+		 * @default null
+		 */
 		this.environment = null;
+
+		/**
+		 * A fog instance defining the type of fog that affects everything
+		 * rendered in the scene.
+		 *
+		 * @type {?(Fog|FogExp2)}
+		 * @default null
+		 */
 		this.fog = null;
 
+		/**
+		 * Sets the blurriness of the background. Only influences environment maps
+		 * assigned to {@link Scene#background}. Valid input is a float between `0`
+		 * and `1`.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.backgroundBlurriness = 0;
+
+		/**
+		 * Attenuates the color of the background. Only applies to background textures.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.backgroundIntensity = 1;
+
+		/**
+		 * The rotation of the background in radians. Only influences environment maps
+		 * assigned to {@link Scene#background}.
+		 *
+		 * @type {Euler}
+		 * @default (0,0,0)
+		 */
 		this.backgroundRotation = new Euler();
 
+		/**
+		 * Attenuates the color of the environment. Only influences environment maps
+		 * assigned to {@link Scene#environment}.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.environmentIntensity = 1;
+
+		/**
+		 * The rotation of the environment map in radians. Only influences physical materials
+		 * in the scene when {@link Scene#environment} is used.
+		 *
+		 * @type {Euler}
+		 * @default (0,0,0)
+		 */
 		this.environmentRotation = new Euler();
 
+		/**
+		 * Forces everything in the scene to be rendered with the defined material.
+		 *
+		 * @type {?Material}
+		 * @default null
+		 */
 		this.overrideMaterial = null;
 
 		if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
@@ -14308,12 +19924,41 @@ const _uvA = /*@__PURE__*/ new Vector2();
 const _uvB = /*@__PURE__*/ new Vector2();
 const _uvC = /*@__PURE__*/ new Vector2();
 
+/**
+ * A sprite is a plane that always faces towards the camera, generally with a
+ * partially transparent texture applied.
+ *
+ * Sprites do not cast shadows, setting {@link Object3D#castShadow} to `true` will
+ * have no effect.
+ *
+ * ```js
+ * const map = new THREE.TextureLoader().load( 'sprite.png' );
+ * const material = new THREE.SpriteMaterial( { map: map } );
+ *
+ * const sprite = new THREE.Sprite( material );
+ * scene.add( sprite );
+ * ```
+ *
+ * @augments Object3D
+ */
 class Sprite extends Object3D {
 
+	/**
+	 * Constructs a new sprite.
+	 *
+	 * @param {SpriteMaterial} [material] - The sprite material.
+	 */
 	constructor( material = new SpriteMaterial() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSprite = true;
 
 		this.type = 'Sprite';
@@ -14337,13 +19982,38 @@ class Sprite extends Object3D {
 
 		}
 
+		/**
+		 * The sprite geometry.
+		 *
+		 * @type {BufferGeometry}
+		 */
 		this.geometry = _geometry;
+
+		/**
+		 * The sprite material.
+		 *
+		 * @type {SpriteMaterial}
+		 */
 		this.material = material;
 
+		/**
+		 * The sprite's anchor point, and the point around which the sprite rotates.
+		 * A value of `(0.5, 0.5)` corresponds to the midpoint of the sprite. A value
+		 * of `(0, 0)` corresponds to the lower left corner of the sprite.
+		 *
+		 * @type {Vector2}
+		 * @default (0.5,0.5)
+		 */
 		this.center = new Vector2( 0.5, 0.5 );
 
 	}
 
+	/**
+	 * Computes intersection points between a casted ray and this sprite.
+	 *
+	 * @param {Raycaster} raycaster - The raycaster.
+	 * @param {Array<Object>} intersects - The target array that holds the intersection points.
+	 */
 	raycast( raycaster, intersects ) {
 
 		if ( raycaster.camera === null ) {
@@ -14463,26 +20133,82 @@ function transformVertex( vertexPosition, mvPosition, center, scale, sin, cos ) 
 const _v1$2 = /*@__PURE__*/ new Vector3();
 const _v2$1 = /*@__PURE__*/ new Vector3();
 
+/**
+ * A component for providing a basic Level of Detail (LOD) mechanism.
+ *
+ * Every LOD level is associated with an object, and rendering can be switched
+ * between them at the distances specified. Typically you would create, say,
+ * three meshes, one for far away (low detail), one for mid range (medium
+ * detail) and one for close up (high detail).
+ *
+ * ```js
+ * const lod = new THREE.LOD();
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ *
+ * //Create spheres with 3 levels of detail and create new LOD levels for them
+ * for( let i = 0; i < 3; i++ ) {
+ *
+ * 	const geometry = new THREE.IcosahedronGeometry( 10, 3 - i );
+ * 	const mesh = new THREE.Mesh( geometry, material );
+ * 	lod.addLevel( mesh, i * 75 );
+ *
+ * }
+ *
+ * scene.add( lod );
+ * ```
+ *
+ * @augments Object3D
+ */
 class LOD extends Object3D {
 
+	/**
+	 * Constructs a new LOD.
+	 */
 	constructor() {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
+		this.isLOD = true;
+
+		/**
+		 * The current LOD index.
+		 *
+		 * @private
+		 * @type {number}
+		 * @default 0
+		 */
 		this._currentLevel = 0;
 
 		this.type = 'LOD';
 
 		Object.defineProperties( this, {
+			/**
+			 * This array holds the LOD levels.
+			 *
+			 * @name LOD#levels
+			 * @type {Array<{object:Object3D,distance:number,hysteresis:number}>}
+			 */
 			levels: {
 				enumerable: true,
 				value: []
-			},
-			isLOD: {
-				value: true,
 			}
 		} );
 
+		/**
+		 * Whether the LOD object is updated automatically by the renderer per frame
+		 * or not. If set to `false`, you have to call {@link LOD#update} in the
+		 * render loop by yourself.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.autoUpdate = true;
 
 	}
@@ -14507,6 +20233,15 @@ class LOD extends Object3D {
 
 	}
 
+	/**
+	 * Adds a mesh that will display at a certain distance and greater. Typically
+	 * the further away the distance, the lower the detail on the mesh.
+	 *
+	 * @param {Object3D} object - The 3D object to display at this level.
+	 * @param {number} [distance=0] - The distance at which to display this level of detail.
+	 * @param {number} [hysteresis=0] - Threshold used to avoid flickering at LOD boundaries, as a fraction of distance.
+	 * @return {LOD} A reference to this instance.
+	 */
 	addLevel( object, distance = 0, hysteresis = 0 ) {
 
 		distance = Math.abs( distance );
@@ -14533,6 +20268,13 @@ class LOD extends Object3D {
 
 	}
 
+	/**
+	 * Removes an existing level, based on the distance from the camera.
+	 * Returns `true` when the level has been removed. Otherwise `false`.
+	 *
+	 * @param {number} distance - Distance of the level to remove.
+	 * @return {boolean} Whether the level has been removed or not.
+	 */
 	removeLevel( distance ) {
 
 		const levels = this.levels;
@@ -14554,14 +20296,24 @@ class LOD extends Object3D {
 
 	}
 
+	/**
+	 * Returns the currently active LOD level index.
+	 *
+	 * @return {number} The current active LOD level index.
+	 */
 	getCurrentLevel() {
 
 		return this._currentLevel;
 
 	}
 
-
-
+	/**
+	 * Returns a reference to the first 3D object that is greater than
+	 * the given distance.
+	 *
+	 * @param {number} distance - The LOD distance.
+	 * @return {Object3D|null} The found 3D object. `null` if no 3D object has been found.
+	 */
 	getObjectForDistance( distance ) {
 
 		const levels = this.levels;
@@ -14596,6 +20348,12 @@ class LOD extends Object3D {
 
 	}
 
+	/**
+	 * Computes intersection points between a casted ray and this LOD.
+	 *
+	 * @param {Raycaster} raycaster - The raycaster.
+	 * @param {Array<Object>} intersects - The target array that holds the intersection points.
+	 */
 	raycast( raycaster, intersects ) {
 
 		const levels = this.levels;
@@ -14612,6 +20370,12 @@ class LOD extends Object3D {
 
 	}
 
+	/**
+	 * Updates the LOD by computing which LOD level should be visible according
+	 * to the current distance of the given camera.
+	 *
+	 * @param {Camera} camera - The camera the scene is renderd with.
+	 */
 	update( camera ) {
 
 		const levels = this.levels;
@@ -14703,25 +20467,90 @@ const _sphere$5 = /*@__PURE__*/ new Sphere();
 const _inverseMatrix$2 = /*@__PURE__*/ new Matrix4();
 const _ray$2 = /*@__PURE__*/ new Ray();
 
+/**
+ * A mesh that has a {@link Skeleton} that can then be used to animate the
+ * vertices of the geometry with skinning/skeleton animation.
+ *
+ * Next to a valid skeleton, the skinned mesh requires skin indices and weights
+ * as buffer attributes in its geometry. These attribute define which bones affect a single
+ * vertex to a certain extend.
+ *
+ * Typically skinned meshes are not created manually but loaders like {@link GLTFLoader}
+ * or {@link FBXLoader } import respective models.
+ *
+ * @augments Mesh
+ */
 class SkinnedMesh extends Mesh {
 
+	/**
+	 * Constructs a new skinned mesh.
+	 *
+	 * @param {BufferGeometry} [geometry] - The mesh geometry.
+	 * @param {Material|Array<Material>} [material] - The mesh material.
+	 */
 	constructor( geometry, material ) {
 
 		super( geometry, material );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSkinnedMesh = true;
 
 		this.type = 'SkinnedMesh';
 
+		/**
+		 * `AttachedBindMode` means the skinned mesh shares the same world space as the skeleton.
+		 * This is not true when using `DetachedBindMode` which is useful when sharing a skeleton
+		 * across multiple skinned meshes.
+		 *
+		 * @type {(AttachedBindMode|DetachedBindMode)}
+		 * @default AttachedBindMode
+		 */
 		this.bindMode = AttachedBindMode;
+
+		/**
+		 * The base matrix that is used for the bound bone transforms.
+		 *
+		 * @type {Matrix4}
+		 */
 		this.bindMatrix = new Matrix4();
+
+		/**
+		 * The base matrix that is used for resetting the bound bone transforms.
+		 *
+		 * @type {Matrix4}
+		 */
 		this.bindMatrixInverse = new Matrix4();
 
+		/**
+		 * The bounding box of the skinned mesh. Can be computed via {@link SkinnedMesh#computeBoundingBox}.
+		 *
+		 * @type {?Box3}
+		 * @default null
+		 */
 		this.boundingBox = null;
+
+		/**
+		 * The bounding sphere of the skinned mesh. Can be computed via {@link SkinnedMesh#computeBoundingSphere}.
+		 *
+		 * @type {?Sphere}
+		 * @default null
+		 */
 		this.boundingSphere = null;
 
 	}
 
+	/**
+	 * Computes the bounding box of the skinned mesh, and updates {@link SkinnedMesh#boundingBox}.
+	 * The bounding box is not automatically computed by the engine; this method must be called by your app.
+	 * If the skinned mesh is animated, the bounding box should be recomputed per frame in order to reflect
+	 * the current animation state.
+	 */
 	computeBoundingBox() {
 
 		const geometry = this.geometry;
@@ -14745,6 +20574,12 @@ class SkinnedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Computes the bounding sphere of the skinned mesh, and updates {@link SkinnedMesh#boundingSphere}.
+	 * The bounding sphere is automatically computed by the engine once when it is needed, e.g., for ray casting
+	 * and view frustum culling. If the skinned mesh is animated, the bounding sphere should be recomputed
+	 * per frame in order to reflect the current animation state.
+	 */
 	computeBoundingSphere() {
 
 		const geometry = this.geometry;
@@ -14830,6 +20665,13 @@ class SkinnedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Binds the given skeleton to the skinned mesh.
+	 *
+	 * @param {Skeleton} skeleton - The skeleton to bind.
+	 * @param {Matrix4} [bindMatrix] - The bind matrix. If no bind matrix is provided,
+	 * the skinned mesh's world matrix will be used instead.
+	 */
 	bind( skeleton, bindMatrix ) {
 
 		this.skeleton = skeleton;
@@ -14849,12 +20691,19 @@ class SkinnedMesh extends Mesh {
 
 	}
 
+	/**
+	 * This method sets the skinned mesh in the rest pose).
+	 */
 	pose() {
 
 		this.skeleton.pose();
 
 	}
 
+	/**
+	 * Normalizes the skin weights which are defined as a buffer attribute
+	 * in the skinned mesh's geometry.
+	 */
 	normalizeSkinWeights() {
 
 		const vector = new Vector4();
@@ -14903,7 +20752,16 @@ class SkinnedMesh extends Mesh {
 
 	}
 
-	applyBoneTransform( index, vector ) {
+	/**
+	 * Applies the bone transform associated with the given index to the given
+	 * vertex position. Returns the updated vector.
+	 *
+	 * @param {number} index - The vertex index.
+	 * @param {Vector3} target - The target object that is used to store the method's result.
+	 * the skinned mesh's world matrix will be used instead.
+	 * @return {Vector3} The updated vertex position.
+	 */
+	applyBoneTransform( index, target ) {
 
 		const skeleton = this.skeleton;
 		const geometry = this.geometry;
@@ -14911,9 +20769,9 @@ class SkinnedMesh extends Mesh {
 		_skinIndex.fromBufferAttribute( geometry.attributes.skinIndex, index );
 		_skinWeight.fromBufferAttribute( geometry.attributes.skinWeight, index );
 
-		_basePosition.copy( vector ).applyMatrix4( this.bindMatrix );
+		_basePosition.copy( target ).applyMatrix4( this.bindMatrix );
 
-		vector.set( 0, 0, 0 );
+		target.set( 0, 0, 0 );
 
 		for ( let i = 0; i < 4; i ++ ) {
 
@@ -14925,24 +20783,48 @@ class SkinnedMesh extends Mesh {
 
 				_matrix4.multiplyMatrices( skeleton.bones[ boneIndex ].matrixWorld, skeleton.boneInverses[ boneIndex ] );
 
-				vector.addScaledVector( _vector3.copy( _basePosition ).applyMatrix4( _matrix4 ), weight );
+				target.addScaledVector( _vector3.copy( _basePosition ).applyMatrix4( _matrix4 ), weight );
 
 			}
 
 		}
 
-		return vector.applyMatrix4( this.bindMatrixInverse );
+		return target.applyMatrix4( this.bindMatrixInverse );
 
 	}
 
 }
 
+/**
+ * A bone which is part of a {@link Skeleton}. The skeleton in turn is used by
+ * the {@link SkinnedMesh}.
+ *
+ * ```js
+ * const root = new THREE.Bone();
+ * const child = new THREE.Bone();
+ *
+ * root.add( child );
+ * child.position.y = 5;
+ * ```
+ *
+ * @augments Object3D
+ */
 class Bone extends Object3D {
 
+	/**
+	 * Constructs a new bone.
+	 */
 	constructor() {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isBone = true;
 
 		this.type = 'Bone';
@@ -14970,24 +20852,85 @@ class DataTexture extends Texture {
 }
 
 const _offsetMatrix = /*@__PURE__*/ new Matrix4();
-const _identityMatrix = /*@__PURE__*/ new Matrix4();
+const _identityMatrix$1 = /*@__PURE__*/ new Matrix4();
 
+/**
+ * Class for representing the armatures in `three.js`. The skeleton
+ * is defined by a hierarchy of bones.
+ *
+ * ```js
+ * const bones = [];
+ *
+ * const shoulder = new THREE.Bone();
+ * const elbow = new THREE.Bone();
+ * const hand = new THREE.Bone();
+ *
+ * shoulder.add( elbow );
+ * elbow.add( hand );
+ *
+ * bones.push( shoulder , elbow, hand);
+ *
+ * shoulder.position.y = -5;
+ * elbow.position.y = 0;
+ * hand.position.y = 5;
+ *
+ * const armSkeleton = new THREE.Skeleton( bones );
+ * ```
+ */
 class Skeleton {
 
+	/**
+	 * Constructs a new skeleton.
+	 *
+	 * @param {Array<Bone>} [bones] - An array of bones.
+	 * @param {Array<Matrix4>} [boneInverses] - An array of bone inverse matrices.
+	 * If not provided, these matrices will be computed automatically via {@link Skeleton#calculateInverses}.
+	 */
 	constructor( bones = [], boneInverses = [] ) {
 
 		this.uuid = generateUUID();
 
+		/**
+		 * An array of bones defining the skeleton.
+		 *
+		 * @type {Array<Bone>}
+		 */
 		this.bones = bones.slice( 0 );
+
+		/**
+		 * An array of bone inverse matrices.
+		 *
+		 * @type {Array<Matrix4>}
+		 */
 		this.boneInverses = boneInverses;
+
+		/**
+		 * An array buffer holding the bone data.
+		 * Input data for {@link Skeleton#boneTexture}.
+		 *
+		 * @type {?Float32Array}
+		 * @default null
+		 */
 		this.boneMatrices = null;
 
+		/**
+		 * A texture holding the bone data for use
+		 * in the vertex shader.
+		 *
+		 * @type {?DataTexture}
+		 * @default null
+		 */
 		this.boneTexture = null;
 
 		this.init();
 
 	}
 
+	/**
+	 * Initializes the skeleton. This method gets automatically called by the constructor
+	 * but depending on how the skeleton is created it might be necessary to call this method
+	 * manually.
+	 */
 	init() {
 
 		const bones = this.bones;
@@ -15023,6 +20966,10 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Computes the bone inverse matrices. This method resets {@link Skeleton#boneInverses}
+	 * and fills it with new matrices.
+	 */
 	calculateInverses() {
 
 		this.boneInverses.length = 0;
@@ -15043,6 +20990,9 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Resets the skeleton to the base pose.
+	 */
 	pose() {
 
 		// recover the bind-time world matrices
@@ -15086,6 +21036,9 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Resets the skeleton to the base pose.
+	 */
 	update() {
 
 		const bones = this.bones;
@@ -15099,7 +21052,7 @@ class Skeleton {
 
 			// compute the offset between the current and the original transform
 
-			const matrix = bones[ i ] ? bones[ i ].matrixWorld : _identityMatrix;
+			const matrix = bones[ i ] ? bones[ i ].matrixWorld : _identityMatrix$1;
 
 			_offsetMatrix.multiplyMatrices( matrix, boneInverses[ i ] );
 			_offsetMatrix.toArray( boneMatrices, i * 16 );
@@ -15114,12 +21067,22 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Returns a new skeleton with copied values from this instance.
+	 *
+	 * @return {Skeleton} A clone of this instance.
+	 */
 	clone() {
 
 		return new Skeleton( this.bones, this.boneInverses );
 
 	}
 
+	/**
+	 * Computes a data texture for passing bone data to the vertex shader.
+	 *
+	 * @return {Skeleton} A reference of this instance.
+	 */
 	computeBoneTexture() {
 
 		// layout (1 matrix = 4 pixels)
@@ -15146,6 +21109,13 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Searches through the skeleton's bone array and returns the first with a
+	 * matching name.
+	 *
+	 * @param {string} name - The name of the bone.
+	 * @return {Bone|undefined} The found bone. `undefined` if no bone has been found.
+	 */
 	getBoneByName( name ) {
 
 		for ( let i = 0, il = this.bones.length; i < il; i ++ ) {
@@ -15164,6 +21134,10 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose( ) {
 
 		if ( this.boneTexture !== null ) {
@@ -15176,6 +21150,13 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Setups the skeleton by the given JSON and bones.
+	 *
+	 * @param {Object} json - The skeleton as serialized JSON.
+	 * @param {Array<Bone>} bones - An array of bones.
+	 * @return {Skeleton} A reference of this instance.
+	 */
 	fromJSON( json, bones ) {
 
 		this.uuid = json.uuid;
@@ -15203,6 +21184,12 @@ class Skeleton {
 
 	}
 
+	/**
+	 * Serializes the skeleton into JSON.
+	 *
+	 * @return {Object} A JSON object representing the serialized skeleton.
+	 * @see {@link ObjectLoader#parse}
+	 */
 	toJSON() {
 
 		const data = {
@@ -15282,21 +21269,87 @@ const _identity = /*@__PURE__*/ new Matrix4();
 const _mesh$1 = /*@__PURE__*/ new Mesh();
 const _sphere$4 = /*@__PURE__*/ new Sphere();
 
+/**
+ * A special version of a mesh with instanced rendering support. Use
+ * this class if you have to render a large number of objects with the same
+ * geometry and material(s) but with different world transformations. The usage
+ * of 'InstancedMesh' will help you to reduce the number of draw calls and thus
+ * improve the overall rendering performance in your application.
+ *
+ * @augments Mesh
+ */
 class InstancedMesh extends Mesh {
 
+	/**
+	 * Constructs a new instanced mesh.
+	 *
+	 * @param {BufferGeometry} [geometry] - The mesh geometry.
+	 * @param {Material|Array<Material>} [material] - The mesh material.
+	 * @param {number} count - The number of instances.
+	 */
 	constructor( geometry, material, count ) {
 
 		super( geometry, material );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isInstancedMesh = true;
 
+		/**
+		 * Represents the local transformation of all instances. You have to set its
+		 * {@link BufferAttribute#needsUpdate} flag to true if you modify instanced data
+		 * via {@link InstancedMesh#setMatrixAt}.
+		 *
+		 * @type {InstancedBufferAttribute}
+		 */
 		this.instanceMatrix = new InstancedBufferAttribute( new Float32Array( count * 16 ), 16 );
+
+		/**
+		 * Represents the color of all instances. You have to set its
+		 * {@link BufferAttribute#needsUpdate} flag to true if you modify instanced data
+		 * via {@link InstancedMesh#setColorAt}.
+		 *
+		 * @type {?InstancedBufferAttribute}
+		 * @default null
+		 */
 		this.instanceColor = null;
+
+		/**
+		 * Represents the morph target weights of all instances. You have to set its
+		 * {@link Texture#needsUpdate} flag to true if you modify instanced data
+		 * via {@link InstancedMesh#setMorphAt}.
+		 *
+		 * @type {?InstancedBufferAttribute}
+		 * @default null
+		 */
 		this.morphTexture = null;
 
+		/**
+		 * The number of instances.
+		 *
+		 * @type {number}
+		 */
 		this.count = count;
 
+		/**
+		 * The bounding box of the instanced mesh. Can be computed via {@link InstancedMesh#computeBoundingBox}.
+		 *
+		 * @type {?Box3}
+		 * @default null
+		 */
 		this.boundingBox = null;
+
+		/**
+		 * The bounding sphere of the instanced mesh. Can be computed via {@link InstancedMesh#computeBoundingSphere}.
+		 *
+		 * @type {?Sphere}
+		 * @default null
+		 */
 		this.boundingSphere = null;
 
 		for ( let i = 0; i < count; i ++ ) {
@@ -15307,6 +21360,11 @@ class InstancedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Computes the bounding box of the instanced mesh, and updates {@link InstancedMesh#boundingBox}.
+	 * The bounding box is not automatically computed by the engine; this method must be called by your app.
+	 * You may need to recompute the bounding box if an instance is transformed via {@link InstancedMesh#setMatrixAt}.
+	 */
 	computeBoundingBox() {
 
 		const geometry = this.geometry;
@@ -15338,6 +21396,11 @@ class InstancedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Computes the bounding sphere of the instanced mesh, and updates {@link InstancedMesh#boundingSphere}
+	 * The engine automatically computes the bounding sphere when it is needed, e.g., for ray casting or view frustum culling.
+	 * You may need to recompute the bounding sphere if an instance is transformed via {@link InstancedMesh#setMatrixAt}.
+	 */
 	computeBoundingSphere() {
 
 		const geometry = this.geometry;
@@ -15387,18 +21450,36 @@ class InstancedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Gets the color of the defined instance.
+	 *
+	 * @param {number} index - The instance index.
+	 * @param {Color} color - The target object that is used to store the method's result.
+	 */
 	getColorAt( index, color ) {
 
 		color.fromArray( this.instanceColor.array, index * 3 );
 
 	}
 
+	/**
+	 * Gets the local transformation matrix of the defined instance.
+	 *
+	 * @param {number} index - The instance index.
+	 * @param {Matrix4} matrix - The target object that is used to store the method's result.
+	 */
 	getMatrixAt( index, matrix ) {
 
 		matrix.fromArray( this.instanceMatrix.array, index * 16 );
 
 	}
 
+	/**
+	 * Gets the morph target weights of the defined instance.
+	 *
+	 * @param {number} index - The instance index.
+	 * @param {Mesh} object - The target object that is used to store the method's result.
+	 */
 	getMorphAt( index, object ) {
 
 		const objectInfluences = object.morphTargetInfluences;
@@ -15469,6 +21550,13 @@ class InstancedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Sets the given color to the defined instance. Make sure you set the `needsUpdate` flag of
+	 * {@link InstancedMesh#instanceColor} to `true` after updating all the colors.
+	 *
+	 * @param {number} index - The instance index.
+	 * @param {Color} color - The instance color.
+	 */
 	setColorAt( index, color ) {
 
 		if ( this.instanceColor === null ) {
@@ -15481,12 +21569,27 @@ class InstancedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Sets the given local transformation matrix to the defined instance. Make sure you set the `needsUpdate` flag of
+	 * {@link InstancedMesh#instanceMatrix} to `true` after updating all the colors.
+	 *
+	 * @param {number} index - The instance index.
+	 * @param {Matrix4} matrix - The the local transformation.
+	 */
 	setMatrixAt( index, matrix ) {
 
 		matrix.toArray( this.instanceMatrix.array, index * 16 );
 
 	}
 
+	/**
+	 * Sets the morph target weights to the defined instance. Make sure you set the `needsUpdate` flag of
+	 * {@link InstancedMesh#morphTexture} to `true` after updating all the influences.
+	 *
+	 * @param {number} index - The instance index.
+	 * @param {Mesh} object -  A mesh which `morphTargetInfluences` property containing the morph target weights
+	 * of a single instance.
+	 */
 	setMorphAt( index, object ) {
 
 		const objectInfluences = object.morphTargetInfluences;
@@ -15523,6 +21626,10 @@ class InstancedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.dispatchEvent( { type: 'dispose' } );
@@ -15534,8 +21641,6 @@ class InstancedMesh extends Mesh {
 
 		}
 
-		return this;
-
 	}
 
 }
@@ -15544,19 +21649,54 @@ const _vector1 = /*@__PURE__*/ new Vector3();
 const _vector2 = /*@__PURE__*/ new Vector3();
 const _normalMatrix = /*@__PURE__*/ new Matrix3();
 
+/**
+ * A two dimensional surface that extends infinitely in 3D space, represented
+ * in [Hessian normal form]{@link http://mathworld.wolfram.com/HessianNormalForm.html}
+ * by a unit length normal vector and a constant.
+ */
 class Plane {
 
+	/**
+	 * Constructs a new plane.
+	 *
+	 * @param {Vector3} [normal=(1,0,0)] - A unit length vector defining the normal of the plane.
+	 * @param {number} [constant=0] - The signed distance from the origin to the plane.
+	 */
 	constructor( normal = new Vector3( 1, 0, 0 ), constant = 0 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isPlane = true;
 
-		// normal is assumed to be normalized
-
+		/**
+		 * A unit length vector defining the normal of the plane.
+		 *
+		 * @type {Vector3}
+		 */
 		this.normal = normal;
+
+		/**
+		 * The signed distance from the origin to the plane.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.constant = constant;
 
 	}
 
+	/**
+	 * Sets the plane components by copying the given values.
+	 *
+	 * @param {Vector3} normal - The normal.
+	 * @param {number} constant - The constant.
+	 * @return {Plane} A reference to this plane.
+	 */
 	set( normal, constant ) {
 
 		this.normal.copy( normal );
@@ -15566,6 +21706,16 @@ class Plane {
 
 	}
 
+	/**
+	 * Sets the plane components by defining `x`, `y`, `z` as the
+	 * plane normal and `w` as the constant.
+	 *
+	 * @param {number} x - The value for the normal's x component.
+	 * @param {number} y - The value for the normal's y component.
+	 * @param {number} z - The value for the normal's z component.
+	 * @param {number} w - The constant value.
+	 * @return {Plane} A reference to this plane.
+	 */
 	setComponents( x, y, z, w ) {
 
 		this.normal.set( x, y, z );
@@ -15575,6 +21725,14 @@ class Plane {
 
 	}
 
+	/**
+	 * Sets the plane from the given normal and coplanar point (that is a point
+	 * that lies onto the plane).
+	 *
+	 * @param {Vector3} normal - The normal.
+	 * @param {Vector3} point - A coplanar point.
+	 * @return {Plane} A reference to this plane.
+	 */
 	setFromNormalAndCoplanarPoint( normal, point ) {
 
 		this.normal.copy( normal );
@@ -15584,6 +21742,16 @@ class Plane {
 
 	}
 
+	/**
+	 * Sets the plane from three coplanar points. The winding order is
+	 * assumed to be counter-clockwise, and determines the direction of
+	 * the plane normal.
+	 *
+	 * @param {Vector3} a - The first coplanar point.
+	 * @param {Vector3} b - The second coplanar point.
+	 * @param {Vector3} c - The third coplanar point.
+	 * @return {Plane} A reference to this plane.
+	 */
 	setFromCoplanarPoints( a, b, c ) {
 
 		const normal = _vector1.subVectors( c, b ).cross( _vector2.subVectors( a, b ) ).normalize();
@@ -15596,6 +21764,12 @@ class Plane {
 
 	}
 
+	/**
+	 * Copies the values of the given plane to this instance.
+	 *
+	 * @param {Plane} plane - The plane to copy.
+	 * @return {Plane} A reference to this plane.
+	 */
 	copy( plane ) {
 
 		this.normal.copy( plane.normal );
@@ -15605,6 +21779,11 @@ class Plane {
 
 	}
 
+	/**
+	 * Normalizes the plane normal and adjusts the constant accordingly.
+	 *
+	 * @return {Plane} A reference to this plane.
+	 */
 	normalize() {
 
 		// Note: will lead to a divide by zero if the plane is invalid.
@@ -15617,6 +21796,11 @@ class Plane {
 
 	}
 
+	/**
+	 * Negates both the plane normal and the constant.
+	 *
+	 * @return {Plane} A reference to this plane.
+	 */
 	negate() {
 
 		this.constant *= -1;
@@ -15626,24 +21810,52 @@ class Plane {
 
 	}
 
+	/**
+	 * Returns the signed distance from the given point to this plane.
+	 *
+	 * @param {Vector3} point - The point to compute the distance for.
+	 * @return {number} The signed distance.
+	 */
 	distanceToPoint( point ) {
 
 		return this.normal.dot( point ) + this.constant;
 
 	}
 
+	/**
+	 * Returns the signed distance from the given sphere to this plane.
+	 *
+	 * @param {Sphere} sphere - The sphere to compute the distance for.
+	 * @return {number} The signed distance.
+	 */
 	distanceToSphere( sphere ) {
 
 		return this.distanceToPoint( sphere.center ) - sphere.radius;
 
 	}
 
+	/**
+	 * Projects a the given point onto the plane.
+	 *
+	 * @param {Vector3} point - The point to project.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The projected point on the plane.
+	 */
 	projectPoint( point, target ) {
 
 		return target.copy( point ).addScaledVector( this.normal, - this.distanceToPoint( point ) );
 
 	}
 
+	/**
+	 * Returns the intersection point of the passed line and the plane. Returns
+	 * `null` if the line does not intersect. Returns the line's starting point if
+	 * the line is coplanar with the plane.
+	 *
+	 * @param {Line3} line - The line to compute the intersection for.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {?Vector3} The intersection point.
+	 */
 	intersectLine( line, target ) {
 
 		const direction = line.delta( _vector1 );
@@ -15676,6 +21888,12 @@ class Plane {
 
 	}
 
+	/**
+	 * Returns `true` if the given line segment intersects with (passes through) the plane.
+	 *
+	 * @param {Line3} line - The line to test.
+	 * @return {boolean} Whether the given line segment intersects with the plane or not.
+	 */
 	intersectsLine( line ) {
 
 		// Note: this tests if a line intersects the plane, not whether it (or its end-points) are coplanar with it.
@@ -15687,24 +21905,55 @@ class Plane {
 
 	}
 
+	/**
+	 * Returns `true` if the given bounding box intersects with the plane.
+	 *
+	 * @param {Box3} box - The bounding box to test.
+	 * @return {boolean} Whether the given bounding box intersects with the plane or not.
+	 */
 	intersectsBox( box ) {
 
 		return box.intersectsPlane( this );
 
 	}
 
+	/**
+	 * Returns `true` if the given bounding sphere intersects with the plane.
+	 *
+	 * @param {Sphere} sphere - The bounding sphere to test.
+	 * @return {boolean} Whether the given bounding sphere intersects with the plane or not.
+	 */
 	intersectsSphere( sphere ) {
 
 		return sphere.intersectsPlane( this );
 
 	}
 
+	/**
+	 * Returns a coplanar vector to the plane, by calculating the
+	 * projection of the normal at the origin onto the plane.
+	 *
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The coplanar point.
+	 */
 	coplanarPoint( target ) {
 
 		return target.copy( this.normal ).multiplyScalar( - this.constant );
 
 	}
 
+	/**
+	 * Apply a 4x4 matrix to the plane. The matrix must be an affine, homogeneous transform.
+	 *
+	 * The optional normal matrix can be pre-computed like so:
+	 * ```js
+	 * const optionalNormalMatrix = new THREE.Matrix3().getNormalMatrix( matrix );
+	 * ```
+	 *
+	 * @param {Matrix4} matrix - The transformation matrix.
+	 * @param {Matrix4} [optionalNormalMatrix] - A pre-computed normal matrix.
+	 * @return {Plane} A reference to this plane.
+	 */
 	applyMatrix4( matrix, optionalNormalMatrix ) {
 
 		const normalMatrix = optionalNormalMatrix || _normalMatrix.getNormalMatrix( matrix );
@@ -15719,6 +21968,13 @@ class Plane {
 
 	}
 
+	/**
+	 * Translates the plane by the distance defined by the given offset vector.
+	 * Note that this only affects the plane constant and will not affect the normal vector.
+	 *
+	 * @param {Vector3} offset - The offset vector.
+	 * @return {Plane} A reference to this plane.
+	 */
 	translate( offset ) {
 
 		this.constant -= offset.dot( this.normal );
@@ -15727,12 +21983,23 @@ class Plane {
 
 	}
 
+	/**
+	 * Returns `true` if this plane is equal with the given one.
+	 *
+	 * @param {Plane} plane - The plane to test for equality.
+	 * @return {boolean} Whether this plane is equal with the given one.
+	 */
 	equals( plane ) {
 
 		return plane.normal.equals( this.normal ) && ( plane.constant === this.constant );
 
 	}
 
+	/**
+	 * Returns a new plane with copied values from this instance.
+	 *
+	 * @return {Plane} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -15744,14 +22011,47 @@ class Plane {
 const _sphere$3 = /*@__PURE__*/ new Sphere();
 const _vector$6 = /*@__PURE__*/ new Vector3();
 
+/**
+ * Frustums are used to determine what is inside the camera's field of view.
+ * They help speed up the rendering process - objects which lie outside a camera's
+ * frustum can safely be excluded from rendering.
+ *
+ * This class is mainly intended for use internally by a renderer.
+ */
 class Frustum {
 
+	/**
+	 * Constructs a new frustum.
+	 *
+	 * @param {Plane} [p0] - The first plane that encloses the frustum.
+	 * @param {Plane} [p1] - The second plane that encloses the frustum.
+	 * @param {Plane} [p2] - The third plane that encloses the frustum.
+	 * @param {Plane} [p3] - The fourth plane that encloses the frustum.
+	 * @param {Plane} [p4] - The fifth plane that encloses the frustum.
+	 * @param {Plane} [p5] - The sixth plane that encloses the frustum.
+	 */
 	constructor( p0 = new Plane(), p1 = new Plane(), p2 = new Plane(), p3 = new Plane(), p4 = new Plane(), p5 = new Plane() ) {
 
+		/**
+		 * This array holds the planes that enclose the frustum.
+		 *
+		 * @type {Array<Plane>}
+		 */
 		this.planes = [ p0, p1, p2, p3, p4, p5 ];
 
 	}
 
+	/**
+	 * Sets the frustum planes by copying the given planes.
+	 *
+	 * @param {Plane} [p0] - The first plane that encloses the frustum.
+	 * @param {Plane} [p1] - The second plane that encloses the frustum.
+	 * @param {Plane} [p2] - The third plane that encloses the frustum.
+	 * @param {Plane} [p3] - The fourth plane that encloses the frustum.
+	 * @param {Plane} [p4] - The fifth plane that encloses the frustum.
+	 * @param {Plane} [p5] - The sixth plane that encloses the frustum.
+	 * @return {Frustum} A reference to this frustum.
+	 */
 	set( p0, p1, p2, p3, p4, p5 ) {
 
 		const planes = this.planes;
@@ -15767,6 +22067,12 @@ class Frustum {
 
 	}
 
+	/**
+	 * Copies the values of the given frustum to this instance.
+	 *
+	 * @param {Frustum} frustum - The frustum to copy.
+	 * @return {Frustum} A reference to this frustum.
+	 */
 	copy( frustum ) {
 
 		const planes = this.planes;
@@ -15781,6 +22087,13 @@ class Frustum {
 
 	}
 
+	/**
+	 * Sets the frustum planes from the given projection matrix.
+	 *
+	 * @param {Matrix4} m - The projection matrix.
+	 * @param {(WebGLCoordinateSystem|WebGPUCoordinateSystem)} coordinateSystem - The coordinate system.
+	 * @return {Frustum} A reference to this frustum.
+	 */
 	setFromProjectionMatrix( m, coordinateSystem = WebGLCoordinateSystem ) {
 
 		const planes = this.planes;
@@ -15814,6 +22127,14 @@ class Frustum {
 
 	}
 
+	/**
+	 * Returns `true` if the 3D object's bounding sphere is intersecting this frustum.
+	 *
+	 * Note that the 3D object must have a geometry so that the bounding sphere can be calculated.
+	 *
+	 * @param {Object3D} object - The 3D object to test.
+	 * @return {boolean} Whether the 3D object's bounding sphere is intersecting this frustum or not.
+	 */
 	intersectsObject( object ) {
 
 		if ( object.boundingSphere !== undefined ) {
@@ -15836,6 +22157,12 @@ class Frustum {
 
 	}
 
+	/**
+	 * Returns `true` if the given sprite is intersecting this frustum.
+	 *
+	 * @param {Sprite} sprite - The sprite to test.
+	 * @return {boolean} Whether the sprite is intersecting this frustum or not.
+	 */
 	intersectsSprite( sprite ) {
 
 		_sphere$3.center.set( 0, 0, 0 );
@@ -15846,6 +22173,12 @@ class Frustum {
 
 	}
 
+	/**
+	 * Returns `true` if the given bounding sphere is intersecting this frustum.
+	 *
+	 * @param {Sphere} sphere - The bounding sphere to test.
+	 * @return {boolean} Whether the bounding sphere is intersecting this frustum or not.
+	 */
 	intersectsSphere( sphere ) {
 
 		const planes = this.planes;
@@ -15868,6 +22201,12 @@ class Frustum {
 
 	}
 
+	/**
+	 * Returns `true` if the given bounding box is intersecting this frustum.
+	 *
+	 * @param {Box3} box - The bounding box to test.
+	 * @return {boolean} Whether the bounding box is intersecting this frustum or not.
+	 */
 	intersectsBox( box ) {
 
 		const planes = this.planes;
@@ -15894,6 +22233,12 @@ class Frustum {
 
 	}
 
+	/**
+	 * Returns `true` if the given point lies within the frustum.
+	 *
+	 * @param {Vector3} point - The point to test.
+	 * @return {boolean} Whether the point lies within this frustum or not.
+	 */
 	containsPoint( point ) {
 
 		const planes = this.planes;
@@ -15912,6 +22257,11 @@ class Frustum {
 
 	}
 
+	/**
+	 * Returns a new frustum with copied values from this instance.
+	 *
+	 * @return {Frustum} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -16050,41 +22400,107 @@ function copyArrayContents( src, target ) {
 
 }
 
+/**
+ * A special version of a mesh with multi draw batch rendering support. Use
+ * this class if you have to render a large number of objects with the same
+ * material but with different geometries or world transformations. The usage of
+ * `BatchedMesh` will help you to reduce the number of draw calls and thus improve the overall
+ * rendering performance in your application.
+ *
+ * ```js
+ * const box = new THREE.BoxGeometry( 1, 1, 1 );
+ * const sphere = new THREE.SphereGeometry( 1, 12, 12 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+ *
+ * // initialize and add geometries into the batched mesh
+ * const batchedMesh = new BatchedMesh( 10, 5000, 10000, material );
+ * const boxGeometryId = batchedMesh.addGeometry( box );
+ * const sphereGeometryId = batchedMesh.addGeometry( sphere );
+ *
+ * // create instances of those geometries
+ * const boxInstancedId1 = batchedMesh.addInstance( boxGeometryId );
+ * const boxInstancedId2 = batchedMesh.addInstance( boxGeometryId );
+ *
+ * const sphereInstancedId1 = batchedMesh.addInstance( sphereGeometryId );
+ * const sphereInstancedId2 = batchedMesh.addInstance( sphereGeometryId );
+ *
+ * // position the geometries
+ * batchedMesh.setMatrixAt( boxInstancedId1, boxMatrix1 );
+ * batchedMesh.setMatrixAt( boxInstancedId2, boxMatrix2 );
+ *
+ * batchedMesh.setMatrixAt( sphereInstancedId1, sphereMatrix1 );
+ * batchedMesh.setMatrixAt( sphereInstancedId2, sphereMatrix2 );
+ *
+ * scene.add( batchedMesh );
+ * ```
+ *
+ * @augments Mesh
+ */
 class BatchedMesh extends Mesh {
 
-	get maxInstanceCount() {
-
-		return this._maxInstanceCount;
-
-	}
-
-	get instanceCount() {
-
-		return this._instanceInfo.length - this._availableInstanceIds.length;
-
-	}
-
-	get unusedVertexCount() {
-
-		return this._maxVertexCount - this._nextVertexStart;
-
-	}
-
-	get unusedIndexCount() {
-
-		return this._maxIndexCount - this._nextIndexStart;
-
-	}
-
+	/**
+	 * Constructs a new batched mesh.
+	 *
+	 * @param {number} maxInstanceCount - The maximum number of individual instances planned to be added and rendered.
+	 * @param {number} maxVertexCount - The maximum number of vertices to be used by all unique geometries.
+	 * @param {number} [maxIndexCount=maxVertexCount*2] - The maximum number of indices to be used by all unique geometries
+	 * @param {Material|Array<Material>} [material] - The mesh material.
+	 */
 	constructor( maxInstanceCount, maxVertexCount, maxIndexCount = maxVertexCount * 2, material ) {
 
 		super( new BufferGeometry(), material );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isBatchedMesh = true;
+
+		/**
+		 * When set ot `true`, the individual objects of a batch are frustum culled.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.perObjectFrustumCulled = true;
+
+		/**
+		 * When set to `true`, the individual objects of a batch are sorted to improve overdraw-related artifacts.
+		 * If the material is marked as "transparent" objects are rendered back to front and if not then they are
+		 * rendered front to back.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.sortObjects = true;
+
+		/**
+		 * The bounding box of the batched mesh. Can be computed via {@link BatchedMesh#computeBoundingBox}.
+		 *
+		 * @type {?Box3}
+		 * @default null
+		 */
 		this.boundingBox = null;
+
+		/**
+		 * The bounding sphere of the batched mesh. Can be computed via {@link BatchedMesh#computeBoundingSphere}.
+		 *
+		 * @type {?Sphere}
+		 * @default null
+		 */
 		this.boundingSphere = null;
+
+		/**
+		 * Takes a sort a function that is run before render. The function takes a list of instances to
+		 * sort and a camera. The objects in the list include a "z" field to perform a depth-ordered
+		 * sort with.
+		 *
+		 * @type {?Function}
+		 * @default null
+		 */
 		this.customSort = null;
 
 		// stores visible, active, and geometry id per instance and reserved buffer ranges for geometries
@@ -16122,6 +22538,54 @@ class BatchedMesh extends Mesh {
 
 		this._initMatricesTexture();
 		this._initIndirectTexture();
+
+	}
+
+	/**
+	 * The maximum number of individual instances that can be stored in the batch.
+	 *
+	 * @type {number}
+	 * @readonly
+	 */
+	get maxInstanceCount() {
+
+		return this._maxInstanceCount;
+
+	}
+
+	/**
+	 * The instance count.
+	 *
+	 * @type {number}
+	 * @readonly
+	 */
+	get instanceCount() {
+
+		return this._instanceInfo.length - this._availableInstanceIds.length;
+
+	}
+
+	/**
+	 * The number of unused vertices.
+	 *
+	 * @type {number}
+	 * @readonly
+	 */
+	get unusedVertexCount() {
+
+		return this._maxVertexCount - this._nextVertexStart;
+
+	}
+
+	/**
+	 * The number of unused indices.
+	 *
+	 * @type {number}
+	 * @readonly
+	 */
+	get unusedIndexCount() {
+
+		return this._maxIndexCount - this._nextIndexStart;
 
 	}
 
@@ -16238,6 +22702,11 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Validates the instance defined by the given ID.
+	 *
+	 * @param {number} instanceId - The the instance to validate.
+	 */
 	validateInstanceId( instanceId ) {
 
 		const instanceInfo = this._instanceInfo;
@@ -16249,6 +22718,11 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Validates the geometry defined by the given ID.
+	 *
+	 * @param {number} geometryId - The the geometry to validate.
+	 */
 	validateGeometryId( geometryId ) {
 
 		const geometryInfoList = this._geometryInfo;
@@ -16260,7 +22734,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
-
+	/**
+	 * Takes a sort a function that is run before render. The function takes a list of instances to
+	 * sort and a camera. The objects in the list include a "z" field to perform a depth-ordered sort with.
+	 *
+	 * @param {Function} func - The custom sort function.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
 	setCustomSort( func ) {
 
 		this.customSort = func;
@@ -16268,6 +22748,11 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Computes the bounding box, updating {@link BatchedMesh#boundingBox}.
+	 * Bounding boxes aren't computed by default. They need to be explicitly computed,
+	 * otherwise they are `null`.
+	 */
 	computeBoundingBox() {
 
 		if ( this.boundingBox === null ) {
@@ -16293,6 +22778,11 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Computes the bounding sphere, updating {@link BatchedMesh#boundingSphere}.
+	 * Bounding spheres aren't computed by default. They need to be explicitly computed,
+	 * otherwise they are `null`.
+	 */
 	computeBoundingSphere() {
 
 		if ( this.boundingSphere === null ) {
@@ -16318,6 +22808,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Adds a new instance to the batch using the geometry of the given ID and returns
+	 * a new id referring to the new instance to be used by other functions.
+	 *
+	 * @param {number} geometryId - The ID of a previously added geometry via {@link BatchedMesh#addGeometry}.
+	 * @return {number} The instance ID.
+	 */
 	addInstance( geometryId ) {
 
 		const atCapacity = this._instanceInfo.length >= this.maxInstanceCount;
@@ -16369,6 +22866,21 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Adds the given geometry to the batch and returns the associated
+	 * geometry id referring to it to be used in other functions.
+	 *
+	 * @param {BufferGeometry} geometry - The geometry to add.
+	 * @param {number} [reservedVertexCount=-1] - Optional parameter specifying the amount of
+	 * vertex buffer space to reserve for the added geometry. This is necessary if it is planned
+	 * to set a new geometry at this index at a later time that is larger than the original geometry.
+	 * Defaults to the length of the given geometry vertex buffer.
+	 * @param {number} [reservedIndexCount=-1] - Optional parameter specifying the amount of index
+	 * buffer space to reserve for the added geometry. This is necessary if it is planned to set a
+	 * new geometry at this index at a later time that is larger than the original geometry. Defaults to
+	 * the length of the given geometry index buffer.
+	 * @return {number} The geometry ID.
+	 */
 	addGeometry( geometry, reservedVertexCount = -1, reservedIndexCount = -1 ) {
 
 		this._initializeGeometry( geometry );
@@ -16447,6 +22959,15 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Replaces the geometry at the given ID with the provided geometry. Throws an error if there
+	 * is not enough space reserved for geometry. Calling this will change all instances that are
+	 * rendering that geometry.
+	 *
+	 * @param {number} geometryId - The ID of the geomtry that should be replaced with the given geometry.
+	 * @param {BufferGeometry} geometry - The new geometry.
+	 * @return {number} The geometry ID.
+	 */
 	setGeometryAt( geometryId, geometry ) {
 
 		if ( geometryId >= this._geometryCount ) {
@@ -16552,6 +23073,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Deletes the geometry defined by the given ID from this batch. Any instances referencing
+	 * this geometry will also be removed as a side effect.
+	 *
+	 * @param {number} geometryId - The ID of the geomtry to remove from the batch.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
 	deleteGeometry( geometryId ) {
 
 		const geometryInfoList = this._geometryInfo;
@@ -16581,6 +23109,12 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Deletes an existing instance from the batch using the given ID.
+	 *
+	 * @param {number} instanceId - The ID of the instance to remove from the batch.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
 	deleteInstance( instanceId ) {
 
 		this.validateInstanceId( instanceId );
@@ -16593,6 +23127,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Repacks the sub geometries in [name] to remove any unused space remaining from
+	 * previously deleted geometry, freeing up space to add new geometry.
+	 *
+	 * @param {number} instanceId - The ID of the instance to remove from the batch.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
 	optimize() {
 
 		// track the next indices to copy data to
@@ -16682,7 +23223,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
-	// get bounding box and compute it if it doesn't exist
+	/**
+	 * Returns the bounding box for the given geometry.
+	 *
+	 * @param {number} geometryId - The ID of the geometry to return the bounding box for.
+	 * @param {Box3} target - The target object that is used to store the method's result.
+	 * @return {Box3|null} The geometry's bounding box. Returns `null` if no geometry has been found for the given ID.
+	 */
 	getBoundingBoxAt( geometryId, target ) {
 
 		if ( geometryId >= this._geometryCount ) {
@@ -16721,7 +23268,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
-	// get bounding sphere and compute it if it doesn't exist
+	/**
+	 * Returns the bounding sphere for the given geometry.
+	 *
+	 * @param {number} geometryId - The ID of the geometry to return the bounding sphere for.
+	 * @param {Sphere} target - The target object that is used to store the method's result.
+	 * @return {Sphere|null} The geometry's bounding sphere. Returns `null` if no geometry has been found for the given ID.
+	 */
 	getBoundingSphereAt( geometryId, target ) {
 
 		if ( geometryId >= this._geometryCount ) {
@@ -16767,6 +23320,14 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Sets the given local transformation matrix to the defined instance.
+	 * Negatively scaled matrices are not supported.
+	 *
+	 * @param {number} instanceId - The ID of an instance to set the matrix of.
+	 * @param {Matrix4} matrix - A 4x4 matrix representing the local transformation of a single instance.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
 	setMatrixAt( instanceId, matrix ) {
 
 		this.validateInstanceId( instanceId );
@@ -16780,6 +23341,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Returns the local transformation matrix of the defined instance.
+	 *
+	 * @param {number} instanceId - The ID of an instance to get the matrix of.
+	 * @param {Matrix4} matrix - The target object that is used to store the method's result.
+	 * @return {Matrix4} The instance's local transformation matrix.
+	 */
 	getMatrixAt( instanceId, matrix ) {
 
 		this.validateInstanceId( instanceId );
@@ -16787,6 +23355,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Sets the given color to the defined instance.
+	 *
+	 * @param {number} instanceId - The ID of an instance to set the color of.
+	 * @param {Color} color - The color to set the instance to.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
 	setColorAt( instanceId, color ) {
 
 		this.validateInstanceId( instanceId );
@@ -16804,6 +23379,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Returns the color of the defined instance.
+	 *
+	 * @param {number} instanceId - The ID of an instance to get the color of.
+	 * @param {Color} color - The target object that is used to store the method's result.
+	 * @return {Color} The instance's color.
+	 */
 	getColorAt( instanceId, color ) {
 
 		this.validateInstanceId( instanceId );
@@ -16811,23 +23393,36 @@ class BatchedMesh extends Mesh {
 
 	}
 
-	setVisibleAt( instanceId, value ) {
+	/**
+	 * Sets the visibility of the instance.
+	 *
+	 * @param {number} instanceId - The id of the instance to set the visibility of.
+	 * @param {boolean} visible - Whether the instance is visible or not.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
+	setVisibleAt( instanceId, visible ) {
 
 		this.validateInstanceId( instanceId );
 
-		if ( this._instanceInfo[ instanceId ].visible === value ) {
+		if ( this._instanceInfo[ instanceId ].visible === visible ) {
 
 			return this;
 
 		}
 
-		this._instanceInfo[ instanceId ].visible = value;
+		this._instanceInfo[ instanceId ].visible = visible;
 		this._visibilityChanged = true;
 
 		return this;
 
 	}
 
+	/**
+	 * Returns the visibility state of the defined instance.
+	 *
+	 * @param {number} instanceId - The ID of an instance to get the visibility state of.
+	 * @return {boolean} Whether the instance is visible or not.
+	 */
 	getVisibleAt( instanceId ) {
 
 		this.validateInstanceId( instanceId );
@@ -16836,6 +23431,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Sets the geometry ID of the instance at the given index.
+	 *
+	 * @param {number} instanceId - The ID of the instance to set the geometry ID of.
+	 * @param {number} geometryId - The geometry ID to be use by the instance.
+	 * @return {BatchedMesh} A reference to this batched mesh.
+	 */
 	setGeometryIdAt( instanceId, geometryId ) {
 
 		this.validateInstanceId( instanceId );
@@ -16847,6 +23449,12 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Returns the geometry ID of the defined instance.
+	 *
+	 * @param {number} instanceId - The ID of an instance to get the geometry ID of.
+	 * @return {number} The instance's geometry ID.
+	 */
 	getGeometryIdAt( instanceId ) {
 
 		this.validateInstanceId( instanceId );
@@ -16855,6 +23463,18 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Get the range representing the subset of triangles related to the attached geometry,
+	 * indicating the starting offset and count, or `null` if invalid.
+	 *
+	 * @param {number} geometryId - The id of the geometry to get the range of.
+	 * @param {Object} [target] - The target object that is used to store the method's result.
+	 * @return {{
+	 * 	vertexStart:number,vertexCount:number,reservedVertexCount:number,
+	 * 	indexStart:number,indexCount:number,reservedIndexCount:number,
+	 * 	start:number,count:number
+	 * }} The result object with range data.
+	 */
 	getGeometryRangeAt( geometryId, target = {} ) {
 
 		this.validateGeometryId( geometryId );
@@ -16875,6 +23495,13 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Resizes the necessary buffers to support the provided number of instances.
+	 * If the provided arguments shrink the number of instances but there are not enough
+	 * unused Ids at the end of the list then an error is thrown.
+	 *
+	 * @param {number} maxInstanceCount - The max number of individual instances that can be added and rendered by the batch.
+	*/
 	setInstanceCount( maxInstanceCount ) {
 
 		// shrink the available instances as much as possible
@@ -16928,6 +23555,14 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Resizes the available space in the batch's vertex and index buffer attributes to the provided sizes.
+	 * If the provided arguments shrink the geometry buffers but there is not enough unused space at the
+	 * end of the geometry attributes then an error is thrown.
+	 *
+	 * @param {number} maxVertexCount - The maximum number of vertices to be used by all unique geometries to resize to.
+	 * @param {number} maxIndexCount - The maximum number of indices to be used by all unique geometries to resize to.
+	*/
 	setGeometrySize( maxVertexCount, maxIndexCount ) {
 
 		// Check if we can shrink to the requested vertex attribute size
@@ -17088,6 +23723,10 @@ class BatchedMesh extends Mesh {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		// Assuming the geometry is not shared with other meshes
@@ -17105,8 +23744,6 @@ class BatchedMesh extends Mesh {
 			this._colorsTexture = null;
 
 		}
-
-		return this;
 
 	}
 
@@ -17314,18 +23951,83 @@ const _sphere$1 = /*@__PURE__*/ new Sphere();
 const _intersectPointOnRay = /*@__PURE__*/ new Vector3();
 const _intersectPointOnSegment = /*@__PURE__*/ new Vector3();
 
+/**
+ * A continuous line. The line are rendered by connecting consecutive
+ * vertices with straight lines.
+ *
+ * ```js
+ * const material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+ *
+ * const points = [];
+ * points.push( new THREE.Vector3( - 10, 0, 0 ) );
+ * points.push( new THREE.Vector3( 0, 10, 0 ) );
+ * points.push( new THREE.Vector3( 10, 0, 0 ) );
+ *
+ * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+ *
+ * const line = new THREE.Line( geometry, material );
+ * scene.add( line );
+ * ```
+ *
+ * @augments Object3D
+ */
 class Line extends Object3D {
 
+	/**
+	 * Constructs a new line.
+	 *
+	 * @param {BufferGeometry} [geometry] - The line geometry.
+	 * @param {Material|Array<Material>} [material] - The line material.
+	 */
 	constructor( geometry = new BufferGeometry(), material = new LineBasicMaterial() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isLine = true;
 
 		this.type = 'Line';
 
+		/**
+		 * The line geometry.
+		 *
+		 * @type {BufferGeometry}
+		 */
 		this.geometry = geometry;
+
+		/**
+		 * The line material.
+		 *
+		 * @type {Material|Array<Material>}
+		 * @default LineBasicMaterial
+		 */
 		this.material = material;
+
+		/**
+		 * A dictionary representing the morph targets in the geometry. The key is the
+		 * morph targets name, the value its attribute index. This member is `undefined`
+		 * by default and only set when morph targets are detected in the geometry.
+		 *
+		 * @type {Object<String,number>|undefined}
+		 * @default undefined
+		 */
+		this.morphTargetDictionary = undefined;
+
+		/**
+		 * An array of weights typically in the range `[0,1]` that specify how much of the morph
+		 * is applied. This member is `undefined` by default and only set when morph targets are
+		 * detected in the geometry.
+		 *
+		 * @type {Array<number>|undefined}
+		 * @default undefined
+		 */
+		this.morphTargetInfluences = undefined;
 
 		this.updateMorphTargets();
 
@@ -17342,6 +24044,13 @@ class Line extends Object3D {
 
 	}
 
+	/**
+	 * Computes an array of distance values which are necessary for rendering dashed lines.
+	 * For each vertex in the geometry, the method calculates the cumulative length from the
+	 * current point to the very beginning of the line.
+	 *
+	 * @return {Line} A reference to this line.
+	 */
 	computeLineDistances() {
 
 		const geometry = this.geometry;
@@ -17375,6 +24084,12 @@ class Line extends Object3D {
 
 	}
 
+	/**
+	 * Computes intersection points between a casted ray and this line.
+	 *
+	 * @param {Raycaster} raycaster - The raycaster.
+	 * @param {Array<Object>} intersects - The target array that holds the intersection points.
+	 */
 	raycast( raycaster, intersects ) {
 
 		const geometry = this.geometry;
@@ -17474,6 +24189,10 @@ class Line extends Object3D {
 
 	}
 
+	/**
+	 * Sets the values of {@link Line#morphTargetDictionary} and {@link Line#morphTargetInfluences}
+	 * to make sure existing morph targets can influence this 3D object.
+	 */
 	updateMorphTargets() {
 
 		const geometry = this.geometry;
@@ -17543,12 +24262,30 @@ function checkIntersection( object, raycaster, ray, thresholdSq, a, b, i ) {
 const _start = /*@__PURE__*/ new Vector3();
 const _end = /*@__PURE__*/ new Vector3();
 
+/**
+ * A series of lines drawn between pairs of vertices.
+ *
+ * @augments Line
+ */
 class LineSegments extends Line {
 
+	/**
+	 * Constructs a new line segments.
+	 *
+	 * @param {BufferGeometry} [geometry] - The line geometry.
+	 * @param {Material|Array<Material>} [material] - The line material.
+	 */
 	constructor( geometry, material ) {
 
 		super( geometry, material );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isLineSegments = true;
 
 		this.type = 'LineSegments';
@@ -17590,12 +24327,32 @@ class LineSegments extends Line {
 
 }
 
+/**
+ * A continuous line. This is nearly the same as {@link Line} the only difference
+ * is that the last vertex is connected with the first vertex in order to close
+ * the line to form a loop.
+ *
+ * @augments Line
+ */
 class LineLoop extends Line {
 
+	/**
+	 * Constructs a new line loop.
+	 *
+	 * @param {BufferGeometry} [geometry] - The line geometry.
+	 * @param {Material|Array<Material>} [material] - The line material.
+	 */
 	constructor( geometry, material ) {
 
 		super( geometry, material );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isLineLoop = true;
 
 		this.type = 'LineLoop';
@@ -17655,18 +24412,68 @@ const _ray$4 = /*@__PURE__*/ new Ray();
 const _sphere = /*@__PURE__*/ new Sphere();
 const _position$2 = /*@__PURE__*/ new Vector3();
 
+/**
+ * A class for displaying points or point clouds.
+ *
+ * @augments Object3D
+ */
 class Points extends Object3D {
 
+	/**
+	 * Constructs a new point cloud.
+	 *
+	 * @param {BufferGeometry} [geometry] - The points geometry.
+	 * @param {Material|Array<Material>} [material] - The points material.
+	 */
 	constructor( geometry = new BufferGeometry(), material = new PointsMaterial() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isPoints = true;
 
 		this.type = 'Points';
 
+		/**
+		 * The points geometry.
+		 *
+		 * @type {BufferGeometry}
+		 */
 		this.geometry = geometry;
+
+		/**
+		 * The line material.
+		 *
+		 * @type {Material|Array<Material>}
+		 * @default PointsMaterial
+		 */
 		this.material = material;
+
+		/**
+		 * A dictionary representing the morph targets in the geometry. The key is the
+		 * morph targets name, the value its attribute index. This member is `undefined`
+		 * by default and only set when morph targets are detected in the geometry.
+		 *
+		 * @type {Object<String,number>|undefined}
+		 * @default undefined
+		 */
+		this.morphTargetDictionary = undefined;
+
+		/**
+		 * An array of weights typically in the range `[0,1]` that specify how much of the morph
+		 * is applied. This member is `undefined` by default and only set when morph targets are
+		 * detected in the geometry.
+		 *
+		 * @type {Array<number>|undefined}
+		 * @default undefined
+		 */
+		this.morphTargetInfluences = undefined;
 
 		this.updateMorphTargets();
 
@@ -17683,6 +24490,12 @@ class Points extends Object3D {
 
 	}
 
+	/**
+	 * Computes intersection points between a casted ray and this point cloud.
+	 *
+	 * @param {Raycaster} raycaster - The raycaster.
+	 * @param {Array<Object>} intersects - The target array that holds the intersection points.
+	 */
 	raycast( raycaster, intersects ) {
 
 		const geometry = this.geometry;
@@ -17744,6 +24557,10 @@ class Points extends Object3D {
 
 	}
 
+	/**
+	 * Sets the values of {@link Points#morphTargetDictionary} and {@link Points#morphTargetInfluences}
+	 * to make sure existing morph targets can influence this 3D object.
+	 */
 	updateMorphTargets() {
 
 		const geometry = this.geometry;
@@ -18027,6 +24844,7 @@ class DepthTexture extends Texture {
 
 		super.copy( source );
 
+		this.source = new Source( Object.assign( {}, source.image ) ); // see #30540
 		this.compareFunction = source.compareFunction;
 
 		return this;
@@ -18046,58 +24864,81 @@ class DepthTexture extends Texture {
 }
 
 /**
- * Extensible curve object.
+ * An abstract base class for creating an analytic curve object that contains methods
+ * for interpolation.
  *
- * Some common of curve methods:
- * .getPoint( t, optionalTarget ), .getTangent( t, optionalTarget )
- * .getPointAt( u, optionalTarget ), .getTangentAt( u, optionalTarget )
- * .getPoints(), .getSpacedPoints()
- * .getLength()
- * .updateArcLengths()
- *
- * This following curves inherit from THREE.Curve:
- *
- * -- 2D curves --
- * THREE.ArcCurve
- * THREE.CubicBezierCurve
- * THREE.EllipseCurve
- * THREE.LineCurve
- * THREE.QuadraticBezierCurve
- * THREE.SplineCurve
- *
- * -- 3D curves --
- * THREE.CatmullRomCurve3
- * THREE.CubicBezierCurve3
- * THREE.LineCurve3
- * THREE.QuadraticBezierCurve3
- *
- * A series of curves can be represented as a THREE.CurvePath.
- *
- **/
-
+ * @abstract
+ */
 class Curve {
 
+	/**
+	 * Constructs a new curve.
+	 */
 	constructor() {
 
+		/**
+		 * The type property is used for detecting the object type
+		 * in context of serialization/deserialization.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.type = 'Curve';
 
+		/**
+		 * This value determines the amount of divisions when calculating the
+		 * cumulative segment lengths of a curve via {@link Curve#getLengths}. To ensure
+		 * precision when using methods like {@link Curve#getSpacedPoints}, it is
+		 * recommended to increase the value of this property if the curve is very large.
+		 *
+		 * @type {number}
+		 * @default 200
+		 */
 		this.arcLengthDivisions = 200;
+
+		/**
+		 * Must be set to `true` if the curve parameters have changed.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.needsUpdate = false;
+
+		/**
+		 * An internal cache that holds precomputed curve length values.
+		 *
+		 * @private
+		 * @type {?Array<number>}
+		 * @default null
+		 */
+		this.cacheArcLengths = null;
 
 	}
 
-	// Virtual base class method to overwrite and implement in subclasses
-	//	- t [0 .. 1]
-
+	/**
+	 * This method returns a vector in 2D or 3D space (depending on the curve definition)
+	 * for the given interpolation factor.
+	 *
+	 * @abstract
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {(Vector2|Vector3)} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {?(Vector2|Vector3)} The position on the curve. It can be a 2D or 3D vector depending on the curve definition.
+	 */
 	getPoint( /* t, optionalTarget */ ) {
 
 		console.warn( 'THREE.Curve: .getPoint() not implemented.' );
-		return null;
 
 	}
 
-	// Get point at relative position in curve according to arc length
-	// - u [0 .. 1]
-
+	/**
+	 * This method returns a vector in 2D or 3D space (depending on the curve definition)
+	 * for the given interpolation factor. Unlike {@link Curve#getPoint}, this method honors the length
+	 * of the curve which equidistant samples.
+	 *
+	 * @param {number} u - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {(Vector2|Vector3)} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {(Vector2|Vector3)} The position on the curve. It can be a 2D or 3D vector depending on the curve definition.
+	 */
 	getPointAt( u, optionalTarget ) {
 
 		const t = this.getUtoTmapping( u );
@@ -18105,8 +24946,13 @@ class Curve {
 
 	}
 
-	// Get sequence of points using getPoint( t )
-
+	/**
+	 * This method samples the curve via {@link Curve#getPoint} and returns an array of points representing
+	 * the curve shape.
+	 *
+	 * @param {number} [divisions=5] - The number of divisions.
+	 * @return {Array<(Vector2|Vector3)>} An array holding the sampled curve values. The number of points is `divisions + 1`.
+	 */
 	getPoints( divisions = 5 ) {
 
 		const points = [];
@@ -18123,6 +24969,14 @@ class Curve {
 
 	// Get sequence of points using getPointAt( u )
 
+	/**
+	 * This method samples the curve via {@link Curve#getPointAt} and returns an array of points representing
+	 * the curve shape. Unlike {@link Curve#getPoints}, this method returns equi-spaced points across the entire
+	 * curve.
+	 *
+	 * @param {number} [divisions=5] - The number of divisions.
+	 * @return {Array<(Vector2|Vector3)>} An array holding the sampled curve values. The number of points is `divisions + 1`.
+	 */
 	getSpacedPoints( divisions = 5 ) {
 
 		const points = [];
@@ -18137,8 +24991,11 @@ class Curve {
 
 	}
 
-	// Get total curve arc length
-
+	/**
+	 * Returns the total arc length of the curve.
+	 *
+	 * @return {number} The length of the curve.
+	 */
 	getLength() {
 
 		const lengths = this.getLengths();
@@ -18146,8 +25003,12 @@ class Curve {
 
 	}
 
-	// Get list of cumulative segment lengths
-
+	/**
+	 * Returns an array of cumulative segment lengths of the curve.
+	 *
+	 * @param {number} [divisions=this.arcLengthDivisions] - The number of divisions.
+	 * @return {Array<number>} An array holding the cumulative segment lengths.
+	 */
 	getLengths( divisions = this.arcLengthDivisions ) {
 
 		if ( this.cacheArcLengths &&
@@ -18181,6 +25042,12 @@ class Curve {
 
 	}
 
+	/**
+	 * Update the cumulative segment distance cache. The method must be called
+	 * every time curve parameters are changed. If an updated curve is part of a
+	 * composed curve like {@link CurvePath}, this method must be called on the
+	 * composed curve, too.
+	 */
 	updateArcLengths() {
 
 		this.needsUpdate = true;
@@ -18188,9 +25055,16 @@ class Curve {
 
 	}
 
-	// Given u ( 0 .. 1 ), get a t to find p. This gives you points which are equidistant
-
-	getUtoTmapping( u, distance ) {
+	/**
+	 * Given an interpolation factor in the range `[0,1]`, this method returns an updated
+	 * interpolation factor in the same range that can be ued to sample equidistant points
+	 * from a curve.
+	 *
+	 * @param {number} u - The interpolation factor.
+	 * @param {?number} distance - An optional distance on the curve.
+	 * @return {number} The updated interpolation factor.
+	 */
+	getUtoTmapping( u, distance = null ) {
 
 		const arcLengths = this.getLengths();
 
@@ -18265,11 +25139,16 @@ class Curve {
 
 	}
 
-	// Returns a unit vector tangent at t
-	// In case any sub curve does not implement its tangent derivation,
-	// 2 points a small delta apart will be used to find its gradient
-	// which seems to give a reasonable approximation
-
+	/**
+	 * Returns a unit vector tangent for the given interpolation factor.
+	 * If the derived curve does not implement its tangent derivation,
+	 * two points a small delta apart will be used to find its gradient
+	 * which seems to give a reasonable approximation.
+	 *
+	 * @param {number} t - The interpolation factor.
+	 * @param {(Vector2|Vector3)} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {(Vector2|Vector3)} The tangent vector.
+	 */
 	getTangent( t, optionalTarget ) {
 
 		const delta = 0.0001;
@@ -18292,6 +25171,14 @@ class Curve {
 
 	}
 
+	/**
+	 * Same as {@link Curve#getTangent} but with equidistant samples.
+	 *
+	 * @param {number} u - The interpolation factor.
+	 * @param {(Vector2|Vector3)} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {(Vector2|Vector3)} The tangent vector.
+	 * @see {@link Curve#getPointAt}
+	 */
 	getTangentAt( u, optionalTarget ) {
 
 		const t = this.getUtoTmapping( u );
@@ -18299,7 +25186,15 @@ class Curve {
 
 	}
 
-	computeFrenetFrames( segments, closed ) {
+	/**
+	 * Generates the Frenet Frames. Requires a curve definition in 3D space. Used
+	 * in geometries like {@link TubeGeometry} or {@link ExtrudeGeometry}.
+	 *
+	 * @param {number} segments - The number of segments.
+	 * @param {boolean} [closed=false] - Whether the curve is closed or not.
+	 * @return {{tangents: Array<Vector3>, normals: Array<Vector3>, binormals: Array<Vector3>}} The Frenet Frames.
+	 */
+	computeFrenetFrames( segments, closed = false ) {
 
 		// see http://www.cs.indiana.edu/pub/techreports/TR425.pdf
 
@@ -18413,12 +25308,23 @@ class Curve {
 
 	}
 
+	/**
+	 * Returns a new curve with copied values from this instance.
+	 *
+	 * @return {Curve} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Copies the values of the given curve to this instance.
+	 *
+	 * @param {Curve} source - The curve to copy.
+	 * @return {Curve} A reference to this curve.
+	 */
 	copy( source ) {
 
 		this.arcLengthDivisions = source.arcLengthDivisions;
@@ -18427,6 +25333,12 @@ class Curve {
 
 	}
 
+	/**
+	 * Serializes the curve into JSON.
+	 *
+	 * @return {Object} A JSON object representing the serialized curve.
+	 * @see {@link ObjectLoader#parse}
+	 */
 	toJSON() {
 
 		const data = {
@@ -18444,6 +25356,12 @@ class Curve {
 
 	}
 
+	/**
+	 * Deserializes the curve from the given JSON.
+	 *
+	 * @param {Object} json - The JSON holding the serialized curve.
+	 * @return {Curve} A reference to this curve.
+	 */
 	fromJSON( json ) {
 
 		this.arcLengthDivisions = json.arcLengthDivisions;
@@ -18454,31 +25372,133 @@ class Curve {
 
 }
 
+/**
+ * A curve representing an ellipse.
+ *
+ * ```js
+ * const curve = new THREE.EllipseCurve(
+ * 	0, 0,
+ * 	10, 10,
+ * 	0, 2 * Math.PI,
+ * 	false,
+ * 	0
+ * );
+ *
+ * const points = curve.getPoints( 50 );
+ * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+ *
+ * const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+ *
+ * // Create the final object to add to the scene
+ * const ellipse = new THREE.Line( geometry, material );
+ * ```
+ *
+ * @augments Curve
+ */
 class EllipseCurve extends Curve {
 
+	/**
+	 * Constructs a new ellipse curve.
+	 *
+	 * @param {number} [aX=0] - The X center of the ellipse.
+	 * @param {number} [aY=0] - The Y center of the ellipse.
+	 * @param {number} [xRadius=1] - The radius of the ellipse in the x direction.
+	 * @param {number} [yRadius=1] - The radius of the ellipse in the y direction.
+	 * @param {number} [aStartAngle=0] - The start angle of the curve in radians starting from the positive X axis.
+	 * @param {number} [aEndAngle=Math.PI*2] - The end angle of the curve in radians starting from the positive X axis.
+	 * @param {boolean} [aClockwise=false] - Whether the ellipse is drawn clockwise or not.
+	 * @param {number} [aRotation=0] - The rotation angle of the ellipse in radians, counterclockwise from the positive X axis.
+	 */
 	constructor( aX = 0, aY = 0, xRadius = 1, yRadius = 1, aStartAngle = 0, aEndAngle = Math.PI * 2, aClockwise = false, aRotation = 0 ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isEllipseCurve = true;
 
 		this.type = 'EllipseCurve';
 
+		/**
+		 * The X center of the ellipse.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.aX = aX;
+
+		/**
+		 * The Y center of the ellipse.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.aY = aY;
 
+		/**
+		 * The radius of the ellipse in the x direction.
+		 * Setting the this value equal to the {@link EllipseCurve#yRadius} will result in a circle.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.xRadius = xRadius;
+
+		/**
+		 * The radius of the ellipse in the y direction.
+		 * Setting the this value equal to the {@link EllipseCurve#xRadius} will result in a circle.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.yRadius = yRadius;
 
+		/**
+		 * The start angle of the curve in radians starting from the positive X axis.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.aStartAngle = aStartAngle;
+
+		/**
+		 * The end angle of the curve in radians starting from the positive X axis.
+		 *
+		 * @type {number}
+		 * @default Math.PI*2
+		 */
 		this.aEndAngle = aEndAngle;
 
+		/**
+		 * Whether the ellipse is drawn clockwise or not.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.aClockwise = aClockwise;
 
+		/**
+		 * The rotation angle of the ellipse in radians, counterclockwise from the positive X axis.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.aRotation = aRotation;
 
 	}
 
+	/**
+	 * Returns a point on the curve.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {Vector2} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector2} The position on the curve.
+	 */
 	getPoint( t, optionalTarget = new Vector2() ) {
 
 		const point = optionalTarget;
@@ -18606,12 +25626,34 @@ class EllipseCurve extends Curve {
 
 }
 
+/**
+ * A curve representing an arc.
+ *
+ * @augments EllipseCurve
+ */
 class ArcCurve extends EllipseCurve {
 
+	/**
+	 * Constructs a new arc curve.
+	 *
+	 * @param {number} [aX=0] - The X center of the ellipse.
+	 * @param {number} [aY=0] - The Y center of the ellipse.
+	 * @param {number} [aRadius=1] - The radius of the ellipse in the x direction.
+	 * @param {number} [aStartAngle=0] - The start angle of the curve in radians starting from the positive X axis.
+	 * @param {number} [aEndAngle=Math.PI*2] - The end angle of the curve in radians starting from the positive X axis.
+	 * @param {boolean} [aClockwise=false] - Whether the ellipse is drawn clockwise or not.
+	 */
 	constructor( aX, aY, aRadius, aStartAngle, aEndAngle, aClockwise ) {
 
 		super( aX, aY, aRadius, aRadius, aStartAngle, aEndAngle, aClockwise );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isArcCurve = true;
 
 		this.type = 'ArcCurve';
@@ -18620,27 +25662,26 @@ class ArcCurve extends EllipseCurve {
 
 }
 
-/**
- * Centripetal CatmullRom Curve - which is useful for avoiding
- * cusps and self-intersections in non-uniform catmull rom curves.
- * http://www.cemyuksel.com/research/catmullrom_param/catmullrom.pdf
- *
- * curve.type accepts centripetal(default), chordal and catmullrom
- * curve.tension is used for catmullrom which defaults to 0.5
- */
-
-
-/*
-Based on an optimized c++ solution in
- - http://stackoverflow.com/questions/9489736/catmull-rom-curve-with-no-cusps-and-no-self-intersections/
- - http://ideone.com/NoEbVM
-
-This CubicPoly class could be used for reusing some variables and calculations,
-but for three.js curve use, it could be possible inlined and flatten into a single function call
-which can be placed in CurveUtils.
-*/
-
 function CubicPoly() {
+
+	/**
+	 * Centripetal CatmullRom Curve - which is useful for avoiding
+	* cusps and self-intersections in non-uniform catmull rom curves.
+	* http://www.cemyuksel.com/research/catmullrom_param/catmullrom.pdf
+	*
+	* curve.type accepts centripetal(default), chordal and catmullrom
+	* curve.tension is used for catmullrom which defaults to 0.5
+	*/
+
+	/*
+	Based on an optimized c++ solution in
+	- http://stackoverflow.com/questions/9489736/catmull-rom-curve-with-no-cusps-and-no-self-intersections/
+	- http://ideone.com/NoEbVM
+
+	This CubicPoly class could be used for reusing some variables and calculations,
+	but for three.js curve use, it could be possible inlined and flatten into a single function call
+	which can be placed in CurveUtils.
+	*/
 
 	let c0 = 0, c1 = 0, c2 = 0, c3 = 0;
 
@@ -18702,23 +25743,95 @@ const px = /*@__PURE__*/ new CubicPoly();
 const py = /*@__PURE__*/ new CubicPoly();
 const pz = /*@__PURE__*/ new CubicPoly();
 
+/**
+ * A curve representing a Catmull-Rom spline.
+ *
+ * ```js
+ * //Create a closed wavey loop
+ * const curve = new THREE.CatmullRomCurve3( [
+ * 	new THREE.Vector3( -10, 0, 10 ),
+ * 	new THREE.Vector3( -5, 5, 5 ),
+ * 	new THREE.Vector3( 0, 0, 0 ),
+ * 	new THREE.Vector3( 5, -5, 5 ),
+ * 	new THREE.Vector3( 10, 0, 10 )
+ * ] );
+ *
+ * const points = curve.getPoints( 50 );
+ * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+ *
+ * const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+ *
+ * // Create the final object to add to the scene
+ * const curveObject = new THREE.Line( geometry, material );
+ * ```
+ *
+ * @augments Curve
+ */
 class CatmullRomCurve3 extends Curve {
 
+	/**
+	 * Constructs a new Catmull-Rom curve.
+	 *
+	 * @param {Array<Vector3>} [points] - An array of 3D points defining the curve.
+	 * @param {boolean} [closed=false] - Whether the curve is closed or not.
+	 * @param {('centripetal'|'chordal'|'catmullrom')} [curveType='centripetal'] - The curve type.
+	 * @param {number} [tension=0.5] - Tension of the curve.
+	 */
 	constructor( points = [], closed = false, curveType = 'centripetal', tension = 0.5 ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isCatmullRomCurve3 = true;
 
 		this.type = 'CatmullRomCurve3';
 
+		/**
+		 * An array of 3D points defining the curve.
+		 *
+		 * @type {Array<Vector3>}
+		 */
 		this.points = points;
+
+		/**
+		 * Whether the curve is closed or not.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.closed = closed;
+
+		/**
+		 * The curve type.
+		 *
+		 * @type {('centripetal'|'chordal'|'catmullrom')}
+		 * @default 'centripetal'
+		 */
 		this.curveType = curveType;
+
+		/**
+		 * Tension of the curve.
+		 *
+		 * @type {number}
+		 * @default 0.5
+		 */
 		this.tension = tension;
 
 	}
 
+	/**
+	 * Returns a point on the curve.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {Vector3} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector3} The position on the curve.
+	 */
 	getPoint( t, optionalTarget = new Vector3() ) {
 
 		const point = optionalTarget;
@@ -18871,11 +25984,18 @@ class CatmullRomCurve3 extends Curve {
 
 }
 
-/**
- * Bezier Curves formulas obtained from
- * https://en.wikipedia.org/wiki/B%C3%A9zier_curve
- */
+// Bezier Curves formulas obtained from: https://en.wikipedia.org/wiki/B%C3%A9zier_curve
 
+/**
+ * Computes a point on a Catmull-Rom spline.
+ *
+ * @param {number} t - The interpolation factor.
+ * @param {number} p0 - The first control point.
+ * @param {number} p1 - The second control point.
+ * @param {number} p2 - The third control point.
+ * @param {number} p3 - The fourth control point.
+ * @return {number} The calculated point on a Catmull-Rom spline.
+ */
 function CatmullRom( t, p0, p1, p2, p3 ) {
 
 	const v0 = ( p2 - p0 ) * 0.5;
@@ -18907,6 +26027,15 @@ function QuadraticBezierP2( t, p ) {
 
 }
 
+/**
+ * Computes a point on a Quadratic Bezier curve.
+ *
+ * @param {number} t - The interpolation factor.
+ * @param {number} p0 - The first control point.
+ * @param {number} p1 - The second control point.
+ * @param {number} p2 - The third control point.
+ * @return {number} The calculated point on a Quadratic Bezier curve.
+ */
 function QuadraticBezier( t, p0, p1, p2 ) {
 
 	return QuadraticBezierP0( t, p0 ) + QuadraticBezierP1( t, p1 ) +
@@ -18942,6 +26071,16 @@ function CubicBezierP3( t, p ) {
 
 }
 
+/**
+ * Computes a point on a Cubic Bezier curve.
+ *
+ * @param {number} t - The interpolation factor.
+ * @param {number} p0 - The first control point.
+ * @param {number} p1 - The second control point.
+ * @param {number} p2 - The third control point.
+ * @param {number} p3 - The fourth control point.
+ * @return {number} The calculated point on a Cubic Bezier curve.
+ */
 function CubicBezier( t, p0, p1, p2, p3 ) {
 
 	return CubicBezierP0( t, p0 ) + CubicBezierP1( t, p1 ) + CubicBezierP2( t, p2 ) +
@@ -18949,23 +26088,90 @@ function CubicBezier( t, p0, p1, p2, p3 ) {
 
 }
 
+/**
+ * A curve representing a 2D Cubic Bezier curve.
+ *
+ * ```js
+ * const curve = new THREE.CubicBezierCurve(
+ * 	new THREE.Vector2( - 0, 0 ),
+ * 	new THREE.Vector2( - 5, 15 ),
+ * 	new THREE.Vector2( 20, 15 ),
+ * 	new THREE.Vector2( 10, 0 )
+ * );
+ *
+ * const points = curve.getPoints( 50 );
+ * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+ *
+ * const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+ *
+ * // Create the final object to add to the scene
+ * const curveObject = new THREE.Line( geometry, material );
+ * ```
+ *
+ * @augments Curve
+ */
 class CubicBezierCurve extends Curve {
 
+	/**
+	 * Constructs a new Cubic Bezier curve.
+	 *
+	 * @param {Vector2} [v0] - The start point.
+	 * @param {Vector2} [v1] - The first control point.
+	 * @param {Vector2} [v2] - The second control point.
+	 * @param {Vector2} [v3] - The end point.
+	 */
 	constructor( v0 = new Vector2(), v1 = new Vector2(), v2 = new Vector2(), v3 = new Vector2() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isCubicBezierCurve = true;
 
 		this.type = 'CubicBezierCurve';
 
+		/**
+		 * The start point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v0 = v0;
+
+		/**
+		 * The first control point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v1 = v1;
+
+		/**
+		 * The second control point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v2 = v2;
+
+		/**
+		 * The end point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v3 = v3;
 
 	}
 
+	/**
+	 * Returns a point on the curve.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {Vector2} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector2} The position on the curve.
+	 */
 	getPoint( t, optionalTarget = new Vector2() ) {
 
 		const point = optionalTarget;
@@ -19022,23 +26228,73 @@ class CubicBezierCurve extends Curve {
 
 }
 
+/**
+ * A curve representing a 3D Cubic Bezier curve.
+ *
+ * @augments Curve
+ */
 class CubicBezierCurve3 extends Curve {
 
+	/**
+	 * Constructs a new Cubic Bezier curve.
+	 *
+	 * @param {Vector3} [v0] - The start point.
+	 * @param {Vector3} [v1] - The first control point.
+	 * @param {Vector3} [v2] - The second control point.
+	 * @param {Vector3} [v3] - The end point.
+	 */
 	constructor( v0 = new Vector3(), v1 = new Vector3(), v2 = new Vector3(), v3 = new Vector3() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isCubicBezierCurve3 = true;
 
 		this.type = 'CubicBezierCurve3';
 
+		/**
+		 * The start point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v0 = v0;
+
+		/**
+		 * The first control point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v1 = v1;
+
+		/**
+		 * The second control point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v2 = v2;
+
+		/**
+		 * The end point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v3 = v3;
 
 	}
 
+	/**
+	 * Returns a point on the curve.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {Vector3} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector3} The position on the curve.
+	 */
 	getPoint( t, optionalTarget = new Vector3() ) {
 
 		const point = optionalTarget;
@@ -19096,21 +26352,57 @@ class CubicBezierCurve3 extends Curve {
 
 }
 
+/**
+ * A curve representing a 2D line segment.
+ *
+ * @augments Curve
+ */
 class LineCurve extends Curve {
 
+	/**
+	 * Constructs a new line curve.
+	 *
+	 * @param {Vector2} [v1] - The start point.
+	 * @param {Vector2} [v2] - The end point.
+	 */
 	constructor( v1 = new Vector2(), v2 = new Vector2() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isLineCurve = true;
 
 		this.type = 'LineCurve';
 
+		/**
+		 * The start point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v1 = v1;
+
+		/**
+		 * The end point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v2 = v2;
 
 	}
 
+	/**
+	 * Returns a point on the line.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the line. Must be in the range `[0,1]`.
+	 * @param {Vector2} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector2} The position on the line.
+	 */
 	getPoint( t, optionalTarget = new Vector2() ) {
 
 		const point = optionalTarget;
@@ -19184,21 +26476,57 @@ class LineCurve extends Curve {
 
 }
 
+/**
+ * A curve representing a 3D line segment.
+ *
+ * @augments Curve
+ */
 class LineCurve3 extends Curve {
 
+	/**
+	 * Constructs a new line curve.
+	 *
+	 * @param {Vector3} [v1] - The start point.
+	 * @param {Vector3} [v2] - The end point.
+	 */
 	constructor( v1 = new Vector3(), v2 = new Vector3() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isLineCurve3 = true;
 
 		this.type = 'LineCurve3';
 
+		/**
+		 * The start point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v1 = v1;
+
+		/**
+		 * The end point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v2 = v2;
 
 	}
 
+	/**
+	 * Returns a point on the line.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the line. Must be in the range `[0,1]`.
+	 * @param {Vector3} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector3} The position on the line.
+	 */
 	getPoint( t, optionalTarget = new Vector3() ) {
 
 		const point = optionalTarget;
@@ -19272,22 +26600,81 @@ class LineCurve3 extends Curve {
 
 }
 
+/**
+ * A curve representing a 2D Quadratic Bezier curve.
+ *
+ * ```js
+ * const curve = new THREE.QuadraticBezierCurve(
+ * 	new THREE.Vector2( - 10, 0 ),
+ * 	new THREE.Vector2( 20, 15 ),
+ * 	new THREE.Vector2( 10, 0 )
+ * )
+ *
+ * const points = curve.getPoints( 50 );
+ * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+ *
+ * const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+ *
+ * // Create the final object to add to the scene
+ * const curveObject = new THREE.Line( geometry, material );
+ * ```
+ *
+ * @augments Curve
+ */
 class QuadraticBezierCurve extends Curve {
 
+	/**
+	 * Constructs a new Quadratic Bezier curve.
+	 *
+	 * @param {Vector2} [v0] - The start point.
+	 * @param {Vector2} [v1] - The control point.
+	 * @param {Vector2} [v2] - The end point.
+	 */
 	constructor( v0 = new Vector2(), v1 = new Vector2(), v2 = new Vector2() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isQuadraticBezierCurve = true;
 
 		this.type = 'QuadraticBezierCurve';
 
+		/**
+		 * The start point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v0 = v0;
+
+		/**
+		 * The control point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v1 = v1;
+
+		/**
+		 * The end point.
+		 *
+		 * @type {Vector2}
+		 */
 		this.v2 = v2;
 
 	}
 
+	/**
+	 * Returns a point on the curve.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {Vector2} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector2} The position on the curve.
+	 */
 	getPoint( t, optionalTarget = new Vector2() ) {
 
 		const point = optionalTarget;
@@ -19341,22 +26728,65 @@ class QuadraticBezierCurve extends Curve {
 
 }
 
+/**
+ * A curve representing a 3D Quadratic Bezier curve.
+ *
+ * @augments Curve
+ */
 class QuadraticBezierCurve3 extends Curve {
 
+	/**
+	 * Constructs a new Quadratic Bezier curve.
+	 *
+	 * @param {Vector3} [v0] - The start point.
+	 * @param {Vector3} [v1] - The control point.
+	 * @param {Vector3} [v2] - The end point.
+	 */
 	constructor( v0 = new Vector3(), v1 = new Vector3(), v2 = new Vector3() ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isQuadraticBezierCurve3 = true;
 
 		this.type = 'QuadraticBezierCurve3';
 
+		/**
+		 * The start point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v0 = v0;
+
+		/**
+		 * The control point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v1 = v1;
+
+		/**
+		 * The end point.
+		 *
+		 * @type {Vector3}
+		 */
 		this.v2 = v2;
 
 	}
 
+	/**
+	 * Returns a point on the curve.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {Vector3} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector3} The position on the curve.
+	 */
 	getPoint( t, optionalTarget = new Vector3() ) {
 
 		const point = optionalTarget;
@@ -19411,20 +26841,68 @@ class QuadraticBezierCurve3 extends Curve {
 
 }
 
+/**
+ * A curve representing a 2D spline curve.
+ *
+ * ```js
+ * // Create a sine-like wave
+ * const curve = new THREE.SplineCurve( [
+ * 	new THREE.Vector2( -10, 0 ),
+ * 	new THREE.Vector2( -5, 5 ),
+ * 	new THREE.Vector2( 0, 0 ),
+ * 	new THREE.Vector2( 5, -5 ),
+ * 	new THREE.Vector2( 10, 0 )
+ * ] );
+ *
+ * const points = curve.getPoints( 50 );
+ * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+ *
+ * const material = new THREE.LineBasicMaterial( { color: 0xff0000 } );
+ *
+ * // Create the final object to add to the scene
+ * const splineObject = new THREE.Line( geometry, material );
+ * ```
+ *
+ * @augments Curve
+ */
 class SplineCurve extends Curve {
 
+	/**
+	 * Constructs a new 2D spline curve.
+	 *
+	 * @param {Array<Vector2>} [points] -  An array of 2D points defining the curve.
+	 */
 	constructor( points = [] ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSplineCurve = true;
 
 		this.type = 'SplineCurve';
 
+		/**
+		 * An array of 2D points defining the curve.
+		 *
+		 * @type {Array<Vector2>}
+		 */
 		this.points = points;
 
 	}
 
+	/**
+	 * Returns a point on the curve.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {Vector2} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {Vector2} The position on the curve.
+	 */
 	getPoint( t, optionalTarget = new Vector2() ) {
 
 		const point = optionalTarget;
@@ -19517,30 +26995,58 @@ var Curves = /*#__PURE__*/Object.freeze({
 	SplineCurve: SplineCurve
 });
 
-/**************************************************************
- *	Curved Path - a curve path is simply a array of connected
- *  curves, but retains the api of a curve
- **************************************************************/
-
+/**
+ * A base class extending {@link Curve}. `CurvePath` is simply an
+ * array of connected curves, but retains the API of a curve.
+ *
+ * @augments Curve
+ */
 class CurvePath extends Curve {
 
+	/**
+	 * Constructs a new curve path.
+	 */
 	constructor() {
 
 		super();
 
 		this.type = 'CurvePath';
 
+		/**
+		 * An array of curves defining the
+		 * path.
+		 *
+		 * @type {Array<Curve>}
+		 */
 		this.curves = [];
-		this.autoClose = false; // Automatically closes the path
+
+		/**
+		 * Whether the path should automatically be closed
+		 * by a line curve.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.autoClose = false;
 
 	}
 
+	/**
+	 * Adds a curve to this curve path.
+	 *
+	 * @param {Curve} curve - The curve to add.
+	 */
 	add( curve ) {
 
 		this.curves.push( curve );
 
 	}
 
+	/**
+	 * Adds a line curve to close the path.
+	 *
+	 * @return {CurvePath} A reference to this curve path.
+	 */
 	closePath() {
 
 		// Add a line curve if start and end of lines are not connected
@@ -19558,16 +27064,24 @@ class CurvePath extends Curve {
 
 	}
 
-	// To get accurate point with reference to
-	// entire path distance at time t,
-	// following has to be done:
-
-	// 1. Length of each sub path have to be known
-	// 2. Locate and identify type of curve
-	// 3. Get t for the curve
-	// 4. Return curve.getPointAt(t')
-
+	/**
+	 * This method returns a vector in 2D or 3D space (depending on the curve definitions)
+	 * for the given interpolation factor.
+	 *
+	 * @param {number} t - A interpolation factor representing a position on the curve. Must be in the range `[0,1]`.
+	 * @param {(Vector2|Vector3)} [optionalTarget] - The optional target vector the result is written to.
+	 * @return {?(Vector2|Vector3)} The position on the curve. It can be a 2D or 3D vector depending on the curve definition.
+	 */
 	getPoint( t, optionalTarget ) {
+
+		// To get accurate point with reference to
+		// entire path distance at time t,
+		// following has to be done:
+
+		// 1. Length of each sub path have to be known
+		// 2. Locate and identify type of curve
+		// 3. Get t for the curve
+		// 4. Return curve.getPointAt(t')
 
 		const d = t * this.getLength();
 		const curveLengths = this.getCurveLengths();
@@ -19599,19 +27113,20 @@ class CurvePath extends Curve {
 
 	}
 
-	// We cannot use the default THREE.Curve getPoint() with getLength() because in
-	// THREE.Curve, getLength() depends on getPoint() but in THREE.CurvePath
-	// getPoint() depends on getLength
-
 	getLength() {
+
+		// We cannot use the default THREE.Curve getPoint() with getLength() because in
+		// THREE.Curve, getLength() depends on getPoint() but in THREE.CurvePath
+		// getPoint() depends on getLength
 
 		const lens = this.getCurveLengths();
 		return lens[ lens.length - 1 ];
 
 	}
 
-	// cacheLengths must be recalculated.
 	updateArcLengths() {
+
+		// cacheLengths must be recalculated.
 
 		this.needsUpdate = true;
 		this.cacheLengths = null;
@@ -19619,11 +27134,15 @@ class CurvePath extends Curve {
 
 	}
 
-	// Compute lengths and cache them
-	// We cannot overwrite getLengths() because UtoT mapping uses it.
-
+	/**
+	 * Returns list of cumulative curve lengths of the defined curves.
+	 *
+	 * @return {Array<number>} The curve lengths.
+	 */
 	getCurveLengths() {
 
+		// Compute lengths and cache them
+		// We cannot overwrite getLengths() because UtoT mapping uses it.
 		// We use cache values if curves and cache array are same length
 
 		if ( this.cacheLengths && this.cacheLengths.length === this.curves.length ) {
@@ -19767,14 +27286,46 @@ class CurvePath extends Curve {
 
 }
 
+/**
+ * A 2D path representation. The class provides methods for creating paths
+ * and contours of 2D shapes similar to the 2D Canvas API.
+ *
+ * ```js
+ * const path = new THREE.Path();
+ *
+ * path.lineTo( 0, 0.8 );
+ * path.quadraticCurveTo( 0, 1, 0.2, 1 );
+ * path.lineTo( 1, 1 );
+ *
+ * const points = path.getPoints();
+ *
+ * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+ * const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+ *
+ * const line = new THREE.Line( geometry, material );
+ * scene.add( line );
+ * ```
+ *
+ * @augments CurvePath
+ */
 class Path extends CurvePath {
 
+	/**
+	 * Constructs a new path.
+	 *
+	 * @param {Array<Vector2>} [points] - An array of 2D points defining the path.
+	 */
 	constructor( points ) {
 
 		super();
 
 		this.type = 'Path';
 
+		/**
+		 * The current offset of the path. Any new curve added will start here.
+		 *
+		 * @type {Vector2}
+		 */
 		this.currentPoint = new Vector2();
 
 		if ( points ) {
@@ -19785,6 +27336,13 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Creates a path from the given list of points. The points are added
+	 * to the path as instances of {@link LineCurve}.
+	 *
+	 * @param {Array<Vector2>} points - An array of 2D points.
+	 * @return {Path} A reference to this path.
+	 */
 	setFromPoints( points ) {
 
 		this.moveTo( points[ 0 ].x, points[ 0 ].y );
@@ -19799,6 +27357,13 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Moves {@link Path#currentPoint} to the given point.
+	 *
+	 * @param {number} x - The x coordinate.
+	 * @param {number} y - The y coordinate.
+	 * @return {Path} A reference to this path.
+	 */
 	moveTo( x, y ) {
 
 		this.currentPoint.set( x, y ); // TODO consider referencing vectors instead of copying?
@@ -19807,6 +27372,14 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Adds an instance of {@link LineCurve} to the path by connecting
+	 * the current point with the given one.
+	 *
+	 * @param {number} x - The x coordinate of the end point.
+	 * @param {number} y - The y coordinate of the end point.
+	 * @return {Path} A reference to this path.
+	 */
 	lineTo( x, y ) {
 
 		const curve = new LineCurve( this.currentPoint.clone(), new Vector2( x, y ) );
@@ -19818,6 +27391,16 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Adds an instance of {@link QuadraticBezierCurve} to the path by connecting
+	 * the current point with the given one.
+	 *
+	 * @param {number} aCPx - The x coordinate of the control point.
+	 * @param {number} aCPy - The y coordinate of the control point.
+	 * @param {number} aX - The x coordinate of the end point.
+	 * @param {number} aY - The y coordinate of the end point.
+	 * @return {Path} A reference to this path.
+	 */
 	quadraticCurveTo( aCPx, aCPy, aX, aY ) {
 
 		const curve = new QuadraticBezierCurve(
@@ -19834,6 +27417,18 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Adds an instance of {@link CubicBezierCurve} to the path by connecting
+	 * the current point with the given one.
+	 *
+	 * @param {number} aCP1x - The x coordinate of the first control point.
+	 * @param {number} aCP1y - The y coordinate of the first control point.
+	 * @param {number} aCP2x - The x coordinate of the second control point.
+	 * @param {number} aCP2y - The y coordinate of the second control point.
+	 * @param {number} aX - The x coordinate of the end point.
+	 * @param {number} aY - The y coordinate of the end point.
+	 * @return {Path} A reference to this path.
+	 */
 	bezierCurveTo( aCP1x, aCP1y, aCP2x, aCP2y, aX, aY ) {
 
 		const curve = new CubicBezierCurve(
@@ -19851,7 +27446,14 @@ class Path extends CurvePath {
 
 	}
 
-	splineThru( pts /*Array of Vector*/ ) {
+	/**
+	 * Adds an instance of {@link SplineCurve} to the path by connecting
+	 * the current point with the given list of points.
+	 *
+	 * @param {Array<Vector2>} pts - An array of points in 2D space.
+	 * @return {Path} A reference to this path.
+	 */
+	splineThru( pts ) {
 
 		const npts = [ this.currentPoint.clone() ].concat( pts );
 
@@ -19864,6 +27466,18 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Adds an arc as an instance of {@link EllipseCurve} to the path, positioned relative
+	 * to the current point.
+	 *
+	 * @param {number} aX - The x coordinate of the center of the arc offsetted from the previous curve.
+	 * @param {number} aY - The y coordinate of the center of the arc offsetted from the previous curve.
+	 * @param {number} aRadius - The radius of the arc.
+	 * @param {number} aStartAngle - The start angle in radians.
+	 * @param {number} aEndAngle - The end angle in radians.
+	 * @param {boolean} [aClockwise=false] - Whether to sweep the arc clockwise or not.
+	 * @return {Path} A reference to this path.
+	 */
 	arc( aX, aY, aRadius, aStartAngle, aEndAngle, aClockwise ) {
 
 		const x0 = this.currentPoint.x;
@@ -19876,6 +27490,17 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Adds an absolutely positioned arc as an instance of {@link EllipseCurve} to the path.
+	 *
+	 * @param {number} aX - The x coordinate of the center of the arc.
+	 * @param {number} aY - The y coordinate of the center of the arc.
+	 * @param {number} aRadius - The radius of the arc.
+	 * @param {number} aStartAngle - The start angle in radians.
+	 * @param {number} aEndAngle - The end angle in radians.
+	 * @param {boolean} [aClockwise=false] - Whether to sweep the arc clockwise or not.
+	 * @return {Path} A reference to this path.
+	 */
 	absarc( aX, aY, aRadius, aStartAngle, aEndAngle, aClockwise ) {
 
 		this.absellipse( aX, aY, aRadius, aRadius, aStartAngle, aEndAngle, aClockwise );
@@ -19884,6 +27509,20 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Adds an ellipse as an instance of {@link EllipseCurve} to the path, positioned relative
+	 * to the current point
+	 *
+	 * @param {number} aX - The x coordinate of the center of the ellipse offsetted from the previous curve.
+	 * @param {number} aY - The y coordinate of the center of the ellipse offsetted from the previous curve.
+	 * @param {number} xRadius - The radius of the ellipse in the x axis.
+	 * @param {number} yRadius - The radius of the ellipse in the y axis.
+	 * @param {number} aStartAngle - The start angle in radians.
+	 * @param {number} aEndAngle - The end angle in radians.
+	 * @param {boolean} [aClockwise=false] - Whether to sweep the ellipse clockwise or not.
+	 * @param {boolean} [aRotation=0] - The rotation angle of the ellipse in radians, counterclockwise from the positive X axis.
+	 * @return {Path} A reference to this path.
+	 */
 	ellipse( aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation ) {
 
 		const x0 = this.currentPoint.x;
@@ -19895,6 +27534,19 @@ class Path extends CurvePath {
 
 	}
 
+	/**
+	 * Adds an absolutely positioned ellipse as an instance of {@link EllipseCurve} to the path.
+	 *
+	 * @param {number} aX - The x coordinate of the absolute center of the ellipse.
+	 * @param {number} aY - The y coordinate of the absolute center of the ellipse.
+	 * @param {number} xRadius - The radius of the ellipse in the x axis.
+	 * @param {number} yRadius - The radius of the ellipse in the y axis.
+	 * @param {number} aStartAngle - The start angle in radians.
+	 * @param {number} aEndAngle - The end angle in radians.
+	 * @param {boolean} [aClockwise=false] - Whether to sweep the ellipse clockwise or not.
+	 * @param {number} [aRotation=0] - The rotation angle of the ellipse in radians, counterclockwise from the positive X axis.
+	 * @return {Path} A reference to this path.
+	 */
 	absellipse( aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation ) {
 
 		const curve = new EllipseCurve( aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation );
@@ -19953,14 +27605,47 @@ class Path extends CurvePath {
 
 }
 
+/**
+ * Creates meshes with axial symmetry like vases. The lathe rotates around the Y axis.
+ *
+ * ```js
+ * const points = [];
+ * for ( let i = 0; i < 10; i ++ ) {
+ * 	points.push( new THREE.Vector2( Math.sin( i * 0.2 ) * 10 + 5, ( i - 5 ) * 2 ) );
+ * }
+ * const geometry = new THREE.LatheGeometry( points );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const lathe = new THREE.Mesh( geometry, material );
+ * scene.add( lathe );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class LatheGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new lathe geometry.
+	 *
+	 * @param {Array<Vector2>} [points] - An array of points in 2D space. The x-coordinate of each point
+	 * must be greater than zero.
+	 * @param {number} [segments=12] - The number of circumference segments to generate.
+	 * @param {number} [phiStart=0] - The starting angle in radians.
+	 * @param {number} [phiLength=Math.PI*2] - The radian (0 to 2PI) range of the lathed section 2PI is a
+	 * closed lathe, less than 2PI is a portion.
+	 */
 	constructor( points = [ new Vector2( 0, -0.5 ), new Vector2( 0.5, 0 ), new Vector2( 0, 0.5 ) ], segments = 12, phiStart = 0, phiLength = Math.PI * 2 ) {
 
 		super();
 
 		this.type = 'LatheGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			points: points,
 			segments: segments,
@@ -20126,6 +27811,13 @@ class LatheGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {LatheGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new LatheGeometry( data.points, data.segments, data.phiStart, data.phiLength );
@@ -20134,8 +27826,28 @@ class LatheGeometry extends BufferGeometry {
 
 }
 
+/**
+ * A geometry class for a capsule with given radii and height. It is constructed using a lathe.
+ *
+ * ```js
+ * const geometry = new THREE.CapsuleGeometry( 1, 1, 4, 8 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+ * const capsule = new THREE.Mesh( geometry, material );
+ * scene.add( capsule );
+ * ```
+ *
+ * @augments LatheGeometry
+ */
 class CapsuleGeometry extends LatheGeometry {
 
+	/**
+	 * Constructs a new capsule geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the capsule.
+	 * @param {number} [length=1] - Length of the middle section.
+	 * @param {number} [capSegments=4] - Number of curve segments used to build the caps.
+	 * @param {number} [radialSegments=8] - Number of segmented faces around the circumference of the capsule.
+	 */
 	constructor( radius = 1, length = 1, capSegments = 4, radialSegments = 8 ) {
 
 		const path = new Path();
@@ -20146,6 +27858,13 @@ class CapsuleGeometry extends LatheGeometry {
 
 		this.type = 'CapsuleGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			length: length,
@@ -20155,6 +27874,13 @@ class CapsuleGeometry extends LatheGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {CapsuleGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new CapsuleGeometry( data.radius, data.length, data.capSegments, data.radialSegments );
@@ -20163,14 +27889,47 @@ class CapsuleGeometry extends LatheGeometry {
 
 }
 
+/**
+ * A simple shape of Euclidean geometry. It is constructed from a
+ * number of triangular segments that are oriented around a central point and
+ * extend as far out as a given radius. It is built counter-clockwise from a
+ * start angle and a given central angle. It can also be used to create
+ * regular polygons, where the number of segments determines the number of
+ * sides.
+ *
+ * ```js
+ * const geometry = new THREE.CircleGeometry( 5, 32 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const circle = new THREE.Mesh( geometry, material );
+ * scene.add( circle )
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class CircleGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new circle geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the circle.
+	 * @param {number} [segments=32] - Number of segments (triangles), minimum = `3`.
+	 * @param {number} [thetaStart=0] - Start angle for first segment in radians.
+	 * @param {number} [thetaLength=Math.PI*2] - The central angle, often called theta,
+	 * of the circular sector in radians. The default value results in a complete circle.
+	 */
 	constructor( radius = 1, segments = 32, thetaStart = 0, thetaLength = Math.PI * 2 ) {
 
 		super();
 
 		this.type = 'CircleGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			segments: segments,
@@ -20249,6 +28008,13 @@ class CircleGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {CircleGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new CircleGeometry( data.radius, data.segments, data.thetaStart, data.thetaLength );
@@ -20257,14 +28023,46 @@ class CircleGeometry extends BufferGeometry {
 
 }
 
+/**
+ * A geometry class for representing a cylinder.
+ *
+ * ```js
+ * const geometry = new THREE.CylinderGeometry( 5, 5, 20, 32 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const cylinder = new THREE.Mesh( geometry, material );
+ * scene.add( cylinder );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class CylinderGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new cylinder geometry.
+	 *
+	 * @param {number} [radiusTop=1] - Radius of the cylinder at the top.
+	 * @param {number} [radiusBottom=1] - Radius of the cylinder at the bottom.
+	 * @param {number} [height=1] - Height of the cylinder.
+	 * @param {number} [radialSegments=32] - Number of segmented faces around the circumference of the cylinder.
+	 * @param {number} [heightSegments=1] - Number of rows of faces along the height of the cylinder.
+	 * @param {boolean} [openEnded=false] - Whether the base of the cylinder is open or capped.
+	 * @param {boolean} [thetaStart=0] - Start angle for first segment, in radians.
+	 * @param {boolean} [thetaLength=Math.PI*2] - The central angle, often called theta, of the circular sector, in radians.
+	 * The default value results in a complete cylinder.
+	 */
 	constructor( radiusTop = 1, radiusBottom = 1, height = 1, radialSegments = 32, heightSegments = 1, openEnded = false, thetaStart = 0, thetaLength = Math.PI * 2 ) {
 
 		super();
 
 		this.type = 'CylinderGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radiusTop: radiusTop,
 			radiusBottom: radiusBottom,
@@ -20535,6 +28333,13 @@ class CylinderGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {CylinderGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new CylinderGeometry( data.radiusTop, data.radiusBottom, data.height, data.radialSegments, data.heightSegments, data.openEnded, data.thetaStart, data.thetaLength );
@@ -20543,14 +28348,45 @@ class CylinderGeometry extends BufferGeometry {
 
 }
 
+/**
+ * A geometry class for representing a cone.
+ *
+ * ```js
+ * const geometry = new THREE.ConeGeometry( 5, 20, 32 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const cone = new THREE.Mesh(geometry, material );
+ * scene.add( cone );
+ * ```
+ *
+ * @augments CylinderGeometry
+ */
 class ConeGeometry extends CylinderGeometry {
 
+	/**
+	 * Constructs a new cone geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the cone base.
+	 * @param {number} [height=1] - Height of the cone.
+	 * @param {number} [radialSegments=32] - Number of segmented faces around the circumference of the cone.
+	 * @param {number} [heightSegments=1] - Number of rows of faces along the height of the cone.
+	 * @param {boolean} [openEnded=false] - Whether the base of the cone is open or capped.
+	 * @param {boolean} [thetaStart=0] - Start angle for first segment, in radians.
+	 * @param {boolean} [thetaLength=Math.PI*2] - The central angle, often called theta, of the circular sector, in radians.
+	 * The default value results in a complete cone.
+	 */
 	constructor( radius = 1, height = 1, radialSegments = 32, heightSegments = 1, openEnded = false, thetaStart = 0, thetaLength = Math.PI * 2 ) {
 
 		super( 0, radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength );
 
 		this.type = 'ConeGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			height: height,
@@ -20563,6 +28399,13 @@ class ConeGeometry extends CylinderGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {ConeGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new ConeGeometry( data.radius, data.height, data.radialSegments, data.heightSegments, data.openEnded, data.thetaStart, data.thetaLength );
@@ -20571,14 +28414,36 @@ class ConeGeometry extends CylinderGeometry {
 
 }
 
+/**
+ * A polyhedron is a solid in three dimensions with flat faces. This class
+ * will take an array of vertices, project them onto a sphere, and then
+ * divide them up to the desired level of detail.
+ *
+ * @augments BufferGeometry
+ */
 class PolyhedronGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new polyhedron geometry.
+	 *
+	 * @param {Array<number>} [vertices] - A flat array of vertices describing the base shape.
+	 * @param {Array<number>} [indices] - A flat array of indices describing the base shape.
+	 * @param {number} [radius=1] - The radius of the shape.
+	 * @param {number} [detail=0] - How many levels to subdivide the geometry. The more detail, the smoother the shape.
+	 */
 	constructor( vertices = [], indices = [], radius = 1, detail = 0 ) {
 
 		super();
 
 		this.type = 'PolyhedronGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			vertices: vertices,
 			indices: indices,
@@ -20876,6 +28741,13 @@ class PolyhedronGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {PolyhedronGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new PolyhedronGeometry( data.vertices, data.indices, data.radius, data.details );
@@ -20884,8 +28756,26 @@ class PolyhedronGeometry extends BufferGeometry {
 
 }
 
+/**
+ * A geometry class for representing a dodecahedron.
+ *
+ * ```js
+ * const geometry = new THREE.DodecahedronGeometry();
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const dodecahedron = new THREE.Mesh( geometry, material );
+ * scene.add( dodecahedron );
+ * ```
+ *
+ * @augments PolyhedronGeometry
+ */
 class DodecahedronGeometry extends PolyhedronGeometry {
 
+	/**
+	 * Constructs a new dodecahedron geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the dodecahedron.
+	 * @param {number} [detail=0] - Setting this to a value greater than `0` adds vertices making it no longer a dodecahedron.
+	 */
 	constructor( radius = 1, detail = 0 ) {
 
 		const t = ( 1 + Math.sqrt( 5 ) ) / 2;
@@ -20931,6 +28821,13 @@ class DodecahedronGeometry extends PolyhedronGeometry {
 
 		this.type = 'DodecahedronGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			detail: detail
@@ -20938,6 +28835,13 @@ class DodecahedronGeometry extends PolyhedronGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {DodecahedronGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new DodecahedronGeometry( data.radius, data.detail );
@@ -20951,14 +28855,42 @@ const _v1$1 = /*@__PURE__*/ new Vector3();
 const _normal = /*@__PURE__*/ new Vector3();
 const _triangle = /*@__PURE__*/ new Triangle();
 
+/**
+ * Can be used as a helper object to view the edges of a geometry.
+ *
+ * ```js
+ * const geometry = new THREE.BoxGeometry();
+ * const edges = new THREE.EdgesGeometry( geometry );
+ * const line = new THREE.LineSegments( edges );
+ * scene.add( line );
+ * ```
+ *
+ * Note: It is not yet possible to serialize/deserialize instances of this class.
+ *
+ * @augments BufferGeometry
+ */
 class EdgesGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new edges geometry.
+	 *
+	 * @param {?BufferGeometry} [geometry=null] - The geometry.
+	 * @param {number} [thresholdAngle=1] - An edge is only rendered if the angle (in degrees)
+	 * between the face normals of the adjoining faces exceeds this value.
+	 */
 	constructor( geometry = null, thresholdAngle = 1 ) {
 
 		super();
 
 		this.type = 'EdgesGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			geometry: geometry,
 			thresholdAngle: thresholdAngle
@@ -21091,20 +29023,76 @@ class EdgesGeometry extends BufferGeometry {
 
 }
 
+/**
+ * Defines an arbitrary 2d shape plane using paths with optional holes. It
+ * can be used with {@link ExtrudeGeometry}, {@link ShapeGeometry}, to get
+ * points, or to get triangulated faces.
+ *
+ * ```js
+ * const heartShape = new THREE.Shape();
+ *
+ * heartShape.moveTo( 25, 25 );
+ * heartShape.bezierCurveTo( 25, 25, 20, 0, 0, 0 );
+ * heartShape.bezierCurveTo( - 30, 0, - 30, 35, - 30, 35 );
+ * heartShape.bezierCurveTo( - 30, 55, - 10, 77, 25, 95 );
+ * heartShape.bezierCurveTo( 60, 77, 80, 55, 80, 35 );
+ * heartShape.bezierCurveTo( 80, 35, 80, 0, 50, 0 );
+ * heartShape.bezierCurveTo( 35, 0, 25, 25, 25, 25 );
+ *
+ * const extrudeSettings = {
+ * 	depth: 8,
+ * 	bevelEnabled: true,
+ * 	bevelSegments: 2,
+ * 	steps: 2,
+ * 	bevelSize: 1,
+ * 	bevelThickness: 1
+ * };
+ *
+ * const geometry = new THREE.ExtrudeGeometry( heartShape, extrudeSettings );
+ * const mesh = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial() );
+ * ```
+ *
+ * @augments Path
+ */
 class Shape extends Path {
 
+	/**
+	 * Constructs a new shape.
+	 *
+	 * @param {Array<Vector2>} [points] - An array of 2D points defining the shape.
+	 */
 	constructor( points ) {
 
 		super( points );
 
+		/**
+		 * The UUID of the shape.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.uuid = generateUUID();
 
 		this.type = 'Shape';
 
+		/**
+		 * Defines the holes in the shape. Hole definitions must use the
+		 * opposite winding order (CW/CCW) than the outer shape.
+		 *
+		 * @type {Array<Path>}
+		 * @readonly
+		 */
 		this.holes = [];
 
 	}
 
+	/**
+	 * Returns an array representing each contour of the holes
+	 * as a list of 2D points.
+	 *
+	 * @param {number} divisions - The fineness of the result.
+	 * @return {Array<Array<Vector2>>} The holes as a series of 2D points.
+	 */
 	getPointsHoles( divisions ) {
 
 		const holesPts = [];
@@ -21121,6 +29109,13 @@ class Shape extends Path {
 
 	// get points of shape and holes (keypoints based on segments parameter)
 
+	/**
+	 * Returns an object that holds contour data for the shape and its holes as
+	 * arrays of 2D points.
+	 *
+	 * @param {number} divisions - The fineness of the result.
+	 * @return {{shape:Array<Vector2>,holes:Array<Array<Vector2>>}} An object with contour data.
+	 */
 	extractPoints( divisions ) {
 
 		return {
@@ -21189,12 +29184,23 @@ class Shape extends Path {
 }
 
 /**
- * Port from https://github.com/mapbox/earcut (v2.2.4)
+ * An implementation of the earcut polygon triangulation algorithm. The code
+ * is a port of [mapbox/earcut]{@link https://github.com/mapbox/earcut mapbox/earcut} (v2.2.4).
+ *
+ * @hideconstructor
  */
+class Earcut {
 
-const Earcut = {
-
-	triangulate: function ( data, holeIndices, dim = 2 ) {
+	/**
+	 * Triangulates the given shape definition by returning an array of triangles.
+	 *
+	 * @param {Array<number>} data - An array with 2D points.
+	 * @param {Array<number>} holeIndices - An array with indices defining holes.
+	 * @param {number} [dim=2] - The number of coordinates per vertex in the input array.
+	 * @return {Array<number>} An array representing the triangulated faces. Each face is defined by three consecutive numbers
+	 * representing vertex indices.
+	 */
+	static triangulate( data, holeIndices, dim = 2 ) {
 
 		const hasHoles = holeIndices && holeIndices.length;
 		const outerLen = hasHoles ? holeIndices[ 0 ] * dim : data.length;
@@ -21236,7 +29242,7 @@ const Earcut = {
 
 	}
 
-};
+}
 
 // create a circular doubly linked list from polygon points in the specified winding order
 function linkedList( data, start, end, dim, clockwise ) {
@@ -21976,10 +29982,19 @@ function signedArea( data, start, end, dim ) {
 
 }
 
+/**
+ * A class containing utility functions for shapes.
+ *
+ * @hideconstructor
+ */
 class ShapeUtils {
 
-	// calculate area of the contour polygon
-
+	/**
+	 * Calculate area of a ( 2D ) contour polygon.
+	 *
+	 * @param {Array<Vector2>} contour - An array of 2D points.
+	 * @return {number} The area.
+	 */
 	static area( contour ) {
 
 		const n = contour.length;
@@ -21995,12 +30010,25 @@ class ShapeUtils {
 
 	}
 
+	/**
+	 * Returns `true` if the given contour uses a clockwise winding order.
+	 *
+	 * @param {Array<Vector2>} pts - An array of 2D points defining a polygon.
+	 * @return {boolean} Whether the given contour uses a clockwise winding order or not.
+	 */
 	static isClockWise( pts ) {
 
 		return ShapeUtils.area( pts ) < 0;
 
 	}
 
+	/**
+	 * Triangulates the given shape definition.
+	 *
+	 * @param {Array<Vector2>} contour - An array of 2D points defining the contour.
+	 * @param {Array<Array<Vector2>>} holes - An array that holds arrays of 2D points defining the holes.
+	 * @return {Array<Array<number>>} An array that holds for each face definition an array with three indices.
+	 */
 	static triangulateShape( contour, holes ) {
 
 		const vertices = []; // flat array of vertices like [ x0,y0, x1,y1, x2,y2, ... ]
@@ -22088,14 +30116,58 @@ function addContour( vertices, contour ) {
  */
 
 
+/**
+ * Creates extruded geometry from a path shape.
+ *
+ * ```js
+ * const length = 12, width = 8;
+ *
+ * const shape = new THREE.Shape();
+ * shape.moveTo( 0,0 );
+ * shape.lineTo( 0, width );
+ * shape.lineTo( length, width );
+ * shape.lineTo( length, 0 );
+ * shape.lineTo( 0, 0 );
+ *
+ * const geometry = new THREE.ExtrudeGeometry( shape );
+ * const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+ * const mesh = new THREE.Mesh( geometry, material ) ;
+ * scene.add( mesh );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class ExtrudeGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new extrude geometry.
+	 *
+	 * @param {Shape|Array<Shape>} [shapes] - A shape or an array of shapes.
+	 * @param {Object} [options={}] - The extrude settings.
+	 * @param {number} [options.curveSegments=12] - Number of points on the curves.
+	 * @param {number} [options.steps=1] - Number of points used for subdividing segments along the depth of the extruded spline.
+	 * @param {number} [options.depth=1] - Depth to extrude the shape.
+	 * @param {boolean} [options.bevelEnabled=true] - Whether to beveling to the shape or not.
+	 * @param {number} [options.bevelThickness=0.2] - How deep into the original shape the bevel goes.
+	 * @param {number} [options.bevelSize=bevelThickness-0.1] - Distance from the shape outline that the bevel extends.
+	 * @param {number} [options.bevelOffset=0] - Distance from the shape outline that the bevel starts.
+	 * @param {number} [options.bevelSegments=3] - Number of bevel layers.
+	 * @param {Curve} [options.extrudePath=3] - A 3D spline path along which the shape should be extruded. Bevels not supported for path extrusion.
+	 * @param {Object} [options.UVGenerator] - An object that provides UV generator functions for custom UV generation.
+	 */
 	constructor( shapes = new Shape( [ new Vector2( 0.5, 0.5 ), new Vector2( -0.5, 0.5 ), new Vector2( -0.5, -0.5 ), new Vector2( 0.5, -0.5 ) ] ), options = {} ) {
 
 		super();
 
 		this.type = 'ExtrudeGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			shapes: shapes,
 			options: options
@@ -22758,6 +30830,14 @@ class ExtrudeGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @param {Array<Shape>} shapes - An array of shapes.
+	 * @return {ExtrudeGeometry} A new instance.
+	 */
 	static fromJSON( data, shapes ) {
 
 		const geometryShapes = [];
@@ -22870,8 +30950,26 @@ function toJSON$1( shapes, options, data ) {
 
 }
 
+/**
+ * A geometry class for representing an icosahedron.
+ *
+ * ```js
+ * const geometry = new THREE.IcosahedronGeometry();
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const icosahedron = new THREE.Mesh( geometry, material );
+ * scene.add( icosahedron );
+ * ```
+ *
+ * @augments PolyhedronGeometry
+ */
 class IcosahedronGeometry extends PolyhedronGeometry {
 
+	/**
+	 * Constructs a new icosahedron geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the icosahedron.
+	 * @param {number} [detail=0] - Setting this to a value greater than `0` adds vertices making it no longer a icosahedron.
+	 */
 	constructor( radius = 1, detail = 0 ) {
 
 		const t = ( 1 + Math.sqrt( 5 ) ) / 2;
@@ -22893,6 +30991,13 @@ class IcosahedronGeometry extends PolyhedronGeometry {
 
 		this.type = 'IcosahedronGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			detail: detail
@@ -22900,6 +31005,13 @@ class IcosahedronGeometry extends PolyhedronGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {IcosahedronGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new IcosahedronGeometry( data.radius, data.detail );
@@ -22908,8 +31020,26 @@ class IcosahedronGeometry extends PolyhedronGeometry {
 
 }
 
+/**
+ * A geometry class for representing an octahedron.
+ *
+ * ```js
+ * const geometry = new THREE.OctahedronGeometry();
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const octahedron = new THREE.Mesh( geometry, material );
+ * scene.add( octahedron );
+ * ```
+ *
+ * @augments PolyhedronGeometry
+ */
 class OctahedronGeometry extends PolyhedronGeometry {
 
+	/**
+	 * Constructs a new octahedron geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the octahedron.
+	 * @param {number} [detail=0] - Setting this to a value greater than `0` adds vertices making it no longer a octahedron.
+	 */
 	constructor( radius = 1, detail = 0 ) {
 
 		const vertices = [
@@ -22927,6 +31057,13 @@ class OctahedronGeometry extends PolyhedronGeometry {
 
 		this.type = 'OctahedronGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			detail: detail
@@ -22934,6 +31071,13 @@ class OctahedronGeometry extends PolyhedronGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {OctahedronGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new OctahedronGeometry( data.radius, data.detail );
@@ -22942,14 +31086,41 @@ class OctahedronGeometry extends PolyhedronGeometry {
 
 }
 
+/**
+ * A geometry class for representing a plane.
+ *
+ * ```js
+ * const geometry = new THREE.PlaneGeometry( 1, 1 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+ * const plane = new THREE.Mesh( geometry, material );
+ * scene.add( plane );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class PlaneGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new plane geometry.
+	 *
+	 * @param {number} [width=1] - The width along the X axis.
+	 * @param {number} [height=1] - The height along the Y axis
+	 * @param {number} [widthSegments=1] - The number of segments along the X axis.
+	 * @param {number} [heightSegments=1] - The number of segments along the Y axis.
+	 */
 	constructor( width = 1, height = 1, widthSegments = 1, heightSegments = 1 ) {
 
 		super();
 
 		this.type = 'PlaneGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			width: width,
 			height: height,
@@ -23028,6 +31199,13 @@ class PlaneGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {PlaneGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new PlaneGeometry( data.width, data.height, data.widthSegments, data.heightSegments );
@@ -23036,14 +31214,43 @@ class PlaneGeometry extends BufferGeometry {
 
 }
 
+/**
+ * A class for generating a two-dimensional ring geometry.
+ *
+ * ```js
+ * const geometry = new THREE.RingGeometry( 1, 5, 32 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+ * const mesh = new THREE.Mesh( geometry, material );
+ * scene.add( mesh );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class RingGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new ring geometry.
+	 *
+	 * @param {number} [innerRadius=0.5] - The inner radius of the ring.
+	 * @param {number} [outerRadius=1] - The outer radius of the ring.
+	 * @param {number} [thetaSegments=32] - Number of segments. A higher number means the ring will be more round. Minimum is `3`.
+	 * @param {number} [phiSegments=1] - Number of segments per ring segment. Minimum is `1`.
+	 * @param {number} [thetaStart=0] - Starting angle in radians.
+	 * @param {number} [thetaLength=Math.PI*2] - Central angle in radians.
+	 */
 	constructor( innerRadius = 0.5, outerRadius = 1, thetaSegments = 32, phiSegments = 1, thetaStart = 0, thetaLength = Math.PI * 2 ) {
 
 		super();
 
 		this.type = 'RingGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			innerRadius: innerRadius,
 			outerRadius: outerRadius,
@@ -23149,6 +31356,13 @@ class RingGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {RingGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new RingGeometry( data.innerRadius, data.outerRadius, data.thetaSegments, data.phiSegments, data.thetaStart, data.thetaLength );
@@ -23157,14 +31371,43 @@ class RingGeometry extends BufferGeometry {
 
 }
 
+/**
+ * Creates an one-sided polygonal geometry from one or more path shapes.
+ *
+ * ```js
+ * const arcShape = new THREE.Shape()
+ *	.moveTo( 5, 1 )
+ *	.absarc( 1, 1, 4, 0, Math.PI * 2, false );
+ *
+ * const geometry = new THREE.ShapeGeometry( arcShape );
+ * const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, side: THREE.DoubleSide } );
+ * const mesh = new THREE.Mesh( geometry, material ) ;
+ * scene.add( mesh );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class ShapeGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new shape geometry.
+	 *
+	 * @param {Shape|Array<Shape>} [shapes] - A shape or an array of shapes.
+	 * @param {number} [curveSegments=12] - Number of segments per shape.
+	 */
 	constructor( shapes = new Shape( [ new Vector2( 0, 0.5 ), new Vector2( -0.5, -0.5 ), new Vector2( 0.5, -0.5 ) ] ), curveSegments = 12 ) {
 
 		super();
 
 		this.type = 'ShapeGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			shapes: shapes,
 			curveSegments: curveSegments
@@ -23303,6 +31546,14 @@ class ShapeGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @param {Array<Shape>} shapes - An array of shapes.
+	 * @return {ShapeGeometry} A new instance.
+	 */
 	static fromJSON( data, shapes ) {
 
 		const geometryShapes = [];
@@ -23345,14 +31596,44 @@ function toJSON( shapes, data ) {
 
 }
 
+/**
+ * A class for generating a sphere geometry.
+ *
+ * ```js
+ * const geometry = new THREE.SphereGeometry( 15, 32, 16 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const sphere = new THREE.Mesh( geometry, material );
+ * scene.add( sphere );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class SphereGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new sphere geometry.
+	 *
+	 * @param {number} [radius=1] - The sphere radius.
+	 * @param {number} [widthSegments=32] - The number of horizontal segments. Minimum value is `3`.
+	 * @param {number} [heightSegments=16] - The number of vertical segments. Minimum value is `2`.
+	 * @param {number} [phiStart=0] - The horizontal starting angle in radians.
+	 * @param {number} [phiLength=Math.PI*2] - The horizontal sweep angle size.
+	 * @param {number} [thetaStart=0] - The vertical starting angle in radians.
+	 * @param {number} [thetaLength=Math.PI] - The vertical sweep angle size.
+	 */
 	constructor( radius = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI ) {
 
 		super();
 
 		this.type = 'SphereGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			widthSegments: widthSegments,
@@ -23469,6 +31750,13 @@ class SphereGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {SphereGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new SphereGeometry( data.radius, data.widthSegments, data.heightSegments, data.phiStart, data.phiLength, data.thetaStart, data.thetaLength );
@@ -23477,8 +31765,26 @@ class SphereGeometry extends BufferGeometry {
 
 }
 
+/**
+ * A geometry class for representing an tetrahedron.
+ *
+ * ```js
+ * const geometry = new THREE.TetrahedronGeometry();
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const tetrahedron = new THREE.Mesh( geometry, material );
+ * scene.add( tetrahedron );
+ * ```
+ *
+ * @augments PolyhedronGeometry
+ */
 class TetrahedronGeometry extends PolyhedronGeometry {
 
+	/**
+	 * Constructs a new tetrahedron geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the tetrahedron.
+	 * @param {number} [detail=0] - Setting this to a value greater than `0` adds vertices making it no longer a tetrahedron.
+	 */
 	constructor( radius = 1, detail = 0 ) {
 
 		const vertices = [
@@ -23493,6 +31799,13 @@ class TetrahedronGeometry extends PolyhedronGeometry {
 
 		this.type = 'TetrahedronGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			detail: detail
@@ -23500,6 +31813,13 @@ class TetrahedronGeometry extends PolyhedronGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {TetrahedronGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new TetrahedronGeometry( data.radius, data.detail );
@@ -23508,14 +31828,42 @@ class TetrahedronGeometry extends PolyhedronGeometry {
 
 }
 
+/**
+ * A geometry class for representing an torus.
+ *
+ * ```js
+ * const geometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const torus = new THREE.Mesh( geometry, material );
+ * scene.add( torus );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class TorusGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new torus geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the torus, from the center of the torus to the center of the tube.
+	 * @param {number} [tube=0.4] - Radius of the tube. Must be smaller than `radius`.
+	 * @param {number} [radialSegments=12] - The number of radial segments.
+	 * @param {number} [tubularSegments=48] - The number of tubular segments.
+	 * @param {number} [arc=Math.PI*2] - Central angle in radians.
+	 */
 	constructor( radius = 1, tube = 0.4, radialSegments = 12, tubularSegments = 48, arc = Math.PI * 2 ) {
 
 		super();
 
 		this.type = 'TorusGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			tube: tube,
@@ -23615,6 +31963,13 @@ class TorusGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {TorusGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new TorusGeometry( data.radius, data.tube, data.radialSegments, data.tubularSegments, data.arc );
@@ -23623,14 +31978,45 @@ class TorusGeometry extends BufferGeometry {
 
 }
 
+/**
+ * Creates a torus knot, the particular shape of which is defined by a pair
+ * of coprime integers, p and q. If p and q are not coprime, the result will
+ * be a torus link.
+ *
+ * ```js
+ * const geometry = new THREE.TorusKnotGeometry( 10, 3, 100, 16 );
+ * const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+ * const torusKnot = new THREE.Mesh( geometry, material );
+ * scene.add( torusKnot );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class TorusKnotGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new torus knot geometry.
+	 *
+	 * @param {number} [radius=1] - Radius of the torus knot.
+	 * @param {number} [tube=0.4] - Radius of the tube.
+	 * @param {number} [tubularSegments=64] - The number of tubular segments.
+	 * @param {number} [radialSegments=8] - The number of radial segments.
+	 * @param {number} [p=2] - This value determines, how many times the geometry winds around its axis of rotational symmetry.
+	 * @param {number} [q=3] - This value determines, how many times the geometry winds around a circle in the interior of the torus.
+	 */
 	constructor( radius = 1, tube = 0.4, tubularSegments = 64, radialSegments = 8, p = 2, q = 3 ) {
 
 		super();
 
 		this.type = 'TorusKnotGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			radius: radius,
 			tube: tube,
@@ -23777,6 +32163,13 @@ class TorusKnotGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {TorusKnotGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		return new TorusKnotGeometry( data.radius, data.tube, data.tubularSegments, data.radialSegments, data.p, data.q );
@@ -23785,14 +32178,56 @@ class TorusKnotGeometry extends BufferGeometry {
 
 }
 
+/**
+ * Creates a tube that extrudes along a 3D curve.
+ *
+ * ```js
+ * class CustomSinCurve extends THREE.Curve {
+ *
+ * 	getPoint( t, optionalTarget = new THREE.Vector3() ) {
+ *
+ * 		const tx = t * 3 - 1.5;
+ * 		const ty = Math.sin( 2 * Math.PI * t );
+ * 		const tz = 0;
+ *
+ * 		return optionalTarget.set( tx, ty, tz );
+ * 	}
+ *
+ * }
+ *
+ * const path = new CustomSinCurve( 10 );
+ * const geometry = new THREE.TubeGeometry( path, 20, 2, 8, false );
+ * const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+ * const mesh = new THREE.Mesh( geometry, material );
+ * scene.add( mesh );
+ * ```
+ *
+ * @augments BufferGeometry
+ */
 class TubeGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new tube geometry.
+	 *
+	 * @param {Curve} [path=QuadraticBezierCurve3] - A 3D curve defining the path of the tube.
+	 * @param {number} [tubularSegments=64] - The number of segments that make up the tube.
+	 * @param {number} [radius=1] -The radius of the tube.
+	 * @param {number} [radialSegments=8] - The number of segments that make up the cross-section.
+	 * @param {boolean} [closed=false] - Whether the tube is closed or not.
+	 */
 	constructor( path = new QuadraticBezierCurve3( new Vector3( -1, -1, 0 ), new Vector3( -1, 1, 0 ), new Vector3( 1, 1, 0 ) ), tubularSegments = 64, radius = 1, radialSegments = 8, closed = false ) {
 
 		super();
 
 		this.type = 'TubeGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			path: path,
 			tubularSegments: tubularSegments,
@@ -23964,6 +32399,13 @@ class TubeGeometry extends BufferGeometry {
 
 	}
 
+	/**
+	 * Factory method for creating an instance of this class from the given
+	 * JSON object.
+	 *
+	 * @param {Object} data - A JSON object representing the serialized geometry.
+	 * @return {TubeGeometry} A new instance.
+	 */
 	static fromJSON( data ) {
 
 		// This only works for built-in curves (e.g. CatmullRomCurve3).
@@ -23980,14 +32422,46 @@ class TubeGeometry extends BufferGeometry {
 
 }
 
+/**
+ * Can be used as a helper object to visualize a geometry as a wireframe.
+ *
+ * ```js
+ * const geometry = new THREE.SphereGeometry();
+ *
+ * const wireframe = new THREE.WireframeGeometry( geometry );
+ *
+ * const line = new THREE.LineSegments( wireframe );
+ * line.material.depthWrite = false;
+ * line.material.opacity = 0.25;
+ * line.material.transparent = true;
+ *
+ * scene.add( line );
+ * ```
+ *
+ * Note: It is not yet possible to serialize/deserialize instances of this class.
+ *
+ * @augments BufferGeometry
+ */
 class WireframeGeometry extends BufferGeometry {
 
+	/**
+	 * Constructs a new wireframe geometry.
+	 *
+	 * @param {?BufferGeometry} [geometry=null] - The geometry.
+	 */
 	constructor( geometry = null ) {
 
 		super();
 
 		this.type = 'WireframeGeometry';
 
+		/**
+		 * Holds the constructor parameters that have been
+		 * used to generate the geometry. Any modification
+		 * after instantiation does not change the geometry.
+		 *
+		 * @type {Object}
+		 */
 		this.parameters = {
 			geometry: geometry
 		};
@@ -25217,7 +33691,7 @@ function flattenJSON( jsonKeys, times, values, valuePropertyName ) {
 			if ( value !== undefined ) {
 
 				times.push( key.time );
-				values.push.apply( values, value ); // push all elements
+				values.push( ...value ); // push all elements
 
 			}
 
@@ -25486,29 +33960,82 @@ const AnimationUtils = {
  * Time complexity is O(1) for linear access crossing at most two points
  * and O(log N) for random access, where N is the number of positions.
  *
- * References:
+ * References: {@link http://www.oodesign.com/template-method-pattern.html}
  *
- * 		http://www.oodesign.com/template-method-pattern.html
- *
+ * @abstract
  */
-
 class Interpolant {
 
+	/**
+	 * Constructs a new interpolant.
+	 *
+	 * @param {TypedArray} parameterPositions - The parameter positions hold the interpolation factors.
+	 * @param {TypedArray} sampleValues - The sample values.
+	 * @param {number} sampleSize - The sample size
+	 * @param {TypedArray} [resultBuffer] - The result buffer.
+	 */
 	constructor( parameterPositions, sampleValues, sampleSize, resultBuffer ) {
 
+		/**
+		 * The parameter positions.
+		 *
+		 * @type {TypedArray}
+		 */
 		this.parameterPositions = parameterPositions;
+
+		/**
+		 * A cache index.
+		 *
+		 * @private
+		 * @type {number}
+		 * @default 0
+		 */
 		this._cachedIndex = 0;
 
-		this.resultBuffer = resultBuffer !== undefined ?
-			resultBuffer : new sampleValues.constructor( sampleSize );
+		/**
+		 * The result buffer.
+		 *
+		 * @type {TypedArray}
+		 */
+		this.resultBuffer = resultBuffer !== undefined ? resultBuffer : new sampleValues.constructor( sampleSize );
+
+		/**
+		 * The sample values.
+		 *
+		 * @type {TypedArray}
+		 */
 		this.sampleValues = sampleValues;
+
+		/**
+		 * The value size.
+		 *
+		 * @type {TypedArray}
+		 */
 		this.valueSize = sampleSize;
 
+		/**
+		 * The interpolation settings.
+		 *
+		 * @type {?Object}
+		 * @default null
+		 */
 		this.settings = null;
+
+		/**
+		 * The default settings object.
+		 *
+		 * @type {Object}
+		 */
 		this.DefaultSettings_ = {};
 
 	}
 
+	/**
+	 * Evaluate the interpolant at position `t`.
+	 *
+	 * @param {number} t - The interpolation factor.
+	 * @return {TypedArray} The result buffer.
+	 */
 	evaluate( t ) {
 
 		const pp = this.parameterPositions;
@@ -25669,12 +34196,23 @@ class Interpolant {
 
 	}
 
+	/**
+	 * Returns the interpolation settings.
+	 *
+	 * @return {Object} The interpolation settings.
+	 */
 	getSettings_() {
 
 		return this.settings || this.DefaultSettings_;
 
 	}
 
+	/**
+	 * Copies a sample value to the result buffer.
+	 *
+	 * @param {number} index - An index into the sample value buffer.
+	 * @return {TypedArray} The result buffer.
+	 */
 	copySampleValue_( index ) {
 
 		// copies a sample value to the result buffer
@@ -25694,8 +34232,16 @@ class Interpolant {
 
 	}
 
-	// Template methods for derived classes:
-
+	/**
+	 * Copies a sample value to the result buffer.
+	 *
+	 * @abstract
+	 * @param {number} i1 - An index into the sample value buffer.
+	 * @param {number} t0 - The previous interpolation factor.
+	 * @param {number} t - The current interpolation factor.
+	 * @param {number} t1 - The next interpolation factor.
+	 * @return {TypedArray} The result buffer.
+	 */
 	interpolate_( /* i1, t0, t, t1 */ ) {
 
 		throw new Error( 'call to abstract method' );
@@ -25703,6 +34249,13 @@ class Interpolant {
 
 	}
 
+	/**
+	 * Optional method that is executed when the interval has changed.
+	 *
+	 * @param {number} i1 - An index into the sample value buffer.
+	 * @param {number} t0 - The previous interpolation factor.
+	 * @param {number} t - The current interpolation factor.
+	 */
 	intervalChanged_( /* i1, t0, t1 */ ) {
 
 		// empty
@@ -25717,10 +34270,19 @@ class Interpolant {
  * It was derived from a Hermitian construction setting the first derivative
  * at each sample position to the linear slope between neighboring positions
  * over their parameter interval.
+ *
+ * @augments Interpolant
  */
-
 class CubicInterpolant extends Interpolant {
 
+	/**
+	 * Constructs a new cubic interpolant.
+	 *
+	 * @param {TypedArray} parameterPositions - The parameter positions hold the interpolation factors.
+	 * @param {TypedArray} sampleValues - The sample values.
+	 * @param {number} sampleSize - The sample size
+	 * @param {TypedArray} [resultBuffer] - The result buffer.
+	 */
 	constructor( parameterPositions, sampleValues, sampleSize, resultBuffer ) {
 
 		super( parameterPositions, sampleValues, sampleSize, resultBuffer );
@@ -25857,8 +34419,21 @@ class CubicInterpolant extends Interpolant {
 
 }
 
+/**
+ * A basic linear interpolant.
+ *
+ * @augments Interpolant
+ */
 class LinearInterpolant extends Interpolant {
 
+	/**
+	 * Constructs a new linear interpolant.
+	 *
+	 * @param {TypedArray} parameterPositions - The parameter positions hold the interpolation factors.
+	 * @param {TypedArray} sampleValues - The sample values.
+	 * @param {number} sampleSize - The sample size
+	 * @param {TypedArray} [resultBuffer] - The result buffer.
+	 */
 	constructor( parameterPositions, sampleValues, sampleSize, resultBuffer ) {
 
 		super( parameterPositions, sampleValues, sampleSize, resultBuffer );
@@ -25892,13 +34467,21 @@ class LinearInterpolant extends Interpolant {
 }
 
 /**
- *
  * Interpolant that evaluates to the sample value at the position preceding
  * the parameter.
+ *
+ * @augments Interpolant
  */
-
 class DiscreteInterpolant extends Interpolant {
 
+	/**
+	 * Constructs a new discrete interpolant.
+	 *
+	 * @param {TypedArray} parameterPositions - The parameter positions hold the interpolation factors.
+	 * @param {TypedArray} sampleValues - The sample values.
+	 * @param {number} sampleSize - The sample size
+	 * @param {TypedArray} [resultBuffer] - The result buffer.
+	 */
 	constructor( parameterPositions, sampleValues, sampleSize, resultBuffer ) {
 
 		super( parameterPositions, sampleValues, sampleSize, resultBuffer );
@@ -26400,10 +34983,19 @@ NumberKeyframeTrack.prototype.ValueTypeName = 'number';
 
 /**
  * Spherical linear unit quaternion interpolant.
+ *
+ * @augments Interpolant
  */
-
 class QuaternionLinearInterpolant extends Interpolant {
 
+	/**
+	 * Constructs a new SLERP interpolant.
+	 *
+	 * @param {TypedArray} parameterPositions - The parameter positions hold the interpolation factors.
+	 * @param {TypedArray} sampleValues - The sample values.
+	 * @param {number} sampleSize - The sample size
+	 * @param {TypedArray} [resultBuffer] - The result buffer.
+	 */
 	constructor( parameterPositions, sampleValues, sampleSize, resultBuffer ) {
 
 		super( parameterPositions, sampleValues, sampleSize, resultBuffer );
@@ -27119,22 +35711,87 @@ class LoadingManager {
 
 const DefaultLoadingManager = /*@__PURE__*/ new LoadingManager();
 
+/**
+ * Abstract base class for loaders.
+ *
+ * @abstract
+ */
 class Loader {
 
+	/**
+	 * Constructs a new loader.
+	 *
+	 * @param {LoadingManager} [manager] - The loading manager.
+	 */
 	constructor( manager ) {
 
+		/**
+		 * The loading manager.
+		 *
+		 * @type {LoadingManager}
+		 * @default DefaultLoadingManager
+		 */
 		this.manager = ( manager !== undefined ) ? manager : DefaultLoadingManager;
 
+		/**
+		 * The crossOrigin string to implement CORS for loading the url from a
+		 * different domain that allows CORS.
+		 *
+		 * @type {string}
+		 * @default 'anonymous'
+		 */
 		this.crossOrigin = 'anonymous';
+
+		/**
+		 * Whether the XMLHttpRequest uses credentials.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.withCredentials = false;
+
+		/**
+		 * The base path from which the asset will be loaded.
+		 *
+		 * @type {string}
+		 */
 		this.path = '';
+
+		/**
+		 * The base path from which additional resources like textures will be loaded.
+		 *
+		 * @type {string}
+		 */
 		this.resourcePath = '';
+
+		/**
+		 * The [request header]{@link https://developer.mozilla.org/en-US/docs/Glossary/Request_header}
+		 * used in HTTP request.
+		 *
+		 * @type {Object}
+		 */
 		this.requestHeader = {};
 
 	}
 
+	/**
+	 * This method needs to be implemented by all concrete loaders. It holds the
+	 * logic for loading assets from the backend.
+	 *
+	 * @param {string} url - The path/URL of the file to be loaded.
+	 * @param {Function} onLoad - Executed when the loading process has been finished.
+	 * @param {onProgressCallback} onProgress - Executed while the loading is in progress.
+	 * @param {onErrorCallback} onError - Executed when errors occur.
+	 */
 	load( /* url, onLoad, onProgress, onError */ ) {}
 
+	/**
+	 * A async version of {@link Loader#load}.
+	 *
+	 * @param {string} url - The path/URL of the file to be loaded.
+	 * @param {onProgressCallback} onProgress - Executed while the loading is in progress.
+	 * @return {Promise} A Promise that resolves when the asset has been loaded.
+	 */
 	loadAsync( url, onProgress ) {
 
 		const scope = this;
@@ -27147,8 +35804,21 @@ class Loader {
 
 	}
 
+	/**
+	 * This method needs to be implemented by all concrete loaders. It holds the
+	 * logic for parsing the asset into three.js entities.
+	 *
+	 * @param {any} data - The data to parse.
+	 */
 	parse( /* data */ ) {}
 
+	/**
+	 * Sets the `crossOrigin` String to implement CORS for loading the URL
+	 * from a different domain that allows CORS.
+	 *
+	 * @param {string} crossOrigin - The `crossOrigin` value.
+	 * @return {Loader} A reference to this instance.
+	 */
 	setCrossOrigin( crossOrigin ) {
 
 		this.crossOrigin = crossOrigin;
@@ -27156,6 +35826,15 @@ class Loader {
 
 	}
 
+	/**
+	 * Whether the XMLHttpRequest uses credentials such as cookies, authorization
+	 * headers or TLS client certificates, see [XMLHttpRequest.withCredentials]{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials}.
+	 *
+	 * Note: This setting has no effect if you are loading files locally or from the same domain.
+	 *
+	 * @param {boolean} value - The `withCredentials` value.
+	 * @return {Loader} A reference to this instance.
+	 */
 	setWithCredentials( value ) {
 
 		this.withCredentials = value;
@@ -27163,6 +35842,12 @@ class Loader {
 
 	}
 
+	/**
+	 * Sets the base path for the asset.
+	 *
+	 * @param {string} path - The base path.
+	 * @return {Loader} A reference to this instance.
+	 */
 	setPath( path ) {
 
 		this.path = path;
@@ -27170,6 +35855,12 @@ class Loader {
 
 	}
 
+	/**
+	 * Sets the base path for dependent resources like textures.
+	 *
+	 * @param {string} resourcePath - The resource path.
+	 * @return {Loader} A reference to this instance.
+	 */
 	setResourcePath( resourcePath ) {
 
 		this.resourcePath = resourcePath;
@@ -27177,6 +35868,13 @@ class Loader {
 
 	}
 
+	/**
+	 * Sets the given request header.
+	 *
+	 * @param {Object} requestHeader - A [request header]{@link https://developer.mozilla.org/en-US/docs/Glossary/Request_header}
+	 * for configuring the HTTP request.
+	 * @return {Loader} A reference to this instance.
+	 */
 	setRequestHeader( requestHeader ) {
 
 		this.requestHeader = requestHeader;
@@ -27186,6 +35884,32 @@ class Loader {
 
 }
 
+/**
+ * Callback for onProgress in loaders.
+ *
+ *
+ * @callback onProgressCallback
+ * @param {ProgressEvent} event - An instance of `ProgressEvent` that represents the current loading status.
+ */
+
+/**
+ * Callback for onError in loaders.
+ *
+ *
+ * @callback onErrorCallback
+ * @param {Error} error - The error which occurred during the loading process.
+ */
+
+/**
+ * The default material name that is used by loaders
+ * when creating materials for loaded 3D objects.
+ *
+ * Note: Not all loaders might honor this setting.
+ *
+ * @static
+ * @type {string}
+ * @default '__DEFAULT'
+ */
 Loader.DEFAULT_MATERIAL_NAME = '__DEFAULT';
 
 const loading = {};
@@ -27953,21 +36677,57 @@ class TextureLoader extends Loader {
 
 }
 
+/**
+ * Abstract base class for lights - all other light types inherit the
+ * properties and methods described here.
+ *
+ * @abstract
+ * @augments Object3D
+ */
 class Light extends Object3D {
 
+	/**
+	 * Constructs a new light.
+	 *
+	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
+	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 */
 	constructor( color, intensity = 1 ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isLight = true;
 
 		this.type = 'Light';
 
+		/**
+		 * The light's color.
+		 *
+		 * @type {Color}
+		 */
 		this.color = new Color( color );
+
+		/**
+		 * The light's intensity.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.intensity = intensity;
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		// Empty here in base class; some subclasses override.
@@ -28008,12 +36768,39 @@ class Light extends Object3D {
 
 }
 
+/**
+ * A light source positioned directly above the scene, with color fading from
+ * the sky color to the ground color.
+ *
+ * This light cannot be used to cast shadows.
+ *
+ * ```js
+ * const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+ * scene.add( light );
+ * ```
+ *
+ * @augments Light
+ */
 class HemisphereLight extends Light {
 
+	/**
+	 * Constructs a new hemisphere light.
+	 *
+	 * @param {(number|Color|string)} [skyColor=0xffffff] - The light's sky color.
+	 * @param {(number|Color|string)} [groundColor=0xffffff] - The light's ground color.
+	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 */
 	constructor( skyColor, groundColor, intensity ) {
 
 		super( skyColor, intensity );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isHemisphereLight = true;
 
 		this.type = 'HemisphereLight';
@@ -28021,6 +36808,11 @@ class HemisphereLight extends Light {
 		this.position.copy( Object3D.DEFAULT_UP );
 		this.updateMatrix();
 
+		/**
+		 * The light's ground color.
+		 *
+		 * @type {Color}
+		 */
 		this.groundColor = new Color( groundColor );
 
 	}
@@ -28041,26 +36833,137 @@ const _projScreenMatrix$1 = /*@__PURE__*/ new Matrix4();
 const _lightPositionWorld$1 = /*@__PURE__*/ new Vector3();
 const _lookTarget$1 = /*@__PURE__*/ new Vector3();
 
+/**
+ * Abstract base class for light shadow classes. These classes
+ * represent the shadow configuration for different ligth types.
+ *
+ * @abstract
+ */
 class LightShadow {
 
+	/**
+	 * Constructs a new light shadow.
+	 *
+	 * @param {Camera} camera - The light's view of the world.
+	 */
 	constructor( camera ) {
 
+		/**
+		 * The light's view of the world.
+		 *
+		 * @type {Camera}
+		 */
 		this.camera = camera;
 
+		/**
+		 * The intensity of the shadow. The default is `1`.
+		 * Valid values are in the range `[0, 1]`.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.intensity = 1;
 
+		/**
+		 * Shadow map bias, how much to add or subtract from the normalized depth
+		 * when deciding whether a surface is in shadow.
+		 *
+		 * The default is `0`. Very tiny adjustments here (in the order of `0.0001`)
+		 * may help reduce artifacts in shadows.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.bias = 0;
+
+		/**
+		 * Defines how much the position used to query the shadow map is offset along
+		 * the object normal. The default is `0`. Increasing this value can be used to
+		 * reduce shadow acne especially in large scenes where light shines onto
+		 * geometry at a shallow angle. The cost is that shadows may appear distorted.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.normalBias = 0;
+
+		/**
+		 * Setting this to values greater than 1 will blur the edges of the shadow.
+		 * High values will cause unwanted banding effects in the shadows - a greater
+		 * map size will allow for a higher value to be used here before these effects
+		 * become visible.
+		 *
+		 * The property has no effect when the shadow map type is `PCFSoftShadowMap` and
+		 * and it is recommended to increase softness by decreasing the shadow map size instead.
+		 *
+		 * The property has no effect when the shadow map type is `BasicShadowMap`.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.radius = 1;
+
+		/**
+		 * The amount of samples to use when blurring a VSM shadow map.
+		 *
+		 * @type {number}
+		 * @default 8
+		 */
 		this.blurSamples = 8;
 
+		/**
+		 * Defines the width and height of the shadow map. Higher values give better quality
+		 * shadows at the cost of computation time. Values must be powers of two.
+		 *
+		 * @type {Vector2}
+		 * @default (512,512)
+		 */
 		this.mapSize = new Vector2( 512, 512 );
 
+		/**
+		 * The depth map generated using the internal camera; a location beyond a
+		 * pixel's depth is in shadow. Computed internally during rendering.
+		 *
+		 * @type {?RenderTarget}
+		 * @default null
+		 */
 		this.map = null;
+
+		/**
+		 * The distribution map generated using the internal camera; an occlusion is
+		 * calculated based on the distribution of depths. Computed internally during
+		 * rendering.
+		 *
+		 * @type {?RenderTarget}
+		 * @default null
+		 */
 		this.mapPass = null;
+
+		/**
+		 * Model to shadow camera space, to compute location and depth in shadow map.
+		 * This is computed internally during rendering.
+		 *
+		 * @type {Matrix4}
+		 */
 		this.matrix = new Matrix4();
 
+		/**
+		 * Enables automatic updates of the light's shadow. If you do not require dynamic
+		 * lighting / shadows, you may set this to `false`.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.autoUpdate = true;
+
+		/**
+		 * When set to `true`, shadow maps will be updated in the next `render` call.
+		 * If you have set {@link LightShadow#autoUpdate} to `false`, you will need to
+		 * set this property to `true` and then make a render call to update the light's shadow.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.needsUpdate = false;
 
 		this._frustum = new Frustum();
@@ -28076,18 +36979,34 @@ class LightShadow {
 
 	}
 
+	/**
+	 * Used internally by the renderer to get the number of viewports that need
+	 * to be rendered for this shadow.
+	 *
+	 * @return {number} The viewport count.
+	 */
 	getViewportCount() {
 
 		return this._viewportCount;
 
 	}
 
+	/**
+	 * Gets the shadow cameras frustum. Used internally by the renderer to cull objects.
+	 *
+	 * @return {Frustum} The shadow camera frustum.
+	 */
 	getFrustum() {
 
 		return this._frustum;
 
 	}
 
+	/**
+	 * Update the matrices for the camera and shadow, used internally by the renderer.
+	 *
+	 * @param {Light} light - The light for which the shadow is being rendered.
+	 */
 	updateMatrices( light ) {
 
 		const shadowCamera = this.camera;
@@ -28114,18 +37033,33 @@ class LightShadow {
 
 	}
 
+	/**
+	 * Returns a viewport definition for the given viewport index.
+	 *
+	 * @param {number} viewportIndex - The viewport index.
+	 * @return {Vector4} The viewport.
+	 */
 	getViewport( viewportIndex ) {
 
 		return this._viewports[ viewportIndex ];
 
 	}
 
+	/**
+	 * Returns the frame extends.
+	 *
+	 * @return {Vector2} The frame extends.
+	 */
 	getFrameExtents() {
 
 		return this._frameExtents;
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		if ( this.map ) {
@@ -28142,6 +37076,12 @@ class LightShadow {
 
 	}
 
+	/**
+	 * Copies the values of the given light shadow instance to this instance.
+	 *
+	 * @param {LightShadow} source - The light shadow to copy.
+	 * @return {LightShadow} A reference to this light shadow instance.
+	 */
 	copy( source ) {
 
 		this.camera = source.camera.clone();
@@ -28157,12 +37097,23 @@ class LightShadow {
 
 	}
 
+	/**
+	 * Returns a new light shadow instance with copied values from this instance.
+	 *
+	 * @return {LightShadow} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Serializes the light shadow into JSON.
+	 *
+	 * @return {Object} A JSON object representing the serialized light shadow.
+	 * @see {@link ObjectLoader#parse}
+	 */
 	toJSON() {
 
 		const object = {};
@@ -28182,14 +37133,36 @@ class LightShadow {
 
 }
 
+/**
+ * Represents the shadow configuration of directional lights.
+ *
+ * @augments LightShadow
+ */
 class SpotLightShadow extends LightShadow {
 
+	/**
+	 * Constructs a new spot light shadow.
+	 */
 	constructor() {
 
 		super( new PerspectiveCamera( 50, 1, 0.5, 500 ) );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSpotLightShadow = true;
 
+		/**
+		 * Used to focus the shadow camera. The camera's field of view is set as a
+		 * percentage of the spotlight's field-of-view. Range is `[0, 1]`.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.focus = 1;
 
 	}
@@ -28227,12 +37200,51 @@ class SpotLightShadow extends LightShadow {
 
 }
 
+/**
+ * This light gets emitted from a single point in one direction, along a cone
+ * that increases in size the further from the light it gets.
+ *
+ * This light can cast shadows - see the {@link SpotLightShadow} for details.
+ *
+ * ```js
+ * // white spotlight shining from the side, modulated by a texture
+ * const spotLight = new THREE.SpotLight( 0xffffff );
+ * spotLight.position.set( 100, 1000, 100 );
+ * spotLight.map = new THREE.TextureLoader().load( url );
+ *
+ * spotLight.castShadow = true;
+ * spotLight.shadow.mapSize.width = 1024;
+ * spotLight.shadow.mapSize.height = 1024;
+ * spotLight.shadow.camera.near = 500;
+ * spotLight.shadow.camera.far = 4000;
+ * spotLight.shadow.camera.fov = 30;s
+ * ```
+ *
+ * @augments Light
+ */
 class SpotLight extends Light {
 
+	/**
+	 * Constructs a new spot light.
+	 *
+	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
+	 * @param {number} [intensity=1] - The light's strength/intensity measured in candela (cd).
+	 * @param {number} [distance=0] - Maximum range of the light. `0` means no limit.
+	 * @param {number} [angle=Math.PI/3] - Maximum angle of light dispersion from its direction whose upper bound is `Math.PI/2`.
+	 * @param {number} [penumbra=0] - Percent of the spotlight cone that is attenuated due to penumbra. Value range is `[0,1]`.
+	 * @param {number} [decay=2] - The amount the light dims along the distance of the light.
+	 */
 	constructor( color, intensity, distance = 0, angle = Math.PI / 3, penumbra = 0, decay = 2 ) {
 
 		super( color, intensity );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSpotLight = true;
 
 		this.type = 'SpotLight';
@@ -28240,19 +37252,82 @@ class SpotLight extends Light {
 		this.position.copy( Object3D.DEFAULT_UP );
 		this.updateMatrix();
 
+		/**
+		 * The spot light points from its position to the
+		 * target's position.
+		 *
+		 * For the target's position to be changed to anything other
+		 * than the default, it must be added to the scene.
+		 *
+		 * It is also possible to set the target to be another 3D object
+		 * in the scene. The light will now track the target object.
+		 *
+		 * @type {Object3D}
+		 */
 		this.target = new Object3D();
 
+		/**
+		 * Maximum range of the light. `0` means no limit.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.distance = distance;
+
+		/**
+		 * Maximum angle of light dispersion from its direction whose upper bound is `Math.PI/2`.
+		 *
+		 * @type {number}
+		 * @default Math.PI/3
+		 */
 		this.angle = angle;
+
+		/**
+		 * Percent of the spotlight cone that is attenuated due to penumbra.
+		 * Value range is `[0,1]`.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.penumbra = penumbra;
+
+		/**
+		 * The amount the light dims along the distance of the light. In context of
+		 * physically-correct rendering the default value should not be changed.
+		 *
+		 * @type {number}
+		 * @default 2
+		 */
 		this.decay = decay;
 
+		/**
+		 * A texture used to modulate the color of the light. The spot light
+		 * color is mixed with the RGB value of this texture, with a ratio
+		 * corresponding to its alpha value. The cookie-like masking effect is
+		 * reproduced using pixel values (0, 0, 0, 1-cookie_value).
+		 *
+		 * *Warning*: This property is disabled if {@link Object3D#castShadow} is set to `false`.
+		 *
+		 * @type {?Texture}
+		 * @default null
+		 */
 		this.map = null;
 
+		/**
+		 * This property holds the light's shadow configuration.
+		 *
+		 * @type {SpotLightShadow}
+		 */
 		this.shadow = new SpotLightShadow();
 
 	}
 
+	/**
+	 * The light's power. Power is the luminous power of the light measured in lumens (lm).
+	 *  Changing the power will also change the light's intensity.
+	 *
+	 * @type {number}
+	 */
 	get power() {
 
 		// compute the light's luminous power (in lumens) from its intensity (in candela)
@@ -28297,12 +37372,27 @@ const _projScreenMatrix = /*@__PURE__*/ new Matrix4();
 const _lightPositionWorld = /*@__PURE__*/ new Vector3();
 const _lookTarget = /*@__PURE__*/ new Vector3();
 
+/**
+ * Represents the shadow configuration of point lights.
+ *
+ * @augments LightShadow
+ */
 class PointLightShadow extends LightShadow {
 
+	/**
+	 * Constructs a new point light shadow.
+	 */
 	constructor() {
 
 		super( new PerspectiveCamera( 90, 1, 0.5, 500 ) );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isPointLightShadow = true;
 
 		this._frameExtents = new Vector2( 4, 2 );
@@ -28349,6 +37439,12 @@ class PointLightShadow extends LightShadow {
 
 	}
 
+	/**
+	 * Update the matrices for the camera and shadow, used internally by the renderer.
+	 *
+	 * @param {Light} light - The light for which the shadow is being rendered.
+	 * @param {number} [viewportIndex=0] - The viewport index.
+	 */
 	updateMatrices( light, viewportIndex = 0 ) {
 
 		const camera = this.camera;
@@ -28381,23 +37477,82 @@ class PointLightShadow extends LightShadow {
 
 }
 
+/**
+ * A light that gets emitted from a single point in all directions. A common
+ * use case for this is to replicate the light emitted from a bare
+ * lightbulb.
+ *
+ * This light can cast shadows - see the {@link PointLightShadow} for details.
+ *
+ * ```js
+ * const light = new THREE.PointLight( 0xff0000, 1, 100 );
+ * light.position.set( 50, 50, 50 );
+ * scene.add( light );
+ * ```
+ *
+ * @augments Light
+ */
 class PointLight extends Light {
 
+	/**
+	 * Constructs a new point light.
+	 *
+	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
+	 * @param {number} [intensity=1] - The light's strength/intensity measured in candela (cd).
+	 * @param {number} [distance=0] - Maximum range of the light. `0` means no limit.
+	 * @param {number} [decay=2] - The amount the light dims along the distance of the light.
+	 */
 	constructor( color, intensity, distance = 0, decay = 2 ) {
 
 		super( color, intensity );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isPointLight = true;
 
 		this.type = 'PointLight';
 
+		/**
+		 * When distance is zero, light will attenuate according to inverse-square
+		 * law to infinite distance. When distance is non-zero, light will attenuate
+		 * according to inverse-square law until near the distance cutoff, where it
+		 * will then attenuate quickly and smoothly to 0. Inherently, cutoffs are not
+		 * physically correct.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.distance = distance;
+
+		/**
+		 * The amount the light dims along the distance of the light. In context of
+		 * physically-correct rendering the default value should not be changed.
+		 *
+		 * @type {number}
+		 * @default 2
+		 */
 		this.decay = decay;
 
+		/**
+		 * This property holds the light's shadow configuration.
+		 *
+		 * @type {PointLightShadow}
+		 */
 		this.shadow = new PointLightShadow();
 
 	}
 
+	/**
+	 * The light's power. Power is the luminous power of the light measured in lumens (lm).
+	 * Changing the power will also change the light's intensity.
+	 *
+	 * @type {number}
+	 */
 	get power() {
 
 		// compute the light's luminous power (in lumens) from its intensity (in candela)
@@ -28434,25 +37589,115 @@ class PointLight extends Light {
 
 }
 
+/**
+ * Camera that uses [orthographic projection]{@link https://en.wikipedia.org/wiki/Orthographic_projection}.
+ *
+ * In this projection mode, an object's size in the rendered image stays
+ * constant regardless of its distance from the camera. This can be useful
+ * for rendering 2D scenes and UI elements, amongst other things.
+ *
+ * ```js
+ * const camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+ * scene.add( camera );
+ * ```
+ *
+ * @augments Camera
+ */
 class OrthographicCamera extends Camera {
 
+	/**
+	 * Constructs a new orthographic camera.
+	 *
+	 * @param {number} [left=-1] - The left plane of the camera's frustum.
+	 * @param {number} [right=1] - The right plane of the camera's frustum.
+	 * @param {number} [top=1] - The top plane of the camera's frustum.
+	 * @param {number} [bottom=-1] - The bottom plane of the camera's frustum.
+	 * @param {number} [near=0.1] - The camera's near plane.
+	 * @param {number} [far=2000] - The camera's far plane.
+	 */
 	constructor( left = -1, right = 1, top = 1, bottom = -1, near = 0.1, far = 2000 ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isOrthographicCamera = true;
 
 		this.type = 'OrthographicCamera';
 
+		/**
+		 * The zoom factor of the camera.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.zoom = 1;
+
+		/**
+		 * Represents the frustum window specification. This property should not be edited
+		 * directly but via {@link PerspectiveCamera#setViewOffset} and {@link PerspectiveCamera#clearViewOffset}.
+		 *
+		 * @type {?Object}
+		 * @default null
+		 */
 		this.view = null;
 
+		/**
+		 * The left plane of the camera's frustum.
+		 *
+		 * @type {number}
+		 * @default -1
+		 */
 		this.left = left;
+
+		/**
+		 * The right plane of the camera's frustum.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.right = right;
+
+		/**
+		 * The top plane of the camera's frustum.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.top = top;
+
+		/**
+		 * The bottom plane of the camera's frustum.
+		 *
+		 * @type {number}
+		 * @default -1
+		 */
 		this.bottom = bottom;
 
+		/**
+		 * The camera's near plane. The valid range is greater than `0`
+		 * and less than the current value of {@link OrthographicCamera#far}.
+		 *
+		 * Note that, unlike for the {@link PerspectiveCamera}, `0` is a
+		 * valid value for an orthographic camera's near plane.
+		 *
+		 * @type {number}
+		 * @default 0.1
+		 */
 		this.near = near;
+
+		/**
+		 * The camera's far plane. Must be greater than the
+		 * current value of {@link OrthographicCamera#near}.
+		 *
+		 * @type {number}
+		 * @default 2000
+		 */
 		this.far = far;
 
 		this.updateProjectionMatrix();
@@ -28477,6 +37722,18 @@ class OrthographicCamera extends Camera {
 
 	}
 
+	/**
+	 * Sets an offset in a larger frustum. This is useful for multi-window or
+	 * multi-monitor/multi-machine setups.
+	 *
+	 * @param {number} fullWidth - The full width of multiview setup.
+	 * @param {number} fullHeight - The full height of multiview setup.
+	 * @param {number} x - The horizontal offset of the subcamera.
+	 * @param {number} y - The vertical offset of the subcamera.
+	 * @param {number} width - The width of subcamera.
+	 * @param {number} height - The height of subcamera.
+	 * @see {@link PerspectiveCamera#setViewOffset}
+	 */
 	setViewOffset( fullWidth, fullHeight, x, y, width, height ) {
 
 		if ( this.view === null ) {
@@ -28505,6 +37762,9 @@ class OrthographicCamera extends Camera {
 
 	}
 
+	/**
+	 * Removes the view offset from the projection matrix.
+	 */
 	clearViewOffset() {
 
 		if ( this.view !== null ) {
@@ -28517,6 +37777,10 @@ class OrthographicCamera extends Camera {
 
 	}
 
+	/**
+	 * Updates the camera's projection matrix. Must be called after any change of
+	 * camera properties.
+	 */
 	updateProjectionMatrix() {
 
 		const dx = ( this.right - this.left ) / ( 2 * this.zoom );
@@ -28567,24 +37831,79 @@ class OrthographicCamera extends Camera {
 
 }
 
+/**
+ * Represents the shadow configuration of directional lights.
+ *
+ * @augments LightShadow
+ */
 class DirectionalLightShadow extends LightShadow {
 
+	/**
+	 * Constructs a new directional light shadow.
+	 */
 	constructor() {
 
 		super( new OrthographicCamera( -5, 5, 5, -5, 0.5, 500 ) );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isDirectionalLightShadow = true;
 
 	}
 
 }
 
+/**
+ * A light that gets emitted in a specific direction. This light will behave
+ * as though it is infinitely far away and the rays produced from it are all
+ * parallel. The common use case for this is to simulate daylight; the sun is
+ * far enough away that its position can be considered to be infinite, and
+ * all light rays coming from it are parallel.
+ *
+ * A common point of confusion for directional lights is that setting the
+ * rotation has no effect. This is because three.js's DirectionalLight is the
+ * equivalent to what is often called a 'Target Direct Light' in other
+ * applications.
+ *
+ * This means that its direction is calculated as pointing from the light's
+ * {@link Object3D#position} to the {@link DirectionalLight#target} position
+ * (as opposed to a 'Free Direct Light' that just has a rotation
+ * component).
+ *
+ * This light can cast shadows - see the {@link DirectionalLightShadow} for details.
+ *
+ * ```js
+ * // White directional light at half intensity shining from the top.
+ * const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+ * scene.add( directionalLight );
+ * ```
+ *
+ * @augments Light
+ */
 class DirectionalLight extends Light {
 
+	/**
+	 * Constructs a new directional light.
+	 *
+	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
+	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 */
 	constructor( color, intensity ) {
 
 		super( color, intensity );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isDirectionalLight = true;
 
 		this.type = 'DirectionalLight';
@@ -28592,8 +37911,25 @@ class DirectionalLight extends Light {
 		this.position.copy( Object3D.DEFAULT_UP );
 		this.updateMatrix();
 
+		/**
+		 * The directional light points from its position to the
+		 * target's position.
+		 *
+		 * For the target's position to be changed to anything other
+		 * than the default, it must be added to the scene.
+		 *
+		 * It is also possible to set the target to be another 3D object
+		 * in the scene. The light will now track the target object.
+		 *
+		 * @type {Object3D}
+		 */
 		this.target = new Object3D();
 
+		/**
+		 * This property holds the light's shadow configuration.
+		 *
+		 * @type {DirectionalLightShadow}
+		 */
 		this.shadow = new DirectionalLightShadow();
 
 	}
@@ -28617,12 +37953,37 @@ class DirectionalLight extends Light {
 
 }
 
+/**
+ * This light globally illuminates all objects in the scene equally.
+ *
+ * It cannot be used to cast shadows as it does not have a direction.
+ *
+ * ```js
+ * const light = new THREE.AmbientLight( 0x404040 ); // soft white light
+ * scene.add( light );
+ * ```
+ *
+ * @augments Light
+ */
 class AmbientLight extends Light {
 
+	/**
+	 * Constructs a new ambient light.
+	 *
+	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
+	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 */
 	constructor( color, intensity ) {
 
 		super( color, intensity );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isAmbientLight = true;
 
 		this.type = 'AmbientLight';
@@ -28631,21 +37992,80 @@ class AmbientLight extends Light {
 
 }
 
+/**
+ * This class emits light uniformly across the face a rectangular plane.
+ * This light type can be used to simulate light sources such as bright
+ * windows or strip lighting.
+ *
+ * Important Notes:
+ *
+ * - There is no shadow support.
+ * - Only PBR materials are supported.
+ * - You have to include `RectAreaLightUniformsLib` (`WebGLRenderer`) or `RectAreaLightTexturesLib` (`WebGPURenderer`)
+ * into your app and init the uniforms/textures.
+ *
+ * ```js
+ * RectAreaLightUniformsLib.init(); // only relevant for WebGLRenderer
+ * THREE.RectAreaLightNode.setLTC( RectAreaLightTexturesLib.init() ); //  only relevant for WebGPURenderer
+ *
+ * const intensity = 1; const width = 10; const height = 10;
+ * const rectLight = new THREE.RectAreaLight( 0xffffff, intensity, width, height );
+ * rectLight.position.set( 5, 5, 0 );
+ * rectLight.lookAt( 0, 0, 0 );
+ * scene.add( rectLight )
+ * ```
+ *
+ * @augments Light
+ */
 class RectAreaLight extends Light {
 
+	/**
+	 * Constructs a new area light.
+	 *
+	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
+	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 * @param {number} [width=10] - The width of the light.
+	 * @param {number} [height=10] - The height of the light.
+	 */
 	constructor( color, intensity, width = 10, height = 10 ) {
 
 		super( color, intensity );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isRectAreaLight = true;
 
 		this.type = 'RectAreaLight';
 
+		/**
+		 * The width of the light.
+		 *
+		 * @type {number}
+		 * @default 10
+		 */
 		this.width = width;
+
+		/**
+		 * The height of the light.
+		 *
+		 * @type {number}
+		 * @default 10
+		 */
 		this.height = height;
 
 	}
 
+	/**
+	 * The light's power. Power is the luminous power of the light measured in lumens (lm).
+	 * Changing the power will also change the light's intensity.
+	 *
+	 * @type {number}
+	 */
 	get power() {
 
 		// compute the light's luminous power (in lumens) from its intensity (in nits)
@@ -28685,21 +38105,33 @@ class RectAreaLight extends Light {
 }
 
 /**
- * Primary reference:
- *   https://graphics.stanford.edu/papers/envmap/envmap.pdf
+ * Represents a third-order spherical harmonics (SH). Light probes use this class
+ * to encode lighting information.
  *
- * Secondary reference:
- *   https://www.ppsloan.org/publications/StupidSH36.pdf
+ * - Primary reference: {@link https://graphics.stanford.edu/papers/envmap/envmap.pdf}
+ * - Secondary reference: {@link https://www.ppsloan.org/publications/StupidSH36.pdf}
  */
-
-// 3-band SH defined by 9 coefficients
-
 class SphericalHarmonics3 {
 
+	/**
+	 * Constructs a new spherical harmonics.
+	 */
 	constructor() {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSphericalHarmonics3 = true;
 
+		/**
+		 * An array holding the (9) SH coefficients.
+		 *
+		 * @type {Array<Vector3>}
+		 */
 		this.coefficients = [];
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28710,6 +38142,13 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Sets the given SH coefficients to this instance by copying
+	 * the values.
+	 *
+	 * @param {Array<Vector3>} coefficients - The SH coefficients.
+	 * @return {SphericalHarmonics3} A reference to this spherical harmonics.
+	 */
 	set( coefficients ) {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28722,6 +38161,11 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Sets all SH coefficients to `0`.
+	 *
+	 * @return {SphericalHarmonics3} A reference to this spherical harmonics.
+	 */
 	zero() {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28734,8 +38178,13 @@ class SphericalHarmonics3 {
 
 	}
 
-	// get the radiance in the direction of the normal
-	// target is a Vector3
+	/**
+	 * Returns the radiance in the direction of the given normal.
+	 *
+	 * @param {Vector3} normal - The normal vector (assumed to be unit length)
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The radiance.
+	 */
 	getAt( normal, target ) {
 
 		// normal is assumed to be unit length
@@ -28763,9 +38212,14 @@ class SphericalHarmonics3 {
 
 	}
 
-	// get the irradiance (radiance convolved with cosine lobe) in the direction of the normal
-	// target is a Vector3
-	// https://graphics.stanford.edu/papers/envmap/envmap.pdf
+	/**
+	 * Returns the irradiance (radiance convolved with cosine lobe) in the
+	 * direction of the given normal.
+	 *
+	 * @param {Vector3} normal - The normal vector (assumed to be unit length)
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The irradiance.
+	 */
 	getIrradianceAt( normal, target ) {
 
 		// normal is assumed to be unit length
@@ -28793,6 +38247,12 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Adds the given SH to this instance.
+	 *
+	 * @param {SphericalHarmonics3} sh - The SH to add.
+	 * @return {SphericalHarmonics3} A reference to this spherical harmonics.
+	 */
 	add( sh ) {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28805,6 +38265,14 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * A convenience method for performing {@link SphericalHarmonics3#add} and
+	 * {@link SphericalHarmonics3#scale} at once.
+	 *
+	 * @param {SphericalHarmonics3} sh - The SH to add.
+	 * @param {number} s - The scale factor.
+	 * @return {SphericalHarmonics3} A reference to this spherical harmonics.
+	 */
 	addScaledSH( sh, s ) {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28817,6 +38285,12 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Scales this SH by the given scale factor.
+	 *
+	 * @param {number} s - The scale factor.
+	 * @return {SphericalHarmonics3} A reference to this spherical harmonics.
+	 */
 	scale( s ) {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28829,6 +38303,14 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Linear interpolates between the given SH and this instance by the given
+	 * alpha factor.
+	 *
+	 * @param {SphericalHarmonics3} sh - The SH to interpolate with.
+	 * @param {number} alpha - The alpha factor.
+	 * @return {SphericalHarmonics3} A reference to this spherical harmonics.
+	 */
 	lerp( sh, alpha ) {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28841,6 +38323,12 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Returns `true` if this spherical harmonics is equal with the given one.
+	 *
+	 * @param {SphericalHarmonics3} sh - The spherical harmonics to test for equality.
+	 * @return {boolean} Whether this spherical harmonics is equal with the given one.
+	 */
 	equals( sh ) {
 
 		for ( let i = 0; i < 9; i ++ ) {
@@ -28857,18 +38345,36 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Copies the values of the given spherical harmonics to this instance.
+	 *
+	 * @param {SphericalHarmonics3} sh - The spherical harmonics to copy.
+	 * @return {SphericalHarmonics3} A reference to this spherical harmonics.
+	 */
 	copy( sh ) {
 
 		return this.set( sh.coefficients );
 
 	}
 
+	/**
+	 * Returns a new spherical harmonics with copied values from this instance.
+	 *
+	 * @return {SphericalHarmonics3} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Sets the SH coefficients of this instance from the given array.
+	 *
+	 * @param {Array<number>} array - An array holding the SH coefficients.
+	 * @param {number} [offset=0] - The array offset where to start copying.
+	 * @return {SphericalHarmonics3} A clone of this instance.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		const coefficients = this.coefficients;
@@ -28883,6 +38389,14 @@ class SphericalHarmonics3 {
 
 	}
 
+	/**
+	 * Returns an array with the SH coefficients, or copies them into the provided
+	 * array. The coefficients are represented as numbers.
+	 *
+	 * @param {Array<number>} [array=[]] - The target array.
+	 * @param {number} [offset=0] - The array offset where to start copying.
+	 * @return {Array<number>} An array with flat SH coefficients.
+	 */
 	toArray( array = [], offset = 0 ) {
 
 		const coefficients = this.coefficients;
@@ -28897,8 +38411,12 @@ class SphericalHarmonics3 {
 
 	}
 
-	// evaluate the basis functions
-	// shBasis is an Array[ 9 ]
+	/**
+	 * Computes the SH basis for the given normal vector.
+	 *
+	 * @param {Vector3} normal - The normal.
+	 * @param {Array<number>} shBasis - The target array holding the SH basis.
+	 */
 	static getBasisAt( normal, shBasis ) {
 
 		// normal is assumed to be unit length
@@ -28924,14 +38442,51 @@ class SphericalHarmonics3 {
 
 }
 
+/**
+ * Light probes are an alternative way of adding light to a 3D scene. Unlike
+ * classical light sources (e.g. directional, point or spot lights), light
+ * probes do not emit light. Instead they store information about light
+ * passing through 3D space. During rendering, the light that hits a 3D
+ * object is approximated by using the data from the light probe.
+ *
+ * Light probes are usually created from (radiance) environment maps. The
+ * class {@link LightProbeGenerator} can be used to create light probes from
+ * cube textures or render targets. However, light estimation data could also
+ * be provided in other forms e.g. by WebXR. This enables the rendering of
+ * augmented reality content that reacts to real world lighting.
+ *
+ * The current probe implementation in three.js supports so-called diffuse
+ * light probes. This type of light probe is functionally equivalent to an
+ * irradiance environment map.
+ *
+ * @augments Light
+ */
 class LightProbe extends Light {
 
+	/**
+	 * Constructs a new light probe.
+	 *
+	 * @param {SphericalHarmonics3} sh - The spherical harmonics which represents encoded lighting information.
+	 * @param {number} [intensity=1] - The light's strength/intensity.
+	 */
 	constructor( sh = new SphericalHarmonics3(), intensity = 1 ) {
 
 		super( undefined, intensity );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isLightProbe = true;
 
+		/**
+		 * A light probe uses spherical harmonics to encode lighting information.
+		 *
+		 * @type {SphericalHarmonics3}
+		 */
 		this.sh = sh;
 
 	}
@@ -28946,6 +38501,12 @@ class LightProbe extends Light {
 
 	}
 
+	/**
+	 * Deserializes the light prove from the given JSON.
+	 *
+	 * @param {Object} json - The JSON holding the serialized light probe.
+	 * @return {LightProbe} A reference to this light probe.
+	 */
 	fromJSON( json ) {
 
 		this.intensity = json.intensity; // TODO: Move this bit to Light.fromJSON();
@@ -30872,8 +40433,18 @@ class ImageBitmapLoader extends Loader {
 
 let _context;
 
+/**
+ * Manages the global audio context in the engine.
+ *
+ * @hideconstructor
+ */
 class AudioContext {
 
+	/**
+	 * Returns the global native audio context.
+	 *
+	 * @return {AudioContext} The native audio context.
+	 */
 	static getContext() {
 
 		if ( _context === undefined ) {
@@ -30886,6 +40457,11 @@ class AudioContext {
 
 	}
 
+	/**
+	 * Allows to set the global native audio context from outside.
+	 *
+	 * @param {AudioContext} value - The native context to set.
+	 */
 	static setContext( value ) {
 
 		_context = value;
@@ -30958,20 +40534,61 @@ const _eyeRight = /*@__PURE__*/ new Matrix4();
 const _eyeLeft = /*@__PURE__*/ new Matrix4();
 const _projectionMatrix = /*@__PURE__*/ new Matrix4();
 
+/**
+ * A special type of camera that uses two perspective cameras with
+ * stereoscopic projection. Can be used for rendering stereo effects
+ * like [3D Anaglyph]{@link https://en.wikipedia.org/wiki/Anaglyph_3D} or
+ * [Parallax Barrier]{@link https://en.wikipedia.org/wiki/parallax_barrier}.
+ */
 class StereoCamera {
 
+	/**
+	 * Constructs a new stereo camera.
+	 */
 	constructor() {
 
+		/**
+		 * The type property is used for detecting the object type
+		 * in context of serialization/deserialization.
+		 *
+		 * @type {string}
+		 * @readonly
+		 */
 		this.type = 'StereoCamera';
 
+		/**
+		 * The aspect.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.aspect = 1;
 
+		/**
+		 * The eye separation which represents the distance
+		 * between the left and right camera.
+		 *
+		 * @type {number}
+		 * @default 0.064
+		 */
 		this.eyeSep = 0.064;
 
+		/**
+		 * The camera representing the left eye. This is added to layer `1` so objects to be
+		 * rendered by the left camera must also be added to this layer.
+		 *
+		 * @type {PerspectiveCamera}
+		 */
 		this.cameraL = new PerspectiveCamera();
 		this.cameraL.layers.enable( 1 );
 		this.cameraL.matrixAutoUpdate = false;
 
+		/**
+		 * The camera representing the right eye. This is added to layer `2` so objects to be
+		 * rendered by the right camera must also be added to this layer.
+		 *
+		 * @type {PerspectiveCamera}
+		 */
 		this.cameraR = new PerspectiveCamera();
 		this.cameraR.layers.enable( 2 );
 		this.cameraR.matrixAutoUpdate = false;
@@ -30988,6 +40605,11 @@ class StereoCamera {
 
 	}
 
+	/**
+	 * Updates the stereo camera based on the given perspective camera.
+	 *
+	 * @param {PerspectiveCamera} camera - The perspective camera.
+	 */
 	update( camera ) {
 
 		const cache = this._cache;
@@ -31049,14 +40671,42 @@ class StereoCamera {
 
 }
 
+/**
+ * This type of camera can be used in order to efficiently render a scene with a
+ * predefined set of cameras. This is an important performance aspect for
+ * rendering VR scenes.
+ *
+ * An instance of `ArrayCamera` always has an array of sub cameras. It's mandatory
+ * to define for each sub camera the `viewport` property which determines the
+ * part of the viewport that is rendered with this camera.
+ *
+ * @augments PerspectiveCamera
+ */
 class ArrayCamera extends PerspectiveCamera {
 
+	/**
+	 * Constructs a new array camera.
+	 *
+	 * @param {Array<PerspectiveCamera>} [array=[]] - An array of perspective sub cameras.
+	 */
 	constructor( array = [] ) {
 
 		super();
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isArrayCamera = true;
 
+		/**
+		 * An array of perspective sub cameras.
+		 *
+		 * @type {Array<PerspectiveCamera>}
+		 */
 		this.cameras = array;
 		this.index = 0;
 
@@ -31142,21 +40792,62 @@ const _quaternion$1 = /*@__PURE__*/ new Quaternion();
 const _scale$1 = /*@__PURE__*/ new Vector3();
 const _orientation$1 = /*@__PURE__*/ new Vector3();
 
+/**
+ * The class represents a virtual listener of the all positional and non-positional audio effects
+ * in the scene. A three.js application usually creates a single listener. It is a mandatory
+ * constructor parameter for audios entities like {@link Audio} and {@link PositionalAudio}.
+ *
+ * In most cases, the listener object is a child of the camera. So the 3D transformation of the
+ * camera represents the 3D transformation of the listener.
+ *
+ * @augments Object3D
+ */
 class AudioListener extends Object3D {
 
+	/**
+	 * Constructs a new audio listener.
+	 */
 	constructor() {
 
 		super();
 
 		this.type = 'AudioListener';
 
+		/**
+		 * The native audio context.
+		 *
+		 * @type {AudioContext}
+		 * @readonly
+		 */
 		this.context = AudioContext.getContext();
 
+		/**
+		 * The gain node used for volume control.
+		 *
+		 * @type {GainNode}
+		 * @readonly
+		 */
 		this.gain = this.context.createGain();
 		this.gain.connect( this.context.destination );
 
+		/**
+		 * An optional filter.
+		 *
+		 * Defined via {@AudioListener#setFilter}.
+		 *
+		 * @type {?AudioNode}
+		 * @default null
+		 * @readonly
+		 */
 		this.filter = null;
 
+		/**
+		 * Time delta values required for `linearRampToValueAtTime()` usage.
+		 *
+		 * @type {number}
+		 * @default 0
+		 * @readonly
+		 */
 		this.timeDelta = 0;
 
 		// private
@@ -31165,12 +40856,24 @@ class AudioListener extends Object3D {
 
 	}
 
+	/**
+	 * Returns the listener's input node.
+	 *
+	 * This method is used by other audio nodes to connect to this listener.
+	 *
+	 * @return {GainNode} The input node.
+	 */
 	getInput() {
 
 		return this.gain;
 
 	}
 
+	/**
+	 * Removes the current filter from this listener.
+	 *
+	 * @return {AudioListener} A reference to this listener.
+	 */
 	removeFilter() {
 
 		if ( this.filter !== null ) {
@@ -31186,12 +40889,23 @@ class AudioListener extends Object3D {
 
 	}
 
+	/**
+	 * Returns the current set filter.
+	 *
+	 * @return {AudioNode} The filter.
+	 */
 	getFilter() {
 
 		return this.filter;
 
 	}
 
+	/**
+	 * Sets the given filter to this listener.
+	 *
+	 * @param {AudioNode} value - The filter to set.
+	 * @return {AudioListener} A reference to this listener.
+	 */
 	setFilter( value ) {
 
 		if ( this.filter !== null ) {
@@ -31213,12 +40927,24 @@ class AudioListener extends Object3D {
 
 	}
 
+	/**
+	 * Returns the applications master volume.
+	 *
+	 * @return {number} The master volume.
+	 */
 	getMasterVolume() {
 
 		return this.gain.gain.value;
 
 	}
 
+	/**
+	 * Sets the applications master volume. This volume setting affects
+	 * all audio nodes in the scene.
+	 *
+	 * @param {number} value - The master volume to set.
+	 * @return {AudioListener} A reference to this listener.
+	 */
 	setMasterVolume( value ) {
 
 		this.gain.gain.setTargetAtTime( value, this.context.currentTime, 0.01 );
@@ -31267,49 +40993,240 @@ class AudioListener extends Object3D {
 
 }
 
+/**
+ * Represents a non-positional ( global ) audio object.
+ *
+ * This and related audio modules make use of the [Web Audio API]{@link https://www.w3.org/TR/webaudio-1.1/}.
+ *
+ * ```js
+ * // create an AudioListener and add it to the camera
+ * const listener = new THREE.AudioListener();
+ * camera.add( listener );
+ *
+ * // create a global audio source
+ * const sound = new THREE.Audio( listener );
+ *
+ * // load a sound and set it as the Audio object's buffer
+ * const audioLoader = new THREE.AudioLoader();
+ * audioLoader.load( 'sounds/ambient.ogg', function( buffer ) {
+ * 	sound.setBuffer( buffer );
+ * 	sound.setLoop( true );
+ * 	sound.setVolume( 0.5 );
+ * 	sound.play();
+ * });
+ * ```
+ *
+ * @augments Object3D
+ */
 class Audio extends Object3D {
 
+	/**
+	 * Constructs a new audio.
+	 *
+	 * @param {AudioListener} listener - The global audio listener.
+	 */
 	constructor( listener ) {
 
 		super();
 
 		this.type = 'Audio';
 
+		/**
+		 * The global audio listener.
+		 *
+		 * @type {AudioListener}
+		 * @readonly
+		 */
 		this.listener = listener;
+
+		/**
+		 * The audio context.
+		 *
+		 * @type {AudioContext}
+		 * @readonly
+		 */
 		this.context = listener.context;
 
+		/**
+		 * The gain node used for volume control.
+		 *
+		 * @type {GainNode}
+		 * @readonly
+		 */
 		this.gain = this.context.createGain();
 		this.gain.connect( listener.getInput() );
 
+		/**
+		 * Whether to start playback automatically or not.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
 		this.autoplay = false;
 
+		/**
+		 * A reference to an audio buffer.
+		 *
+		 * Defined via {@link Audio#setBuffer}.
+		 *
+		 * @type {?AudioBuffer}
+		 * @default null
+		 * @readonly
+		 */
 		this.buffer = null;
+
+		/**
+		 * Modify pitch, measured in cents. +/- 100 is a semitone.
+		 * +/- 1200 is an octave.
+		 *
+		 * Defined via {@link Audio#setDetune}.
+		 *
+		 * @type {number}
+		 * @default 0
+		 * @readonly
+		 */
 		this.detune = 0;
+
+		/**
+		 * Whether the audio should loop or not.
+		 *
+		 * Defined via {@link Audio#setLoop}.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 * @readonly
+		 */
 		this.loop = false;
+
+		/**
+		 * Defines where in the audio buffer the replay should
+		 * start, in seconds.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.loopStart = 0;
+
+		/**
+		 * Defines where in the audio buffer the replay should
+		 * stop, in seconds.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.loopEnd = 0;
+
+		/**
+		 * An offset to the time within the audio buffer the playback
+		 * should begin, in seconds.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
 		this.offset = 0;
+
+		/**
+		 * Overrides the default duration of the audio.
+		 *
+		 * @type {undefined|number}
+		 * @default undefined
+		 */
 		this.duration = undefined;
+
+		/**
+		 * The playback speed.
+		 *
+		 * Defined via {@link Audio#setPlaybackRate}.
+		 *
+		 * @type {number}
+		 * @readonly
+		 * @default 1
+		 */
 		this.playbackRate = 1;
+
+		/**
+		 * Indicates whether the audio is playing or not.
+		 *
+		 * This flag will be automatically set when using {@link Audio#play},
+		 * {@link Audio#pause}, {@link Audio#stop}.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default false
+		 */
 		this.isPlaying = false;
+
+		/**
+		 * Indicates whether the audio playback can be controlled
+		 * with method like {@link Audio#play} or {@link Audio#pause}.
+		 *
+		 * This flag will be automatically set when audio sources are
+		 * defined.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.hasPlaybackControl = true;
+
+		/**
+		 * Holds a reference to the current audio source.
+		 *
+		 * The property is automatically by one of the `set*()` methods.
+		 *
+		 * @type {?AudioNode}
+		 * @readonly
+		 * @default null
+		 */
 		this.source = null;
+
+		/**
+		 * Defines the source type.
+		 *
+		 * The property is automatically by one of the `set*()` methods.
+		 *
+		 * @type {('empty'|'audioNode'|'mediaNode'|'mediaStreamNode'|'buffer')}
+		 * @readonly
+		 * @default 'empty'
+		 */
 		this.sourceType = 'empty';
 
 		this._startedAt = 0;
 		this._progress = 0;
 		this._connected = false;
 
+		/**
+		 * Can be used to apply a variety of low-order filters to create
+		 * more complex sound effects e.g. via `BiquadFilterNode`.
+		 *
+		 * The property is automatically set by {@link Audio#setFilters}.
+		 *
+		 * @type {Array<AudioNode>}
+		 * @readonly
+		 */
 		this.filters = [];
 
 	}
 
+	/**
+	 * Returns the output audio node.
+	 *
+	 * @return {GainNode} The output node.
+	 */
 	getOutput() {
 
 		return this.gain;
 
 	}
 
+	/**
+	 * Sets the given audio node as the source of this instance.
+	 *
+	 * {@link Audio#sourceType} is set to `audioNode` and {@link Audio#hasPlaybackControl} to `false`.
+	 *
+	 * @param {AudioNode} audioNode - The audio node like an instance of `OscillatorNode`.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setNodeSource( audioNode ) {
 
 		this.hasPlaybackControl = false;
@@ -31321,6 +41238,14 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Sets the given media element as the source of this instance.
+	 *
+	 * {@link Audio#sourceType} is set to `mediaNode` and {@link Audio#hasPlaybackControl} to `false`.
+	 *
+	 * @param {HTMLMediaElement} mediaElement - The media element.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setMediaElementSource( mediaElement ) {
 
 		this.hasPlaybackControl = false;
@@ -31332,6 +41257,14 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Sets the given media stream as the source of this instance.
+	 *
+	 * {@link Audio#sourceType} is set to `mediaStreamNode` and {@link Audio#hasPlaybackControl} to `false`.
+	 *
+	 * @param {MediaStream} mediaStream - The media stream.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setMediaStreamSource( mediaStream ) {
 
 		this.hasPlaybackControl = false;
@@ -31343,6 +41276,14 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Sets the given audio buffer as the source of this instance.
+	 *
+	 * {@link Audio#sourceType} is set to `buffer` and {@link Audio#hasPlaybackControl} to `true`.
+	 *
+	 * @param {AudioBuffer} audioBuffer - The audio buffer.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setBuffer( audioBuffer ) {
 
 		this.buffer = audioBuffer;
@@ -31354,6 +41295,14 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Starts the playback of the audio.
+	 *
+	 * Can only be used with compatible audio sources that allow playback control.
+	 *
+	 * @param {number} [delay=0] - The delay, in seconds, at which the audio should start playing.
+	 * @return {Audio|undefined} A reference to this instance.
+	 */
 	play( delay = 0 ) {
 
 		if ( this.isPlaying === true ) {
@@ -31391,6 +41340,13 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Pauses the playback of the audio.
+	 *
+	 * Can only be used with compatible audio sources that allow playback control.
+	 *
+	 * @return {Audio|undefined} A reference to this instance.
+	 */
 	pause() {
 
 		if ( this.hasPlaybackControl === false ) {
@@ -31425,6 +41381,14 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Stops the playback of the audio.
+	 *
+	 * Can only be used with compatible audio sources that allow playback control.
+	 *
+	 * @param {number} [delay=0] - The delay, in seconds, at which the audio should stop playing.
+	 * @return {Audio|undefined} A reference to this instance.
+	 */
 	stop( delay = 0 ) {
 
 		if ( this.hasPlaybackControl === false ) {
@@ -31449,6 +41413,12 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Connects to the audio source. This is used internally on
+	 * initialisation and when setting / removing filters.
+	 *
+	 * @return {Audio} A reference to this instance.
+	 */
 	connect() {
 
 		if ( this.filters.length > 0 ) {
@@ -31475,6 +41445,12 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Disconnects to the audio source. This is used internally on
+	 * initialisation and when setting / removing filters.
+	 *
+	 * @return {Audio|undefined} A reference to this instance.
+	 */
 	disconnect() {
 
 		if ( this._connected === false ) {
@@ -31507,12 +41483,23 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Returns the current set filters.
+	 *
+	 * @return {Array<AudioNode>} The list of filters.
+	 */
 	getFilters() {
 
 		return this.filters;
 
 	}
 
+	/**
+	 * Sets an array of filters and connects them with the audio source.
+	 *
+	 * @param {Array<AudioNode>} [value] - A list of filters.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setFilters( value ) {
 
 		if ( ! value ) value = [];
@@ -31533,6 +41520,12 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Defines the detuning of oscillation in cents.
+	 *
+	 * @param {number} value - The detuning of oscillation in cents.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setDetune( value ) {
 
 		this.detune = value;
@@ -31547,24 +41540,48 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Returns the detuning of oscillation in cents.
+	 *
+	 * @return {number} The detuning of oscillation in cents.
+	 */
 	getDetune() {
 
 		return this.detune;
 
 	}
 
+	/**
+	 * Returns the first filter in the list of filters.
+	 *
+	 * @return {AudioNode|undefined} The first filter in the list of filters.
+	 */
 	getFilter() {
 
 		return this.getFilters()[ 0 ];
 
 	}
 
+	/**
+	 * Applies a single filter node to the audio.
+	 *
+	 * @param {AudioNode} [filter] - The filter to set.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setFilter( filter ) {
 
 		return this.setFilters( filter ? [ filter ] : [] );
 
 	}
 
+	/**
+	 * Sets the playback rate.
+	 *
+	 * Can only be used with compatible audio sources that allow playback control.
+	 *
+	 * @param {number} [value] - The playback rate to set.
+	 * @return {Audio|undefined} A reference to this instance.
+	 */
 	setPlaybackRate( value ) {
 
 		if ( this.hasPlaybackControl === false ) {
@@ -31586,12 +41603,20 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Returns the current playback rate.
+
+	 * @return {number} The playback rate.
+	 */
 	getPlaybackRate() {
 
 		return this.playbackRate;
 
 	}
 
+	/**
+	 * Automatically called when playback finished.
+	 */
 	onEnded() {
 
 		this.isPlaying = false;
@@ -31599,6 +41624,13 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Returns the loop flag.
+	 *
+	 * Can only be used with compatible audio sources that allow playback control.
+	 *
+	 * @return {boolean} Whether the audio should loop or not.
+	 */
 	getLoop() {
 
 		if ( this.hasPlaybackControl === false ) {
@@ -31612,6 +41644,14 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Sets the loop flag.
+	 *
+	 * Can only be used with compatible audio sources that allow playback control.
+	 *
+	 * @param {boolean} value - Whether the audio should loop or not.
+	 * @return {Audio|undefined} A reference to this instance.
+	 */
 	setLoop( value ) {
 
 		if ( this.hasPlaybackControl === false ) {
@@ -31633,6 +41673,13 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Sets the loop start value which defines where in the audio buffer the replay should
+	 * start, in seconds.
+	 *
+	 * @param {number} value - The loop start value.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setLoopStart( value ) {
 
 		this.loopStart = value;
@@ -31641,6 +41688,13 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Sets the loop end value which defines where in the audio buffer the replay should
+	 * stop, in seconds.
+	 *
+	 * @param {number} value - The loop end value.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setLoopEnd( value ) {
 
 		this.loopEnd = value;
@@ -31649,12 +41703,23 @@ class Audio extends Object3D {
 
 	}
 
+	/**
+	 * Returns the volume.
+	 *
+	 * @return {number} The volume.
+	 */
 	getVolume() {
 
 		return this.gain.gain.value;
 
 	}
 
+	/**
+	 * Sets the volume.
+	 *
+	 * @param {number} value - The volume to set.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setVolume( value ) {
 
 		this.gain.gain.setTargetAtTime( value, this.context.currentTime, 0.01 );
@@ -31707,12 +41772,54 @@ const _quaternion = /*@__PURE__*/ new Quaternion();
 const _scale = /*@__PURE__*/ new Vector3();
 const _orientation = /*@__PURE__*/ new Vector3();
 
+/**
+ * Represents a positional audio object.
+ *
+ * ```js
+ * // create an AudioListener and add it to the camera
+ * const listener = new THREE.AudioListener();
+ * camera.add( listener );
+ *
+ * // create the PositionalAudio object (passing in the listener)
+ * const sound = new THREE.PositionalAudio( listener );
+ *
+ * // load a sound and set it as the PositionalAudio object's buffer
+ * const audioLoader = new THREE.AudioLoader();
+ * audioLoader.load( 'sounds/song.ogg', function( buffer ) {
+ * 	sound.setBuffer( buffer );
+ * 	sound.setRefDistance( 20 );
+ * 	sound.play();
+ * });
+ *
+ * // create an object for the sound to play from
+ * const sphere = new THREE.SphereGeometry( 20, 32, 16 );
+ * const material = new THREE.MeshPhongMaterial( { color: 0xff2200 } );
+ * const mesh = new THREE.Mesh( sphere, material );
+ * scene.add( mesh );
+ *
+ * // finally add the sound to the mesh
+ * mesh.add( sound );
+ *
+ * @augments Audio
+ */
 class PositionalAudio extends Audio {
 
+	/**
+	 * Constructs a positional audio.
+	 *
+	 * @param {AudioListener} listener - The global audio listener.
+	 */
 	constructor( listener ) {
 
 		super( listener );
 
+		/**
+		 * The panner node represents the location, direction, and behavior of an audio
+		 * source in 3D space.
+		 *
+		 * @type {PannerNode}
+		 * @readonly
+		 */
 		this.panner = this.context.createPanner();
 		this.panner.panningModel = 'HRTF';
 		this.panner.connect( this.gain );
@@ -31725,6 +41832,8 @@ class PositionalAudio extends Audio {
 
 		this.panner.connect( this.gain );
 
+		return this;
+
 	}
 
 	disconnect() {
@@ -31732,6 +41841,8 @@ class PositionalAudio extends Audio {
 		super.disconnect();
 
 		this.panner.disconnect( this.gain );
+
+		return this;
 
 	}
 
@@ -31741,12 +41852,25 @@ class PositionalAudio extends Audio {
 
 	}
 
+	/**
+	 * Returns the current reference distance.
+	 *
+	 * @return {number} The reference distance.
+	 */
 	getRefDistance() {
 
 		return this.panner.refDistance;
 
 	}
 
+	/**
+	 * Defines the reference distance for reducing volume as the audio source moves
+	 * further from the listener – i.e. the distance at which the volume reduction
+	 * starts taking effect.
+	 *
+	 * @param {number} value - The reference distance to set.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setRefDistance( value ) {
 
 		this.panner.refDistance = value;
@@ -31755,12 +41879,23 @@ class PositionalAudio extends Audio {
 
 	}
 
+	/**
+	 * Returns the current rolloff factor.
+	 *
+	 * @return {number} The rolloff factor.
+	 */
 	getRolloffFactor() {
 
 		return this.panner.rolloffFactor;
 
 	}
 
+	/**
+	 * Defines how quickly the volume is reduced as the source moves away from the listener.
+	 *
+	 * @param {number} value - The rolloff factor.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setRolloffFactor( value ) {
 
 		this.panner.rolloffFactor = value;
@@ -31769,12 +41904,27 @@ class PositionalAudio extends Audio {
 
 	}
 
+	/**
+	 * Returns the current distance model.
+	 *
+	 * @return {('linear'|'inverse'|'exponential')} The distance model.
+	 */
 	getDistanceModel() {
 
 		return this.panner.distanceModel;
 
 	}
 
+	/**
+	 * Defines which algorithm to use to reduce the volume of the audio source
+	 * as it moves away from the listener.
+	 *
+	 * Read [the spec]{@link https://www.w3.org/TR/webaudio-1.1/#enumdef-distancemodeltype}
+	 * for more details.
+	 *
+	 * @param {('linear'|'inverse'|'exponential')} value - The distance model to set.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setDistanceModel( value ) {
 
 		this.panner.distanceModel = value;
@@ -31783,12 +41933,26 @@ class PositionalAudio extends Audio {
 
 	}
 
+	/**
+	 * Returns the current max distance.
+	 *
+	 * @return {number} The max distance.
+	 */
 	getMaxDistance() {
 
 		return this.panner.maxDistance;
 
 	}
 
+	/**
+	 * Defines the maximum distance between the audio source and the listener,
+	 * after which the volume is not reduced any further.
+	 *
+	 * This value is used only by the `linear` distance model.
+	 *
+	 * @param {number} value - The max distance.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setMaxDistance( value ) {
 
 		this.panner.maxDistance = value;
@@ -31797,6 +41961,14 @@ class PositionalAudio extends Audio {
 
 	}
 
+	/**
+	 * Sets the directional cone in which the audio can be listened.
+	 *
+	 * @param {number} coneInnerAngle - An angle, in degrees, of a cone inside of which there will be no volume reduction.
+	 * @param {number} coneOuterAngle - An angle, in degrees, of a cone outside of which the volume will be reduced by a constant value, defined by the `coneOuterGain` parameter.
+	 * @param {number} coneOuterGain - The amount of volume reduction outside the cone defined by the `coneOuterAngle`. When set to `0`, no sound can be heard.
+	 * @return {Audio} A reference to this instance.
+	 */
 	setDirectionalCone( coneInnerAngle, coneOuterAngle, coneOuterGain ) {
 
 		this.panner.coneInnerAngle = coneInnerAngle;
@@ -31843,20 +42015,72 @@ class PositionalAudio extends Audio {
 
 }
 
+/**
+ * This class can be used to analyse audio data.
+ *
+ * ```js
+ * // create an AudioListener and add it to the camera
+ * const listener = new THREE.AudioListener();
+ * camera.add( listener );
+ *
+ * // create an Audio source
+ * const sound = new THREE.Audio( listener );
+ *
+ * // load a sound and set it as the Audio object's buffer
+ * const audioLoader = new THREE.AudioLoader();
+ * audioLoader.load( 'sounds/ambient.ogg', function( buffer ) {
+ * 	sound.setBuffer( buffer );
+ * 	sound.setLoop(true);
+ * 	sound.setVolume(0.5);
+ * 	sound.play();
+ * });
+ *
+ * // create an AudioAnalyser, passing in the sound and desired fftSize
+ * const analyser = new THREE.AudioAnalyser( sound, 32 );
+ *
+ * // get the average frequency of the sound
+ * const data = analyser.getAverageFrequency();
+ * ```
+ */
 class AudioAnalyser {
 
+	/**
+	 * Constructs a new audio analyzer.
+	 *
+	 * @param {Audio} audio - The audio to analyze.
+	 * @param {Audio} [fftSize=2048] - The window size in samples that is used when performing a Fast Fourier Transform (FFT) to get frequency domain data.
+	 */
 	constructor( audio, fftSize = 2048 ) {
 
+		/**
+		 * The global audio listener.
+		 *
+		 * @type {AnalyserNode}
+		 */
 		this.analyser = audio.context.createAnalyser();
 		this.analyser.fftSize = fftSize;
 
+		/**
+		 * Holds the analyzed data.
+		 *
+		 * @type {Uint8Array}
+		 */
 		this.data = new Uint8Array( this.analyser.frequencyBinCount );
 
 		audio.getOutput().connect( this.analyser );
 
 	}
 
-
+	/**
+	 * Returns an array with frequency data of the audio.
+	 *
+	 * Each item in the array represents the decibel value for a specific frequency.
+	 * The frequencies are spread linearly from 0 to 1/2 of the sample rate.
+	 * For example, for 48000 sample rate, the last item of the array will represent
+	 * the decibel value for 24000 Hz.
+	 *
+	 * @return {Uint8Array} The frequency data.
+	 */
 	getFrequencyData() {
 
 		this.analyser.getByteFrequencyData( this.data );
@@ -31865,6 +42089,11 @@ class AudioAnalyser {
 
 	}
 
+	/**
+	 * Returns the average of the frequencies returned by {@link AudioAnalyser#getFrequencyData}.
+	 *
+	 * @return {number} The average frequency.
+	 */
 	getAverageFrequency() {
 
 		let value = 0;
@@ -35125,23 +45354,54 @@ function intersect( object, raycaster, intersects, recursive ) {
 }
 
 /**
- * Ref: https://en.wikipedia.org/wiki/Spherical_coordinate_system
- *
- * phi (the polar angle) is measured from the positive y-axis. The positive y-axis is up.
- * theta (the azimuthal angle) is measured from the positive z-axis.
+ * This class can be used to represent points in 3D space as
+ * [Spherical coordinates]{@link https://en.wikipedia.org/wiki/Spherical_coordinate_system}.
  */
 class Spherical {
 
+	/**
+	 * Constructs a new spherical.
+	 *
+	 * @param {number} [radius=1] - The radius, or the Euclidean distance (straight-line distance) from the point to the origin.
+	 * @param {number} [phi=0] - The polar angle in radians from the y (up) axis.
+	 * @param {number} [theta=0] - The equator/azimuthal angle in radians around the y (up) axis.
+	 */
 	constructor( radius = 1, phi = 0, theta = 0 ) {
 
+		/**
+		 * The radius, or the Euclidean distance (straight-line distance) from the point to the origin.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.radius = radius;
-		this.phi = phi; // polar angle
-		this.theta = theta; // azimuthal angle
 
-		return this;
+		/**
+		 * The polar angle in radians from the y (up) axis.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
+		this.phi = phi;
+
+		/**
+		 * The equator/azimuthal angle in radians around the y (up) axis.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
+		this.theta = theta;
 
 	}
 
+	/**
+	 * Sets the spherical components by copying the given values.
+	 *
+	 * @param {number} radius - The radius.
+	 * @param {number} phi - The polar angle.
+	 * @param {number} theta - The azimuthal angle.
+	 * @return {Spherical} A reference to this spherical.
+	 */
 	set( radius, phi, theta ) {
 
 		this.radius = radius;
@@ -35152,6 +45412,12 @@ class Spherical {
 
 	}
 
+	/**
+	 * Copies the values of the given spherical to this instance.
+	 *
+	 * @param {Spherical} other - The spherical to copy.
+	 * @return {Spherical} A reference to this spherical.
+	 */
 	copy( other ) {
 
 		this.radius = other.radius;
@@ -35162,7 +45428,12 @@ class Spherical {
 
 	}
 
-	// restrict phi to be between EPS and PI-EPS
+	/**
+	 * Restricts the polar angle [page:.phi phi] to be between `0.000001` and pi -
+	 * `0.000001`.
+	 *
+	 * @return {Spherical} A reference to this spherical.
+	 */
 	makeSafe() {
 
 		const EPS = 0.000001;
@@ -35172,12 +45443,27 @@ class Spherical {
 
 	}
 
+	/**
+	 * Sets the spherical components from the given vector which is assumed to hold
+	 * Cartesian coordinates.
+	 *
+	 * @param {Vector3} v - The vector to set.
+	 * @return {Spherical} A reference to this spherical.
+	 */
 	setFromVector3( v ) {
 
 		return this.setFromCartesianCoords( v.x, v.y, v.z );
 
 	}
 
+	/**
+	 * Sets the spherical components from the given Cartesian coordinates.
+	 *
+	 * @param {number} x - The x value.
+	 * @param {number} y - The x value.
+	 * @param {number} z - The x value.
+	 * @return {Spherical} A reference to this spherical.
+	 */
 	setFromCartesianCoords( x, y, z ) {
 
 		this.radius = Math.sqrt( x * x + y * y + z * z );
@@ -35198,6 +45484,11 @@ class Spherical {
 
 	}
 
+	/**
+	 * Returns a new spherical with copied values from this instance.
+	 *
+	 * @return {Spherical} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -35207,21 +45498,54 @@ class Spherical {
 }
 
 /**
- * Ref: https://en.wikipedia.org/wiki/Cylindrical_coordinate_system
+ * This class can be used to represent points in 3D space as
+ * [Cylindrical coordinates]{@link https://en.wikipedia.org/wiki/Cylindrical_coordinate_system}.
  */
-
 class Cylindrical {
 
+	/**
+	 * Constructs a new cylindrical.
+	 *
+	 * @param {number} [radius=1] - The distance from the origin to a point in the x-z plane.
+	 * @param {number} [theta=0] - A counterclockwise angle in the x-z plane measured in radians from the positive z-axis.
+	 * @param {number} [y=0] - The height above the x-z plane.
+	 */
 	constructor( radius = 1, theta = 0, y = 0 ) {
 
-		this.radius = radius; // distance from the origin to a point in the x-z plane
-		this.theta = theta; // counterclockwise angle in the x-z plane measured in radians from the positive z-axis
-		this.y = y; // height above the x-z plane
+		/**
+		 * The distance from the origin to a point in the x-z plane.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
+		this.radius = radius;
 
-		return this;
+		/**
+		 * A counterclockwise angle in the x-z plane measured in radians from the positive z-axis.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
+		this.theta = theta;
+
+		/**
+		 * The height above the x-z plane.
+		 *
+		 * @type {number}
+		 * @default 0
+		 */
+		this.y = y;
 
 	}
 
+	/**
+	 * Sets the cylindrical components by copying the given values.
+	 *
+	 * @param {number} radius - The radius.
+	 * @param {number} theta - The theta angle.
+	 * @param {number} y - The height value.
+	 * @return {Cylindrical} A reference to this cylindrical.
+	 */
 	set( radius, theta, y ) {
 
 		this.radius = radius;
@@ -35232,6 +45556,12 @@ class Cylindrical {
 
 	}
 
+	/**
+	 * Copies the values of the given cylindrical to this instance.
+	 *
+	 * @param {Cylindrical} other - The cylindrical to copy.
+	 * @return {Cylindrical} A reference to this cylindrical.
+	 */
 	copy( other ) {
 
 		this.radius = other.radius;
@@ -35242,12 +45572,27 @@ class Cylindrical {
 
 	}
 
+	/**
+	 * Sets the cylindrical components from the given vector which is assumed to hold
+	 * Cartesian coordinates.
+	 *
+	 * @param {Vector3} v - The vector to set.
+	 * @return {Cylindrical} A reference to this cylindrical.
+	 */
 	setFromVector3( v ) {
 
 		return this.setFromCartesianCoords( v.x, v.y, v.z );
 
 	}
 
+	/**
+	 * Sets the cylindrical components from the given Cartesian coordinates.
+	 *
+	 * @param {number} x - The x value.
+	 * @param {number} y - The x value.
+	 * @param {number} z - The x value.
+	 * @return {Cylindrical} A reference to this cylindrical.
+	 */
 	setFromCartesianCoords( x, y, z ) {
 
 		this.radius = Math.sqrt( x * x + z * z );
@@ -35258,6 +45603,11 @@ class Cylindrical {
 
 	}
 
+	/**
+	 * Returns a new cylindrical with copied values from this instance.
+	 *
+	 * @return {Cylindrical} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -35266,12 +45616,60 @@ class Cylindrical {
 
 }
 
+/**
+ * Represents a 2x2 matrix.
+ *
+ * A Note on Row-Major and Column-Major Ordering:
+ *
+ * The constructor and {@link Matrix2#set} method take arguments in
+ * [row-major]{@link https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order}
+ * order, while internally they are stored in the {@link Matrix2#elements} array in column-major order.
+ * This means that calling:
+ * ```js
+ * const m = new THREE.Matrix2();
+ * m.set( 11, 12,
+ *        21, 22 );
+ * ```
+ * will result in the elements array containing:
+ * ```js
+ * m.elements = [ 11, 21,
+ *                12, 22 ];
+ * ```
+ * and internally all calculations are performed using column-major ordering.
+ * However, as the actual ordering makes no difference mathematically and
+ * most people are used to thinking about matrices in row-major order, the
+ * three.js documentation shows matrices in row-major order. Just bear in
+ * mind that if you are reading the source code, you'll have to take the
+ * transpose of any matrices outlined here to make sense of the calculations.
+ */
 class Matrix2 {
 
+	/**
+	 * Constructs a new 2x2 matrix. The arguments are supposed to be
+	 * in row-major order. If no arguments are provided, the constructor
+	 * initializes the matrix as an identity matrix.
+	 *
+	 * @param {number} [n11] - 1-1 matrix element.
+	 * @param {number} [n12] - 1-2 matrix element.
+	 * @param {number} [n21] - 2-1 matrix element.
+	 * @param {number} [n22] - 2-2 matrix element.
+	 */
 	constructor( n11, n12, n21, n22 ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		Matrix2.prototype.isMatrix2 = true;
 
+		/**
+		 * A column-major list of matrix values.
+		 *
+		 * @type {Array<number>}
+		 */
 		this.elements = [
 			1, 0,
 			0, 1,
@@ -35285,6 +45683,11 @@ class Matrix2 {
 
 	}
 
+	/**
+	 * Sets this matrix to the 2x2 identity matrix.
+	 *
+	 * @return {Matrix2} A reference to this matrix.
+	 */
 	identity() {
 
 		this.set(
@@ -35296,6 +45699,13 @@ class Matrix2 {
 
 	}
 
+	/**
+	 * Sets the elements of the matrix from the given array.
+	 *
+	 * @param {Array<number>} array - The matrix elements in column-major order.
+	 * @param {number} [offset=0] - Index of the first element in the array.
+	 * @return {Matrix2} A reference to this matrix.
+	 */
 	fromArray( array, offset = 0 ) {
 
 		for ( let i = 0; i < 4; i ++ ) {
@@ -35308,6 +45718,16 @@ class Matrix2 {
 
 	}
 
+	/**
+	 * Sets the elements of the matrix.The arguments are supposed to be
+	 * in row-major order.
+	 *
+	 * @param {number} n11 - 1-1 matrix element.
+	 * @param {number} n12 - 1-2 matrix element.
+	 * @param {number} n21 - 2-1 matrix element.
+	 * @param {number} n22 - 2-2 matrix element.
+	 * @return {Matrix2} A reference to this matrix.
+	 */
 	set( n11, n12, n21, n22 ) {
 
 		const te = this.elements;
@@ -35323,17 +45743,52 @@ class Matrix2 {
 
 const _vector$4 = /*@__PURE__*/ new Vector2();
 
+/**
+ * Represents an axis-aligned bounding box (AABB) in 2D space.
+ */
 class Box2 {
 
+	/**
+	 * Constructs a new bounding box.
+	 *
+	 * @param {Vector2} [min=(Infinity,Infinity)] - A vector representing the lower boundary of the box.
+	 * @param {Vector2} [max=(-Infinity,-Infinity)] - A vector representing the upper boundary of the box.
+	 */
 	constructor( min = new Vector2( + Infinity, + Infinity ), max = new Vector2( - Infinity, - Infinity ) ) {
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isBox2 = true;
 
+		/**
+		 * The lower boundary of the box.
+		 *
+		 * @type {Vector2}
+		 */
 		this.min = min;
+
+		/**
+		 * The upper boundary of the box.
+		 *
+		 * @type {Vector2}
+		 */
 		this.max = max;
 
 	}
 
+	/**
+	 * Sets the lower and upper boundaries of this box.
+	 * Please note that this method only copies the values from the given objects.
+	 *
+	 * @param {Vector2} min - The lower boundary of the box.
+	 * @param {Vector2} max - The upper boundary of the box.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	set( min, max ) {
 
 		this.min.copy( min );
@@ -35343,6 +45798,13 @@ class Box2 {
 
 	}
 
+	/**
+	 * Sets the upper and lower bounds of this box so it encloses the position data
+	 * in the given array.
+	 *
+	 * @param {Array<Vector2>} points - An array holding 2D position data as instances of {@link Vector2}.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	setFromPoints( points ) {
 
 		this.makeEmpty();
@@ -35357,6 +45819,14 @@ class Box2 {
 
 	}
 
+	/**
+	 * Centers this box on the given center vector and sets this box's width, height and
+	 * depth to the given size values.
+	 *
+	 * @param {Vector2} center - The center of the box.
+	 * @param {Vector2} size - The x and y dimensions of the box.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	setFromCenterAndSize( center, size ) {
 
 		const halfSize = _vector$4.copy( size ).multiplyScalar( 0.5 );
@@ -35367,12 +45837,23 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns a new box with copied values from this instance.
+	 *
+	 * @return {Box2} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
 
 	}
 
+	/**
+	 * Copies the values of the given box to this instance.
+	 *
+	 * @param {Box2} box - The box to copy.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	copy( box ) {
 
 		this.min.copy( box.min );
@@ -35382,6 +45863,11 @@ class Box2 {
 
 	}
 
+	/**
+	 * Makes this box empty which means in encloses a zero space in 2D.
+	 *
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	makeEmpty() {
 
 		this.min.x = this.min.y = + Infinity;
@@ -35391,6 +45877,13 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns true if this box includes zero points within its bounds.
+	 * Note that a box with equal lower and upper bounds still includes one
+	 * point, the one both bounds share.
+	 *
+	 * @return {boolean} Whether this box is empty or not.
+	 */
 	isEmpty() {
 
 		// this is a more robust check for empty than ( volume <= 0 ) because volume can get positive with two negative axes
@@ -35399,18 +45892,36 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns the center point of this box.
+	 *
+	 * @param {Vector2} target - The target vector that is used to store the method's result.
+	 * @return {Vector2} The center point.
+	 */
 	getCenter( target ) {
 
 		return this.isEmpty() ? target.set( 0, 0 ) : target.addVectors( this.min, this.max ).multiplyScalar( 0.5 );
 
 	}
 
+	/**
+	 * Returns the dimensions of this box.
+	 *
+	 * @param {Vector2} target - The target vector that is used to store the method's result.
+	 * @return {Vector2} The size.
+	 */
 	getSize( target ) {
 
 		return this.isEmpty() ? target.set( 0, 0 ) : target.subVectors( this.max, this.min );
 
 	}
 
+	/**
+	 * Expands the boundaries of this box to include the given point.
+	 *
+	 * @param {Vector2} point - The point that should be included by the bounding box.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	expandByPoint( point ) {
 
 		this.min.min( point );
@@ -35420,6 +45931,15 @@ class Box2 {
 
 	}
 
+	/**
+	 * Expands this box equilaterally by the given vector. The width of this
+	 * box will be expanded by the x component of the vector in both
+	 * directions. The height of this box will be expanded by the y component of
+	 * the vector in both directions.
+	 *
+	 * @param {Vector2} vector - The vector that should expand the bounding box.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	expandByVector( vector ) {
 
 		this.min.sub( vector );
@@ -35429,6 +45949,13 @@ class Box2 {
 
 	}
 
+	/**
+	 * Expands each dimension of the box by the given scalar. If negative, the
+	 * dimensions of the box will be contracted.
+	 *
+	 * @param {number} scalar - The scalar value that should expand the bounding box.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	expandByScalar( scalar ) {
 
 		this.min.addScalar( - scalar );
@@ -35438,6 +45965,12 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns `true` if the given point lies within or on the boundaries of this box.
+	 *
+	 * @param {Vector2} point - The point to test.
+	 * @return {boolean} Whether the bounding box contains the given point or not.
+	 */
 	containsPoint( point ) {
 
 		return point.x >= this.min.x && point.x <= this.max.x &&
@@ -35445,6 +45978,13 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns `true` if this bounding box includes the entirety of the given bounding box.
+	 * If this box and the given one are identical, this function also returns `true`.
+	 *
+	 * @param {Box2} box - The bounding box to test.
+	 * @return {boolean} Whether the bounding box contains the given bounding box or not.
+	 */
 	containsBox( box ) {
 
 		return this.min.x <= box.min.x && box.max.x <= this.max.x &&
@@ -35452,6 +45992,13 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns a point as a proportion of this box's width and height.
+	 *
+	 * @param {Vector2} point - A point in 2D space.
+	 * @param {Vector2} target - The target vector that is used to store the method's result.
+	 * @return {Vector2} A point as a proportion of this box's width and height.
+	 */
 	getParameter( point, target ) {
 
 		// This can potentially have a divide by zero if the box
@@ -35464,6 +46011,12 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns `true` if the given bounding box intersects with this bounding box.
+	 *
+	 * @param {Box2} box - The bounding box to test.
+	 * @return {boolean} Whether the given bounding box intersects with this bounding box.
+	 */
 	intersectsBox( box ) {
 
 		// using 4 splitting planes to rule out intersections
@@ -35473,18 +46026,41 @@ class Box2 {
 
 	}
 
+	/**
+	 * Clamps the given point within the bounds of this box.
+	 *
+	 * @param {Vector2} point - The point to clamp.
+	 * @param {Vector2} target - The target vector that is used to store the method's result.
+	 * @return {Vector2} The clamped point.
+	 */
 	clampPoint( point, target ) {
 
 		return target.copy( point ).clamp( this.min, this.max );
 
 	}
 
+	/**
+	 * Returns the euclidean distance from any edge of this box to the specified point. If
+	 * the given point lies inside of this box, the distance will be `0`.
+	 *
+	 * @param {Vector2} point - The point to compute the distance to.
+	 * @return {number} The euclidean distance.
+	 */
 	distanceToPoint( point ) {
 
 		return this.clampPoint( point, _vector$4 ).distanceTo( point );
 
 	}
 
+	/**
+	 * Computes the intersection of this bounding box and the given one, setting the upper
+	 * bound of this box to the lesser of the two boxes' upper bounds and the
+	 * lower bound of this box to the greater of the two boxes' lower bounds. If
+	 * there's no overlap, makes this box empty.
+	 *
+	 * @param {Box2} box - The bounding box to intersect with.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	intersect( box ) {
 
 		this.min.max( box.min );
@@ -35496,6 +46072,14 @@ class Box2 {
 
 	}
 
+	/**
+	 * Computes the union of this box and another and the given one, setting the upper
+	 * bound of this box to the greater of the two boxes' upper bounds and the
+	 * lower bound of this box to the lesser of the two boxes' lower bounds.
+	 *
+	 * @param {Box2} box - The bounding box that will be unioned with this instance.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	union( box ) {
 
 		this.min.min( box.min );
@@ -35505,6 +46089,13 @@ class Box2 {
 
 	}
 
+	/**
+	 * Adds the given offset to both the upper and lower bounds of this bounding box,
+	 * effectively moving it in 2D space.
+	 *
+	 * @param {Vector2} offset - The offset that should be used to translate the bounding box.
+	 * @return {Box2} A reference to this bounding box.
+	 */
 	translate( offset ) {
 
 		this.min.add( offset );
@@ -35514,6 +46105,12 @@ class Box2 {
 
 	}
 
+	/**
+	 * Returns `true` if this bounding box is equal with the given one.
+	 *
+	 * @param {Box2} box - The box to test for equality.
+	 * @return {boolean} Whether this bounding box is equal with the given one.
+	 */
 	equals( box ) {
 
 		return box.min.equals( this.min ) && box.max.equals( this.max );
@@ -35525,15 +46122,42 @@ class Box2 {
 const _startP = /*@__PURE__*/ new Vector3();
 const _startEnd = /*@__PURE__*/ new Vector3();
 
+/**
+ * An analytical line segment in 3D space represented by a start and end point.
+ */
 class Line3 {
 
+	/**
+	 * Constructs a new line segment.
+	 *
+	 * @param {Vector3} [start=(0,0,0)] - Start of the line segment.
+	 * @param {Vector3} [end=(0,0,0)] - End of the line segment.
+	 */
 	constructor( start = new Vector3(), end = new Vector3() ) {
 
+		/**
+		 * Start of the line segment.
+		 *
+		 * @type {Vector3}
+		 */
 		this.start = start;
+
+		/**
+		 * End of the line segment.
+		 *
+		 * @type {Vector3}
+		 */
 		this.end = end;
 
 	}
 
+	/**
+	 * Sets the start and end values by copying the given vectors.
+	 *
+	 * @param {Vector3} start - The start point.
+	 * @param {Vector3} end - The end point.
+	 * @return {Line3} A reference to this line segment.
+	 */
 	set( start, end ) {
 
 		this.start.copy( start );
@@ -35543,6 +46167,12 @@ class Line3 {
 
 	}
 
+	/**
+	 * Copies the values of the given line segment to this instance.
+	 *
+	 * @param {Line3} line - The line segment to copy.
+	 * @return {Line3} A reference to this line segment.
+	 */
 	copy( line ) {
 
 		this.start.copy( line.start );
@@ -35552,36 +46182,72 @@ class Line3 {
 
 	}
 
+	/**
+	 * Returns the center of the line segment.
+	 *
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The center point.
+	 */
 	getCenter( target ) {
 
 		return target.addVectors( this.start, this.end ).multiplyScalar( 0.5 );
 
 	}
 
+	/**
+	 * Returns the delta vector of the line segment's start and end point.
+	 *
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The delta vector.
+	 */
 	delta( target ) {
 
 		return target.subVectors( this.end, this.start );
 
 	}
 
+	/**
+	 * Returns the squared Euclidean distance between the line' start and end point.
+	 *
+	 * @return {number} The squared Euclidean distance.
+	 */
 	distanceSq() {
 
 		return this.start.distanceToSquared( this.end );
 
 	}
 
+	/**
+	 * Returns the Euclidean distance between the line' start and end point.
+	 *
+	 * @return {number} The Euclidean distance.
+	 */
 	distance() {
 
 		return this.start.distanceTo( this.end );
 
 	}
 
+	/**
+	 * Returns a vector at a certain position along the line segment.
+	 *
+	 * @param {number} t - A value between `[0,1]` to represent a position along the line segment.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
+	 * @return {Vector3} The delta vector.
+	 */
 	at( t, target ) {
 
 		return this.delta( target ).multiplyScalar( t ).add( this.start );
 
 	}
 
+	/**
+	 * Returns a point parameter based on the closest point as projected on the line segment.
+	 *
+	 * @param {Vector3} point - The point for which to return a point parameter.
+	 * @param {boolean} clampToLine - Whether to clamp the result to the range `[0,1]` or not.
+	 * @return {number} The point parameter.
+	 */
 	closestPointToPointParameter( point, clampToLine ) {
 
 		_startP.subVectors( point, this.start );
@@ -35602,6 +46268,14 @@ class Line3 {
 
 	}
 
+	/**
+	 * Returns the closets point on the line for a given point.
+	 *
+	 * @param {Vector3} point - The point to compute the closest point on the line for.
+	 * @param {boolean} clampToLine - Whether to clamp the result to the range `[0,1]` or not.
+	 * @param {Vector3} target -  The target vector that is used to store the method's result.
+	 * @return {Vector3} The closest point on the line.
+	 */
 	closestPointToPoint( point, clampToLine, target ) {
 
 		const t = this.closestPointToPointParameter( point, clampToLine );
@@ -35610,6 +46284,12 @@ class Line3 {
 
 	}
 
+	/**
+	 * Applies a 4x4 transformation matrix to this line segment.
+	 *
+	 * @param {Matrix4} matrix - The transformation matrix.
+	 * @return {Line3} A reference to this line segment.
+	 */
 	applyMatrix4( matrix ) {
 
 		this.start.applyMatrix4( matrix );
@@ -35619,12 +46299,23 @@ class Line3 {
 
 	}
 
+	/**
+	 * Returns `true` if this line segment is equal with the given one.
+	 *
+	 * @param {Line3} line - The line segment to test for equality.
+	 * @return {boolean} Whether this line segment is equal with the given one.
+	 */
 	equals( line ) {
 
 		return line.start.equals( this.start ) && line.end.equals( this.end );
 
 	}
 
+	/**
+	 * Returns a new line segment with copied values from this instance.
+	 *
+	 * @return {Line3} A clone of this instance.
+	 */
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -35635,16 +46326,48 @@ class Line3 {
 
 const _vector$3 = /*@__PURE__*/ new Vector3();
 
+/**
+ * This displays a cone shaped helper object for a {@link SpotLight}.
+ *
+ * ```js
+ * const spotLight = new THREE.SpotLight( 0xffffff );
+ * spotLight.position.set( 10, 10, 10 );
+ * scene.add( spotLight );
+ *
+ * const spotLightHelper = new THREE.SpotLightHelper( spotLight );
+ * scene.add( spotLightHelper );
+ * ```
+ *
+ * @augments Object3D
+ */
 class SpotLightHelper extends Object3D {
 
+	/**
+	 * Constructs a new spot light helper.
+	 *
+	 * @param {HemisphereLight} light - The light to be visualized.
+	 * @param {number|Color|string} [color] - The helper's color. If not set, the helper will take
+	 * the color of the light.
+	 */
 	constructor( light, color ) {
 
 		super();
 
+		/**
+		 * The light being visualized.
+		 *
+		 * @type {SpotLight}
+		 */
 		this.light = light;
 
 		this.matrixAutoUpdate = false;
 
+		/**
+		 * The color parameter passed in the constructor.
+		 * If not set, the helper will take the color of the light.
+		 *
+		 * @type {number|Color|string}
+		 */
 		this.color = color;
 
 		this.type = 'SpotLightHelper';
@@ -35682,6 +46405,10 @@ class SpotLightHelper extends Object3D {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.cone.geometry.dispose();
@@ -35689,6 +46416,10 @@ class SpotLightHelper extends Object3D {
 
 	}
 
+	/**
+	 * Updates the helper to match the position and direction of the
+	 * light being visualized.
+	 */
 	update() {
 
 		this.light.updateWorldMatrix( true, false );
@@ -35739,9 +46470,24 @@ const _vector$2 = /*@__PURE__*/ new Vector3();
 const _boneMatrix = /*@__PURE__*/ new Matrix4();
 const _matrixWorldInv = /*@__PURE__*/ new Matrix4();
 
-
+/**
+ * A helper object to assist with visualizing a {@link Skeleton}.
+ *
+ * ```js
+ * const helper = new THREE.SkeletonHelper( skinnedMesh );
+ * scene.add( helper );
+ * ```
+ *
+ * @augments LineSegments
+ */
 class SkeletonHelper extends LineSegments {
 
+	/**
+	 * Constructs a new hemisphere light helper.
+	 *
+	 * @param {Object3D} object -  Usually an instance of {@link SkinnedMesh}. However, any 3D object
+	 * can be used if it represents a hierarchy of bones (see {@link Bone}).
+	 */
 	constructor( object ) {
 
 		const bones = getBoneList( object );
@@ -35776,11 +46522,29 @@ class SkeletonHelper extends LineSegments {
 
 		super( geometry, material );
 
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
 		this.isSkeletonHelper = true;
 
 		this.type = 'SkeletonHelper';
 
+		/**
+		 * The object being visualized.
+		 *
+		 * @type {Object3D}
+		 */
 		this.root = object;
+
+		/**
+		 * he list of bones that the helper visualizes.
+		 *
+		 * @type {Array<Bone>}
+		 */
 		this.bones = bones;
 
 		this.matrix = object.matrixWorld;
@@ -35823,6 +46587,10 @@ class SkeletonHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -35845,7 +46613,7 @@ function getBoneList( object ) {
 
 	for ( let i = 0; i < object.children.length; i ++ ) {
 
-		boneList.push.apply( boneList, getBoneList( object.children[ i ] ) );
+		boneList.push( ...getBoneList( object.children[ i ] ) );
 
 	}
 
@@ -35853,8 +46621,32 @@ function getBoneList( object ) {
 
 }
 
+/**
+ * This displays a helper object consisting of a spherical mesh for
+ * visualizing an instance of {@link PointLight}.
+ *
+ * ```js
+ * const pointLight = new THREE.PointLight( 0xff0000, 1, 100 );
+ * pointLight.position.set( 10, 10, 10 );
+ * scene.add( pointLight );
+ *
+ * const sphereSize = 1;
+ * const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
+ * scene.add( pointLightHelper );
+ * ```
+ *
+ * @augments Mesh
+ */
 class PointLightHelper extends Mesh {
 
+	/**
+	 * Constructs a new point light helper.
+	 *
+	 * @param {PointLight} light - The light to be visualized.
+	 * @param {number} [sphereSize=1] - The size of the sphere helper.
+	 * @param {number|Color|string} [color] - The helper's color. If not set, the helper will take
+	 * the color of the light.
+	 */
 	constructor( light, sphereSize, color ) {
 
 		const geometry = new SphereGeometry( sphereSize, 4, 2 );
@@ -35862,8 +46654,19 @@ class PointLightHelper extends Mesh {
 
 		super( geometry, material );
 
+		/**
+		 * The light being visualized.
+		 *
+		 * @type {HemisphereLight}
+		 */
 		this.light = light;
 
+		/**
+		 * The color parameter passed in the constructor.
+		 * If not set, the helper will take the color of the light.
+		 *
+		 * @type {number|Color|string}
+		 */
 		this.color = color;
 
 		this.type = 'PointLightHelper';
@@ -35899,6 +46702,10 @@ class PointLightHelper extends Mesh {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -35906,6 +46713,10 @@ class PointLightHelper extends Mesh {
 
 	}
 
+	/**
+	 * Updates the helper to match the position of the
+	 * light being visualized.
+	 */
 	update() {
 
 		this.light.updateWorldMatrix( true, false );
@@ -35943,17 +46754,48 @@ const _vector$1 = /*@__PURE__*/ new Vector3();
 const _color1 = /*@__PURE__*/ new Color();
 const _color2 = /*@__PURE__*/ new Color();
 
+/**
+ * Creates a visual aid consisting of a spherical mesh for a
+ * given {@link HemisphereLight}.
+ *
+ * ```js
+ * const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+ * const helper = new THREE.HemisphereLightHelper( light, 5 );
+ * scene.add( helper );
+ * ```
+ *
+ * @augments Object3D
+ */
 class HemisphereLightHelper extends Object3D {
 
+	/**
+	 * Constructs a new hemisphere light helper.
+	 *
+	 * @param {HemisphereLight} light - The light to be visualized.
+	 * @param {number} [size=1] - The size of the mesh used to visualize the light.
+	 * @param {number|Color|string} [color] - The helper's color. If not set, the helper will take
+	 * the color of the light.
+	 */
 	constructor( light, size, color ) {
 
 		super();
 
+		/**
+		 * The light being visualized.
+		 *
+		 * @type {HemisphereLight}
+		 */
 		this.light = light;
 
 		this.matrix = light.matrixWorld;
 		this.matrixAutoUpdate = false;
 
+		/**
+		 * The color parameter passed in the constructor.
+		 * If not set, the helper will take the color of the light.
+		 *
+		 * @type {number|Color|string}
+		 */
 		this.color = color;
 
 		this.type = 'HemisphereLightHelper';
@@ -35975,6 +46817,10 @@ class HemisphereLightHelper extends Object3D {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.children[ 0 ].geometry.dispose();
@@ -35982,6 +46828,10 @@ class HemisphereLightHelper extends Object3D {
 
 	}
 
+	/**
+	 * Updates the helper to match the position and direction of the
+	 * light being visualized.
+	 */
 	update() {
 
 		const mesh = this.children[ 0 ];
@@ -36017,8 +46867,30 @@ class HemisphereLightHelper extends Object3D {
 
 }
 
+/**
+ * The helper is an object to define grids. Grids are two-dimensional
+ * arrays of lines.
+ *
+ * ```js
+ * const size = 10;
+ * const divisions = 10;
+ *
+ * const gridHelper = new THREE.GridHelper( size, divisions );
+ * scene.add( gridHelper );
+ * ```
+ *
+ * @augments LineSegments
+ */
 class GridHelper extends LineSegments {
 
+	/**
+	 * Constructs a new grid helper.
+	 *
+	 * @param {number} [size=10] - The size of the grid.
+	 * @param {number} [divisions=10] - The number of divisions across the grid.
+	 * @param {number|Color|string} [color1=0x444444] - The color of the center line.
+	 * @param {number|Color|string} [color2=0x888888] - The color of the lines of the grid.
+	 */
 	constructor( size = 10, divisions = 10, color1 = 0x444444, color2 = 0x888888 ) {
 
 		color1 = new Color( color1 );
@@ -36056,6 +46928,10 @@ class GridHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -36065,8 +46941,34 @@ class GridHelper extends LineSegments {
 
 }
 
+/**
+ * This helper is an object to define polar grids. Grids are
+ * two-dimensional arrays of lines.
+ *
+ * ```js
+ * const radius = 10;
+ * const sectors = 16;
+ * const rings = 8;
+ * const divisions = 64;
+ *
+ * const helper = new THREE.PolarGridHelper( radius, sectors, rings, divisions );
+ * scene.add( helper );
+ * ```
+ *
+ * @augments LineSegments
+ */
 class PolarGridHelper extends LineSegments {
 
+	/**
+	 * Constructs a new polar grid helper.
+	 *
+	 * @param {number} [radius=10] - The radius of the polar grid. This can be any positive number.
+	 * @param {number} [sectors=16] - The number of sectors the grid will be divided into. This can be any positive integer.
+	 * @param {number} [rings=16] - The number of rings. This can be any positive integer.
+	 * @param {number} [divisions=64] - The number of line segments used for each circle. This can be any positive integer.
+	 * @param {number|Color|string} [color1=0x444444] - The first color used for grid elements.
+	 * @param {number|Color|string} [color2=0x888888] -  The second color used for grid elements.
+	 */
 	constructor( radius = 10, sectors = 16, rings = 8, divisions = 64, color1 = 0x444444, color2 = 0x888888 ) {
 
 		color1 = new Color( color1 );
@@ -36144,6 +47046,10 @@ class PolarGridHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -36157,17 +47063,51 @@ const _v1 = /*@__PURE__*/ new Vector3();
 const _v2 = /*@__PURE__*/ new Vector3();
 const _v3 = /*@__PURE__*/ new Vector3();
 
+/**
+ * Helper object to assist with visualizing a {@link DirectionalLight}'s
+ * effect on the scene. This consists of plane and a line representing the
+ * light's position and direction.
+ *
+ * ```js
+ * const light = new THREE.DirectionalLight( 0xFFFFFF );
+ * scene.add( light );
+ *
+ * const helper = new THREE.DirectionalLightHelper( light, 5 );
+ * scene.add( helper );
+ * ```
+ *
+ * @augments Object3D
+ */
 class DirectionalLightHelper extends Object3D {
 
+	/**
+	 * Constructs a new directional light helper.
+	 *
+	 * @param {DirectionalLight} light - The light to be visualized.
+	 * @param {number} [size=1] - The dimensions of the plane.
+	 * @param {number|Color|string} [color] - The helper's color. If not set, the helper will take
+	 * the color of the light.
+	 */
 	constructor( light, size, color ) {
 
 		super();
 
+		/**
+		 * The light being visualized.
+		 *
+		 * @type {DirectionalLight}
+		 */
 		this.light = light;
 
 		this.matrix = light.matrixWorld;
 		this.matrixAutoUpdate = false;
 
+		/**
+		 * The color parameter passed in the constructor.
+		 * If not set, the helper will take the color of the light.
+		 *
+		 * @type {number|Color|string}
+		 */
 		this.color = color;
 
 		this.type = 'DirectionalLightHelper';
@@ -36185,12 +47125,22 @@ class DirectionalLightHelper extends Object3D {
 
 		const material = new LineBasicMaterial( { fog: false, toneMapped: false } );
 
+		/**
+		 * Contains the line showing the location of the directional light.
+		 *
+		 * @type {Line}
+		 */
 		this.lightPlane = new Line( geometry, material );
 		this.add( this.lightPlane );
 
 		geometry = new BufferGeometry();
 		geometry.setAttribute( 'position', new Float32BufferAttribute( [ 0, 0, 0, 0, 0, 1 ], 3 ) );
 
+		/**
+		 * Represents the target line of the directional light.
+		 *
+		 * @type {Line}
+		 */
 		this.targetLine = new Line( geometry, material );
 		this.add( this.targetLine );
 
@@ -36198,6 +47148,10 @@ class DirectionalLightHelper extends Object3D {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.lightPlane.geometry.dispose();
@@ -36207,6 +47161,10 @@ class DirectionalLightHelper extends Object3D {
 
 	}
 
+	/**
+	 * Updates the helper to match the position and direction of the
+	 * light being visualized.
+	 */
 	update() {
 
 		this.light.updateWorldMatrix( true, false );
@@ -36241,14 +47199,28 @@ const _vector = /*@__PURE__*/ new Vector3();
 const _camera = /*@__PURE__*/ new Camera();
 
 /**
- *	- shows frustum, line of sight and up of the camera
- *	- suitable for fast updates
- * 	- based on frustum visualization in lightgl.js shadowmap example
- *		https://github.com/evanw/lightgl.js/blob/master/tests/shadowmap.html
+ * This helps with visualizing what a camera contains in its frustum. It
+ * visualizes the frustum of a camera using a line segments.
+ *
+ * Based on frustum visualization in [lightgl.js shadowmap example]{@link https://github.com/evanw/lightgl.js/blob/master/tests/shadowmap.html}.
+ *
+ * `CameraHelper` must be a child of the scene.
+ *
+ * ```js
+ * const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+ * const helper = new THREE.CameraHelper( camera );
+ * scene.add( helper );
+ * ```
+ *
+ * @augments LineSegments
  */
-
 class CameraHelper extends LineSegments {
 
+	/**
+	 * Constructs a new arrow helper.
+	 *
+	 * @param {Camera} camera - The camera to visualize.
+	 */
 	constructor( camera ) {
 
 		const geometry = new BufferGeometry();
@@ -36335,12 +47307,22 @@ class CameraHelper extends LineSegments {
 
 		this.type = 'CameraHelper';
 
+		/**
+		 * The camera being visualized.
+		 *
+		 * @type {Camera}
+		 */
 		this.camera = camera;
 		if ( this.camera.updateProjectionMatrix ) this.camera.updateProjectionMatrix();
 
 		this.matrix = camera.matrixWorld;
 		this.matrixAutoUpdate = false;
 
+		/**
+		 * This contains the points used to visualize the camera.
+		 *
+		 * @type {Object<string,Array<number>>}
+		 */
 		this.pointMap = pointMap;
 
 		this.update();
@@ -36357,6 +47339,15 @@ class CameraHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Defines the colors of the helper.
+	 *
+	 * @param {Color} frustum - The frustum line color.
+	 * @param {Color} cone - The cone line color.
+	 * @param {Color} up - The up line color.
+	 * @param {Color} target - The target line color.
+	 * @param {Color} cross - The cross line color.
+	 */
 	setColors( frustum, cone, up, target, cross ) {
 
 		const geometry = this.geometry;
@@ -36414,6 +47405,9 @@ class CameraHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Updates the helper based on the projection matrix of the camera.
+	 */
 	update() {
 
 		const geometry = this.geometry;
@@ -36469,6 +47463,10 @@ class CameraHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -36501,8 +47499,31 @@ function setPoint( point, pointMap, geometry, camera, x, y, z ) {
 
 const _box = /*@__PURE__*/ new Box3();
 
+/**
+ * Helper object to graphically show the world-axis-aligned bounding box
+ * around an object. The actual bounding box is handled with {@link Box3},
+ * this is just a visual helper for debugging. It can be automatically
+ * resized with {@link BoxHelper#update} when the object it's created from
+ * is transformed. Note that the object must have a geometry for this to work,
+ * so it won't work with sprites.
+ *
+ * ```js
+ * const sphere = new THREE.SphereGeometry();
+ * const object = new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( 0xff0000 ) );
+ * const box = new THREE.BoxHelper( object, 0xffff00 );
+ * scene.add( box );
+ * ```
+ *
+ * @augments LineSegments
+ */
 class BoxHelper extends LineSegments {
 
+	/**
+	 * Constructs a new box helper.
+	 *
+	 * @param {Object3D} [object] - The 3D object to show the world-axis-aligned bounding box.
+	 * @param {number|Color|string} [color=0xffff00] - The box's color.
+	 */
 	constructor( object, color = 0xffff00 ) {
 
 		const indices = new Uint16Array( [ 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ] );
@@ -36514,6 +47535,11 @@ class BoxHelper extends LineSegments {
 
 		super( geometry, new LineBasicMaterial( { color: color, toneMapped: false } ) );
 
+		/**
+		 * The 3D object being visualized.
+		 *
+		 * @type {Object3D}
+		 */
 		this.object = object;
 		this.type = 'BoxHelper';
 
@@ -36523,13 +47549,11 @@ class BoxHelper extends LineSegments {
 
 	}
 
-	update( object ) {
-
-		if ( object !== undefined ) {
-
-			console.warn( 'THREE.BoxHelper: .update() has no longer arguments.' );
-
-		}
+	/**
+	 * Updates the helper's geometry to match the dimensions of the object,
+	 * including any children.
+	 */
+	update() {
 
 		if ( this.object !== undefined ) {
 
@@ -36576,6 +47600,12 @@ class BoxHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Updates the wireframe box for the passed object.
+	 *
+	 * @param {Object3D} object - The 3D object to create the helper for.
+	 * @return {BoxHelper} A reference to this instance.
+	 */
 	setFromObject( object ) {
 
 		this.object = object;
@@ -36595,6 +47625,10 @@ class BoxHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -36604,8 +47638,27 @@ class BoxHelper extends LineSegments {
 
 }
 
+/**
+ * A helper object to visualize an instance of {@link Box3}.
+ *
+ * ```js
+ * const box = new THREE.Box3();
+ * box.setFromCenterAndSize( new THREE.Vector3( 1, 1, 1 ), new THREE.Vector3( 2, 1, 3 ) );
+ *
+ * const helper = new THREE.Box3Helper( box, 0xffff00 );
+ * scene.add( helper )
+ * ```
+ *
+ * @augments LineSegments
+ */
 class Box3Helper extends LineSegments {
 
+	/**
+	 * Constructs a new box3 helper.
+	 *
+	 * @param {Box3} box - The box to visualize.
+	 * @param {number|Color|string} [color=0xffff00] - The box's color.
+	 */
 	constructor( box, color = 0xffff00 ) {
 
 		const indices = new Uint16Array( [ 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ] );
@@ -36620,6 +47673,11 @@ class Box3Helper extends LineSegments {
 
 		super( geometry, new LineBasicMaterial( { color: color, toneMapped: false } ) );
 
+		/**
+		 * The box being visualized.
+		 *
+		 * @type {Box3}
+		 */
 		this.box = box;
 
 		this.type = 'Box3Helper';
@@ -36644,6 +47702,10 @@ class Box3Helper extends LineSegments {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -36653,8 +47715,26 @@ class Box3Helper extends LineSegments {
 
 }
 
+/**
+ * A helper object to visualize an instance of {@link Plane}.
+ *
+ * ```js
+ * const plane = new THREE.Plane( new THREE.Vector3( 1, 1, 0.2 ), 3 );
+ * const helper = new THREE.PlaneHelper( plane, 1, 0xffff00 );
+ * scene.add( helper );
+ * ```
+ *
+ * @augments Line
+ */
 class PlaneHelper extends Line {
 
+	/**
+	 * Constructs a new plane helper.
+	 *
+	 * @param {Plane} plane - The plane to be visualized.
+	 * @param {number} [size=1] - The side length of plane helper.
+	 * @param {number|Color|string} [hex=0xffff00] - The helper's color.
+	 */
 	constructor( plane, size = 1, hex = 0xffff00 ) {
 
 		const color = hex;
@@ -36669,8 +47749,19 @@ class PlaneHelper extends Line {
 
 		this.type = 'PlaneHelper';
 
+		/**
+		 * The plane being visualized.
+		 *
+		 * @type {Plane}
+		 */
 		this.plane = plane;
 
+		/**
+		 * The side length of plane helper.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
 		this.size = size;
 
 		const positions2 = [ 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0 ];
@@ -36697,6 +47788,10 @@ class PlaneHelper extends Line {
 
 	}
 
+	/**
+	 * Updates the helper to match the position and direction of the
+	 * light being visualized.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -36711,10 +47806,37 @@ class PlaneHelper extends Line {
 const _axis = /*@__PURE__*/ new Vector3();
 let _lineGeometry, _coneGeometry;
 
+/**
+ * An 3D arrow object for visualizing directions.
+ *
+ * ```js
+ * const dir = new THREE.Vector3( 1, 2, 0 );
+ *
+ * //normalize the direction vector (convert to vector of length 1)
+ * dir.normalize();
+ *
+ * const origin = new THREE.Vector3( 0, 0, 0 );
+ * const length = 1;
+ * const hex = 0xffff00;
+ *
+ * const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
+ * scene.add( arrowHelper );
+ * ```
+ *
+ * @augments Object3D
+ */
 class ArrowHelper extends Object3D {
 
-	// dir is assumed to be normalized
-
+	/**
+	 * Constructs a new arrow helper.
+	 *
+	 * @param {Vector3} [dir=(0, 0, 1)] - The (normalized) direction vector.
+	 * @param {Vector3} [origin=(0, 0, 0)] - Point at which the arrow starts.
+	 * @param {number} [length=1] - Length of the arrow in world units.
+	 * @param {(number|Color|string)} [color=0xffff00] - Color of the arrow.
+	 * @param {number} [headLength=length*0.2] - The length of the head of the arrow.
+	 * @param {number} [headWidth=headLength*0.2] - The width of the head of the arrow.
+	 */
 	constructor( dir = new Vector3( 0, 0, 1 ), origin = new Vector3( 0, 0, 0 ), length = 1, color = 0xffff00, headLength = length * 0.2, headWidth = headLength * 0.2 ) {
 
 		super();
@@ -36733,10 +47855,20 @@ class ArrowHelper extends Object3D {
 
 		this.position.copy( origin );
 
+		/**
+		 * The line part of the arrow helper.
+		 *
+		 * @type {Line}
+		 */
 		this.line = new Line( _lineGeometry, new LineBasicMaterial( { color: color, toneMapped: false } ) );
 		this.line.matrixAutoUpdate = false;
 		this.add( this.line );
 
+		/**
+		 * The cone part of the arrow helper.
+		 *
+		 * @type {Mesh}
+		 */
 		this.cone = new Mesh( _coneGeometry, new MeshBasicMaterial( { color: color, toneMapped: false } ) );
 		this.cone.matrixAutoUpdate = false;
 		this.add( this.cone );
@@ -36746,6 +47878,11 @@ class ArrowHelper extends Object3D {
 
 	}
 
+	/**
+	 * Sets the direction of the helper.
+	 *
+	 * @param {Vector3} dir - The normalized direction vector.
+	 */
 	setDirection( dir ) {
 
 		// dir is assumed to be normalized
@@ -36770,6 +47907,13 @@ class ArrowHelper extends Object3D {
 
 	}
 
+	/**
+	 * Sets the length of the helper.
+	 *
+	 * @param {number} length - Length of the arrow in world units.
+	 * @param {number} [headLength=length*0.2] - The length of the head of the arrow.
+	 * @param {number} [headWidth=headLength*0.2] - The width of the head of the arrow.
+	 */
 	setLength( length, headLength = length * 0.2, headWidth = headLength * 0.2 ) {
 
 		this.line.scale.set( 1, Math.max( 0.0001, length - headLength ), 1 ); // see #17458
@@ -36781,6 +47925,11 @@ class ArrowHelper extends Object3D {
 
 	}
 
+	/**
+	 * Sets the color of the helper.
+	 *
+	 * @param {number|Color|string} color - The color to set.
+	 */
 	setColor( color ) {
 
 		this.line.material.color.set( color );
@@ -36799,6 +47948,10 @@ class ArrowHelper extends Object3D {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.line.geometry.dispose();
@@ -36810,8 +47963,24 @@ class ArrowHelper extends Object3D {
 
 }
 
+/**
+ * An axis object to visualize the 3 axes in a simple way.
+ * The X axis is red. The Y axis is green. The Z axis is blue.
+ *
+ * ```js
+ * const axesHelper = new THREE.AxesHelper( 5 );
+ * scene.add( axesHelper );
+ * ```
+ *
+ * @augments LineSegments
+ */
 class AxesHelper extends LineSegments {
 
+	/**
+	 * Constructs a new axes helper.
+	 *
+	 * @param {number} [size=1] - Size of the lines representing the axes.
+	 */
 	constructor( size = 1 ) {
 
 		const vertices = [
@@ -36838,6 +48007,14 @@ class AxesHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Defines the colors of the axes helper.
+	 *
+	 * @param {number|Color|string} xAxisColor - The color for the x axis.
+	 * @param {number|Color|string} yAxisColor - The color for the y axis.
+	 * @param {number|Color|string} zAxisColor - The color for the z axis.
+	 * @return {AxesHelper} A reference to this axes helper.
+	 */
 	setColors( xAxisColor, yAxisColor, zAxisColor ) {
 
 		const color = new Color();
@@ -36861,6 +48038,10 @@ class AxesHelper extends LineSegments {
 
 	}
 
+	/**
+	 * Frees the GPU-related resources allocated by this instance. Call this
+	 * method whenever this instance is no longer used in your app.
+	 */
 	dispose() {
 
 		this.geometry.dispose();
@@ -36870,19 +48051,51 @@ class AxesHelper extends LineSegments {
 
 }
 
+/**
+ * This class is used to convert a series of paths to an array of
+ * shapes. It is specifically used in context of fonts and SVG.
+ */
 class ShapePath {
 
+	/**
+	 * Constructs a new shape path.
+	 */
 	constructor() {
 
 		this.type = 'ShapePath';
 
+		/**
+		 * The color of the shape.
+		 *
+		 * @type {Color}
+		 */
 		this.color = new Color();
 
+		/**
+		 * The paths that have been generated for this shape.
+		 *
+		 * @type {Array<Path>}
+		 * @default null
+		 */
 		this.subPaths = [];
+
+		/**
+		 * The current path that is being generated.
+		 *
+		 * @type {?Path}
+		 * @default null
+		 */
 		this.currentPath = null;
 
 	}
 
+	/**
+	 * Creates a new path and moves it current point to the given one.
+	 *
+	 * @param {number} x - The x coordinate.
+	 * @param {number} y - The y coordinate.
+	 * @return {ShapePath} A reference to this shape path.
+	 */
 	moveTo( x, y ) {
 
 		this.currentPath = new Path();
@@ -36893,6 +48106,14 @@ class ShapePath {
 
 	}
 
+	/**
+	 * Adds an instance of {@link LineCurve} to the path by connecting
+	 * the current point with the given one.
+	 *
+	 * @param {number} x - The x coordinate of the end point.
+	 * @param {number} y - The y coordinate of the end point.
+	 * @return {ShapePath} A reference to this shape path.
+	 */
 	lineTo( x, y ) {
 
 		this.currentPath.lineTo( x, y );
@@ -36901,6 +48122,16 @@ class ShapePath {
 
 	}
 
+	/**
+	 * Adds an instance of {@link QuadraticBezierCurve} to the path by connecting
+	 * the current point with the given one.
+	 *
+	 * @param {number} aCPx - The x coordinate of the control point.
+	 * @param {number} aCPy - The y coordinate of the control point.
+	 * @param {number} aX - The x coordinate of the end point.
+	 * @param {number} aY - The y coordinate of the end point.
+	 * @return {ShapePath} A reference to this shape path.
+	 */
 	quadraticCurveTo( aCPx, aCPy, aX, aY ) {
 
 		this.currentPath.quadraticCurveTo( aCPx, aCPy, aX, aY );
@@ -36909,6 +48140,18 @@ class ShapePath {
 
 	}
 
+	/**
+	 * Adds an instance of {@link CubicBezierCurve} to the path by connecting
+	 * the current point with the given one.
+	 *
+	 * @param {number} aCP1x - The x coordinate of the first control point.
+	 * @param {number} aCP1y - The y coordinate of the first control point.
+	 * @param {number} aCP2x - The x coordinate of the second control point.
+	 * @param {number} aCP2y - The y coordinate of the second control point.
+	 * @param {number} aX - The x coordinate of the end point.
+	 * @param {number} aY - The y coordinate of the end point.
+	 * @return {ShapePath} A reference to this shape path.
+	 */
 	bezierCurveTo( aCP1x, aCP1y, aCP2x, aCP2y, aX, aY ) {
 
 		this.currentPath.bezierCurveTo( aCP1x, aCP1y, aCP2x, aCP2y, aX, aY );
@@ -36917,6 +48160,13 @@ class ShapePath {
 
 	}
 
+	/**
+	 * Adds an instance of {@link SplineCurve} to the path by connecting
+	 * the current point with the given list of points.
+	 *
+	 * @param {Array<Vector2>} pts - An array of points in 2D space.
+	 * @return {ShapePath} A reference to this shape path.
+	 */
 	splineThru( pts ) {
 
 		this.currentPath.splineThru( pts );
@@ -36925,6 +48175,13 @@ class ShapePath {
 
 	}
 
+	/**
+	 * Converts the paths into an array of shapes.
+	 *
+	 * @param {boolean} isCCW - By default solid shapes are  defined clockwise (CW) and holes are defined counterclockwise (CCW).
+	 * If this flag is set to `true`, then those are flipped.
+	 * @return {Array<Shape>} An array of shapes.
+	 */
 	toShapes( isCCW ) {
 
 		function toShapesNoHoles( inSubpaths ) {
@@ -37154,35 +48411,116 @@ class ShapePath {
 
 }
 
+/**
+ * Abstract base class for controls.
+ *
+ * @abstract
+ * @augments EventDispatcher
+ */
 class Controls extends EventDispatcher {
 
+	/**
+	 * Constructs a new controls instance.
+	 *
+	 * @param {Object3D} object - The object that is managed by the controls.
+	 * @param {?HTMLDOMElement} domElement - The HTML element used for event listeners.
+	 */
 	constructor( object, domElement = null ) {
 
 		super();
 
+		/**
+		 * The object that is managed by the controls.
+		 *
+		 * @type {Object3D}
+		 */
 		this.object = object;
+
+		/**
+		 * The HTML element used for event listeners.
+		 *
+		 * @type {?HTMLDOMElement}
+		 * @default null
+		 */
 		this.domElement = domElement;
 
+		/**
+		 * Whether the controls responds to user input or not.
+		 *
+		 * @type {boolean}
+		 * @default true
+		 */
 		this.enabled = true;
 
+		/**
+		 * The internal state of the controls.
+		 *
+		 * @type {number}
+		 * @default -1
+		 */
 		this.state = -1;
 
+		/**
+		 * This object defines the keyboard input of the controls.
+		 *
+		 * @type {Object}
+		 */
 		this.keys = {};
+
+		/**
+		 * This object defines what type of actions are assigned to the available mouse buttons.
+		 * It depends on the control implementation what kind of mouse buttons and actions are supported.
+		 *
+		 * @type {{LEFT: ?number, MIDDLE: ?number, RIGHT: ?number}}
+		 */
 		this.mouseButtons = { LEFT: null, MIDDLE: null, RIGHT: null };
+
+		/**
+		 * This object defines what type of actions are assigned to what kind of touch interaction.
+		 * It depends on the control implementation what kind of touch interaction and actions are supported.
+		 *
+		 * @type {{ONE: ?number, TWO: ?number}}
+		 */
 		this.touches = { ONE: null, TWO: null };
 
 	}
 
+	/**
+	 * Connects the controls to the DOM. This method has so called "side effects" since
+	 * it adds the module's event listeners to the DOM.
+	 */
 	connect() {}
 
+	/**
+	 * Disconnects the controls from the DOM.
+	 */
 	disconnect() {}
 
+	/**
+	 * Call this method if you no longer want use to the controls. It frees all internal
+	 * resources and removes all event listeners.
+	 */
 	dispose() {}
 
+	/**
+	 * Controls should implement this method if they have to update their internal state
+	 * per simulation step.
+	 *
+	 * @param {number} [delta] - The time delta in seconds.
+	 */
 	update( /* delta */ ) {}
 
 }
 
+/**
+ * Scales the texture as large as possible within its surface without cropping
+ * or stretching the texture. The method preserves the original aspect ratio of
+ * the texture. Akin to CSS `object-fit: contain`
+ *
+ * @param {Texture} texture - The texture.
+ * @param {number} aspect - The texture's aspect ratio.
+ * @return {Texture} The updated texture.
+ */
 function contain( texture, aspect ) {
 
 	const imageAspect = ( texture.image && texture.image.width ) ? texture.image.width / texture.image.height : 1;
@@ -37209,6 +48547,15 @@ function contain( texture, aspect ) {
 
 }
 
+/**
+ * Scales the texture to the smallest possible size to fill the surface, leaving
+ * no empty space. The method preserves the original aspect ratio of the texture.
+ * Akin to CSS `object-fit: cover`.
+ *
+ * @param {Texture} texture - The texture.
+ * @param {number} aspect - The texture's aspect ratio.
+ * @return {Texture} The updated texture.
+ */
 function cover( texture, aspect ) {
 
 	const imageAspect = ( texture.image && texture.image.width ) ? texture.image.width / texture.image.height : 1;
@@ -37235,6 +48582,12 @@ function cover( texture, aspect ) {
 
 }
 
+/**
+ * Configures the texture to the default transformation. Akin to CSS `object-fit: fill`.
+ *
+ * @param {Texture} texture - The texture.
+ * @return {Texture} The updated texture.
+ */
 function fill( texture ) {
 
 	texture.repeat.x = 1;
@@ -37247,17 +48600,14 @@ function fill( texture ) {
 
 }
 
-
-
 /**
- * Given the width, height, format, and type of a texture. Determines how many
- * bytes must be used to represent the texture.
+ * Determines how many bytes must be used to represent the texture.
  *
- * @param {Number} width
- * @param {Number} height
- * @param {Number} format
- * @param {Number} type
- * @return {Number} The number of bytes required to represent the texture.
+ * @param {number} width - The width of the texture.
+ * @param {number} height - The height of the texture.
+ * @param {number} format - The texture's format.
+ * @param {number} type - The texture's type.
+ * @return {number} The byte length.
  */
 function getByteLength( width, height, format, type ) {
 
@@ -37389,12 +48739,71 @@ function getTextureTypeByteLength( type ) {
 
 }
 
-const TextureUtils = {
-	contain,
-	cover,
-	fill,
-	getByteLength
-};
+/**
+ * A class containing utility functions for textures.
+ *
+ * @hideconstructor
+ */
+class TextureUtils {
+
+	/**
+	 * Scales the texture as large as possible within its surface without cropping
+	 * or stretching the texture. The method preserves the original aspect ratio of
+	 * the texture. Akin to CSS `object-fit: contain`
+	 *
+	 * @param {Texture} texture - The texture.
+	 * @param {number} aspect - The texture's aspect ratio.
+	 * @return {Texture} The updated texture.
+	 */
+	static contain( texture, aspect ) {
+
+		return contain( texture, aspect );
+
+	}
+
+	/**
+	 * Scales the texture to the smallest possible size to fill the surface, leaving
+	 * no empty space. The method preserves the original aspect ratio of the texture.
+	 * Akin to CSS `object-fit: cover`.
+	 *
+	 * @param {Texture} texture - The texture.
+	 * @param {number} aspect - The texture's aspect ratio.
+	 * @return {Texture} The updated texture.
+	 */
+	static cover( texture, aspect ) {
+
+		return cover( texture, aspect );
+
+	}
+
+	/**
+	 * Configures the texture to the default transformation. Akin to CSS `object-fit: fill`.
+	 *
+	 * @param {Texture} texture - The texture.
+	 * @return {Texture} The updated texture.
+	 */
+	static fill( texture ) {
+
+		return fill( texture );
+
+	}
+
+	/**
+	 * Determines how many bytes must be used to represent the texture.
+	 *
+	 * @param {number} width - The width of the texture.
+	 * @param {number} height - The height of the texture.
+	 * @param {number} format - The texture's format.
+	 * @param {number} type - The texture's type.
+	 * @return {number} The byte length.
+	 */
+	static getByteLength( width, height, format, type ) {
+
+		return getByteLength( width, height, format, type );
+
+	}
+
+}
 
 if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
 
@@ -40116,6 +51525,8 @@ const _axisDirections = [
 	/*@__PURE__*/ new Vector3( -1, 1, 1 ),
 	/*@__PURE__*/ new Vector3( 1, 1, 1 ) ];
 
+const _origin = /*@__PURE__*/ new Vector3();
+
 /**
  * This class generates a Prefiltered, Mipmapped Radiance Environment Map
  * (PMREM) from a cubeMap environment texture. This allows different levels of
@@ -40156,16 +51567,21 @@ class PMREMGenerator {
 	 * Generates a PMREM from a supplied Scene, which can be faster than using an
 	 * image if networking bandwidth is low. Optional sigma specifies a blur radius
 	 * in radians to be applied to the scene before PMREM generation. Optional near
-	 * and far planes ensure the scene is rendered in its entirety (the cubeCamera
-	 * is placed at the origin).
+	 * and far planes ensure the scene is rendered in its entirety.
 	 *
 	 * @param {Scene} scene
 	 * @param {number} sigma
 	 * @param {number} near
 	 * @param {number} far
+	 * @param {Object} [options={}]
 	 * @return {WebGLRenderTarget}
 	 */
-	fromScene( scene, sigma = 0, near = 0.1, far = 100 ) {
+	fromScene( scene, sigma = 0, near = 0.1, far = 100, options = {} ) {
+
+		const {
+			size = 256,
+			position = _origin,
+		} = options;
 
 		_oldTarget = this._renderer.getRenderTarget();
 		_oldActiveCubeFace = this._renderer.getActiveCubeFace();
@@ -40174,12 +51590,12 @@ class PMREMGenerator {
 
 		this._renderer.xr.enabled = false;
 
-		this._setSize( 256 );
+		this._setSize( size );
 
 		const cubeUVRenderTarget = this._allocateTargets();
 		cubeUVRenderTarget.depthBuffer = true;
 
-		this._sceneToCubeUV( scene, near, far, cubeUVRenderTarget );
+		this._sceneToCubeUV( scene, near, far, cubeUVRenderTarget, position );
 
 		if ( sigma > 0 ) {
 
@@ -40201,7 +51617,7 @@ class PMREMGenerator {
 	 * The smallest supported equirectangular image size is 64 x 32.
 	 *
 	 * @param {Texture} equirectangular
-	 * @param {WebGLRenderTarget} [renderTarget=null] - Optional render target.
+	 * @param {?WebGLRenderTarget} [renderTarget=null] - Optional render target.
 	 * @return {WebGLRenderTarget}
 	 */
 	fromEquirectangular( equirectangular, renderTarget = null ) {
@@ -40376,7 +51792,7 @@ class PMREMGenerator {
 
 	}
 
-	_sceneToCubeUV( scene, near, far, cubeUVRenderTarget ) {
+	_sceneToCubeUV( scene, near, far, cubeUVRenderTarget, position ) {
 
 		const fov = 90;
 		const aspect = 1;
@@ -40428,17 +51844,21 @@ class PMREMGenerator {
 			if ( col === 0 ) {
 
 				cubeCamera.up.set( 0, upSign[ i ], 0 );
-				cubeCamera.lookAt( forwardSign[ i ], 0, 0 );
+				cubeCamera.position.set( position.x, position.y, position.z );
+				cubeCamera.lookAt( position.x + forwardSign[ i ], position.y, position.z );
 
 			} else if ( col === 1 ) {
 
 				cubeCamera.up.set( 0, 0, upSign[ i ] );
-				cubeCamera.lookAt( 0, forwardSign[ i ], 0 );
+				cubeCamera.position.set( position.x, position.y, position.z );
+				cubeCamera.lookAt( position.x, position.y + forwardSign[ i ], position.z );
+
 
 			} else {
 
 				cubeCamera.up.set( 0, upSign[ i ], 0 );
-				cubeCamera.lookAt( 0, 0, forwardSign[ i ] );
+				cubeCamera.position.set( position.x, position.y, position.z );
+				cubeCamera.lookAt( position.x, position.y, position.z + forwardSign[ i ] );
 
 			}
 
@@ -47167,7 +58587,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.compressedTexImage2D.apply( gl, arguments );
+			gl.compressedTexImage2D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47181,7 +58601,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.compressedTexImage3D.apply( gl, arguments );
+			gl.compressedTexImage3D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47195,7 +58615,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.texSubImage2D.apply( gl, arguments );
+			gl.texSubImage2D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47209,7 +58629,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.texSubImage3D.apply( gl, arguments );
+			gl.texSubImage3D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47223,7 +58643,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.compressedTexSubImage2D.apply( gl, arguments );
+			gl.compressedTexSubImage2D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47237,7 +58657,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.compressedTexSubImage3D.apply( gl, arguments );
+			gl.compressedTexSubImage3D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47251,7 +58671,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.texStorage2D.apply( gl, arguments );
+			gl.texStorage2D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47265,7 +58685,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.texStorage3D.apply( gl, arguments );
+			gl.texStorage3D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47279,7 +58699,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.texImage2D.apply( gl, arguments );
+			gl.texImage2D( ...arguments );
 
 		} catch ( error ) {
 
@@ -47293,7 +58713,7 @@ function WebGLState( gl, extensions ) {
 
 		try {
 
-			gl.texImage3D.apply( gl, arguments );
+			gl.texImage3D( ...arguments );
 
 		} catch ( error ) {
 
@@ -50297,7 +61717,10 @@ class WebXRManager extends EventDispatcher {
 							format: RGBAFormat,
 							type: UnsignedByteType,
 							colorSpace: renderer.outputColorSpace,
-							stencilBuffer: attributes.stencil
+							stencilBuffer: attributes.stencil,
+							resolveDepthBuffer: ( glBaseLayer.ignoreDepthValues === false ),
+							resolveStencilBuffer: ( glBaseLayer.ignoreDepthValues === false )
+
 						}
 					);
 
@@ -50340,7 +61763,8 @@ class WebXRManager extends EventDispatcher {
 							stencilBuffer: attributes.stencil,
 							colorSpace: renderer.outputColorSpace,
 							samples: attributes.antialias ? 4 : 0,
-							resolveDepthBuffer: ( glProjLayer.ignoreDepthValues === false )
+							resolveDepthBuffer: ( glProjLayer.ignoreDepthValues === false ),
+							resolveStencilBuffer: ( glProjLayer.ignoreDepthValues === false )
 						} );
 
 				}
@@ -52283,7 +63707,7 @@ class WebGLRenderer {
 
 		this.setClearColor = function () {
 
-			background.setClearColor.apply( background, arguments );
+			background.setClearColor( ...arguments );
 
 		};
 
@@ -52295,7 +63719,7 @@ class WebGLRenderer {
 
 		this.setClearAlpha = function () {
 
-			background.setClearAlpha.apply( background, arguments );
+			background.setClearAlpha( ...arguments );
 
 		};
 
@@ -52631,6 +64055,8 @@ class WebGLRenderer {
 
 				if ( object._multiDrawInstances !== null ) {
 
+					// @deprecated, r174
+					warnOnce( 'THREE.WebGLRenderer: renderMultiDrawInstances has been deprecated and will be removed in r184. Append to renderMultiDraw arguments and use indirection.' );
 					renderer.renderMultiDrawInstances( object._multiDrawStarts, object._multiDrawCounts, object._multiDrawCount, object._multiDrawInstances );
 
 				} else {
@@ -52787,8 +64213,7 @@ class WebGLRenderer {
 
 			} );
 
-			renderStateStack.pop();
-			currentRenderState = null;
+			currentRenderState = renderStateStack.pop();
 
 			return materials;
 
@@ -55134,6 +66559,4778 @@ var three_module = /*#__PURE__*/Object.freeze({
 	ZeroStencilOp: ZeroStencilOp,
 	createCanvasElement: createCanvasElement
 });
+
+/**
+ * @param {BufferGeometry} geometry
+ * @param {number} drawMode
+ * @return {BufferGeometry}
+ */
+function toTrianglesDrawMode( geometry, drawMode ) {
+
+	if ( drawMode === TrianglesDrawMode ) {
+
+		console.warn( 'THREE.BufferGeometryUtils.toTrianglesDrawMode(): Geometry already defined as triangles.' );
+		return geometry;
+
+	}
+
+	if ( drawMode === TriangleFanDrawMode || drawMode === TriangleStripDrawMode ) {
+
+		let index = geometry.getIndex();
+
+		// generate index if not present
+
+		if ( index === null ) {
+
+			const indices = [];
+
+			const position = geometry.getAttribute( 'position' );
+
+			if ( position !== undefined ) {
+
+				for ( let i = 0; i < position.count; i ++ ) {
+
+					indices.push( i );
+
+				}
+
+				geometry.setIndex( indices );
+				index = geometry.getIndex();
+
+			} else {
+
+				console.error( 'THREE.BufferGeometryUtils.toTrianglesDrawMode(): Undefined position attribute. Processing not possible.' );
+				return geometry;
+
+			}
+
+		}
+
+		//
+
+		const numberOfTriangles = index.count - 2;
+		const newIndices = [];
+
+		if ( drawMode === TriangleFanDrawMode ) {
+
+			// gl.TRIANGLE_FAN
+
+			for ( let i = 1; i <= numberOfTriangles; i ++ ) {
+
+				newIndices.push( index.getX( 0 ) );
+				newIndices.push( index.getX( i ) );
+				newIndices.push( index.getX( i + 1 ) );
+
+			}
+
+		} else {
+
+			// gl.TRIANGLE_STRIP
+
+			for ( let i = 0; i < numberOfTriangles; i ++ ) {
+
+				if ( i % 2 === 0 ) {
+
+					newIndices.push( index.getX( i ) );
+					newIndices.push( index.getX( i + 1 ) );
+					newIndices.push( index.getX( i + 2 ) );
+
+				} else {
+
+					newIndices.push( index.getX( i + 2 ) );
+					newIndices.push( index.getX( i + 1 ) );
+					newIndices.push( index.getX( i ) );
+
+				}
+
+			}
+
+		}
+
+		if ( ( newIndices.length / 3 ) !== numberOfTriangles ) {
+
+			console.error( 'THREE.BufferGeometryUtils.toTrianglesDrawMode(): Unable to generate correct amount of triangles.' );
+
+		}
+
+		// build final geometry
+
+		const newGeometry = geometry.clone();
+		newGeometry.setIndex( newIndices );
+		newGeometry.clearGroups();
+
+		return newGeometry;
+
+	} else {
+
+		console.error( 'THREE.BufferGeometryUtils.toTrianglesDrawMode(): Unknown draw mode:', drawMode );
+		return geometry;
+
+	}
+
+}
+
+class GLTFLoader extends Loader {
+
+	constructor( manager ) {
+
+		super( manager );
+
+		this.dracoLoader = null;
+		this.ktx2Loader = null;
+		this.meshoptDecoder = null;
+
+		this.pluginCallbacks = [];
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsClearcoatExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsDispersionExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFTextureBasisUExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFTextureWebPExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFTextureAVIFExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsSheenExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsTransmissionExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsVolumeExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsIorExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsEmissiveStrengthExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsSpecularExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsIridescenceExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsAnisotropyExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMaterialsBumpExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFLightsExtension( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMeshoptCompression( parser );
+
+		} );
+
+		this.register( function ( parser ) {
+
+			return new GLTFMeshGpuInstancing( parser );
+
+		} );
+
+	}
+
+	load( url, onLoad, onProgress, onError ) {
+
+		const scope = this;
+
+		let resourcePath;
+
+		if ( this.resourcePath !== '' ) {
+
+			resourcePath = this.resourcePath;
+
+		} else if ( this.path !== '' ) {
+
+			// If a base path is set, resources will be relative paths from that plus the relative path of the gltf file
+			// Example  path = 'https://my-cnd-server.com/', url = 'assets/models/model.gltf'
+			// resourcePath = 'https://my-cnd-server.com/assets/models/'
+			// referenced resource 'model.bin' will be loaded from 'https://my-cnd-server.com/assets/models/model.bin'
+			// referenced resource '../textures/texture.png' will be loaded from 'https://my-cnd-server.com/assets/textures/texture.png'
+			const relativeUrl = LoaderUtils.extractUrlBase( url );
+			resourcePath = LoaderUtils.resolveURL( relativeUrl, this.path );
+
+		} else {
+
+			resourcePath = LoaderUtils.extractUrlBase( url );
+
+		}
+
+		// Tells the LoadingManager to track an extra item, which resolves after
+		// the model is fully loaded. This means the count of items loaded will
+		// be incorrect, but ensures manager.onLoad() does not fire early.
+		this.manager.itemStart( url );
+
+		const _onError = function ( e ) {
+
+			if ( onError ) {
+
+				onError( e );
+
+			} else {
+
+				console.error( e );
+
+			}
+
+			scope.manager.itemError( url );
+			scope.manager.itemEnd( url );
+
+		};
+
+		const loader = new FileLoader( this.manager );
+
+		loader.setPath( this.path );
+		loader.setResponseType( 'arraybuffer' );
+		loader.setRequestHeader( this.requestHeader );
+		loader.setWithCredentials( this.withCredentials );
+
+		loader.load( url, function ( data ) {
+
+			try {
+
+				scope.parse( data, resourcePath, function ( gltf ) {
+
+					onLoad( gltf );
+
+					scope.manager.itemEnd( url );
+
+				}, _onError );
+
+			} catch ( e ) {
+
+				_onError( e );
+
+			}
+
+		}, onProgress, _onError );
+
+	}
+
+	setDRACOLoader( dracoLoader ) {
+
+		this.dracoLoader = dracoLoader;
+		return this;
+
+	}
+
+	setKTX2Loader( ktx2Loader ) {
+
+		this.ktx2Loader = ktx2Loader;
+		return this;
+
+	}
+
+	setMeshoptDecoder( meshoptDecoder ) {
+
+		this.meshoptDecoder = meshoptDecoder;
+		return this;
+
+	}
+
+	register( callback ) {
+
+		if ( this.pluginCallbacks.indexOf( callback ) === -1 ) {
+
+			this.pluginCallbacks.push( callback );
+
+		}
+
+		return this;
+
+	}
+
+	unregister( callback ) {
+
+		if ( this.pluginCallbacks.indexOf( callback ) !== -1 ) {
+
+			this.pluginCallbacks.splice( this.pluginCallbacks.indexOf( callback ), 1 );
+
+		}
+
+		return this;
+
+	}
+
+	parse( data, path, onLoad, onError ) {
+
+		let json;
+		const extensions = {};
+		const plugins = {};
+		const textDecoder = new TextDecoder();
+
+		if ( typeof data === 'string' ) {
+
+			json = JSON.parse( data );
+
+		} else if ( data instanceof ArrayBuffer ) {
+
+			const magic = textDecoder.decode( new Uint8Array( data, 0, 4 ) );
+
+			if ( magic === BINARY_EXTENSION_HEADER_MAGIC ) {
+
+				try {
+
+					extensions[ EXTENSIONS.KHR_BINARY_GLTF ] = new GLTFBinaryExtension( data );
+
+				} catch ( error ) {
+
+					if ( onError ) onError( error );
+					return;
+
+				}
+
+				json = JSON.parse( extensions[ EXTENSIONS.KHR_BINARY_GLTF ].content );
+
+			} else {
+
+				json = JSON.parse( textDecoder.decode( data ) );
+
+			}
+
+		} else {
+
+			json = data;
+
+		}
+
+		if ( json.asset === undefined || json.asset.version[ 0 ] < 2 ) {
+
+			if ( onError ) onError( new Error( 'THREE.GLTFLoader: Unsupported asset. glTF versions >=2.0 are supported.' ) );
+			return;
+
+		}
+
+		const parser = new GLTFParser( json, {
+
+			path: path || this.resourcePath || '',
+			crossOrigin: this.crossOrigin,
+			requestHeader: this.requestHeader,
+			manager: this.manager,
+			ktx2Loader: this.ktx2Loader,
+			meshoptDecoder: this.meshoptDecoder
+
+		} );
+
+		parser.fileLoader.setRequestHeader( this.requestHeader );
+
+		for ( let i = 0; i < this.pluginCallbacks.length; i ++ ) {
+
+			const plugin = this.pluginCallbacks[ i ]( parser );
+
+			if ( ! plugin.name ) console.error( 'THREE.GLTFLoader: Invalid plugin found: missing name' );
+
+			plugins[ plugin.name ] = plugin;
+
+			// Workaround to avoid determining as unknown extension
+			// in addUnknownExtensionsToUserData().
+			// Remove this workaround if we move all the existing
+			// extension handlers to plugin system
+			extensions[ plugin.name ] = true;
+
+		}
+
+		if ( json.extensionsUsed ) {
+
+			for ( let i = 0; i < json.extensionsUsed.length; ++ i ) {
+
+				const extensionName = json.extensionsUsed[ i ];
+				const extensionsRequired = json.extensionsRequired || [];
+
+				switch ( extensionName ) {
+
+					case EXTENSIONS.KHR_MATERIALS_UNLIT:
+						extensions[ extensionName ] = new GLTFMaterialsUnlitExtension();
+						break;
+
+					case EXTENSIONS.KHR_DRACO_MESH_COMPRESSION:
+						extensions[ extensionName ] = new GLTFDracoMeshCompressionExtension( json, this.dracoLoader );
+						break;
+
+					case EXTENSIONS.KHR_TEXTURE_TRANSFORM:
+						extensions[ extensionName ] = new GLTFTextureTransformExtension();
+						break;
+
+					case EXTENSIONS.KHR_MESH_QUANTIZATION:
+						extensions[ extensionName ] = new GLTFMeshQuantizationExtension();
+						break;
+
+					default:
+
+						if ( extensionsRequired.indexOf( extensionName ) >= 0 && plugins[ extensionName ] === undefined ) {
+
+							console.warn( 'THREE.GLTFLoader: Unknown extension "' + extensionName + '".' );
+
+						}
+
+				}
+
+			}
+
+		}
+
+		parser.setExtensions( extensions );
+		parser.setPlugins( plugins );
+		parser.parse( onLoad, onError );
+
+	}
+
+	parseAsync( data, path ) {
+
+		const scope = this;
+
+		return new Promise( function ( resolve, reject ) {
+
+			scope.parse( data, path, resolve, reject );
+
+		} );
+
+	}
+
+}
+
+/* GLTFREGISTRY */
+
+function GLTFRegistry() {
+
+	let objects = {};
+
+	return	{
+
+		get: function ( key ) {
+
+			return objects[ key ];
+
+		},
+
+		add: function ( key, object ) {
+
+			objects[ key ] = object;
+
+		},
+
+		remove: function ( key ) {
+
+			delete objects[ key ];
+
+		},
+
+		removeAll: function () {
+
+			objects = {};
+
+		}
+
+	};
+
+}
+
+/*********************************/
+/********** EXTENSIONS ***********/
+/*********************************/
+
+const EXTENSIONS = {
+	KHR_BINARY_GLTF: 'KHR_binary_glTF',
+	KHR_DRACO_MESH_COMPRESSION: 'KHR_draco_mesh_compression',
+	KHR_LIGHTS_PUNCTUAL: 'KHR_lights_punctual',
+	KHR_MATERIALS_CLEARCOAT: 'KHR_materials_clearcoat',
+	KHR_MATERIALS_DISPERSION: 'KHR_materials_dispersion',
+	KHR_MATERIALS_IOR: 'KHR_materials_ior',
+	KHR_MATERIALS_SHEEN: 'KHR_materials_sheen',
+	KHR_MATERIALS_SPECULAR: 'KHR_materials_specular',
+	KHR_MATERIALS_TRANSMISSION: 'KHR_materials_transmission',
+	KHR_MATERIALS_IRIDESCENCE: 'KHR_materials_iridescence',
+	KHR_MATERIALS_ANISOTROPY: 'KHR_materials_anisotropy',
+	KHR_MATERIALS_UNLIT: 'KHR_materials_unlit',
+	KHR_MATERIALS_VOLUME: 'KHR_materials_volume',
+	KHR_TEXTURE_BASISU: 'KHR_texture_basisu',
+	KHR_TEXTURE_TRANSFORM: 'KHR_texture_transform',
+	KHR_MESH_QUANTIZATION: 'KHR_mesh_quantization',
+	KHR_MATERIALS_EMISSIVE_STRENGTH: 'KHR_materials_emissive_strength',
+	EXT_MATERIALS_BUMP: 'EXT_materials_bump',
+	EXT_TEXTURE_WEBP: 'EXT_texture_webp',
+	EXT_TEXTURE_AVIF: 'EXT_texture_avif',
+	EXT_MESHOPT_COMPRESSION: 'EXT_meshopt_compression',
+	EXT_MESH_GPU_INSTANCING: 'EXT_mesh_gpu_instancing'
+};
+
+/**
+ * Punctual Lights Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
+ */
+class GLTFLightsExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_LIGHTS_PUNCTUAL;
+
+		// Object3D instance caches
+		this.cache = { refs: {}, uses: {} };
+
+	}
+
+	_markDefs() {
+
+		const parser = this.parser;
+		const nodeDefs = this.parser.json.nodes || [];
+
+		for ( let nodeIndex = 0, nodeLength = nodeDefs.length; nodeIndex < nodeLength; nodeIndex ++ ) {
+
+			const nodeDef = nodeDefs[ nodeIndex ];
+
+			if ( nodeDef.extensions
+					&& nodeDef.extensions[ this.name ]
+					&& nodeDef.extensions[ this.name ].light !== undefined ) {
+
+				parser._addNodeRef( this.cache, nodeDef.extensions[ this.name ].light );
+
+			}
+
+		}
+
+	}
+
+	_loadLight( lightIndex ) {
+
+		const parser = this.parser;
+		const cacheKey = 'light:' + lightIndex;
+		let dependency = parser.cache.get( cacheKey );
+
+		if ( dependency ) return dependency;
+
+		const json = parser.json;
+		const extensions = ( json.extensions && json.extensions[ this.name ] ) || {};
+		const lightDefs = extensions.lights || [];
+		const lightDef = lightDefs[ lightIndex ];
+		let lightNode;
+
+		const color = new Color( 0xffffff );
+
+		if ( lightDef.color !== undefined ) color.setRGB( lightDef.color[ 0 ], lightDef.color[ 1 ], lightDef.color[ 2 ], LinearSRGBColorSpace );
+
+		const range = lightDef.range !== undefined ? lightDef.range : 0;
+
+		switch ( lightDef.type ) {
+
+			case 'directional':
+				lightNode = new DirectionalLight( color );
+				lightNode.target.position.set( 0, 0, -1 );
+				lightNode.add( lightNode.target );
+				break;
+
+			case 'point':
+				lightNode = new PointLight( color );
+				lightNode.distance = range;
+				break;
+
+			case 'spot':
+				lightNode = new SpotLight( color );
+				lightNode.distance = range;
+				// Handle spotlight properties.
+				lightDef.spot = lightDef.spot || {};
+				lightDef.spot.innerConeAngle = lightDef.spot.innerConeAngle !== undefined ? lightDef.spot.innerConeAngle : 0;
+				lightDef.spot.outerConeAngle = lightDef.spot.outerConeAngle !== undefined ? lightDef.spot.outerConeAngle : Math.PI / 4.0;
+				lightNode.angle = lightDef.spot.outerConeAngle;
+				lightNode.penumbra = 1.0 - lightDef.spot.innerConeAngle / lightDef.spot.outerConeAngle;
+				lightNode.target.position.set( 0, 0, -1 );
+				lightNode.add( lightNode.target );
+				break;
+
+			default:
+				throw new Error( 'THREE.GLTFLoader: Unexpected light type: ' + lightDef.type );
+
+		}
+
+		// Some lights (e.g. spot) default to a position other than the origin. Reset the position
+		// here, because node-level parsing will only override position if explicitly specified.
+		lightNode.position.set( 0, 0, 0 );
+
+		assignExtrasToUserData( lightNode, lightDef );
+
+		if ( lightDef.intensity !== undefined ) lightNode.intensity = lightDef.intensity;
+
+		lightNode.name = parser.createUniqueName( lightDef.name || ( 'light_' + lightIndex ) );
+
+		dependency = Promise.resolve( lightNode );
+
+		parser.cache.add( cacheKey, dependency );
+
+		return dependency;
+
+	}
+
+	getDependency( type, index ) {
+
+		if ( type !== 'light' ) return;
+
+		return this._loadLight( index );
+
+	}
+
+	createNodeAttachment( nodeIndex ) {
+
+		const self = this;
+		const parser = this.parser;
+		const json = parser.json;
+		const nodeDef = json.nodes[ nodeIndex ];
+		const lightDef = ( nodeDef.extensions && nodeDef.extensions[ this.name ] ) || {};
+		const lightIndex = lightDef.light;
+
+		if ( lightIndex === undefined ) return null;
+
+		return this._loadLight( lightIndex ).then( function ( light ) {
+
+			return parser._getNodeRef( self.cache, lightIndex, light );
+
+		} );
+
+	}
+
+}
+
+/**
+ * Unlit Materials Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit
+ */
+class GLTFMaterialsUnlitExtension {
+
+	constructor() {
+
+		this.name = EXTENSIONS.KHR_MATERIALS_UNLIT;
+
+	}
+
+	getMaterialType() {
+
+		return MeshBasicMaterial;
+
+	}
+
+	extendParams( materialParams, materialDef, parser ) {
+
+		const pending = [];
+
+		materialParams.color = new Color( 1.0, 1.0, 1.0 );
+		materialParams.opacity = 1.0;
+
+		const metallicRoughness = materialDef.pbrMetallicRoughness;
+
+		if ( metallicRoughness ) {
+
+			if ( Array.isArray( metallicRoughness.baseColorFactor ) ) {
+
+				const array = metallicRoughness.baseColorFactor;
+
+				materialParams.color.setRGB( array[ 0 ], array[ 1 ], array[ 2 ], LinearSRGBColorSpace );
+				materialParams.opacity = array[ 3 ];
+
+			}
+
+			if ( metallicRoughness.baseColorTexture !== undefined ) {
+
+				pending.push( parser.assignTexture( materialParams, 'map', metallicRoughness.baseColorTexture, SRGBColorSpace ) );
+
+			}
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * Materials Emissive Strength Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/blob/5768b3ce0ef32bc39cdf1bef10b948586635ead3/extensions/2.0/Khronos/KHR_materials_emissive_strength/README.md
+ */
+class GLTFMaterialsEmissiveStrengthExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_EMISSIVE_STRENGTH;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const emissiveStrength = materialDef.extensions[ this.name ].emissiveStrength;
+
+		if ( emissiveStrength !== undefined ) {
+
+			materialParams.emissiveIntensity = emissiveStrength;
+
+		}
+
+		return Promise.resolve();
+
+	}
+
+}
+
+/**
+ * Clearcoat Materials Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
+ */
+class GLTFMaterialsClearcoatExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_CLEARCOAT;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
+
+		if ( extension.clearcoatFactor !== undefined ) {
+
+			materialParams.clearcoat = extension.clearcoatFactor;
+
+		}
+
+		if ( extension.clearcoatTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'clearcoatMap', extension.clearcoatTexture ) );
+
+		}
+
+		if ( extension.clearcoatRoughnessFactor !== undefined ) {
+
+			materialParams.clearcoatRoughness = extension.clearcoatRoughnessFactor;
+
+		}
+
+		if ( extension.clearcoatRoughnessTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'clearcoatRoughnessMap', extension.clearcoatRoughnessTexture ) );
+
+		}
+
+		if ( extension.clearcoatNormalTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'clearcoatNormalMap', extension.clearcoatNormalTexture ) );
+
+			if ( extension.clearcoatNormalTexture.scale !== undefined ) {
+
+				const scale = extension.clearcoatNormalTexture.scale;
+
+				materialParams.clearcoatNormalScale = new Vector2( scale, scale );
+
+			}
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * Materials dispersion Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_dispersion
+ */
+class GLTFMaterialsDispersionExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_DISPERSION;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const extension = materialDef.extensions[ this.name ];
+
+		materialParams.dispersion = extension.dispersion !== undefined ? extension.dispersion : 0;
+
+		return Promise.resolve();
+
+	}
+
+}
+
+/**
+ * Iridescence Materials Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_iridescence
+ */
+class GLTFMaterialsIridescenceExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_IRIDESCENCE;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
+
+		if ( extension.iridescenceFactor !== undefined ) {
+
+			materialParams.iridescence = extension.iridescenceFactor;
+
+		}
+
+		if ( extension.iridescenceTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'iridescenceMap', extension.iridescenceTexture ) );
+
+		}
+
+		if ( extension.iridescenceIor !== undefined ) {
+
+			materialParams.iridescenceIOR = extension.iridescenceIor;
+
+		}
+
+		if ( materialParams.iridescenceThicknessRange === undefined ) {
+
+			materialParams.iridescenceThicknessRange = [ 100, 400 ];
+
+		}
+
+		if ( extension.iridescenceThicknessMinimum !== undefined ) {
+
+			materialParams.iridescenceThicknessRange[ 0 ] = extension.iridescenceThicknessMinimum;
+
+		}
+
+		if ( extension.iridescenceThicknessMaximum !== undefined ) {
+
+			materialParams.iridescenceThicknessRange[ 1 ] = extension.iridescenceThicknessMaximum;
+
+		}
+
+		if ( extension.iridescenceThicknessTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'iridescenceThicknessMap', extension.iridescenceThicknessTexture ) );
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * Sheen Materials Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen
+ */
+class GLTFMaterialsSheenExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_SHEEN;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		materialParams.sheenColor = new Color( 0, 0, 0 );
+		materialParams.sheenRoughness = 0;
+		materialParams.sheen = 1;
+
+		const extension = materialDef.extensions[ this.name ];
+
+		if ( extension.sheenColorFactor !== undefined ) {
+
+			const colorFactor = extension.sheenColorFactor;
+			materialParams.sheenColor.setRGB( colorFactor[ 0 ], colorFactor[ 1 ], colorFactor[ 2 ], LinearSRGBColorSpace );
+
+		}
+
+		if ( extension.sheenRoughnessFactor !== undefined ) {
+
+			materialParams.sheenRoughness = extension.sheenRoughnessFactor;
+
+		}
+
+		if ( extension.sheenColorTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'sheenColorMap', extension.sheenColorTexture, SRGBColorSpace ) );
+
+		}
+
+		if ( extension.sheenRoughnessTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'sheenRoughnessMap', extension.sheenRoughnessTexture ) );
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * Transmission Materials Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_transmission
+ * Draft: https://github.com/KhronosGroup/glTF/pull/1698
+ */
+class GLTFMaterialsTransmissionExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_TRANSMISSION;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
+
+		if ( extension.transmissionFactor !== undefined ) {
+
+			materialParams.transmission = extension.transmissionFactor;
+
+		}
+
+		if ( extension.transmissionTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'transmissionMap', extension.transmissionTexture ) );
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * Materials Volume Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_volume
+ */
+class GLTFMaterialsVolumeExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_VOLUME;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
+
+		materialParams.thickness = extension.thicknessFactor !== undefined ? extension.thicknessFactor : 0;
+
+		if ( extension.thicknessTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'thicknessMap', extension.thicknessTexture ) );
+
+		}
+
+		materialParams.attenuationDistance = extension.attenuationDistance || Infinity;
+
+		const colorArray = extension.attenuationColor || [ 1, 1, 1 ];
+		materialParams.attenuationColor = new Color().setRGB( colorArray[ 0 ], colorArray[ 1 ], colorArray[ 2 ], LinearSRGBColorSpace );
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * Materials ior Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_ior
+ */
+class GLTFMaterialsIorExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_IOR;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const extension = materialDef.extensions[ this.name ];
+
+		materialParams.ior = extension.ior !== undefined ? extension.ior : 1.5;
+
+		return Promise.resolve();
+
+	}
+
+}
+
+/**
+ * Materials specular Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_specular
+ */
+class GLTFMaterialsSpecularExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_SPECULAR;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
+
+		materialParams.specularIntensity = extension.specularFactor !== undefined ? extension.specularFactor : 1.0;
+
+		if ( extension.specularTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'specularIntensityMap', extension.specularTexture ) );
+
+		}
+
+		const colorArray = extension.specularColorFactor || [ 1, 1, 1 ];
+		materialParams.specularColor = new Color().setRGB( colorArray[ 0 ], colorArray[ 1 ], colorArray[ 2 ], LinearSRGBColorSpace );
+
+		if ( extension.specularColorTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'specularColorMap', extension.specularColorTexture, SRGBColorSpace ) );
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+
+/**
+ * Materials bump Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/EXT_materials_bump
+ */
+class GLTFMaterialsBumpExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.EXT_MATERIALS_BUMP;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
+
+		materialParams.bumpScale = extension.bumpFactor !== undefined ? extension.bumpFactor : 1.0;
+
+		if ( extension.bumpTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'bumpMap', extension.bumpTexture ) );
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * Materials anisotropy Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_anisotropy
+ */
+class GLTFMaterialsAnisotropyExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_MATERIALS_ANISOTROPY;
+
+	}
+
+	getMaterialType( materialIndex ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) return null;
+
+		return MeshPhysicalMaterial;
+
+	}
+
+	extendMaterialParams( materialIndex, materialParams ) {
+
+		const parser = this.parser;
+		const materialDef = parser.json.materials[ materialIndex ];
+
+		if ( ! materialDef.extensions || ! materialDef.extensions[ this.name ] ) {
+
+			return Promise.resolve();
+
+		}
+
+		const pending = [];
+
+		const extension = materialDef.extensions[ this.name ];
+
+		if ( extension.anisotropyStrength !== undefined ) {
+
+			materialParams.anisotropy = extension.anisotropyStrength;
+
+		}
+
+		if ( extension.anisotropyRotation !== undefined ) {
+
+			materialParams.anisotropyRotation = extension.anisotropyRotation;
+
+		}
+
+		if ( extension.anisotropyTexture !== undefined ) {
+
+			pending.push( parser.assignTexture( materialParams, 'anisotropyMap', extension.anisotropyTexture ) );
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+}
+
+/**
+ * BasisU Texture Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
+ */
+class GLTFTextureBasisUExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.KHR_TEXTURE_BASISU;
+
+	}
+
+	loadTexture( textureIndex ) {
+
+		const parser = this.parser;
+		const json = parser.json;
+
+		const textureDef = json.textures[ textureIndex ];
+
+		if ( ! textureDef.extensions || ! textureDef.extensions[ this.name ] ) {
+
+			return null;
+
+		}
+
+		const extension = textureDef.extensions[ this.name ];
+		const loader = parser.options.ktx2Loader;
+
+		if ( ! loader ) {
+
+			if ( json.extensionsRequired && json.extensionsRequired.indexOf( this.name ) >= 0 ) {
+
+				throw new Error( 'THREE.GLTFLoader: setKTX2Loader must be called before loading KTX2 textures' );
+
+			} else {
+
+				// Assumes that the extension is optional and that a fallback texture is present
+				return null;
+
+			}
+
+		}
+
+		return parser.loadTextureImage( textureIndex, extension.source, loader );
+
+	}
+
+}
+
+/**
+ * WebP Texture Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_texture_webp
+ */
+class GLTFTextureWebPExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.EXT_TEXTURE_WEBP;
+		this.isSupported = null;
+
+	}
+
+	loadTexture( textureIndex ) {
+
+		const name = this.name;
+		const parser = this.parser;
+		const json = parser.json;
+
+		const textureDef = json.textures[ textureIndex ];
+
+		if ( ! textureDef.extensions || ! textureDef.extensions[ name ] ) {
+
+			return null;
+
+		}
+
+		const extension = textureDef.extensions[ name ];
+		const source = json.images[ extension.source ];
+
+		let loader = parser.textureLoader;
+		if ( source.uri ) {
+
+			const handler = parser.options.manager.getHandler( source.uri );
+			if ( handler !== null ) loader = handler;
+
+		}
+
+		return this.detectSupport().then( function ( isSupported ) {
+
+			if ( isSupported ) return parser.loadTextureImage( textureIndex, extension.source, loader );
+
+			if ( json.extensionsRequired && json.extensionsRequired.indexOf( name ) >= 0 ) {
+
+				throw new Error( 'THREE.GLTFLoader: WebP required by asset but unsupported.' );
+
+			}
+
+			// Fall back to PNG or JPEG.
+			return parser.loadTexture( textureIndex );
+
+		} );
+
+	}
+
+	detectSupport() {
+
+		if ( ! this.isSupported ) {
+
+			this.isSupported = new Promise( function ( resolve ) {
+
+				const image = new Image();
+
+				// Lossy test image. Support for lossy images doesn't guarantee support for all
+				// WebP images, unfortunately.
+				image.src = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+
+				image.onload = image.onerror = function () {
+
+					resolve( image.height === 1 );
+
+				};
+
+			} );
+
+		}
+
+		return this.isSupported;
+
+	}
+
+}
+
+/**
+ * AVIF Texture Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_texture_avif
+ */
+class GLTFTextureAVIFExtension {
+
+	constructor( parser ) {
+
+		this.parser = parser;
+		this.name = EXTENSIONS.EXT_TEXTURE_AVIF;
+		this.isSupported = null;
+
+	}
+
+	loadTexture( textureIndex ) {
+
+		const name = this.name;
+		const parser = this.parser;
+		const json = parser.json;
+
+		const textureDef = json.textures[ textureIndex ];
+
+		if ( ! textureDef.extensions || ! textureDef.extensions[ name ] ) {
+
+			return null;
+
+		}
+
+		const extension = textureDef.extensions[ name ];
+		const source = json.images[ extension.source ];
+
+		let loader = parser.textureLoader;
+		if ( source.uri ) {
+
+			const handler = parser.options.manager.getHandler( source.uri );
+			if ( handler !== null ) loader = handler;
+
+		}
+
+		return this.detectSupport().then( function ( isSupported ) {
+
+			if ( isSupported ) return parser.loadTextureImage( textureIndex, extension.source, loader );
+
+			if ( json.extensionsRequired && json.extensionsRequired.indexOf( name ) >= 0 ) {
+
+				throw new Error( 'THREE.GLTFLoader: AVIF required by asset but unsupported.' );
+
+			}
+
+			// Fall back to PNG or JPEG.
+			return parser.loadTexture( textureIndex );
+
+		} );
+
+	}
+
+	detectSupport() {
+
+		if ( ! this.isSupported ) {
+
+			this.isSupported = new Promise( function ( resolve ) {
+
+				const image = new Image();
+
+				// Lossy test image.
+				image.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAABcAAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQAMAAAAABNjb2xybmNseAACAAIABoAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAAB9tZGF0EgAKCBgABogQEDQgMgkQAAAAB8dSLfI=';
+				image.onload = image.onerror = function () {
+
+					resolve( image.height === 1 );
+
+				};
+
+			} );
+
+		}
+
+		return this.isSupported;
+
+	}
+
+}
+
+/**
+ * meshopt BufferView Compression Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_meshopt_compression
+ */
+class GLTFMeshoptCompression {
+
+	constructor( parser ) {
+
+		this.name = EXTENSIONS.EXT_MESHOPT_COMPRESSION;
+		this.parser = parser;
+
+	}
+
+	loadBufferView( index ) {
+
+		const json = this.parser.json;
+		const bufferView = json.bufferViews[ index ];
+
+		if ( bufferView.extensions && bufferView.extensions[ this.name ] ) {
+
+			const extensionDef = bufferView.extensions[ this.name ];
+
+			const buffer = this.parser.getDependency( 'buffer', extensionDef.buffer );
+			const decoder = this.parser.options.meshoptDecoder;
+
+			if ( ! decoder || ! decoder.supported ) {
+
+				if ( json.extensionsRequired && json.extensionsRequired.indexOf( this.name ) >= 0 ) {
+
+					throw new Error( 'THREE.GLTFLoader: setMeshoptDecoder must be called before loading compressed files' );
+
+				} else {
+
+					// Assumes that the extension is optional and that fallback buffer data is present
+					return null;
+
+				}
+
+			}
+
+			return buffer.then( function ( res ) {
+
+				const byteOffset = extensionDef.byteOffset || 0;
+				const byteLength = extensionDef.byteLength || 0;
+
+				const count = extensionDef.count;
+				const stride = extensionDef.byteStride;
+
+				const source = new Uint8Array( res, byteOffset, byteLength );
+
+				if ( decoder.decodeGltfBufferAsync ) {
+
+					return decoder.decodeGltfBufferAsync( count, stride, source, extensionDef.mode, extensionDef.filter ).then( function ( res ) {
+
+						return res.buffer;
+
+					} );
+
+				} else {
+
+					// Support for MeshoptDecoder 0.18 or earlier, without decodeGltfBufferAsync
+					return decoder.ready.then( function () {
+
+						const result = new ArrayBuffer( count * stride );
+						decoder.decodeGltfBuffer( new Uint8Array( result ), count, stride, source, extensionDef.mode, extensionDef.filter );
+						return result;
+
+					} );
+
+				}
+
+			} );
+
+		} else {
+
+			return null;
+
+		}
+
+	}
+
+}
+
+/**
+ * GPU Instancing Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_mesh_gpu_instancing
+ *
+ */
+class GLTFMeshGpuInstancing {
+
+	constructor( parser ) {
+
+		this.name = EXTENSIONS.EXT_MESH_GPU_INSTANCING;
+		this.parser = parser;
+
+	}
+
+	createNodeMesh( nodeIndex ) {
+
+		const json = this.parser.json;
+		const nodeDef = json.nodes[ nodeIndex ];
+
+		if ( ! nodeDef.extensions || ! nodeDef.extensions[ this.name ] ||
+			nodeDef.mesh === undefined ) {
+
+			return null;
+
+		}
+
+		const meshDef = json.meshes[ nodeDef.mesh ];
+
+		// No Points or Lines + Instancing support yet
+
+		for ( const primitive of meshDef.primitives ) {
+
+			if ( primitive.mode !== WEBGL_CONSTANTS.TRIANGLES &&
+				 primitive.mode !== WEBGL_CONSTANTS.TRIANGLE_STRIP &&
+				 primitive.mode !== WEBGL_CONSTANTS.TRIANGLE_FAN &&
+				 primitive.mode !== undefined ) {
+
+				return null;
+
+			}
+
+		}
+
+		const extensionDef = nodeDef.extensions[ this.name ];
+		const attributesDef = extensionDef.attributes;
+
+		// @TODO: Can we support InstancedMesh + SkinnedMesh?
+
+		const pending = [];
+		const attributes = {};
+
+		for ( const key in attributesDef ) {
+
+			pending.push( this.parser.getDependency( 'accessor', attributesDef[ key ] ).then( accessor => {
+
+				attributes[ key ] = accessor;
+				return attributes[ key ];
+
+			} ) );
+
+		}
+
+		if ( pending.length < 1 ) {
+
+			return null;
+
+		}
+
+		pending.push( this.parser.createNodeMesh( nodeIndex ) );
+
+		return Promise.all( pending ).then( results => {
+
+			const nodeObject = results.pop();
+			const meshes = nodeObject.isGroup ? nodeObject.children : [ nodeObject ];
+			const count = results[ 0 ].count; // All attribute counts should be same
+			const instancedMeshes = [];
+
+			for ( const mesh of meshes ) {
+
+				// Temporal variables
+				const m = new Matrix4();
+				const p = new Vector3();
+				const q = new Quaternion();
+				const s = new Vector3( 1, 1, 1 );
+
+				const instancedMesh = new InstancedMesh( mesh.geometry, mesh.material, count );
+
+				for ( let i = 0; i < count; i ++ ) {
+
+					if ( attributes.TRANSLATION ) {
+
+						p.fromBufferAttribute( attributes.TRANSLATION, i );
+
+					}
+
+					if ( attributes.ROTATION ) {
+
+						q.fromBufferAttribute( attributes.ROTATION, i );
+
+					}
+
+					if ( attributes.SCALE ) {
+
+						s.fromBufferAttribute( attributes.SCALE, i );
+
+					}
+
+					instancedMesh.setMatrixAt( i, m.compose( p, q, s ) );
+
+				}
+
+				// Add instance attributes to the geometry, excluding TRS.
+				for ( const attributeName in attributes ) {
+
+					if ( attributeName === '_COLOR_0' ) {
+
+						const attr = attributes[ attributeName ];
+						instancedMesh.instanceColor = new InstancedBufferAttribute( attr.array, attr.itemSize, attr.normalized );
+
+					} else if ( attributeName !== 'TRANSLATION' &&
+						 attributeName !== 'ROTATION' &&
+						 attributeName !== 'SCALE' ) {
+
+						mesh.geometry.setAttribute( attributeName, attributes[ attributeName ] );
+
+					}
+
+				}
+
+				// Just in case
+				Object3D.prototype.copy.call( instancedMesh, mesh );
+
+				this.parser.assignFinalMaterial( instancedMesh );
+
+				instancedMeshes.push( instancedMesh );
+
+			}
+
+			if ( nodeObject.isGroup ) {
+
+				nodeObject.clear();
+
+				nodeObject.add( ... instancedMeshes );
+
+				return nodeObject;
+
+			}
+
+			return instancedMeshes[ 0 ];
+
+		} );
+
+	}
+
+}
+
+/* BINARY EXTENSION */
+const BINARY_EXTENSION_HEADER_MAGIC = 'glTF';
+const BINARY_EXTENSION_HEADER_LENGTH = 12;
+const BINARY_EXTENSION_CHUNK_TYPES = { JSON: 0x4E4F534A, BIN: 0x004E4942 };
+
+class GLTFBinaryExtension {
+
+	constructor( data ) {
+
+		this.name = EXTENSIONS.KHR_BINARY_GLTF;
+		this.content = null;
+		this.body = null;
+
+		const headerView = new DataView( data, 0, BINARY_EXTENSION_HEADER_LENGTH );
+		const textDecoder = new TextDecoder();
+
+		this.header = {
+			magic: textDecoder.decode( new Uint8Array( data.slice( 0, 4 ) ) ),
+			version: headerView.getUint32( 4, true ),
+			length: headerView.getUint32( 8, true )
+		};
+
+		if ( this.header.magic !== BINARY_EXTENSION_HEADER_MAGIC ) {
+
+			throw new Error( 'THREE.GLTFLoader: Unsupported glTF-Binary header.' );
+
+		} else if ( this.header.version < 2.0 ) {
+
+			throw new Error( 'THREE.GLTFLoader: Legacy binary file detected.' );
+
+		}
+
+		const chunkContentsLength = this.header.length - BINARY_EXTENSION_HEADER_LENGTH;
+		const chunkView = new DataView( data, BINARY_EXTENSION_HEADER_LENGTH );
+		let chunkIndex = 0;
+
+		while ( chunkIndex < chunkContentsLength ) {
+
+			const chunkLength = chunkView.getUint32( chunkIndex, true );
+			chunkIndex += 4;
+
+			const chunkType = chunkView.getUint32( chunkIndex, true );
+			chunkIndex += 4;
+
+			if ( chunkType === BINARY_EXTENSION_CHUNK_TYPES.JSON ) {
+
+				const contentArray = new Uint8Array( data, BINARY_EXTENSION_HEADER_LENGTH + chunkIndex, chunkLength );
+				this.content = textDecoder.decode( contentArray );
+
+			} else if ( chunkType === BINARY_EXTENSION_CHUNK_TYPES.BIN ) {
+
+				const byteOffset = BINARY_EXTENSION_HEADER_LENGTH + chunkIndex;
+				this.body = data.slice( byteOffset, byteOffset + chunkLength );
+
+			}
+
+			// Clients must ignore chunks with unknown types.
+
+			chunkIndex += chunkLength;
+
+		}
+
+		if ( this.content === null ) {
+
+			throw new Error( 'THREE.GLTFLoader: JSON content not found.' );
+
+		}
+
+	}
+
+}
+
+/**
+ * DRACO Mesh Compression Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
+ */
+class GLTFDracoMeshCompressionExtension {
+
+	constructor( json, dracoLoader ) {
+
+		if ( ! dracoLoader ) {
+
+			throw new Error( 'THREE.GLTFLoader: No DRACOLoader instance provided.' );
+
+		}
+
+		this.name = EXTENSIONS.KHR_DRACO_MESH_COMPRESSION;
+		this.json = json;
+		this.dracoLoader = dracoLoader;
+		this.dracoLoader.preload();
+
+	}
+
+	decodePrimitive( primitive, parser ) {
+
+		const json = this.json;
+		const dracoLoader = this.dracoLoader;
+		const bufferViewIndex = primitive.extensions[ this.name ].bufferView;
+		const gltfAttributeMap = primitive.extensions[ this.name ].attributes;
+		const threeAttributeMap = {};
+		const attributeNormalizedMap = {};
+		const attributeTypeMap = {};
+
+		for ( const attributeName in gltfAttributeMap ) {
+
+			const threeAttributeName = ATTRIBUTES[ attributeName ] || attributeName.toLowerCase();
+
+			threeAttributeMap[ threeAttributeName ] = gltfAttributeMap[ attributeName ];
+
+		}
+
+		for ( const attributeName in primitive.attributes ) {
+
+			const threeAttributeName = ATTRIBUTES[ attributeName ] || attributeName.toLowerCase();
+
+			if ( gltfAttributeMap[ attributeName ] !== undefined ) {
+
+				const accessorDef = json.accessors[ primitive.attributes[ attributeName ] ];
+				const componentType = WEBGL_COMPONENT_TYPES[ accessorDef.componentType ];
+
+				attributeTypeMap[ threeAttributeName ] = componentType.name;
+				attributeNormalizedMap[ threeAttributeName ] = accessorDef.normalized === true;
+
+			}
+
+		}
+
+		return parser.getDependency( 'bufferView', bufferViewIndex ).then( function ( bufferView ) {
+
+			return new Promise( function ( resolve, reject ) {
+
+				dracoLoader.decodeDracoFile( bufferView, function ( geometry ) {
+
+					for ( const attributeName in geometry.attributes ) {
+
+						const attribute = geometry.attributes[ attributeName ];
+						const normalized = attributeNormalizedMap[ attributeName ];
+
+						if ( normalized !== undefined ) attribute.normalized = normalized;
+
+					}
+
+					resolve( geometry );
+
+				}, threeAttributeMap, attributeTypeMap, LinearSRGBColorSpace, reject );
+
+			} );
+
+		} );
+
+	}
+
+}
+
+/**
+ * Texture Transform Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform
+ */
+class GLTFTextureTransformExtension {
+
+	constructor() {
+
+		this.name = EXTENSIONS.KHR_TEXTURE_TRANSFORM;
+
+	}
+
+	extendTexture( texture, transform ) {
+
+		if ( ( transform.texCoord === undefined || transform.texCoord === texture.channel )
+			&& transform.offset === undefined
+			&& transform.rotation === undefined
+			&& transform.scale === undefined ) {
+
+			// See https://github.com/mrdoob/three.js/issues/21819.
+			return texture;
+
+		}
+
+		texture = texture.clone();
+
+		if ( transform.texCoord !== undefined ) {
+
+			texture.channel = transform.texCoord;
+
+		}
+
+		if ( transform.offset !== undefined ) {
+
+			texture.offset.fromArray( transform.offset );
+
+		}
+
+		if ( transform.rotation !== undefined ) {
+
+			texture.rotation = transform.rotation;
+
+		}
+
+		if ( transform.scale !== undefined ) {
+
+			texture.repeat.fromArray( transform.scale );
+
+		}
+
+		texture.needsUpdate = true;
+
+		return texture;
+
+	}
+
+}
+
+/**
+ * Mesh Quantization Extension
+ *
+ * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization
+ */
+class GLTFMeshQuantizationExtension {
+
+	constructor() {
+
+		this.name = EXTENSIONS.KHR_MESH_QUANTIZATION;
+
+	}
+
+}
+
+/*********************************/
+/********** INTERPOLATION ********/
+/*********************************/
+
+// Spline Interpolation
+// Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#appendix-c-spline-interpolation
+class GLTFCubicSplineInterpolant extends Interpolant {
+
+	constructor( parameterPositions, sampleValues, sampleSize, resultBuffer ) {
+
+		super( parameterPositions, sampleValues, sampleSize, resultBuffer );
+
+	}
+
+	copySampleValue_( index ) {
+
+		// Copies a sample value to the result buffer. See description of glTF
+		// CUBICSPLINE values layout in interpolate_() function below.
+
+		const result = this.resultBuffer,
+			values = this.sampleValues,
+			valueSize = this.valueSize,
+			offset = index * valueSize * 3 + valueSize;
+
+		for ( let i = 0; i !== valueSize; i ++ ) {
+
+			result[ i ] = values[ offset + i ];
+
+		}
+
+		return result;
+
+	}
+
+	interpolate_( i1, t0, t, t1 ) {
+
+		const result = this.resultBuffer;
+		const values = this.sampleValues;
+		const stride = this.valueSize;
+
+		const stride2 = stride * 2;
+		const stride3 = stride * 3;
+
+		const td = t1 - t0;
+
+		const p = ( t - t0 ) / td;
+		const pp = p * p;
+		const ppp = pp * p;
+
+		const offset1 = i1 * stride3;
+		const offset0 = offset1 - stride3;
+
+		const s2 = -2 * ppp + 3 * pp;
+		const s3 = ppp - pp;
+		const s0 = 1 - s2;
+		const s1 = s3 - pp + p;
+
+		// Layout of keyframe output values for CUBICSPLINE animations:
+		//   [ inTangent_1, splineVertex_1, outTangent_1, inTangent_2, splineVertex_2, ... ]
+		for ( let i = 0; i !== stride; i ++ ) {
+
+			const p0 = values[ offset0 + i + stride ]; // splineVertex_k
+			const m0 = values[ offset0 + i + stride2 ] * td; // outTangent_k * (t_k+1 - t_k)
+			const p1 = values[ offset1 + i + stride ]; // splineVertex_k+1
+			const m1 = values[ offset1 + i ] * td; // inTangent_k+1 * (t_k+1 - t_k)
+
+			result[ i ] = s0 * p0 + s1 * m0 + s2 * p1 + s3 * m1;
+
+		}
+
+		return result;
+
+	}
+
+}
+
+const _q = new Quaternion();
+
+class GLTFCubicSplineQuaternionInterpolant extends GLTFCubicSplineInterpolant {
+
+	interpolate_( i1, t0, t, t1 ) {
+
+		const result = super.interpolate_( i1, t0, t, t1 );
+
+		_q.fromArray( result ).normalize().toArray( result );
+
+		return result;
+
+	}
+
+}
+
+
+/*********************************/
+/********** INTERNALS ************/
+/*********************************/
+
+/* CONSTANTS */
+
+const WEBGL_CONSTANTS = {
+	POINTS: 0,
+	LINES: 1,
+	LINE_LOOP: 2,
+	LINE_STRIP: 3,
+	TRIANGLES: 4,
+	TRIANGLE_STRIP: 5,
+	TRIANGLE_FAN: 6};
+
+const WEBGL_COMPONENT_TYPES = {
+	5120: Int8Array,
+	5121: Uint8Array,
+	5122: Int16Array,
+	5123: Uint16Array,
+	5125: Uint32Array,
+	5126: Float32Array
+};
+
+const WEBGL_FILTERS = {
+	9728: NearestFilter,
+	9729: LinearFilter,
+	9984: NearestMipmapNearestFilter,
+	9985: LinearMipmapNearestFilter,
+	9986: NearestMipmapLinearFilter,
+	9987: LinearMipmapLinearFilter
+};
+
+const WEBGL_WRAPPINGS = {
+	33071: ClampToEdgeWrapping,
+	33648: MirroredRepeatWrapping,
+	10497: RepeatWrapping
+};
+
+const WEBGL_TYPE_SIZES = {
+	'SCALAR': 1,
+	'VEC2': 2,
+	'VEC3': 3,
+	'VEC4': 4,
+	'MAT2': 4,
+	'MAT3': 9,
+	'MAT4': 16
+};
+
+const ATTRIBUTES = {
+	POSITION: 'position',
+	NORMAL: 'normal',
+	TANGENT: 'tangent',
+	TEXCOORD_0: 'uv',
+	TEXCOORD_1: 'uv1',
+	TEXCOORD_2: 'uv2',
+	TEXCOORD_3: 'uv3',
+	COLOR_0: 'color',
+	WEIGHTS_0: 'skinWeight',
+	JOINTS_0: 'skinIndex',
+};
+
+const PATH_PROPERTIES = {
+	scale: 'scale',
+	translation: 'position',
+	rotation: 'quaternion',
+	weights: 'morphTargetInfluences'
+};
+
+const INTERPOLATION = {
+	CUBICSPLINE: undefined, // We use a custom interpolant (GLTFCubicSplineInterpolation) for CUBICSPLINE tracks. Each
+		                        // keyframe track will be initialized with a default interpolation type, then modified.
+	LINEAR: InterpolateLinear,
+	STEP: InterpolateDiscrete
+};
+
+const ALPHA_MODES = {
+	OPAQUE: 'OPAQUE',
+	MASK: 'MASK',
+	BLEND: 'BLEND'
+};
+
+/**
+ * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#default-material
+ *
+ * @param {Object<string, Material>} cache
+ * @return {Material}
+ */
+function createDefaultMaterial( cache ) {
+
+	if ( cache[ 'DefaultMaterial' ] === undefined ) {
+
+		cache[ 'DefaultMaterial' ] = new MeshStandardMaterial( {
+			color: 0xFFFFFF,
+			emissive: 0x000000,
+			metalness: 1,
+			roughness: 1,
+			transparent: false,
+			depthTest: true,
+			side: FrontSide
+		} );
+
+	}
+
+	return cache[ 'DefaultMaterial' ];
+
+}
+
+function addUnknownExtensionsToUserData( knownExtensions, object, objectDef ) {
+
+	// Add unknown glTF extensions to an object's userData.
+
+	for ( const name in objectDef.extensions ) {
+
+		if ( knownExtensions[ name ] === undefined ) {
+
+			object.userData.gltfExtensions = object.userData.gltfExtensions || {};
+			object.userData.gltfExtensions[ name ] = objectDef.extensions[ name ];
+
+		}
+
+	}
+
+}
+
+/**
+ * @param {Object3D|Material|BufferGeometry} object
+ * @param {GLTF.definition} gltfDef
+ */
+function assignExtrasToUserData( object, gltfDef ) {
+
+	if ( gltfDef.extras !== undefined ) {
+
+		if ( typeof gltfDef.extras === 'object' ) {
+
+			Object.assign( object.userData, gltfDef.extras );
+
+		} else {
+
+			console.warn( 'THREE.GLTFLoader: Ignoring primitive type .extras, ' + gltfDef.extras );
+
+		}
+
+	}
+
+}
+
+/**
+ * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#morph-targets
+ *
+ * @param {BufferGeometry} geometry
+ * @param {Array<GLTF.Target>} targets
+ * @param {GLTFParser} parser
+ * @return {Promise<BufferGeometry>}
+ */
+function addMorphTargets( geometry, targets, parser ) {
+
+	let hasMorphPosition = false;
+	let hasMorphNormal = false;
+	let hasMorphColor = false;
+
+	for ( let i = 0, il = targets.length; i < il; i ++ ) {
+
+		const target = targets[ i ];
+
+		if ( target.POSITION !== undefined ) hasMorphPosition = true;
+		if ( target.NORMAL !== undefined ) hasMorphNormal = true;
+		if ( target.COLOR_0 !== undefined ) hasMorphColor = true;
+
+		if ( hasMorphPosition && hasMorphNormal && hasMorphColor ) break;
+
+	}
+
+	if ( ! hasMorphPosition && ! hasMorphNormal && ! hasMorphColor ) return Promise.resolve( geometry );
+
+	const pendingPositionAccessors = [];
+	const pendingNormalAccessors = [];
+	const pendingColorAccessors = [];
+
+	for ( let i = 0, il = targets.length; i < il; i ++ ) {
+
+		const target = targets[ i ];
+
+		if ( hasMorphPosition ) {
+
+			const pendingAccessor = target.POSITION !== undefined
+				? parser.getDependency( 'accessor', target.POSITION )
+				: geometry.attributes.position;
+
+			pendingPositionAccessors.push( pendingAccessor );
+
+		}
+
+		if ( hasMorphNormal ) {
+
+			const pendingAccessor = target.NORMAL !== undefined
+				? parser.getDependency( 'accessor', target.NORMAL )
+				: geometry.attributes.normal;
+
+			pendingNormalAccessors.push( pendingAccessor );
+
+		}
+
+		if ( hasMorphColor ) {
+
+			const pendingAccessor = target.COLOR_0 !== undefined
+				? parser.getDependency( 'accessor', target.COLOR_0 )
+				: geometry.attributes.color;
+
+			pendingColorAccessors.push( pendingAccessor );
+
+		}
+
+	}
+
+	return Promise.all( [
+		Promise.all( pendingPositionAccessors ),
+		Promise.all( pendingNormalAccessors ),
+		Promise.all( pendingColorAccessors )
+	] ).then( function ( accessors ) {
+
+		const morphPositions = accessors[ 0 ];
+		const morphNormals = accessors[ 1 ];
+		const morphColors = accessors[ 2 ];
+
+		if ( hasMorphPosition ) geometry.morphAttributes.position = morphPositions;
+		if ( hasMorphNormal ) geometry.morphAttributes.normal = morphNormals;
+		if ( hasMorphColor ) geometry.morphAttributes.color = morphColors;
+		geometry.morphTargetsRelative = true;
+
+		return geometry;
+
+	} );
+
+}
+
+/**
+ * @param {Mesh} mesh
+ * @param {GLTF.Mesh} meshDef
+ */
+function updateMorphTargets( mesh, meshDef ) {
+
+	mesh.updateMorphTargets();
+
+	if ( meshDef.weights !== undefined ) {
+
+		for ( let i = 0, il = meshDef.weights.length; i < il; i ++ ) {
+
+			mesh.morphTargetInfluences[ i ] = meshDef.weights[ i ];
+
+		}
+
+	}
+
+	// .extras has user-defined data, so check that .extras.targetNames is an array.
+	if ( meshDef.extras && Array.isArray( meshDef.extras.targetNames ) ) {
+
+		const targetNames = meshDef.extras.targetNames;
+
+		if ( mesh.morphTargetInfluences.length === targetNames.length ) {
+
+			mesh.morphTargetDictionary = {};
+
+			for ( let i = 0, il = targetNames.length; i < il; i ++ ) {
+
+				mesh.morphTargetDictionary[ targetNames[ i ] ] = i;
+
+			}
+
+		} else {
+
+			console.warn( 'THREE.GLTFLoader: Invalid extras.targetNames length. Ignoring names.' );
+
+		}
+
+	}
+
+}
+
+function createPrimitiveKey( primitiveDef ) {
+
+	let geometryKey;
+
+	const dracoExtension = primitiveDef.extensions && primitiveDef.extensions[ EXTENSIONS.KHR_DRACO_MESH_COMPRESSION ];
+
+	if ( dracoExtension ) {
+
+		geometryKey = 'draco:' + dracoExtension.bufferView
+				+ ':' + dracoExtension.indices
+				+ ':' + createAttributesKey( dracoExtension.attributes );
+
+	} else {
+
+		geometryKey = primitiveDef.indices + ':' + createAttributesKey( primitiveDef.attributes ) + ':' + primitiveDef.mode;
+
+	}
+
+	if ( primitiveDef.targets !== undefined ) {
+
+		for ( let i = 0, il = primitiveDef.targets.length; i < il; i ++ ) {
+
+			geometryKey += ':' + createAttributesKey( primitiveDef.targets[ i ] );
+
+		}
+
+	}
+
+	return geometryKey;
+
+}
+
+function createAttributesKey( attributes ) {
+
+	let attributesKey = '';
+
+	const keys = Object.keys( attributes ).sort();
+
+	for ( let i = 0, il = keys.length; i < il; i ++ ) {
+
+		attributesKey += keys[ i ] + ':' + attributes[ keys[ i ] ] + ';';
+
+	}
+
+	return attributesKey;
+
+}
+
+function getNormalizedComponentScale( constructor ) {
+
+	// Reference:
+	// https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mesh_quantization#encoding-quantized-data
+
+	switch ( constructor ) {
+
+		case Int8Array:
+			return 1 / 127;
+
+		case Uint8Array:
+			return 1 / 255;
+
+		case Int16Array:
+			return 1 / 32767;
+
+		case Uint16Array:
+			return 1 / 65535;
+
+		default:
+			throw new Error( 'THREE.GLTFLoader: Unsupported normalized accessor component type.' );
+
+	}
+
+}
+
+function getImageURIMimeType( uri ) {
+
+	if ( uri.search( /\.jpe?g($|\?)/i ) > 0 || uri.search( /^data\:image\/jpeg/ ) === 0 ) return 'image/jpeg';
+	if ( uri.search( /\.webp($|\?)/i ) > 0 || uri.search( /^data\:image\/webp/ ) === 0 ) return 'image/webp';
+	if ( uri.search( /\.ktx2($|\?)/i ) > 0 || uri.search( /^data\:image\/ktx2/ ) === 0 ) return 'image/ktx2';
+
+	return 'image/png';
+
+}
+
+const _identityMatrix = new Matrix4();
+
+/* GLTF PARSER */
+
+class GLTFParser {
+
+	constructor( json = {}, options = {} ) {
+
+		this.json = json;
+		this.extensions = {};
+		this.plugins = {};
+		this.options = options;
+
+		// loader object cache
+		this.cache = new GLTFRegistry();
+
+		// associations between Three.js objects and glTF elements
+		this.associations = new Map();
+
+		// BufferGeometry caching
+		this.primitiveCache = {};
+
+		// Node cache
+		this.nodeCache = {};
+
+		// Object3D instance caches
+		this.meshCache = { refs: {}, uses: {} };
+		this.cameraCache = { refs: {}, uses: {} };
+		this.lightCache = { refs: {}, uses: {} };
+
+		this.sourceCache = {};
+		this.textureCache = {};
+
+		// Track node names, to ensure no duplicates
+		this.nodeNamesUsed = {};
+
+		// Use an ImageBitmapLoader if imageBitmaps are supported. Moves much of the
+		// expensive work of uploading a texture to the GPU off the main thread.
+
+		let isSafari = false;
+		let safariVersion = -1;
+		let isFirefox = false;
+		let firefoxVersion = -1;
+
+		if ( typeof navigator !== 'undefined' ) {
+
+			const userAgent = navigator.userAgent;
+
+			isSafari = /^((?!chrome|android).)*safari/i.test( userAgent ) === true;
+			const safariMatch = userAgent.match( /Version\/(\d+)/ );
+			safariVersion = isSafari && safariMatch ? parseInt( safariMatch[ 1 ], 10 ) : -1;
+
+			isFirefox = userAgent.indexOf( 'Firefox' ) > -1;
+			firefoxVersion = isFirefox ? userAgent.match( /Firefox\/([0-9]+)\./ )[ 1 ] : -1;
+
+		}
+
+		if ( typeof createImageBitmap === 'undefined' || ( isSafari && safariVersion < 17 ) || ( isFirefox && firefoxVersion < 98 ) ) {
+
+			this.textureLoader = new TextureLoader( this.options.manager );
+
+		} else {
+
+			this.textureLoader = new ImageBitmapLoader( this.options.manager );
+
+		}
+
+		this.textureLoader.setCrossOrigin( this.options.crossOrigin );
+		this.textureLoader.setRequestHeader( this.options.requestHeader );
+
+		this.fileLoader = new FileLoader( this.options.manager );
+		this.fileLoader.setResponseType( 'arraybuffer' );
+
+		if ( this.options.crossOrigin === 'use-credentials' ) {
+
+			this.fileLoader.setWithCredentials( true );
+
+		}
+
+	}
+
+	setExtensions( extensions ) {
+
+		this.extensions = extensions;
+
+	}
+
+	setPlugins( plugins ) {
+
+		this.plugins = plugins;
+
+	}
+
+	parse( onLoad, onError ) {
+
+		const parser = this;
+		const json = this.json;
+		const extensions = this.extensions;
+
+		// Clear the loader cache
+		this.cache.removeAll();
+		this.nodeCache = {};
+
+		// Mark the special nodes/meshes in json for efficient parse
+		this._invokeAll( function ( ext ) {
+
+			return ext._markDefs && ext._markDefs();
+
+		} );
+
+		Promise.all( this._invokeAll( function ( ext ) {
+
+			return ext.beforeRoot && ext.beforeRoot();
+
+		} ) ).then( function () {
+
+			return Promise.all( [
+
+				parser.getDependencies( 'scene' ),
+				parser.getDependencies( 'animation' ),
+				parser.getDependencies( 'camera' ),
+
+			] );
+
+		} ).then( function ( dependencies ) {
+
+			const result = {
+				scene: dependencies[ 0 ][ json.scene || 0 ],
+				scenes: dependencies[ 0 ],
+				animations: dependencies[ 1 ],
+				cameras: dependencies[ 2 ],
+				asset: json.asset,
+				parser: parser,
+				userData: {}
+			};
+
+			addUnknownExtensionsToUserData( extensions, result, json );
+
+			assignExtrasToUserData( result, json );
+
+			return Promise.all( parser._invokeAll( function ( ext ) {
+
+				return ext.afterRoot && ext.afterRoot( result );
+
+			} ) ).then( function () {
+
+				for ( const scene of result.scenes ) {
+
+					scene.updateMatrixWorld();
+
+				}
+
+				onLoad( result );
+
+			} );
+
+		} ).catch( onError );
+
+	}
+
+	/**
+	 * Marks the special nodes/meshes in json for efficient parse.
+	 */
+	_markDefs() {
+
+		const nodeDefs = this.json.nodes || [];
+		const skinDefs = this.json.skins || [];
+		const meshDefs = this.json.meshes || [];
+
+		// Nothing in the node definition indicates whether it is a Bone or an
+		// Object3D. Use the skins' joint references to mark bones.
+		for ( let skinIndex = 0, skinLength = skinDefs.length; skinIndex < skinLength; skinIndex ++ ) {
+
+			const joints = skinDefs[ skinIndex ].joints;
+
+			for ( let i = 0, il = joints.length; i < il; i ++ ) {
+
+				nodeDefs[ joints[ i ] ].isBone = true;
+
+			}
+
+		}
+
+		// Iterate over all nodes, marking references to shared resources,
+		// as well as skeleton joints.
+		for ( let nodeIndex = 0, nodeLength = nodeDefs.length; nodeIndex < nodeLength; nodeIndex ++ ) {
+
+			const nodeDef = nodeDefs[ nodeIndex ];
+
+			if ( nodeDef.mesh !== undefined ) {
+
+				this._addNodeRef( this.meshCache, nodeDef.mesh );
+
+				// Nothing in the mesh definition indicates whether it is
+				// a SkinnedMesh or Mesh. Use the node's mesh reference
+				// to mark SkinnedMesh if node has skin.
+				if ( nodeDef.skin !== undefined ) {
+
+					meshDefs[ nodeDef.mesh ].isSkinnedMesh = true;
+
+				}
+
+			}
+
+			if ( nodeDef.camera !== undefined ) {
+
+				this._addNodeRef( this.cameraCache, nodeDef.camera );
+
+			}
+
+		}
+
+	}
+
+	/**
+	 * Counts references to shared node / Object3D resources. These resources
+	 * can be reused, or "instantiated", at multiple nodes in the scene
+	 * hierarchy. Mesh, Camera, and Light instances are instantiated and must
+	 * be marked. Non-scenegraph resources (like Materials, Geometries, and
+	 * Textures) can be reused directly and are not marked here.
+	 *
+	 * Example: CesiumMilkTruck sample model reuses "Wheel" meshes.
+	 *
+	 * @param {Object} cache
+	 * @param {Object3D} index
+	 */
+	_addNodeRef( cache, index ) {
+
+		if ( index === undefined ) return;
+
+		if ( cache.refs[ index ] === undefined ) {
+
+			cache.refs[ index ] = cache.uses[ index ] = 0;
+
+		}
+
+		cache.refs[ index ] ++;
+
+	}
+
+	/**
+	 * Returns a reference to a shared resource, cloning it if necessary.
+	 *
+	 * @param {Object} cache
+	 * @param {number} index
+	 * @param {Object} object
+	 * @return {Object}
+	 */
+	_getNodeRef( cache, index, object ) {
+
+		if ( cache.refs[ index ] <= 1 ) return object;
+
+		const ref = object.clone();
+
+		// Propagates mappings to the cloned object, prevents mappings on the
+		// original object from being lost.
+		const updateMappings = ( original, clone ) => {
+
+			const mappings = this.associations.get( original );
+			if ( mappings != null ) {
+
+				this.associations.set( clone, mappings );
+
+			}
+
+			for ( const [ i, child ] of original.children.entries() ) {
+
+				updateMappings( child, clone.children[ i ] );
+
+			}
+
+		};
+
+		updateMappings( object, ref );
+
+		ref.name += '_instance_' + ( cache.uses[ index ] ++ );
+
+		return ref;
+
+	}
+
+	_invokeOne( func ) {
+
+		const extensions = Object.values( this.plugins );
+		extensions.push( this );
+
+		for ( let i = 0; i < extensions.length; i ++ ) {
+
+			const result = func( extensions[ i ] );
+
+			if ( result ) return result;
+
+		}
+
+		return null;
+
+	}
+
+	_invokeAll( func ) {
+
+		const extensions = Object.values( this.plugins );
+		extensions.unshift( this );
+
+		const pending = [];
+
+		for ( let i = 0; i < extensions.length; i ++ ) {
+
+			const result = func( extensions[ i ] );
+
+			if ( result ) pending.push( result );
+
+		}
+
+		return pending;
+
+	}
+
+	/**
+	 * Requests the specified dependency asynchronously, with caching.
+	 * @param {string} type
+	 * @param {number} index
+	 * @return {Promise<Object3D|Material|THREE.Texture|AnimationClip|ArrayBuffer|Object>}
+	 */
+	getDependency( type, index ) {
+
+		const cacheKey = type + ':' + index;
+		let dependency = this.cache.get( cacheKey );
+
+		if ( ! dependency ) {
+
+			switch ( type ) {
+
+				case 'scene':
+					dependency = this.loadScene( index );
+					break;
+
+				case 'node':
+					dependency = this._invokeOne( function ( ext ) {
+
+						return ext.loadNode && ext.loadNode( index );
+
+					} );
+					break;
+
+				case 'mesh':
+					dependency = this._invokeOne( function ( ext ) {
+
+						return ext.loadMesh && ext.loadMesh( index );
+
+					} );
+					break;
+
+				case 'accessor':
+					dependency = this.loadAccessor( index );
+					break;
+
+				case 'bufferView':
+					dependency = this._invokeOne( function ( ext ) {
+
+						return ext.loadBufferView && ext.loadBufferView( index );
+
+					} );
+					break;
+
+				case 'buffer':
+					dependency = this.loadBuffer( index );
+					break;
+
+				case 'material':
+					dependency = this._invokeOne( function ( ext ) {
+
+						return ext.loadMaterial && ext.loadMaterial( index );
+
+					} );
+					break;
+
+				case 'texture':
+					dependency = this._invokeOne( function ( ext ) {
+
+						return ext.loadTexture && ext.loadTexture( index );
+
+					} );
+					break;
+
+				case 'skin':
+					dependency = this.loadSkin( index );
+					break;
+
+				case 'animation':
+					dependency = this._invokeOne( function ( ext ) {
+
+						return ext.loadAnimation && ext.loadAnimation( index );
+
+					} );
+					break;
+
+				case 'camera':
+					dependency = this.loadCamera( index );
+					break;
+
+				default:
+					dependency = this._invokeOne( function ( ext ) {
+
+						return ext != this && ext.getDependency && ext.getDependency( type, index );
+
+					} );
+
+					if ( ! dependency ) {
+
+						throw new Error( 'Unknown type: ' + type );
+
+					}
+
+					break;
+
+			}
+
+			this.cache.add( cacheKey, dependency );
+
+		}
+
+		return dependency;
+
+	}
+
+	/**
+	 * Requests all dependencies of the specified type asynchronously, with caching.
+	 * @param {string} type
+	 * @return {Promise<Array<Object>>}
+	 */
+	getDependencies( type ) {
+
+		let dependencies = this.cache.get( type );
+
+		if ( ! dependencies ) {
+
+			const parser = this;
+			const defs = this.json[ type + ( type === 'mesh' ? 'es' : 's' ) ] || [];
+
+			dependencies = Promise.all( defs.map( function ( def, index ) {
+
+				return parser.getDependency( type, index );
+
+			} ) );
+
+			this.cache.add( type, dependencies );
+
+		}
+
+		return dependencies;
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#buffers-and-buffer-views
+	 * @param {number} bufferIndex
+	 * @return {Promise<ArrayBuffer>}
+	 */
+	loadBuffer( bufferIndex ) {
+
+		const bufferDef = this.json.buffers[ bufferIndex ];
+		const loader = this.fileLoader;
+
+		if ( bufferDef.type && bufferDef.type !== 'arraybuffer' ) {
+
+			throw new Error( 'THREE.GLTFLoader: ' + bufferDef.type + ' buffer type is not supported.' );
+
+		}
+
+		// If present, GLB container is required to be the first buffer.
+		if ( bufferDef.uri === undefined && bufferIndex === 0 ) {
+
+			return Promise.resolve( this.extensions[ EXTENSIONS.KHR_BINARY_GLTF ].body );
+
+		}
+
+		const options = this.options;
+
+		return new Promise( function ( resolve, reject ) {
+
+			loader.load( LoaderUtils.resolveURL( bufferDef.uri, options.path ), resolve, undefined, function () {
+
+				reject( new Error( 'THREE.GLTFLoader: Failed to load buffer "' + bufferDef.uri + '".' ) );
+
+			} );
+
+		} );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#buffers-and-buffer-views
+	 * @param {number} bufferViewIndex
+	 * @return {Promise<ArrayBuffer>}
+	 */
+	loadBufferView( bufferViewIndex ) {
+
+		const bufferViewDef = this.json.bufferViews[ bufferViewIndex ];
+
+		return this.getDependency( 'buffer', bufferViewDef.buffer ).then( function ( buffer ) {
+
+			const byteLength = bufferViewDef.byteLength || 0;
+			const byteOffset = bufferViewDef.byteOffset || 0;
+			return buffer.slice( byteOffset, byteOffset + byteLength );
+
+		} );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#accessors
+	 * @param {number} accessorIndex
+	 * @return {Promise<BufferAttribute|InterleavedBufferAttribute>}
+	 */
+	loadAccessor( accessorIndex ) {
+
+		const parser = this;
+		const json = this.json;
+
+		const accessorDef = this.json.accessors[ accessorIndex ];
+
+		if ( accessorDef.bufferView === undefined && accessorDef.sparse === undefined ) {
+
+			const itemSize = WEBGL_TYPE_SIZES[ accessorDef.type ];
+			const TypedArray = WEBGL_COMPONENT_TYPES[ accessorDef.componentType ];
+			const normalized = accessorDef.normalized === true;
+
+			const array = new TypedArray( accessorDef.count * itemSize );
+			return Promise.resolve( new BufferAttribute( array, itemSize, normalized ) );
+
+		}
+
+		const pendingBufferViews = [];
+
+		if ( accessorDef.bufferView !== undefined ) {
+
+			pendingBufferViews.push( this.getDependency( 'bufferView', accessorDef.bufferView ) );
+
+		} else {
+
+			pendingBufferViews.push( null );
+
+		}
+
+		if ( accessorDef.sparse !== undefined ) {
+
+			pendingBufferViews.push( this.getDependency( 'bufferView', accessorDef.sparse.indices.bufferView ) );
+			pendingBufferViews.push( this.getDependency( 'bufferView', accessorDef.sparse.values.bufferView ) );
+
+		}
+
+		return Promise.all( pendingBufferViews ).then( function ( bufferViews ) {
+
+			const bufferView = bufferViews[ 0 ];
+
+			const itemSize = WEBGL_TYPE_SIZES[ accessorDef.type ];
+			const TypedArray = WEBGL_COMPONENT_TYPES[ accessorDef.componentType ];
+
+			// For VEC3: itemSize is 3, elementBytes is 4, itemBytes is 12.
+			const elementBytes = TypedArray.BYTES_PER_ELEMENT;
+			const itemBytes = elementBytes * itemSize;
+			const byteOffset = accessorDef.byteOffset || 0;
+			const byteStride = accessorDef.bufferView !== undefined ? json.bufferViews[ accessorDef.bufferView ].byteStride : undefined;
+			const normalized = accessorDef.normalized === true;
+			let array, bufferAttribute;
+
+			// The buffer is not interleaved if the stride is the item size in bytes.
+			if ( byteStride && byteStride !== itemBytes ) {
+
+				// Each "slice" of the buffer, as defined by 'count' elements of 'byteStride' bytes, gets its own InterleavedBuffer
+				// This makes sure that IBA.count reflects accessor.count properly
+				const ibSlice = Math.floor( byteOffset / byteStride );
+				const ibCacheKey = 'InterleavedBuffer:' + accessorDef.bufferView + ':' + accessorDef.componentType + ':' + ibSlice + ':' + accessorDef.count;
+				let ib = parser.cache.get( ibCacheKey );
+
+				if ( ! ib ) {
+
+					array = new TypedArray( bufferView, ibSlice * byteStride, accessorDef.count * byteStride / elementBytes );
+
+					// Integer parameters to IB/IBA are in array elements, not bytes.
+					ib = new InterleavedBuffer( array, byteStride / elementBytes );
+
+					parser.cache.add( ibCacheKey, ib );
+
+				}
+
+				bufferAttribute = new InterleavedBufferAttribute( ib, itemSize, ( byteOffset % byteStride ) / elementBytes, normalized );
+
+			} else {
+
+				if ( bufferView === null ) {
+
+					array = new TypedArray( accessorDef.count * itemSize );
+
+				} else {
+
+					array = new TypedArray( bufferView, byteOffset, accessorDef.count * itemSize );
+
+				}
+
+				bufferAttribute = new BufferAttribute( array, itemSize, normalized );
+
+			}
+
+			// https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#sparse-accessors
+			if ( accessorDef.sparse !== undefined ) {
+
+				const itemSizeIndices = WEBGL_TYPE_SIZES.SCALAR;
+				const TypedArrayIndices = WEBGL_COMPONENT_TYPES[ accessorDef.sparse.indices.componentType ];
+
+				const byteOffsetIndices = accessorDef.sparse.indices.byteOffset || 0;
+				const byteOffsetValues = accessorDef.sparse.values.byteOffset || 0;
+
+				const sparseIndices = new TypedArrayIndices( bufferViews[ 1 ], byteOffsetIndices, accessorDef.sparse.count * itemSizeIndices );
+				const sparseValues = new TypedArray( bufferViews[ 2 ], byteOffsetValues, accessorDef.sparse.count * itemSize );
+
+				if ( bufferView !== null ) {
+
+					// Avoid modifying the original ArrayBuffer, if the bufferView wasn't initialized with zeroes.
+					bufferAttribute = new BufferAttribute( bufferAttribute.array.slice(), bufferAttribute.itemSize, bufferAttribute.normalized );
+
+				}
+
+				// Ignore normalized since we copy from sparse
+				bufferAttribute.normalized = false;
+
+				for ( let i = 0, il = sparseIndices.length; i < il; i ++ ) {
+
+					const index = sparseIndices[ i ];
+
+					bufferAttribute.setX( index, sparseValues[ i * itemSize ] );
+					if ( itemSize >= 2 ) bufferAttribute.setY( index, sparseValues[ i * itemSize + 1 ] );
+					if ( itemSize >= 3 ) bufferAttribute.setZ( index, sparseValues[ i * itemSize + 2 ] );
+					if ( itemSize >= 4 ) bufferAttribute.setW( index, sparseValues[ i * itemSize + 3 ] );
+					if ( itemSize >= 5 ) throw new Error( 'THREE.GLTFLoader: Unsupported itemSize in sparse BufferAttribute.' );
+
+				}
+
+				bufferAttribute.normalized = normalized;
+
+			}
+
+			return bufferAttribute;
+
+		} );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#textures
+	 * @param {number} textureIndex
+	 * @return {Promise<THREE.Texture|null>}
+	 */
+	loadTexture( textureIndex ) {
+
+		const json = this.json;
+		const options = this.options;
+		const textureDef = json.textures[ textureIndex ];
+		const sourceIndex = textureDef.source;
+		const sourceDef = json.images[ sourceIndex ];
+
+		let loader = this.textureLoader;
+
+		if ( sourceDef.uri ) {
+
+			const handler = options.manager.getHandler( sourceDef.uri );
+			if ( handler !== null ) loader = handler;
+
+		}
+
+		return this.loadTextureImage( textureIndex, sourceIndex, loader );
+
+	}
+
+	loadTextureImage( textureIndex, sourceIndex, loader ) {
+
+		const parser = this;
+		const json = this.json;
+
+		const textureDef = json.textures[ textureIndex ];
+		const sourceDef = json.images[ sourceIndex ];
+
+		const cacheKey = ( sourceDef.uri || sourceDef.bufferView ) + ':' + textureDef.sampler;
+
+		if ( this.textureCache[ cacheKey ] ) {
+
+			// See https://github.com/mrdoob/three.js/issues/21559.
+			return this.textureCache[ cacheKey ];
+
+		}
+
+		const promise = this.loadImageSource( sourceIndex, loader ).then( function ( texture ) {
+
+			texture.flipY = false;
+
+			texture.name = textureDef.name || sourceDef.name || '';
+
+			if ( texture.name === '' && typeof sourceDef.uri === 'string' && sourceDef.uri.startsWith( 'data:image/' ) === false ) {
+
+				texture.name = sourceDef.uri;
+
+			}
+
+			const samplers = json.samplers || {};
+			const sampler = samplers[ textureDef.sampler ] || {};
+
+			texture.magFilter = WEBGL_FILTERS[ sampler.magFilter ] || LinearFilter;
+			texture.minFilter = WEBGL_FILTERS[ sampler.minFilter ] || LinearMipmapLinearFilter;
+			texture.wrapS = WEBGL_WRAPPINGS[ sampler.wrapS ] || RepeatWrapping;
+			texture.wrapT = WEBGL_WRAPPINGS[ sampler.wrapT ] || RepeatWrapping;
+			texture.generateMipmaps = ! texture.isCompressedTexture && texture.minFilter !== NearestFilter && texture.minFilter !== LinearFilter;
+
+			parser.associations.set( texture, { textures: textureIndex } );
+
+			return texture;
+
+		} ).catch( function () {
+
+			return null;
+
+		} );
+
+		this.textureCache[ cacheKey ] = promise;
+
+		return promise;
+
+	}
+
+	loadImageSource( sourceIndex, loader ) {
+
+		const parser = this;
+		const json = this.json;
+		const options = this.options;
+
+		if ( this.sourceCache[ sourceIndex ] !== undefined ) {
+
+			return this.sourceCache[ sourceIndex ].then( ( texture ) => texture.clone() );
+
+		}
+
+		const sourceDef = json.images[ sourceIndex ];
+
+		const URL = self.URL || self.webkitURL;
+
+		let sourceURI = sourceDef.uri || '';
+		let isObjectURL = false;
+
+		if ( sourceDef.bufferView !== undefined ) {
+
+			// Load binary image data from bufferView, if provided.
+
+			sourceURI = parser.getDependency( 'bufferView', sourceDef.bufferView ).then( function ( bufferView ) {
+
+				isObjectURL = true;
+				const blob = new Blob( [ bufferView ], { type: sourceDef.mimeType } );
+				sourceURI = URL.createObjectURL( blob );
+				return sourceURI;
+
+			} );
+
+		} else if ( sourceDef.uri === undefined ) {
+
+			throw new Error( 'THREE.GLTFLoader: Image ' + sourceIndex + ' is missing URI and bufferView' );
+
+		}
+
+		const promise = Promise.resolve( sourceURI ).then( function ( sourceURI ) {
+
+			return new Promise( function ( resolve, reject ) {
+
+				let onLoad = resolve;
+
+				if ( loader.isImageBitmapLoader === true ) {
+
+					onLoad = function ( imageBitmap ) {
+
+						const texture = new Texture( imageBitmap );
+						texture.needsUpdate = true;
+
+						resolve( texture );
+
+					};
+
+				}
+
+				loader.load( LoaderUtils.resolveURL( sourceURI, options.path ), onLoad, undefined, reject );
+
+			} );
+
+		} ).then( function ( texture ) {
+
+			// Clean up resources and configure Texture.
+
+			if ( isObjectURL === true ) {
+
+				URL.revokeObjectURL( sourceURI );
+
+			}
+
+			assignExtrasToUserData( texture, sourceDef );
+
+			texture.userData.mimeType = sourceDef.mimeType || getImageURIMimeType( sourceDef.uri );
+
+			return texture;
+
+		} ).catch( function ( error ) {
+
+			console.error( 'THREE.GLTFLoader: Couldn\'t load texture', sourceURI );
+			throw error;
+
+		} );
+
+		this.sourceCache[ sourceIndex ] = promise;
+		return promise;
+
+	}
+
+	/**
+	 * Asynchronously assigns a texture to the given material parameters.
+	 *
+	 * @param {Object} materialParams
+	 * @param {string} mapName
+	 * @param {Object} mapDef
+	 * @param {string} colorSpace
+	 * @return {Promise<Texture>}
+	 */
+	assignTexture( materialParams, mapName, mapDef, colorSpace ) {
+
+		const parser = this;
+
+		return this.getDependency( 'texture', mapDef.index ).then( function ( texture ) {
+
+			if ( ! texture ) return null;
+
+			if ( mapDef.texCoord !== undefined && mapDef.texCoord > 0 ) {
+
+				texture = texture.clone();
+				texture.channel = mapDef.texCoord;
+
+			}
+
+			if ( parser.extensions[ EXTENSIONS.KHR_TEXTURE_TRANSFORM ] ) {
+
+				const transform = mapDef.extensions !== undefined ? mapDef.extensions[ EXTENSIONS.KHR_TEXTURE_TRANSFORM ] : undefined;
+
+				if ( transform ) {
+
+					const gltfReference = parser.associations.get( texture );
+					texture = parser.extensions[ EXTENSIONS.KHR_TEXTURE_TRANSFORM ].extendTexture( texture, transform );
+					parser.associations.set( texture, gltfReference );
+
+				}
+
+			}
+
+			if ( colorSpace !== undefined ) {
+
+				texture.colorSpace = colorSpace;
+
+			}
+
+			materialParams[ mapName ] = texture;
+
+			return texture;
+
+		} );
+
+	}
+
+	/**
+	 * Assigns final material to a Mesh, Line, or Points instance. The instance
+	 * already has a material (generated from the glTF material options alone)
+	 * but reuse of the same glTF material may require multiple threejs materials
+	 * to accommodate different primitive types, defines, etc. New materials will
+	 * be created if necessary, and reused from a cache.
+	 * @param  {Object3D} mesh Mesh, Line, or Points instance.
+	 */
+	assignFinalMaterial( mesh ) {
+
+		const geometry = mesh.geometry;
+		let material = mesh.material;
+
+		const useDerivativeTangents = geometry.attributes.tangent === undefined;
+		const useVertexColors = geometry.attributes.color !== undefined;
+		const useFlatShading = geometry.attributes.normal === undefined;
+
+		if ( mesh.isPoints ) {
+
+			const cacheKey = 'PointsMaterial:' + material.uuid;
+
+			let pointsMaterial = this.cache.get( cacheKey );
+
+			if ( ! pointsMaterial ) {
+
+				pointsMaterial = new PointsMaterial();
+				Material.prototype.copy.call( pointsMaterial, material );
+				pointsMaterial.color.copy( material.color );
+				pointsMaterial.map = material.map;
+				pointsMaterial.sizeAttenuation = false; // glTF spec says points should be 1px
+
+				this.cache.add( cacheKey, pointsMaterial );
+
+			}
+
+			material = pointsMaterial;
+
+		} else if ( mesh.isLine ) {
+
+			const cacheKey = 'LineBasicMaterial:' + material.uuid;
+
+			let lineMaterial = this.cache.get( cacheKey );
+
+			if ( ! lineMaterial ) {
+
+				lineMaterial = new LineBasicMaterial();
+				Material.prototype.copy.call( lineMaterial, material );
+				lineMaterial.color.copy( material.color );
+				lineMaterial.map = material.map;
+
+				this.cache.add( cacheKey, lineMaterial );
+
+			}
+
+			material = lineMaterial;
+
+		}
+
+		// Clone the material if it will be modified
+		if ( useDerivativeTangents || useVertexColors || useFlatShading ) {
+
+			let cacheKey = 'ClonedMaterial:' + material.uuid + ':';
+
+			if ( useDerivativeTangents ) cacheKey += 'derivative-tangents:';
+			if ( useVertexColors ) cacheKey += 'vertex-colors:';
+			if ( useFlatShading ) cacheKey += 'flat-shading:';
+
+			let cachedMaterial = this.cache.get( cacheKey );
+
+			if ( ! cachedMaterial ) {
+
+				cachedMaterial = material.clone();
+
+				if ( useVertexColors ) cachedMaterial.vertexColors = true;
+				if ( useFlatShading ) cachedMaterial.flatShading = true;
+
+				if ( useDerivativeTangents ) {
+
+					// https://github.com/mrdoob/three.js/issues/11438#issuecomment-507003995
+					if ( cachedMaterial.normalScale ) cachedMaterial.normalScale.y *= -1;
+					if ( cachedMaterial.clearcoatNormalScale ) cachedMaterial.clearcoatNormalScale.y *= -1;
+
+				}
+
+				this.cache.add( cacheKey, cachedMaterial );
+
+				this.associations.set( cachedMaterial, this.associations.get( material ) );
+
+			}
+
+			material = cachedMaterial;
+
+		}
+
+		mesh.material = material;
+
+	}
+
+	getMaterialType( /* materialIndex */ ) {
+
+		return MeshStandardMaterial;
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#materials
+	 * @param {number} materialIndex
+	 * @return {Promise<Material>}
+	 */
+	loadMaterial( materialIndex ) {
+
+		const parser = this;
+		const json = this.json;
+		const extensions = this.extensions;
+		const materialDef = json.materials[ materialIndex ];
+
+		let materialType;
+		const materialParams = {};
+		const materialExtensions = materialDef.extensions || {};
+
+		const pending = [];
+
+		if ( materialExtensions[ EXTENSIONS.KHR_MATERIALS_UNLIT ] ) {
+
+			const kmuExtension = extensions[ EXTENSIONS.KHR_MATERIALS_UNLIT ];
+			materialType = kmuExtension.getMaterialType();
+			pending.push( kmuExtension.extendParams( materialParams, materialDef, parser ) );
+
+		} else {
+
+			// Specification:
+			// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#metallic-roughness-material
+
+			const metallicRoughness = materialDef.pbrMetallicRoughness || {};
+
+			materialParams.color = new Color( 1.0, 1.0, 1.0 );
+			materialParams.opacity = 1.0;
+
+			if ( Array.isArray( metallicRoughness.baseColorFactor ) ) {
+
+				const array = metallicRoughness.baseColorFactor;
+
+				materialParams.color.setRGB( array[ 0 ], array[ 1 ], array[ 2 ], LinearSRGBColorSpace );
+				materialParams.opacity = array[ 3 ];
+
+			}
+
+			if ( metallicRoughness.baseColorTexture !== undefined ) {
+
+				pending.push( parser.assignTexture( materialParams, 'map', metallicRoughness.baseColorTexture, SRGBColorSpace ) );
+
+			}
+
+			materialParams.metalness = metallicRoughness.metallicFactor !== undefined ? metallicRoughness.metallicFactor : 1.0;
+			materialParams.roughness = metallicRoughness.roughnessFactor !== undefined ? metallicRoughness.roughnessFactor : 1.0;
+
+			if ( metallicRoughness.metallicRoughnessTexture !== undefined ) {
+
+				pending.push( parser.assignTexture( materialParams, 'metalnessMap', metallicRoughness.metallicRoughnessTexture ) );
+				pending.push( parser.assignTexture( materialParams, 'roughnessMap', metallicRoughness.metallicRoughnessTexture ) );
+
+			}
+
+			materialType = this._invokeOne( function ( ext ) {
+
+				return ext.getMaterialType && ext.getMaterialType( materialIndex );
+
+			} );
+
+			pending.push( Promise.all( this._invokeAll( function ( ext ) {
+
+				return ext.extendMaterialParams && ext.extendMaterialParams( materialIndex, materialParams );
+
+			} ) ) );
+
+		}
+
+		if ( materialDef.doubleSided === true ) {
+
+			materialParams.side = DoubleSide;
+
+		}
+
+		const alphaMode = materialDef.alphaMode || ALPHA_MODES.OPAQUE;
+
+		if ( alphaMode === ALPHA_MODES.BLEND ) {
+
+			materialParams.transparent = true;
+
+			// See: https://github.com/mrdoob/three.js/issues/17706
+			materialParams.depthWrite = false;
+
+		} else {
+
+			materialParams.transparent = false;
+
+			if ( alphaMode === ALPHA_MODES.MASK ) {
+
+				materialParams.alphaTest = materialDef.alphaCutoff !== undefined ? materialDef.alphaCutoff : 0.5;
+
+			}
+
+		}
+
+		if ( materialDef.normalTexture !== undefined && materialType !== MeshBasicMaterial ) {
+
+			pending.push( parser.assignTexture( materialParams, 'normalMap', materialDef.normalTexture ) );
+
+			materialParams.normalScale = new Vector2( 1, 1 );
+
+			if ( materialDef.normalTexture.scale !== undefined ) {
+
+				const scale = materialDef.normalTexture.scale;
+
+				materialParams.normalScale.set( scale, scale );
+
+			}
+
+		}
+
+		if ( materialDef.occlusionTexture !== undefined && materialType !== MeshBasicMaterial ) {
+
+			pending.push( parser.assignTexture( materialParams, 'aoMap', materialDef.occlusionTexture ) );
+
+			if ( materialDef.occlusionTexture.strength !== undefined ) {
+
+				materialParams.aoMapIntensity = materialDef.occlusionTexture.strength;
+
+			}
+
+		}
+
+		if ( materialDef.emissiveFactor !== undefined && materialType !== MeshBasicMaterial ) {
+
+			const emissiveFactor = materialDef.emissiveFactor;
+			materialParams.emissive = new Color().setRGB( emissiveFactor[ 0 ], emissiveFactor[ 1 ], emissiveFactor[ 2 ], LinearSRGBColorSpace );
+
+		}
+
+		if ( materialDef.emissiveTexture !== undefined && materialType !== MeshBasicMaterial ) {
+
+			pending.push( parser.assignTexture( materialParams, 'emissiveMap', materialDef.emissiveTexture, SRGBColorSpace ) );
+
+		}
+
+		return Promise.all( pending ).then( function () {
+
+			const material = new materialType( materialParams );
+
+			if ( materialDef.name ) material.name = materialDef.name;
+
+			assignExtrasToUserData( material, materialDef );
+
+			parser.associations.set( material, { materials: materialIndex } );
+
+			if ( materialDef.extensions ) addUnknownExtensionsToUserData( extensions, material, materialDef );
+
+			return material;
+
+		} );
+
+	}
+
+	/**
+	 * When Object3D instances are targeted by animation, they need unique names.
+	 *
+	 * @param {string} originalName
+	 * @return {string}
+	 */
+	createUniqueName( originalName ) {
+
+		const sanitizedName = PropertyBinding.sanitizeNodeName( originalName || '' );
+
+		if ( sanitizedName in this.nodeNamesUsed ) {
+
+			return sanitizedName + '_' + ( ++ this.nodeNamesUsed[ sanitizedName ] );
+
+		} else {
+
+			this.nodeNamesUsed[ sanitizedName ] = 0;
+
+			return sanitizedName;
+
+		}
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#geometry
+	 *
+	 * Creates BufferGeometries from primitives.
+	 *
+	 * @param {Array<GLTF.Primitive>} primitives
+	 * @return {Promise<Array<BufferGeometry>>}
+	 */
+	loadGeometries( primitives ) {
+
+		const parser = this;
+		const extensions = this.extensions;
+		const cache = this.primitiveCache;
+
+		function createDracoPrimitive( primitive ) {
+
+			return extensions[ EXTENSIONS.KHR_DRACO_MESH_COMPRESSION ]
+				.decodePrimitive( primitive, parser )
+				.then( function ( geometry ) {
+
+					return addPrimitiveAttributes( geometry, primitive, parser );
+
+				} );
+
+		}
+
+		const pending = [];
+
+		for ( let i = 0, il = primitives.length; i < il; i ++ ) {
+
+			const primitive = primitives[ i ];
+			const cacheKey = createPrimitiveKey( primitive );
+
+			// See if we've already created this geometry
+			const cached = cache[ cacheKey ];
+
+			if ( cached ) {
+
+				// Use the cached geometry if it exists
+				pending.push( cached.promise );
+
+			} else {
+
+				let geometryPromise;
+
+				if ( primitive.extensions && primitive.extensions[ EXTENSIONS.KHR_DRACO_MESH_COMPRESSION ] ) {
+
+					// Use DRACO geometry if available
+					geometryPromise = createDracoPrimitive( primitive );
+
+				} else {
+
+					// Otherwise create a new geometry
+					geometryPromise = addPrimitiveAttributes( new BufferGeometry(), primitive, parser );
+
+				}
+
+				// Cache this geometry
+				cache[ cacheKey ] = { primitive: primitive, promise: geometryPromise };
+
+				pending.push( geometryPromise );
+
+			}
+
+		}
+
+		return Promise.all( pending );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#meshes
+	 * @param {number} meshIndex
+	 * @return {Promise<Group|Mesh|SkinnedMesh>}
+	 */
+	loadMesh( meshIndex ) {
+
+		const parser = this;
+		const json = this.json;
+		const extensions = this.extensions;
+
+		const meshDef = json.meshes[ meshIndex ];
+		const primitives = meshDef.primitives;
+
+		const pending = [];
+
+		for ( let i = 0, il = primitives.length; i < il; i ++ ) {
+
+			const material = primitives[ i ].material === undefined
+				? createDefaultMaterial( this.cache )
+				: this.getDependency( 'material', primitives[ i ].material );
+
+			pending.push( material );
+
+		}
+
+		pending.push( parser.loadGeometries( primitives ) );
+
+		return Promise.all( pending ).then( function ( results ) {
+
+			const materials = results.slice( 0, results.length - 1 );
+			const geometries = results[ results.length - 1 ];
+
+			const meshes = [];
+
+			for ( let i = 0, il = geometries.length; i < il; i ++ ) {
+
+				const geometry = geometries[ i ];
+				const primitive = primitives[ i ];
+
+				// 1. create Mesh
+
+				let mesh;
+
+				const material = materials[ i ];
+
+				if ( primitive.mode === WEBGL_CONSTANTS.TRIANGLES ||
+						primitive.mode === WEBGL_CONSTANTS.TRIANGLE_STRIP ||
+						primitive.mode === WEBGL_CONSTANTS.TRIANGLE_FAN ||
+						primitive.mode === undefined ) {
+
+					// .isSkinnedMesh isn't in glTF spec. See ._markDefs()
+					mesh = meshDef.isSkinnedMesh === true
+						? new SkinnedMesh( geometry, material )
+						: new Mesh( geometry, material );
+
+					if ( mesh.isSkinnedMesh === true ) {
+
+						// normalize skin weights to fix malformed assets (see #15319)
+						mesh.normalizeSkinWeights();
+
+					}
+
+					if ( primitive.mode === WEBGL_CONSTANTS.TRIANGLE_STRIP ) {
+
+						mesh.geometry = toTrianglesDrawMode( mesh.geometry, TriangleStripDrawMode );
+
+					} else if ( primitive.mode === WEBGL_CONSTANTS.TRIANGLE_FAN ) {
+
+						mesh.geometry = toTrianglesDrawMode( mesh.geometry, TriangleFanDrawMode );
+
+					}
+
+				} else if ( primitive.mode === WEBGL_CONSTANTS.LINES ) {
+
+					mesh = new LineSegments( geometry, material );
+
+				} else if ( primitive.mode === WEBGL_CONSTANTS.LINE_STRIP ) {
+
+					mesh = new Line( geometry, material );
+
+				} else if ( primitive.mode === WEBGL_CONSTANTS.LINE_LOOP ) {
+
+					mesh = new LineLoop( geometry, material );
+
+				} else if ( primitive.mode === WEBGL_CONSTANTS.POINTS ) {
+
+					mesh = new Points( geometry, material );
+
+				} else {
+
+					throw new Error( 'THREE.GLTFLoader: Primitive mode unsupported: ' + primitive.mode );
+
+				}
+
+				if ( Object.keys( mesh.geometry.morphAttributes ).length > 0 ) {
+
+					updateMorphTargets( mesh, meshDef );
+
+				}
+
+				mesh.name = parser.createUniqueName( meshDef.name || ( 'mesh_' + meshIndex ) );
+
+				assignExtrasToUserData( mesh, meshDef );
+
+				if ( primitive.extensions ) addUnknownExtensionsToUserData( extensions, mesh, primitive );
+
+				parser.assignFinalMaterial( mesh );
+
+				meshes.push( mesh );
+
+			}
+
+			for ( let i = 0, il = meshes.length; i < il; i ++ ) {
+
+				parser.associations.set( meshes[ i ], {
+					meshes: meshIndex,
+					primitives: i
+				} );
+
+			}
+
+			if ( meshes.length === 1 ) {
+
+				if ( meshDef.extensions ) addUnknownExtensionsToUserData( extensions, meshes[ 0 ], meshDef );
+
+				return meshes[ 0 ];
+
+			}
+
+			const group = new Group();
+
+			if ( meshDef.extensions ) addUnknownExtensionsToUserData( extensions, group, meshDef );
+
+			parser.associations.set( group, { meshes: meshIndex } );
+
+			for ( let i = 0, il = meshes.length; i < il; i ++ ) {
+
+				group.add( meshes[ i ] );
+
+			}
+
+			return group;
+
+		} );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#cameras
+	 * @param {number} cameraIndex
+	 * @return {Promise<THREE.Camera>}
+	 */
+	loadCamera( cameraIndex ) {
+
+		let camera;
+		const cameraDef = this.json.cameras[ cameraIndex ];
+		const params = cameraDef[ cameraDef.type ];
+
+		if ( ! params ) {
+
+			console.warn( 'THREE.GLTFLoader: Missing camera parameters.' );
+			return;
+
+		}
+
+		if ( cameraDef.type === 'perspective' ) {
+
+			camera = new PerspectiveCamera( MathUtils.radToDeg( params.yfov ), params.aspectRatio || 1, params.znear || 1, params.zfar || 2e6 );
+
+		} else if ( cameraDef.type === 'orthographic' ) {
+
+			camera = new OrthographicCamera( - params.xmag, params.xmag, params.ymag, - params.ymag, params.znear, params.zfar );
+
+		}
+
+		if ( cameraDef.name ) camera.name = this.createUniqueName( cameraDef.name );
+
+		assignExtrasToUserData( camera, cameraDef );
+
+		return Promise.resolve( camera );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#skins
+	 * @param {number} skinIndex
+	 * @return {Promise<Skeleton>}
+	 */
+	loadSkin( skinIndex ) {
+
+		const skinDef = this.json.skins[ skinIndex ];
+
+		const pending = [];
+
+		for ( let i = 0, il = skinDef.joints.length; i < il; i ++ ) {
+
+			pending.push( this._loadNodeShallow( skinDef.joints[ i ] ) );
+
+		}
+
+		if ( skinDef.inverseBindMatrices !== undefined ) {
+
+			pending.push( this.getDependency( 'accessor', skinDef.inverseBindMatrices ) );
+
+		} else {
+
+			pending.push( null );
+
+		}
+
+		return Promise.all( pending ).then( function ( results ) {
+
+			const inverseBindMatrices = results.pop();
+			const jointNodes = results;
+
+			// Note that bones (joint nodes) may or may not be in the
+			// scene graph at this time.
+
+			const bones = [];
+			const boneInverses = [];
+
+			for ( let i = 0, il = jointNodes.length; i < il; i ++ ) {
+
+				const jointNode = jointNodes[ i ];
+
+				if ( jointNode ) {
+
+					bones.push( jointNode );
+
+					const mat = new Matrix4();
+
+					if ( inverseBindMatrices !== null ) {
+
+						mat.fromArray( inverseBindMatrices.array, i * 16 );
+
+					}
+
+					boneInverses.push( mat );
+
+				} else {
+
+					console.warn( 'THREE.GLTFLoader: Joint "%s" could not be found.', skinDef.joints[ i ] );
+
+				}
+
+			}
+
+			return new Skeleton( bones, boneInverses );
+
+		} );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#animations
+	 * @param {number} animationIndex
+	 * @return {Promise<AnimationClip>}
+	 */
+	loadAnimation( animationIndex ) {
+
+		const json = this.json;
+		const parser = this;
+
+		const animationDef = json.animations[ animationIndex ];
+		const animationName = animationDef.name ? animationDef.name : 'animation_' + animationIndex;
+
+		const pendingNodes = [];
+		const pendingInputAccessors = [];
+		const pendingOutputAccessors = [];
+		const pendingSamplers = [];
+		const pendingTargets = [];
+
+		for ( let i = 0, il = animationDef.channels.length; i < il; i ++ ) {
+
+			const channel = animationDef.channels[ i ];
+			const sampler = animationDef.samplers[ channel.sampler ];
+			const target = channel.target;
+			const name = target.node;
+			const input = animationDef.parameters !== undefined ? animationDef.parameters[ sampler.input ] : sampler.input;
+			const output = animationDef.parameters !== undefined ? animationDef.parameters[ sampler.output ] : sampler.output;
+
+			if ( target.node === undefined ) continue;
+
+			pendingNodes.push( this.getDependency( 'node', name ) );
+			pendingInputAccessors.push( this.getDependency( 'accessor', input ) );
+			pendingOutputAccessors.push( this.getDependency( 'accessor', output ) );
+			pendingSamplers.push( sampler );
+			pendingTargets.push( target );
+
+		}
+
+		return Promise.all( [
+
+			Promise.all( pendingNodes ),
+			Promise.all( pendingInputAccessors ),
+			Promise.all( pendingOutputAccessors ),
+			Promise.all( pendingSamplers ),
+			Promise.all( pendingTargets )
+
+		] ).then( function ( dependencies ) {
+
+			const nodes = dependencies[ 0 ];
+			const inputAccessors = dependencies[ 1 ];
+			const outputAccessors = dependencies[ 2 ];
+			const samplers = dependencies[ 3 ];
+			const targets = dependencies[ 4 ];
+
+			const tracks = [];
+
+			for ( let i = 0, il = nodes.length; i < il; i ++ ) {
+
+				const node = nodes[ i ];
+				const inputAccessor = inputAccessors[ i ];
+				const outputAccessor = outputAccessors[ i ];
+				const sampler = samplers[ i ];
+				const target = targets[ i ];
+
+				if ( node === undefined ) continue;
+
+				if ( node.updateMatrix ) {
+
+					node.updateMatrix();
+
+				}
+
+				const createdTracks = parser._createAnimationTracks( node, inputAccessor, outputAccessor, sampler, target );
+
+				if ( createdTracks ) {
+
+					for ( let k = 0; k < createdTracks.length; k ++ ) {
+
+						tracks.push( createdTracks[ k ] );
+
+					}
+
+				}
+
+			}
+
+			return new AnimationClip( animationName, undefined, tracks );
+
+		} );
+
+	}
+
+	createNodeMesh( nodeIndex ) {
+
+		const json = this.json;
+		const parser = this;
+		const nodeDef = json.nodes[ nodeIndex ];
+
+		if ( nodeDef.mesh === undefined ) return null;
+
+		return parser.getDependency( 'mesh', nodeDef.mesh ).then( function ( mesh ) {
+
+			const node = parser._getNodeRef( parser.meshCache, nodeDef.mesh, mesh );
+
+			// if weights are provided on the node, override weights on the mesh.
+			if ( nodeDef.weights !== undefined ) {
+
+				node.traverse( function ( o ) {
+
+					if ( ! o.isMesh ) return;
+
+					for ( let i = 0, il = nodeDef.weights.length; i < il; i ++ ) {
+
+						o.morphTargetInfluences[ i ] = nodeDef.weights[ i ];
+
+					}
+
+				} );
+
+			}
+
+			return node;
+
+		} );
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#nodes-and-hierarchy
+	 * @param {number} nodeIndex
+	 * @return {Promise<Object3D>}
+	 */
+	loadNode( nodeIndex ) {
+
+		const json = this.json;
+		const parser = this;
+
+		const nodeDef = json.nodes[ nodeIndex ];
+
+		const nodePending = parser._loadNodeShallow( nodeIndex );
+
+		const childPending = [];
+		const childrenDef = nodeDef.children || [];
+
+		for ( let i = 0, il = childrenDef.length; i < il; i ++ ) {
+
+			childPending.push( parser.getDependency( 'node', childrenDef[ i ] ) );
+
+		}
+
+		const skeletonPending = nodeDef.skin === undefined
+			? Promise.resolve( null )
+			: parser.getDependency( 'skin', nodeDef.skin );
+
+		return Promise.all( [
+			nodePending,
+			Promise.all( childPending ),
+			skeletonPending
+		] ).then( function ( results ) {
+
+			const node = results[ 0 ];
+			const children = results[ 1 ];
+			const skeleton = results[ 2 ];
+
+			if ( skeleton !== null ) {
+
+				// This full traverse should be fine because
+				// child glTF nodes have not been added to this node yet.
+				node.traverse( function ( mesh ) {
+
+					if ( ! mesh.isSkinnedMesh ) return;
+
+					mesh.bind( skeleton, _identityMatrix );
+
+				} );
+
+			}
+
+			for ( let i = 0, il = children.length; i < il; i ++ ) {
+
+				node.add( children[ i ] );
+
+			}
+
+			return node;
+
+		} );
+
+	}
+
+	// ._loadNodeShallow() parses a single node.
+	// skin and child nodes are created and added in .loadNode() (no '_' prefix).
+	_loadNodeShallow( nodeIndex ) {
+
+		const json = this.json;
+		const extensions = this.extensions;
+		const parser = this;
+
+		// This method is called from .loadNode() and .loadSkin().
+		// Cache a node to avoid duplication.
+
+		if ( this.nodeCache[ nodeIndex ] !== undefined ) {
+
+			return this.nodeCache[ nodeIndex ];
+
+		}
+
+		const nodeDef = json.nodes[ nodeIndex ];
+
+		// reserve node's name before its dependencies, so the root has the intended name.
+		const nodeName = nodeDef.name ? parser.createUniqueName( nodeDef.name ) : '';
+
+		const pending = [];
+
+		const meshPromise = parser._invokeOne( function ( ext ) {
+
+			return ext.createNodeMesh && ext.createNodeMesh( nodeIndex );
+
+		} );
+
+		if ( meshPromise ) {
+
+			pending.push( meshPromise );
+
+		}
+
+		if ( nodeDef.camera !== undefined ) {
+
+			pending.push( parser.getDependency( 'camera', nodeDef.camera ).then( function ( camera ) {
+
+				return parser._getNodeRef( parser.cameraCache, nodeDef.camera, camera );
+
+			} ) );
+
+		}
+
+		parser._invokeAll( function ( ext ) {
+
+			return ext.createNodeAttachment && ext.createNodeAttachment( nodeIndex );
+
+		} ).forEach( function ( promise ) {
+
+			pending.push( promise );
+
+		} );
+
+		this.nodeCache[ nodeIndex ] = Promise.all( pending ).then( function ( objects ) {
+
+			let node;
+
+			// .isBone isn't in glTF spec. See ._markDefs
+			if ( nodeDef.isBone === true ) {
+
+				node = new Bone();
+
+			} else if ( objects.length > 1 ) {
+
+				node = new Group();
+
+			} else if ( objects.length === 1 ) {
+
+				node = objects[ 0 ];
+
+			} else {
+
+				node = new Object3D();
+
+			}
+
+			if ( node !== objects[ 0 ] ) {
+
+				for ( let i = 0, il = objects.length; i < il; i ++ ) {
+
+					node.add( objects[ i ] );
+
+				}
+
+			}
+
+			if ( nodeDef.name ) {
+
+				node.userData.name = nodeDef.name;
+				node.name = nodeName;
+
+			}
+
+			assignExtrasToUserData( node, nodeDef );
+
+			if ( nodeDef.extensions ) addUnknownExtensionsToUserData( extensions, node, nodeDef );
+
+			if ( nodeDef.matrix !== undefined ) {
+
+				const matrix = new Matrix4();
+				matrix.fromArray( nodeDef.matrix );
+				node.applyMatrix4( matrix );
+
+			} else {
+
+				if ( nodeDef.translation !== undefined ) {
+
+					node.position.fromArray( nodeDef.translation );
+
+				}
+
+				if ( nodeDef.rotation !== undefined ) {
+
+					node.quaternion.fromArray( nodeDef.rotation );
+
+				}
+
+				if ( nodeDef.scale !== undefined ) {
+
+					node.scale.fromArray( nodeDef.scale );
+
+				}
+
+			}
+
+			if ( ! parser.associations.has( node ) ) {
+
+				parser.associations.set( node, {} );
+
+			}
+
+			parser.associations.get( node ).nodes = nodeIndex;
+
+			return node;
+
+		} );
+
+		return this.nodeCache[ nodeIndex ];
+
+	}
+
+	/**
+	 * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#scenes
+	 * @param {number} sceneIndex
+	 * @return {Promise<Group>}
+	 */
+	loadScene( sceneIndex ) {
+
+		const extensions = this.extensions;
+		const sceneDef = this.json.scenes[ sceneIndex ];
+		const parser = this;
+
+		// Loader returns Group, not Scene.
+		// See: https://github.com/mrdoob/three.js/issues/18342#issuecomment-578981172
+		const scene = new Group();
+		if ( sceneDef.name ) scene.name = parser.createUniqueName( sceneDef.name );
+
+		assignExtrasToUserData( scene, sceneDef );
+
+		if ( sceneDef.extensions ) addUnknownExtensionsToUserData( extensions, scene, sceneDef );
+
+		const nodeIds = sceneDef.nodes || [];
+
+		const pending = [];
+
+		for ( let i = 0, il = nodeIds.length; i < il; i ++ ) {
+
+			pending.push( parser.getDependency( 'node', nodeIds[ i ] ) );
+
+		}
+
+		return Promise.all( pending ).then( function ( nodes ) {
+
+			for ( let i = 0, il = nodes.length; i < il; i ++ ) {
+
+				scene.add( nodes[ i ] );
+
+			}
+
+			// Removes dangling associations, associations that reference a node that
+			// didn't make it into the scene.
+			const reduceAssociations = ( node ) => {
+
+				const reducedAssociations = new Map();
+
+				for ( const [ key, value ] of parser.associations ) {
+
+					if ( key instanceof Material || key instanceof Texture ) {
+
+						reducedAssociations.set( key, value );
+
+					}
+
+				}
+
+				node.traverse( ( node ) => {
+
+					const mappings = parser.associations.get( node );
+
+					if ( mappings != null ) {
+
+						reducedAssociations.set( node, mappings );
+
+					}
+
+				} );
+
+				return reducedAssociations;
+
+			};
+
+			parser.associations = reduceAssociations( scene );
+
+			return scene;
+
+		} );
+
+	}
+
+	_createAnimationTracks( node, inputAccessor, outputAccessor, sampler, target ) {
+
+		const tracks = [];
+
+		const targetName = node.name ? node.name : node.uuid;
+		const targetNames = [];
+
+		if ( PATH_PROPERTIES[ target.path ] === PATH_PROPERTIES.weights ) {
+
+			node.traverse( function ( object ) {
+
+				if ( object.morphTargetInfluences ) {
+
+					targetNames.push( object.name ? object.name : object.uuid );
+
+				}
+
+			} );
+
+		} else {
+
+			targetNames.push( targetName );
+
+		}
+
+		let TypedKeyframeTrack;
+
+		switch ( PATH_PROPERTIES[ target.path ] ) {
+
+			case PATH_PROPERTIES.weights:
+
+				TypedKeyframeTrack = NumberKeyframeTrack;
+				break;
+
+			case PATH_PROPERTIES.rotation:
+
+				TypedKeyframeTrack = QuaternionKeyframeTrack;
+				break;
+
+			case PATH_PROPERTIES.position:
+			case PATH_PROPERTIES.scale:
+
+				TypedKeyframeTrack = VectorKeyframeTrack;
+				break;
+
+			default:
+
+				switch ( outputAccessor.itemSize ) {
+
+					case 1:
+						TypedKeyframeTrack = NumberKeyframeTrack;
+						break;
+					case 2:
+					case 3:
+					default:
+						TypedKeyframeTrack = VectorKeyframeTrack;
+						break;
+
+				}
+
+				break;
+
+		}
+
+		const interpolation = sampler.interpolation !== undefined ? INTERPOLATION[ sampler.interpolation ] : InterpolateLinear;
+
+
+		const outputArray = this._getArrayFromAccessor( outputAccessor );
+
+		for ( let j = 0, jl = targetNames.length; j < jl; j ++ ) {
+
+			const track = new TypedKeyframeTrack(
+				targetNames[ j ] + '.' + PATH_PROPERTIES[ target.path ],
+				inputAccessor.array,
+				outputArray,
+				interpolation
+			);
+
+			// Override interpolation with custom factory method.
+			if ( sampler.interpolation === 'CUBICSPLINE' ) {
+
+				this._createCubicSplineTrackInterpolant( track );
+
+			}
+
+			tracks.push( track );
+
+		}
+
+		return tracks;
+
+	}
+
+	_getArrayFromAccessor( accessor ) {
+
+		let outputArray = accessor.array;
+
+		if ( accessor.normalized ) {
+
+			const scale = getNormalizedComponentScale( outputArray.constructor );
+			const scaled = new Float32Array( outputArray.length );
+
+			for ( let j = 0, jl = outputArray.length; j < jl; j ++ ) {
+
+				scaled[ j ] = outputArray[ j ] * scale;
+
+			}
+
+			outputArray = scaled;
+
+		}
+
+		return outputArray;
+
+	}
+
+	_createCubicSplineTrackInterpolant( track ) {
+
+		track.createInterpolant = function InterpolantFactoryMethodGLTFCubicSpline( result ) {
+
+			// A CUBICSPLINE keyframe in glTF has three output values for each input value,
+			// representing inTangent, splineVertex, and outTangent. As a result, track.getValueSize()
+			// must be divided by three to get the interpolant's sampleSize argument.
+
+			const interpolantType = ( this instanceof QuaternionKeyframeTrack ) ? GLTFCubicSplineQuaternionInterpolant : GLTFCubicSplineInterpolant;
+
+			return new interpolantType( this.times, this.values, this.getValueSize() / 3, result );
+
+		};
+
+		// Mark as CUBICSPLINE. `track.getInterpolation()` doesn't support custom interpolants.
+		track.createInterpolant.isInterpolantFactoryMethodGLTFCubicSpline = true;
+
+	}
+
+}
+
+/**
+ * @param {BufferGeometry} geometry
+ * @param {GLTF.Primitive} primitiveDef
+ * @param {GLTFParser} parser
+ */
+function computeBounds( geometry, primitiveDef, parser ) {
+
+	const attributes = primitiveDef.attributes;
+
+	const box = new Box3();
+
+	if ( attributes.POSITION !== undefined ) {
+
+		const accessor = parser.json.accessors[ attributes.POSITION ];
+
+		const min = accessor.min;
+		const max = accessor.max;
+
+		// glTF requires 'min' and 'max', but VRM (which extends glTF) currently ignores that requirement.
+
+		if ( min !== undefined && max !== undefined ) {
+
+			box.set(
+				new Vector3( min[ 0 ], min[ 1 ], min[ 2 ] ),
+				new Vector3( max[ 0 ], max[ 1 ], max[ 2 ] )
+			);
+
+			if ( accessor.normalized ) {
+
+				const boxScale = getNormalizedComponentScale( WEBGL_COMPONENT_TYPES[ accessor.componentType ] );
+				box.min.multiplyScalar( boxScale );
+				box.max.multiplyScalar( boxScale );
+
+			}
+
+		} else {
+
+			console.warn( 'THREE.GLTFLoader: Missing min/max properties for accessor POSITION.' );
+
+			return;
+
+		}
+
+	} else {
+
+		return;
+
+	}
+
+	const targets = primitiveDef.targets;
+
+	if ( targets !== undefined ) {
+
+		const maxDisplacement = new Vector3();
+		const vector = new Vector3();
+
+		for ( let i = 0, il = targets.length; i < il; i ++ ) {
+
+			const target = targets[ i ];
+
+			if ( target.POSITION !== undefined ) {
+
+				const accessor = parser.json.accessors[ target.POSITION ];
+				const min = accessor.min;
+				const max = accessor.max;
+
+				// glTF requires 'min' and 'max', but VRM (which extends glTF) currently ignores that requirement.
+
+				if ( min !== undefined && max !== undefined ) {
+
+					// we need to get max of absolute components because target weight is [-1,1]
+					vector.setX( Math.max( Math.abs( min[ 0 ] ), Math.abs( max[ 0 ] ) ) );
+					vector.setY( Math.max( Math.abs( min[ 1 ] ), Math.abs( max[ 1 ] ) ) );
+					vector.setZ( Math.max( Math.abs( min[ 2 ] ), Math.abs( max[ 2 ] ) ) );
+
+
+					if ( accessor.normalized ) {
+
+						const boxScale = getNormalizedComponentScale( WEBGL_COMPONENT_TYPES[ accessor.componentType ] );
+						vector.multiplyScalar( boxScale );
+
+					}
+
+					// Note: this assumes that the sum of all weights is at most 1. This isn't quite correct - it's more conservative
+					// to assume that each target can have a max weight of 1. However, for some use cases - notably, when morph targets
+					// are used to implement key-frame animations and as such only two are active at a time - this results in very large
+					// boxes. So for now we make a box that's sometimes a touch too small but is hopefully mostly of reasonable size.
+					maxDisplacement.max( vector );
+
+				} else {
+
+					console.warn( 'THREE.GLTFLoader: Missing min/max properties for accessor POSITION.' );
+
+				}
+
+			}
+
+		}
+
+		// As per comment above this box isn't conservative, but has a reasonable size for a very large number of morph targets.
+		box.expandByVector( maxDisplacement );
+
+	}
+
+	geometry.boundingBox = box;
+
+	const sphere = new Sphere();
+
+	box.getCenter( sphere.center );
+	sphere.radius = box.min.distanceTo( box.max ) / 2;
+
+	geometry.boundingSphere = sphere;
+
+}
+
+/**
+ * @param {BufferGeometry} geometry
+ * @param {GLTF.Primitive} primitiveDef
+ * @param {GLTFParser} parser
+ * @return {Promise<BufferGeometry>}
+ */
+function addPrimitiveAttributes( geometry, primitiveDef, parser ) {
+
+	const attributes = primitiveDef.attributes;
+
+	const pending = [];
+
+	function assignAttributeAccessor( accessorIndex, attributeName ) {
+
+		return parser.getDependency( 'accessor', accessorIndex )
+			.then( function ( accessor ) {
+
+				geometry.setAttribute( attributeName, accessor );
+
+			} );
+
+	}
+
+	for ( const gltfAttributeName in attributes ) {
+
+		const threeAttributeName = ATTRIBUTES[ gltfAttributeName ] || gltfAttributeName.toLowerCase();
+
+		// Skip attributes already provided by e.g. Draco extension.
+		if ( threeAttributeName in geometry.attributes ) continue;
+
+		pending.push( assignAttributeAccessor( attributes[ gltfAttributeName ], threeAttributeName ) );
+
+	}
+
+	if ( primitiveDef.indices !== undefined && ! geometry.index ) {
+
+		const accessor = parser.getDependency( 'accessor', primitiveDef.indices ).then( function ( accessor ) {
+
+			geometry.setIndex( accessor );
+
+		} );
+
+		pending.push( accessor );
+
+	}
+
+	if ( ColorManagement.workingColorSpace !== LinearSRGBColorSpace && 'COLOR_0' in attributes ) {
+
+		console.warn( `THREE.GLTFLoader: Converting vertex colors from "srgb-linear" to "${ColorManagement.workingColorSpace}" not supported.` );
+
+	}
+
+	assignExtrasToUserData( geometry, primitiveDef );
+
+	computeBounds( geometry, primitiveDef, parser );
+
+	return Promise.all( pending ).then( function () {
+
+		return primitiveDef.targets !== undefined
+			? addMorphTargets( geometry, primitiveDef.targets, parser )
+			: geometry;
+
+	} );
+
+}
 
 class TGALoader extends DataTextureLoader {
 
@@ -59571,7 +75768,7 @@ class ColladaLoader extends Loader {
 				} else {
 
 					result += '\n';
-					stack.push.apply( stack, node.childNodes );
+					stack.push( ...node.childNodes );
 
 				}
 
@@ -59711,6 +75908,1048 @@ class ColladaLoader extends Loader {
 			library: library,
 			scene: scene
 		};
+
+	}
+
+}
+
+const _taskCache = new WeakMap();
+
+class DRACOLoader extends Loader {
+
+	constructor( manager ) {
+
+		super( manager );
+
+		this.decoderPath = '';
+		this.decoderConfig = {};
+		this.decoderBinary = null;
+		this.decoderPending = null;
+
+		this.workerLimit = 4;
+		this.workerPool = [];
+		this.workerNextTaskID = 1;
+		this.workerSourceURL = '';
+
+		this.defaultAttributeIDs = {
+			position: 'POSITION',
+			normal: 'NORMAL',
+			color: 'COLOR',
+			uv: 'TEX_COORD'
+		};
+		this.defaultAttributeTypes = {
+			position: 'Float32Array',
+			normal: 'Float32Array',
+			color: 'Float32Array',
+			uv: 'Float32Array'
+		};
+
+	}
+
+	setDecoderPath( path ) {
+
+		this.decoderPath = path;
+
+		return this;
+
+	}
+
+	setDecoderConfig( config ) {
+
+		this.decoderConfig = config;
+
+		return this;
+
+	}
+
+	setWorkerLimit( workerLimit ) {
+
+		this.workerLimit = workerLimit;
+
+		return this;
+
+	}
+
+	load( url, onLoad, onProgress, onError ) {
+
+		const loader = new FileLoader( this.manager );
+
+		loader.setPath( this.path );
+		loader.setResponseType( 'arraybuffer' );
+		loader.setRequestHeader( this.requestHeader );
+		loader.setWithCredentials( this.withCredentials );
+
+		loader.load( url, ( buffer ) => {
+
+			this.parse( buffer, onLoad, onError );
+
+		}, onProgress, onError );
+
+	}
+
+
+	parse( buffer, onLoad, onError = ()=>{} ) {
+
+		this.decodeDracoFile( buffer, onLoad, null, null, SRGBColorSpace, onError ).catch( onError );
+
+	}
+
+	decodeDracoFile( buffer, callback, attributeIDs, attributeTypes, vertexColorSpace = LinearSRGBColorSpace, onError = () => {} ) {
+
+		const taskConfig = {
+			attributeIDs: attributeIDs || this.defaultAttributeIDs,
+			attributeTypes: attributeTypes || this.defaultAttributeTypes,
+			useUniqueIDs: !! attributeIDs,
+			vertexColorSpace: vertexColorSpace,
+		};
+
+		return this.decodeGeometry( buffer, taskConfig ).then( callback ).catch( onError );
+
+	}
+
+	decodeGeometry( buffer, taskConfig ) {
+
+		const taskKey = JSON.stringify( taskConfig );
+
+		// Check for an existing task using this buffer. A transferred buffer cannot be transferred
+		// again from this thread.
+		if ( _taskCache.has( buffer ) ) {
+
+			const cachedTask = _taskCache.get( buffer );
+
+			if ( cachedTask.key === taskKey ) {
+
+				return cachedTask.promise;
+
+			} else if ( buffer.byteLength === 0 ) {
+
+				// Technically, it would be possible to wait for the previous task to complete,
+				// transfer the buffer back, and decode again with the second configuration. That
+				// is complex, and I don't know of any reason to decode a Draco buffer twice in
+				// different ways, so this is left unimplemented.
+				throw new Error(
+
+					'THREE.DRACOLoader: Unable to re-decode a buffer with different ' +
+					'settings. Buffer has already been transferred.'
+
+				);
+
+			}
+
+		}
+
+		//
+
+		let worker;
+		const taskID = this.workerNextTaskID ++;
+		const taskCost = buffer.byteLength;
+
+		// Obtain a worker and assign a task, and construct a geometry instance
+		// when the task completes.
+		const geometryPending = this._getWorker( taskID, taskCost )
+			.then( ( _worker ) => {
+
+				worker = _worker;
+
+				return new Promise( ( resolve, reject ) => {
+
+					worker._callbacks[ taskID ] = { resolve, reject };
+
+					worker.postMessage( { type: 'decode', id: taskID, taskConfig, buffer }, [ buffer ] );
+
+					// this.debug();
+
+				} );
+
+			} )
+			.then( ( message ) => this._createGeometry( message.geometry ) );
+
+		// Remove task from the task list.
+		// Note: replaced '.finally()' with '.catch().then()' block - iOS 11 support (#19416)
+		geometryPending
+			.catch( () => true )
+			.then( () => {
+
+				if ( worker && taskID ) {
+
+					this._releaseTask( worker, taskID );
+
+					// this.debug();
+
+				}
+
+			} );
+
+		// Cache the task result.
+		_taskCache.set( buffer, {
+
+			key: taskKey,
+			promise: geometryPending
+
+		} );
+
+		return geometryPending;
+
+	}
+
+	_createGeometry( geometryData ) {
+
+		const geometry = new BufferGeometry();
+
+		if ( geometryData.index ) {
+
+			geometry.setIndex( new BufferAttribute( geometryData.index.array, 1 ) );
+
+		}
+
+		for ( let i = 0; i < geometryData.attributes.length; i ++ ) {
+
+			const result = geometryData.attributes[ i ];
+			const name = result.name;
+			const array = result.array;
+			const itemSize = result.itemSize;
+
+			const attribute = new BufferAttribute( array, itemSize );
+
+			if ( name === 'color' ) {
+
+				this._assignVertexColorSpace( attribute, result.vertexColorSpace );
+
+				attribute.normalized = ( array instanceof Float32Array ) === false;
+
+			}
+
+			geometry.setAttribute( name, attribute );
+
+		}
+
+		return geometry;
+
+	}
+
+	_assignVertexColorSpace( attribute, inputColorSpace ) {
+
+		// While .drc files do not specify colorspace, the only 'official' tooling
+		// is PLY and OBJ converters, which use sRGB. We'll assume sRGB when a .drc
+		// file is passed into .load() or .parse(). GLTFLoader uses internal APIs
+		// to decode geometry, and vertex colors are already Linear-sRGB in there.
+
+		if ( inputColorSpace !== SRGBColorSpace ) return;
+
+		const _color = new Color();
+
+		for ( let i = 0, il = attribute.count; i < il; i ++ ) {
+
+			_color.fromBufferAttribute( attribute, i );
+			ColorManagement.toWorkingColorSpace( _color, SRGBColorSpace );
+			attribute.setXYZ( i, _color.r, _color.g, _color.b );
+
+		}
+
+	}
+
+	_loadLibrary( url, responseType ) {
+
+		const loader = new FileLoader( this.manager );
+		loader.setPath( this.decoderPath );
+		loader.setResponseType( responseType );
+		loader.setWithCredentials( this.withCredentials );
+
+		return new Promise( ( resolve, reject ) => {
+
+			loader.load( url, resolve, undefined, reject );
+
+		} );
+
+	}
+
+	preload() {
+
+		this._initDecoder();
+
+		return this;
+
+	}
+
+	_initDecoder() {
+
+		if ( this.decoderPending ) return this.decoderPending;
+
+		const useJS = typeof WebAssembly !== 'object' || this.decoderConfig.type === 'js';
+		const librariesPending = [];
+
+		if ( useJS ) {
+
+			librariesPending.push( this._loadLibrary( 'draco_decoder.js', 'text' ) );
+
+		} else {
+
+			librariesPending.push( this._loadLibrary( 'draco_wasm_wrapper.js', 'text' ) );
+			librariesPending.push( this._loadLibrary( 'draco_decoder.wasm', 'arraybuffer' ) );
+
+		}
+
+		this.decoderPending = Promise.all( librariesPending )
+			.then( ( libraries ) => {
+
+				const jsContent = libraries[ 0 ];
+
+				if ( ! useJS ) {
+
+					this.decoderConfig.wasmBinary = libraries[ 1 ];
+
+				}
+
+				const fn = DRACOWorker.toString();
+
+				const body = [
+					'/* draco decoder */',
+					jsContent,
+					'',
+					'/* worker */',
+					fn.substring( fn.indexOf( '{' ) + 1, fn.lastIndexOf( '}' ) )
+				].join( '\n' );
+
+				this.workerSourceURL = URL.createObjectURL( new Blob( [ body ] ) );
+
+			} );
+
+		return this.decoderPending;
+
+	}
+
+	_getWorker( taskID, taskCost ) {
+
+		return this._initDecoder().then( () => {
+
+			if ( this.workerPool.length < this.workerLimit ) {
+
+				const worker = new Worker( this.workerSourceURL );
+
+				worker._callbacks = {};
+				worker._taskCosts = {};
+				worker._taskLoad = 0;
+
+				worker.postMessage( { type: 'init', decoderConfig: this.decoderConfig } );
+
+				worker.onmessage = function ( e ) {
+
+					const message = e.data;
+
+					switch ( message.type ) {
+
+						case 'decode':
+							worker._callbacks[ message.id ].resolve( message );
+							break;
+
+						case 'error':
+							worker._callbacks[ message.id ].reject( message );
+							break;
+
+						default:
+							console.error( 'THREE.DRACOLoader: Unexpected message, "' + message.type + '"' );
+
+					}
+
+				};
+
+				this.workerPool.push( worker );
+
+			} else {
+
+				this.workerPool.sort( function ( a, b ) {
+
+					return a._taskLoad > b._taskLoad ? -1 : 1;
+
+				} );
+
+			}
+
+			const worker = this.workerPool[ this.workerPool.length - 1 ];
+			worker._taskCosts[ taskID ] = taskCost;
+			worker._taskLoad += taskCost;
+			return worker;
+
+		} );
+
+	}
+
+	_releaseTask( worker, taskID ) {
+
+		worker._taskLoad -= worker._taskCosts[ taskID ];
+		delete worker._callbacks[ taskID ];
+		delete worker._taskCosts[ taskID ];
+
+	}
+
+	debug() {
+
+		console.log( 'Task load: ', this.workerPool.map( ( worker ) => worker._taskLoad ) );
+
+	}
+
+	dispose() {
+
+		for ( let i = 0; i < this.workerPool.length; ++ i ) {
+
+			this.workerPool[ i ].terminate();
+
+		}
+
+		this.workerPool.length = 0;
+
+		if ( this.workerSourceURL !== '' ) {
+
+			URL.revokeObjectURL( this.workerSourceURL );
+
+		}
+
+		return this;
+
+	}
+
+}
+
+/* WEB WORKER */
+
+function DRACOWorker() {
+
+	let decoderConfig;
+	let decoderPending;
+
+	onmessage = function ( e ) {
+
+		const message = e.data;
+
+		switch ( message.type ) {
+
+			case 'init':
+				decoderConfig = message.decoderConfig;
+				decoderPending = new Promise( function ( resolve/*, reject*/ ) {
+
+					decoderConfig.onModuleLoaded = function ( draco ) {
+
+						// Module is Promise-like. Wrap before resolving to avoid loop.
+						resolve( { draco: draco } );
+
+					};
+
+					DracoDecoderModule( decoderConfig ); // eslint-disable-line no-undef
+
+				} );
+				break;
+
+			case 'decode':
+				const buffer = message.buffer;
+				const taskConfig = message.taskConfig;
+				decoderPending.then( ( module ) => {
+
+					const draco = module.draco;
+					const decoder = new draco.Decoder();
+
+					try {
+
+						const geometry = decodeGeometry( draco, decoder, new Int8Array( buffer ), taskConfig );
+
+						const buffers = geometry.attributes.map( ( attr ) => attr.array.buffer );
+
+						if ( geometry.index ) buffers.push( geometry.index.array.buffer );
+
+						self.postMessage( { type: 'decode', id: message.id, geometry }, buffers );
+
+					} catch ( error ) {
+
+						console.error( error );
+
+						self.postMessage( { type: 'error', id: message.id, error: error.message } );
+
+					} finally {
+
+						draco.destroy( decoder );
+
+					}
+
+				} );
+				break;
+
+		}
+
+	};
+
+	function decodeGeometry( draco, decoder, array, taskConfig ) {
+
+		const attributeIDs = taskConfig.attributeIDs;
+		const attributeTypes = taskConfig.attributeTypes;
+
+		let dracoGeometry;
+		let decodingStatus;
+
+		const geometryType = decoder.GetEncodedGeometryType( array );
+
+		if ( geometryType === draco.TRIANGULAR_MESH ) {
+
+			dracoGeometry = new draco.Mesh();
+			decodingStatus = decoder.DecodeArrayToMesh( array, array.byteLength, dracoGeometry );
+
+		} else if ( geometryType === draco.POINT_CLOUD ) {
+
+			dracoGeometry = new draco.PointCloud();
+			decodingStatus = decoder.DecodeArrayToPointCloud( array, array.byteLength, dracoGeometry );
+
+		} else {
+
+			throw new Error( 'THREE.DRACOLoader: Unexpected geometry type.' );
+
+		}
+
+		if ( ! decodingStatus.ok() || dracoGeometry.ptr === 0 ) {
+
+			throw new Error( 'THREE.DRACOLoader: Decoding failed: ' + decodingStatus.error_msg() );
+
+		}
+
+		const geometry = { index: null, attributes: [] };
+
+		// Gather all vertex attributes.
+		for ( const attributeName in attributeIDs ) {
+
+			const attributeType = self[ attributeTypes[ attributeName ] ];
+
+			let attribute;
+			let attributeID;
+
+			// A Draco file may be created with default vertex attributes, whose attribute IDs
+			// are mapped 1:1 from their semantic name (POSITION, NORMAL, ...). Alternatively,
+			// a Draco file may contain a custom set of attributes, identified by known unique
+			// IDs. glTF files always do the latter, and `.drc` files typically do the former.
+			if ( taskConfig.useUniqueIDs ) {
+
+				attributeID = attributeIDs[ attributeName ];
+				attribute = decoder.GetAttributeByUniqueId( dracoGeometry, attributeID );
+
+			} else {
+
+				attributeID = decoder.GetAttributeId( dracoGeometry, draco[ attributeIDs[ attributeName ] ] );
+
+				if ( attributeID === -1 ) continue;
+
+				attribute = decoder.GetAttribute( dracoGeometry, attributeID );
+
+			}
+
+			const attributeResult = decodeAttribute( draco, decoder, dracoGeometry, attributeName, attributeType, attribute );
+
+			if ( attributeName === 'color' ) {
+
+				attributeResult.vertexColorSpace = taskConfig.vertexColorSpace;
+
+			}
+
+			geometry.attributes.push( attributeResult );
+
+		}
+
+		// Add index.
+		if ( geometryType === draco.TRIANGULAR_MESH ) {
+
+			geometry.index = decodeIndex( draco, decoder, dracoGeometry );
+
+		}
+
+		draco.destroy( dracoGeometry );
+
+		return geometry;
+
+	}
+
+	function decodeIndex( draco, decoder, dracoGeometry ) {
+
+		const numFaces = dracoGeometry.num_faces();
+		const numIndices = numFaces * 3;
+		const byteLength = numIndices * 4;
+
+		const ptr = draco._malloc( byteLength );
+		decoder.GetTrianglesUInt32Array( dracoGeometry, byteLength, ptr );
+		const index = new Uint32Array( draco.HEAPF32.buffer, ptr, numIndices ).slice();
+		draco._free( ptr );
+
+		return { array: index, itemSize: 1 };
+
+	}
+
+	function decodeAttribute( draco, decoder, dracoGeometry, attributeName, attributeType, attribute ) {
+
+		const numComponents = attribute.num_components();
+		const numPoints = dracoGeometry.num_points();
+		const numValues = numPoints * numComponents;
+		const byteLength = numValues * attributeType.BYTES_PER_ELEMENT;
+		const dataType = getDracoDataType( draco, attributeType );
+
+		const ptr = draco._malloc( byteLength );
+		decoder.GetAttributeDataArrayForAllPoints( dracoGeometry, attribute, dataType, byteLength, ptr );
+		const array = new attributeType( draco.HEAPF32.buffer, ptr, numValues ).slice();
+		draco._free( ptr );
+
+		return {
+			name: attributeName,
+			array: array,
+			itemSize: numComponents
+		};
+
+	}
+
+	function getDracoDataType( draco, attributeType ) {
+
+		switch ( attributeType ) {
+
+			case Float32Array: return draco.DT_FLOAT32;
+			case Int8Array: return draco.DT_INT8;
+			case Int16Array: return draco.DT_INT16;
+			case Int32Array: return draco.DT_INT32;
+			case Uint8Array: return draco.DT_UINT8;
+			case Uint16Array: return draco.DT_UINT16;
+			case Uint32Array: return draco.DT_UINT32;
+
+		}
+
+	}
+
+}
+
+// https://github.com/mrdoob/three.js/issues/5552
+// http://en.wikipedia.org/wiki/RGBE_image_format
+
+class RGBELoader extends DataTextureLoader {
+
+	constructor( manager ) {
+
+		super( manager );
+
+		this.type = HalfFloatType;
+
+	}
+
+	// adapted from http://www.graphics.cornell.edu/~bjw/rgbe.html
+
+	parse( buffer ) {
+
+		const
+			/* default error routine.  change this to change error handling */
+			rgbe_read_error = 1,
+			rgbe_write_error = 2,
+			rgbe_format_error = 3,
+			rgbe_memory_error = 4,
+			rgbe_error = function ( rgbe_error_code, msg ) {
+
+				switch ( rgbe_error_code ) {
+
+					case rgbe_read_error: throw new Error( 'THREE.RGBELoader: Read Error: ' + ( msg || '' ) );
+					case rgbe_write_error: throw new Error( 'THREE.RGBELoader: Write Error: ' + ( msg || '' ) );
+					case rgbe_format_error: throw new Error( 'THREE.RGBELoader: Bad File Format: ' + ( msg || '' ) );
+					default:
+					case rgbe_memory_error: throw new Error( 'THREE.RGBELoader: Memory Error: ' + ( msg || '' ) );
+
+				}
+
+			},
+
+			/* offsets to red, green, and blue components in a data (float) pixel */
+			//RGBE_DATA_RED = 0,
+			//RGBE_DATA_GREEN = 1,
+			//RGBE_DATA_BLUE = 2,
+
+			/* number of floats per pixel, use 4 since stored in rgba image format */
+			//RGBE_DATA_SIZE = 4,
+
+			/* flags indicating which fields in an rgbe_header_info are valid */
+			RGBE_VALID_PROGRAMTYPE = 1,
+			RGBE_VALID_FORMAT = 2,
+			RGBE_VALID_DIMENSIONS = 4,
+
+			NEWLINE = '\n',
+
+			fgets = function ( buffer, lineLimit, consume ) {
+
+				const chunkSize = 128;
+
+				lineLimit = ! lineLimit ? 1024 : lineLimit;
+				let p = buffer.pos,
+					i = -1, len = 0, s = '',
+					chunk = String.fromCharCode.apply( null, new Uint16Array( buffer.subarray( p, p + chunkSize ) ) );
+
+				while ( ( 0 > ( i = chunk.indexOf( NEWLINE ) ) ) && ( len < lineLimit ) && ( p < buffer.byteLength ) ) {
+
+					s += chunk; len += chunk.length;
+					p += chunkSize;
+					chunk += String.fromCharCode.apply( null, new Uint16Array( buffer.subarray( p, p + chunkSize ) ) );
+
+				}
+
+				if ( -1 < i ) {
+
+					/*for (i=l-1; i>=0; i--) {
+						byteCode = m.charCodeAt(i);
+						if (byteCode > 0x7f && byteCode <= 0x7ff) byteLen++;
+						else if (byteCode > 0x7ff && byteCode <= 0xffff) byteLen += 2;
+						if (byteCode >= 0xDC00 && byteCode <= 0xDFFF) i--; //trail surrogate
+					}*/
+					buffer.pos += len + i + 1;
+					return s + chunk.slice( 0, i );
+
+				}
+
+				return false;
+
+			},
+
+			/* minimal header reading.  modify if you want to parse more information */
+			RGBE_ReadHeader = function ( buffer ) {
+
+
+				// regexes to parse header info fields
+				const magic_token_re = /^#\?(\S+)/,
+					gamma_re = /^\s*GAMMA\s*=\s*(\d+(\.\d+)?)\s*$/,
+					exposure_re = /^\s*EXPOSURE\s*=\s*(\d+(\.\d+)?)\s*$/,
+					format_re = /^\s*FORMAT=(\S+)\s*$/,
+					dimensions_re = /^\s*\-Y\s+(\d+)\s+\+X\s+(\d+)\s*$/,
+
+					// RGBE format header struct
+					header = {
+
+						valid: 0, /* indicate which fields are valid */
+
+						string: '', /* the actual header string */
+
+						comments: '', /* comments found in header */
+
+						programtype: 'RGBE', /* listed at beginning of file to identify it after "#?". defaults to "RGBE" */
+
+						format: '', /* RGBE format, default 32-bit_rle_rgbe */
+
+						gamma: 1.0, /* image has already been gamma corrected with given gamma. defaults to 1.0 (no correction) */
+
+						exposure: 1.0, /* a value of 1.0 in an image corresponds to <exposure> watts/steradian/m^2. defaults to 1.0 */
+
+						width: 0, height: 0 /* image dimensions, width/height */
+
+					};
+
+				let line, match;
+
+				if ( buffer.pos >= buffer.byteLength || ! ( line = fgets( buffer ) ) ) {
+
+					rgbe_error( rgbe_read_error, 'no header found' );
+
+				}
+
+				/* if you want to require the magic token then uncomment the next line */
+				if ( ! ( match = line.match( magic_token_re ) ) ) {
+
+					rgbe_error( rgbe_format_error, 'bad initial token' );
+
+				}
+
+				header.valid |= RGBE_VALID_PROGRAMTYPE;
+				header.programtype = match[ 1 ];
+				header.string += line + '\n';
+
+				while ( true ) {
+
+					line = fgets( buffer );
+					if ( false === line ) break;
+					header.string += line + '\n';
+
+					if ( '#' === line.charAt( 0 ) ) {
+
+						header.comments += line + '\n';
+						continue; // comment line
+
+					}
+
+					if ( match = line.match( gamma_re ) ) {
+
+						header.gamma = parseFloat( match[ 1 ] );
+
+					}
+
+					if ( match = line.match( exposure_re ) ) {
+
+						header.exposure = parseFloat( match[ 1 ] );
+
+					}
+
+					if ( match = line.match( format_re ) ) {
+
+						header.valid |= RGBE_VALID_FORMAT;
+						header.format = match[ 1 ];//'32-bit_rle_rgbe';
+
+					}
+
+					if ( match = line.match( dimensions_re ) ) {
+
+						header.valid |= RGBE_VALID_DIMENSIONS;
+						header.height = parseInt( match[ 1 ], 10 );
+						header.width = parseInt( match[ 2 ], 10 );
+
+					}
+
+					if ( ( header.valid & RGBE_VALID_FORMAT ) && ( header.valid & RGBE_VALID_DIMENSIONS ) ) break;
+
+				}
+
+				if ( ! ( header.valid & RGBE_VALID_FORMAT ) ) {
+
+					rgbe_error( rgbe_format_error, 'missing format specifier' );
+
+				}
+
+				if ( ! ( header.valid & RGBE_VALID_DIMENSIONS ) ) {
+
+					rgbe_error( rgbe_format_error, 'missing image size specifier' );
+
+				}
+
+				return header;
+
+			},
+
+			RGBE_ReadPixels_RLE = function ( buffer, w, h ) {
+
+				const scanline_width = w;
+
+				if (
+					// run length encoding is not allowed so read flat
+					( ( scanline_width < 8 ) || ( scanline_width > 0x7fff ) ) ||
+					// this file is not run length encoded
+					( ( 2 !== buffer[ 0 ] ) || ( 2 !== buffer[ 1 ] ) || ( buffer[ 2 ] & 0x80 ) )
+				) {
+
+					// return the flat buffer
+					return new Uint8Array( buffer );
+
+				}
+
+				if ( scanline_width !== ( ( buffer[ 2 ] << 8 ) | buffer[ 3 ] ) ) {
+
+					rgbe_error( rgbe_format_error, 'wrong scanline width' );
+
+				}
+
+				const data_rgba = new Uint8Array( 4 * w * h );
+
+				if ( ! data_rgba.length ) {
+
+					rgbe_error( rgbe_memory_error, 'unable to allocate buffer space' );
+
+				}
+
+				let offset = 0, pos = 0;
+
+				const ptr_end = 4 * scanline_width;
+				const rgbeStart = new Uint8Array( 4 );
+				const scanline_buffer = new Uint8Array( ptr_end );
+				let num_scanlines = h;
+
+				// read in each successive scanline
+				while ( ( num_scanlines > 0 ) && ( pos < buffer.byteLength ) ) {
+
+					if ( pos + 4 > buffer.byteLength ) {
+
+						rgbe_error( rgbe_read_error );
+
+					}
+
+					rgbeStart[ 0 ] = buffer[ pos ++ ];
+					rgbeStart[ 1 ] = buffer[ pos ++ ];
+					rgbeStart[ 2 ] = buffer[ pos ++ ];
+					rgbeStart[ 3 ] = buffer[ pos ++ ];
+
+					if ( ( 2 != rgbeStart[ 0 ] ) || ( 2 != rgbeStart[ 1 ] ) || ( ( ( rgbeStart[ 2 ] << 8 ) | rgbeStart[ 3 ] ) != scanline_width ) ) {
+
+						rgbe_error( rgbe_format_error, 'bad rgbe scanline format' );
+
+					}
+
+					// read each of the four channels for the scanline into the buffer
+					// first red, then green, then blue, then exponent
+					let ptr = 0, count;
+
+					while ( ( ptr < ptr_end ) && ( pos < buffer.byteLength ) ) {
+
+						count = buffer[ pos ++ ];
+						const isEncodedRun = count > 128;
+						if ( isEncodedRun ) count -= 128;
+
+						if ( ( 0 === count ) || ( ptr + count > ptr_end ) ) {
+
+							rgbe_error( rgbe_format_error, 'bad scanline data' );
+
+						}
+
+						if ( isEncodedRun ) {
+
+							// a (encoded) run of the same value
+							const byteValue = buffer[ pos ++ ];
+							for ( let i = 0; i < count; i ++ ) {
+
+								scanline_buffer[ ptr ++ ] = byteValue;
+
+							}
+							//ptr += count;
+
+						} else {
+
+							// a literal-run
+							scanline_buffer.set( buffer.subarray( pos, pos + count ), ptr );
+							ptr += count; pos += count;
+
+						}
+
+					}
+
+
+					// now convert data from buffer into rgba
+					// first red, then green, then blue, then exponent (alpha)
+					const l = scanline_width; //scanline_buffer.byteLength;
+					for ( let i = 0; i < l; i ++ ) {
+
+						let off = 0;
+						data_rgba[ offset ] = scanline_buffer[ i + off ];
+						off += scanline_width; //1;
+						data_rgba[ offset + 1 ] = scanline_buffer[ i + off ];
+						off += scanline_width; //1;
+						data_rgba[ offset + 2 ] = scanline_buffer[ i + off ];
+						off += scanline_width; //1;
+						data_rgba[ offset + 3 ] = scanline_buffer[ i + off ];
+						offset += 4;
+
+					}
+
+					num_scanlines --;
+
+				}
+
+				return data_rgba;
+
+			};
+
+		const RGBEByteToRGBFloat = function ( sourceArray, sourceOffset, destArray, destOffset ) {
+
+			const e = sourceArray[ sourceOffset + 3 ];
+			const scale = Math.pow( 2.0, e - 128.0 ) / 255.0;
+
+			destArray[ destOffset + 0 ] = sourceArray[ sourceOffset + 0 ] * scale;
+			destArray[ destOffset + 1 ] = sourceArray[ sourceOffset + 1 ] * scale;
+			destArray[ destOffset + 2 ] = sourceArray[ sourceOffset + 2 ] * scale;
+			destArray[ destOffset + 3 ] = 1;
+
+		};
+
+		const RGBEByteToRGBHalf = function ( sourceArray, sourceOffset, destArray, destOffset ) {
+
+			const e = sourceArray[ sourceOffset + 3 ];
+			const scale = Math.pow( 2.0, e - 128.0 ) / 255.0;
+
+			// clamping to 65504, the maximum representable value in float16
+			destArray[ destOffset + 0 ] = DataUtils.toHalfFloat( Math.min( sourceArray[ sourceOffset + 0 ] * scale, 65504 ) );
+			destArray[ destOffset + 1 ] = DataUtils.toHalfFloat( Math.min( sourceArray[ sourceOffset + 1 ] * scale, 65504 ) );
+			destArray[ destOffset + 2 ] = DataUtils.toHalfFloat( Math.min( sourceArray[ sourceOffset + 2 ] * scale, 65504 ) );
+			destArray[ destOffset + 3 ] = DataUtils.toHalfFloat( 1 );
+
+		};
+
+		const byteArray = new Uint8Array( buffer );
+		byteArray.pos = 0;
+		const rgbe_header_info = RGBE_ReadHeader( byteArray );
+
+		const w = rgbe_header_info.width,
+			h = rgbe_header_info.height,
+			image_rgba_data = RGBE_ReadPixels_RLE( byteArray.subarray( byteArray.pos ), w, h );
+
+
+		let data, type;
+		let numElements;
+
+		switch ( this.type ) {
+
+			case FloatType:
+
+				numElements = image_rgba_data.length / 4;
+				const floatArray = new Float32Array( numElements * 4 );
+
+				for ( let j = 0; j < numElements; j ++ ) {
+
+					RGBEByteToRGBFloat( image_rgba_data, j * 4, floatArray, j * 4 );
+
+				}
+
+				data = floatArray;
+				type = FloatType;
+				break;
+
+			case HalfFloatType:
+
+				numElements = image_rgba_data.length / 4;
+				const halfArray = new Uint16Array( numElements * 4 );
+
+				for ( let j = 0; j < numElements; j ++ ) {
+
+					RGBEByteToRGBHalf( image_rgba_data, j * 4, halfArray, j * 4 );
+
+				}
+
+				data = halfArray;
+				type = HalfFloatType;
+				break;
+
+			default:
+
+				throw new Error( 'THREE.RGBELoader: Unsupported type: ' + this.type );
+
+		}
+
+		return {
+			width: w, height: h,
+			data: data,
+			header: rgbe_header_info.string,
+			gamma: rgbe_header_info.gamma,
+			exposure: rgbe_header_info.exposure,
+			type: type
+		};
+
+	}
+
+	setDataType( value ) {
+
+		this.type = value;
+		return this;
+
+	}
+
+	load( url, onLoad, onProgress, onError ) {
+
+		function onLoadCallback( texture, texData ) {
+
+			switch ( texture.type ) {
+
+				case FloatType:
+				case HalfFloatType:
+
+					texture.colorSpace = LinearSRGBColorSpace;
+					texture.minFilter = LinearFilter;
+					texture.magFilter = LinearFilter;
+					texture.generateMipmaps = false;
+					texture.flipY = true;
+
+					break;
+
+			}
+
+			if ( onLoad ) onLoad( texture, texData );
+
+		}
+
+		return super.load( url, onLoadCallback, onProgress, onError );
 
 	}
 
@@ -61258,4 +78497,4 @@ function interceptControlUp( event ) {
 
 }
 
-export { ColladaLoader, OrbitControls, three_module as THREE };
+export { ColladaLoader, DRACOLoader, GLTFLoader, OrbitControls, RGBELoader, three_module as THREE };

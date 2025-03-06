@@ -10,9 +10,6 @@
     "rollup": "rollup -c"
   },
   "dependencies": {
-    "@babylonjs/core": "^7.51.2",
-    "@babylonjs/loaders": "^7.51.2",
-    "@google/model-viewer": "^4.0.0",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.4.1",
     "@prisma/extension-optimize": "^1.1.8",

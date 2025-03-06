@@ -10,14 +10,15 @@ import {
   WrenchScrewdriverIcon,
   ClipboardDocumentListIcon
 } from "@heroicons/react/24/outline";
-import { convertGltfModel } from "@/utils/gltfFix";
+import { convertGltfModel } from "@/components/utils/gltfFix";
 import type { FileWithPath } from "react-dropzone";
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 // GLTF转换页面
 export default function GltfFixPage() {
   const t = useTranslations('GltfFixPage');
-  const locale = useLocale();
+  const t2 = useTranslations('GltfFix');
+
   
   const [file, setFile] = useState<File | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -78,7 +79,7 @@ export default function GltfFixPage() {
     
     try {
       // 调用工具函数进行转换，传递当前语言环境
-      const result = await convertGltfModel(file, addLog, locale);
+      const result = await convertGltfModel(file, t2, addLog);
       
       if (result.convertedFile) {
         setConvertedFile(result.convertedFile);

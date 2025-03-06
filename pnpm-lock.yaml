@@ -8,15 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@babylonjs/core':
-        specifier: ^7.51.2
-        version: 7.51.2
-      '@babylonjs/loaders':
-        specifier: ^7.51.2
-        version: 7.51.2(@babylonjs/core@7.51.2)(babylonjs-gltf2interface@7.43.0)
-      '@google/model-viewer':
-        specifier: ^4.0.0
-        version: 4.0.0(three@0.174.0)
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@18.3.1)
@@ -166,15 +157,6 @@ packages:
   '@babel/runtime@7.26.0':
     resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
     engines: {node: '>=6.9.0'}
-
-  '@babylonjs/core@7.51.2':
-    resolution: {integrity: sha512-ZNlojZIGV87GkxWr+28lfe8flCvzGqDBQKelSWd2/sR3gou83D/RSoScecVlmy79mDPZCM2/4udXVJt1xpF0yw==}
-
-  '@babylonjs/loaders@7.51.2':
-    resolution: {integrity: sha512-9YsacDtrZcDIn6dTmwq6dmMjDCmOOMPdr1sUhYiLnFhrcmpTxZ62aCsWFfoeCpZzODOy+G9/zjWo6iRLNqREug==}
-    peerDependencies:
-      '@babylonjs/core': ^7.0.0
-      babylonjs-gltf2interface: ^7.0.0
 
   '@emnapi/runtime@1.3.1':
     resolution: {integrity: sha512-kEBmG8KyqtxJZv+ygbEim+KCGtIq1fC22Ms3S4ziXmYKm8uyoLX0MHONVKwp+9opg390VaKRNt4a7A9NwmpNhw==}
@@ -359,12 +341,6 @@ packages:
   '@formatjs/intl-localematcher@0.5.10':
     resolution: {integrity: sha512-af3qATX+m4Rnd9+wHcjJ4w2ijq+rAVP3CCinJQvFv1kgSu1W6jypUmvleJxcewdxmutM8dmIRZFxO/IQBZmP2Q==}
 
-  '@google/model-viewer@4.0.0':
-    resolution: {integrity: sha512-hf4mixP178gGtvWQq97a0uULr7k98BwJGRU3lvt12XnurOdLmZA/RPdW4tPsINNNQxZvmvQsjud4lZWre6WGNw==}
-    engines: {node: '>=6.0.0'}
-    peerDependencies:
-      three: ^0.169.0
-
   '@heroicons/react@2.2.0':
     resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
     peerDependencies:
@@ -508,12 +484,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
-
-  '@lit-labs/ssr-dom-shim@1.2.1':
-    resolution: {integrity: sha512-wx4aBmgeGvFmOKucFKY+8VFJSYZxs9poN3SDNQFF6lT6NrQUnHiPB2PWz2sc4ieEcAaYYzN+1uWahEeTq2aRIQ==}
-
-  '@lit/reactive-element@1.6.3':
-    resolution: {integrity: sha512-QuTgnG52Poic7uM1AN5yJ09QMe0O28e10XzSvWDz02TJiiKee4stsiownEIadWm8nYzyDAyT+gKzUoZmiWQtsQ==}
 
   '@mediapipe/tasks-vision@0.10.17':
     resolution: {integrity: sha512-CZWV/q6TTe8ta61cZXjfnnHsfWIdFhms03M9T7Cnd5y2mdpylJM0rF1qRq+wsQVRMLz1OYPVEBU9ph2Bx8cxrg==}
@@ -1215,9 +1185,6 @@ packages:
   '@types/three@0.174.0':
     resolution: {integrity: sha512-De/+vZnfg2aVWNiuy1Ldu+n2ydgw1osinmiZTAn0necE++eOfsygL8JpZgFjR2uHmAPo89MkxBj3JJ+2BMe+Uw==}
 
-  '@types/trusted-types@2.0.7':
-    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
-
   '@types/webxr@0.5.20':
     resolution: {integrity: sha512-JGpU6qiIJQKUuVSKx1GtQnHJGxRjtfGIhzO2ilq43VZZS//f1h1Sgexbdk+Lq+7569a6EYhOWrUpIruR/1Enmg==}
 
@@ -1312,9 +1279,6 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
-
-  babylonjs-gltf2interface@7.43.0:
-    resolution: {integrity: sha512-/I8nyrsEV7ihpiuqNadT9eZxVLdfnIL5wTGovotmoMCUScR+5/Ibm31gD/U2ND8W0JfQxGKEI+aUETlfOceJ1w==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1981,15 +1945,6 @@ packages:
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
-
-  lit-element@3.3.3:
-    resolution: {integrity: sha512-XbeRxmTHubXENkV4h8RIPyr8lXc+Ff28rkcQzw3G6up2xg5E8Zu1IgOWIwBLEQsu3cOVFqdYwiVi0hv0SlpqUA==}
-
-  lit-html@2.8.0:
-    resolution: {integrity: sha512-o9t+MQM3P4y7M7yNzqAyjp7z+mQGa4NS4CxiyLqFPyFWyc4O+nodLrkrxSaCTrla6M5YOLaT3RpbbqjszB5g3Q==}
-
-  lit@2.8.0:
-    resolution: {integrity: sha512-4Sc3OFX9QHOJaHbmTMk28SYgVxLN3ePDjg7hofEft2zWlehFL3LiAuapWc4U/kYwMYJSh2hTCPZ6/LIC7ii0MA==}
 
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
@@ -3154,13 +3109,6 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@babylonjs/core@7.51.2': {}
-
-  '@babylonjs/loaders@7.51.2(@babylonjs/core@7.51.2)(babylonjs-gltf2interface@7.43.0)':
-    dependencies:
-      '@babylonjs/core': 7.51.2
-      babylonjs-gltf2interface: 7.43.0
-
   '@emnapi/runtime@1.3.1':
     dependencies:
       tslib: 2.8.1
@@ -3284,12 +3232,6 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@google/model-viewer@4.0.0(three@0.174.0)':
-    dependencies:
-      '@monogrid/gainmap-js': 3.1.0(three@0.174.0)
-      lit: 2.8.0
-      three: 0.174.0
-
   '@heroicons/react@2.2.0(react@18.3.1)':
     dependencies:
       react: 18.3.1
@@ -3394,12 +3336,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
-
-  '@lit-labs/ssr-dom-shim@1.2.1': {}
-
-  '@lit/reactive-element@1.6.3':
-    dependencies:
-      '@lit-labs/ssr-dom-shim': 1.2.1
 
   '@mediapipe/tasks-vision@0.10.17': {}
 
@@ -4029,8 +3965,6 @@ snapshots:
       fflate: 0.8.2
       meshoptimizer: 0.18.1
 
-  '@types/trusted-types@2.0.7': {}
-
   '@types/webxr@0.5.20': {}
 
   '@use-gesture/core@10.3.1': {}
@@ -4134,8 +4068,6 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.0.0
-
-  babylonjs-gltf2interface@7.43.0: {}
 
   balanced-match@1.0.2: {}
 
@@ -4815,22 +4747,6 @@ snapshots:
   lilconfig@3.1.3: {}
 
   lines-and-columns@1.2.4: {}
-
-  lit-element@3.3.3:
-    dependencies:
-      '@lit-labs/ssr-dom-shim': 1.2.1
-      '@lit/reactive-element': 1.6.3
-      lit-html: 2.8.0
-
-  lit-html@2.8.0:
-    dependencies:
-      '@types/trusted-types': 2.0.7
-
-  lit@2.8.0:
-    dependencies:
-      '@lit/reactive-element': 1.6.3
-      lit-element: 3.3.3
-      lit-html: 2.8.0
 
   lodash.memoize@4.1.2: {}
 
