@@ -15,44 +15,37 @@ interface CheckInStats {
 function calculateStreaks(checkIns: Date[]): { currentStreak: number; maxStreak: number } {
   if (!checkIns.length) return { currentStreak: 0, maxStreak: 0 }
 
-  // 按UTC时间排序
+  // 按UTC时间排序 - 从早到晚排序
   const sortedDates = [...checkIns].sort((a, b) => a.getTime() - b.getTime())
   
   // 获取UTC今天0点
   const todayStart = getTodayStart()
   
-  let currentStreak = 0
-  let maxStreak = 0
+  // 初始化当前连续天数和最长连续天数
+  let currentStreak = 1
+  let maxStreak = 1
+  let tempStreak = 1
   
-  // 使用UTC时间计算连续天数
-  const { maxStreak: calculatedMaxStreak, lastStreak } = sortedDates.reduce(
-    (acc, curr, index) => {
-      if (index === 0) return { ...acc, lastDate: curr, lastStreak: 1 }
-      
-      const currDayStart = getUTCDayStart(curr)
-      const prevDayStart = getUTCDayStart(acc.lastDate)
-      const dayDiff = Math.floor(
-        (prevDayStart.getTime() - currDayStart.getTime()) 
-        / (1000 * 60 * 60 * 24)
-      )
-      
-      if (dayDiff === 1) {
-        const newStreak = acc.lastStreak + 1
-        return {
-          maxStreak: Math.max(acc.maxStreak, newStreak),
-          lastDate: curr,
-          lastStreak: newStreak
-        }
-      }
-      
-      return {
-        maxStreak: Math.max(acc.maxStreak, acc.lastStreak),
-        lastDate: curr,
-        lastStreak: 1
-      }
-    },
-    { maxStreak: 1, lastDate: sortedDates[0], lastStreak: 1 }
-  )
+  // 逐日检查连续情况
+  for (let i = 1; i < sortedDates.length; i++) {
+    const currDayStart = getUTCDayStart(sortedDates[i])
+    const prevDayStart = getUTCDayStart(sortedDates[i-1])
+    
+    // 计算两次签到之间的天数差
+    const dayDiff = Math.round(
+      (currDayStart.getTime() - prevDayStart.getTime()) 
+      / (1000 * 60 * 60 * 24)
+    )
+    
+    // 如果是连续的一天
+    if (dayDiff === 1) {
+      tempStreak++
+      maxStreak = Math.max(maxStreak, tempStreak)
+    } else if (dayDiff > 1) {
+      // 如果不连续，重置计数
+      tempStreak = 1
+    }
+  }
   
   // 计算当前连续天数
   const lastCheckIn = sortedDates[sortedDates.length - 1]
@@ -62,17 +55,16 @@ function calculateStreaks(checkIns: Date[]): { currentStreak: number; maxStreak:
     / (1000 * 60 * 60 * 24)
   )
   
-  if (daysSinceLastCheckIn === 0) {
-    currentStreak = lastStreak
-  } else if (daysSinceLastCheckIn === 1) {
-    currentStreak = lastStreak
+  if (daysSinceLastCheckIn <= 1) {
+    // 今天已签到或者昨天签到过（仍然保持连续）
+    currentStreak = tempStreak
   } else {
     currentStreak = 0 // 超过1天未签到，重置连续天数
   }
   
   return {
     currentStreak,
-    maxStreak: Math.max(calculatedMaxStreak, maxStreak)
+    maxStreak
   }
 }
 
