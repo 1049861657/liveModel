@@ -51,11 +51,12 @@ export default function CheckInPage() {
       return response.json()
     },
     enabled: !!session,
-    staleTime: 1000 * 60, // 1分钟内不重新获取数据
-    refetchOnWindowFocus: false, // 窗口获得焦点时不重新获取
-    refetchOnMount: false, // 组件挂载时不重新获取
-    refetchOnReconnect: false, // 重新连接时不重新获取
-    retry: false // 失败时不重试
+    staleTime: 1000 * 30, // 修改为30秒内不重新获取数据
+    refetchOnWindowFocus: true, // 修改为窗口获得焦点时重新获取
+    refetchOnMount: true, // 修改为组件挂载时重新获取
+    refetchInterval: 1000 * 60 * 5, // 每5分钟自动刷新一次
+    refetchOnReconnect: true, // 修改为重新连接时重新获取
+    retry: 1 // 失败时重试一次
   })
 
   // 处理月份切换
