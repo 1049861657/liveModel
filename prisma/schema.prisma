@@ -8,188 +8,233 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
-  models    Model[]
-  favorites Favorite[]
-  checkIns      CheckIn[]                 // 关联签到记录
+  // 基础信息
+  id        String   @id @default(cuid())
+  email     String   
+  name      String?  
+  password  String                   // 存储加密后的密码哈希
+  avatarId  String?  @unique         // 头像图片ID
+  
+  // 时间戳
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  reviews     Review[]      // 用户发表的评价
-  replies     Reply[]       // 用户的回复
-  reviewLikes ReviewLike[]  // 用户点赞的评价
-  chatMessages  ChatMessage[]  // 保留聊天消息关系
-  avatarId  String?  @unique  // 头像图片ID
-  avatar    Image?   @relation("UserAvatar", fields: [avatarId], references: [id])
-  images    Image[]  @relation("UserImages")
+  
+  // 关系字段
+  models       Model[]       // 用户创建的模型
+  favorites    Favorite[]    // 用户收藏的模型
+  checkIns     CheckIn[]     // 用户签到记录
+  reviews      Review[]      // 用户发表的评价
+  replies      Reply[]       // 用户的回复
+  reviewLikes  ReviewLike[]  // 用户点赞的评价
+  chatMessages ChatMessage[] // 用户的聊天消息
+  avatar       Image?        @relation("UserAvatar", fields: [avatarId], references: [id])
+  images       Image[]       @relation("UserImages")
+  
+  // 索引
+  @@index([email], name: "email_idx")
+  @@index([createdAt], name: "user_created_at_idx")
 }
 
 model Model {
+  // 基础信息
   id            String    @id @default(cuid())
-  name          String
+  name          String    
   description   String?   @db.Text
-  filePath      String
-  fileSize      Int
-  format        String
-  componentName String?
-  isPublic      Boolean   @default(true)
-  texturesSize  Int       @default(0)  // 所有贴图的总大小（字节）
+  componentName String?   
+  format        String                         // 模型格式，如 GLB, GLTF, OBJ 等
+  isPublic      Boolean   @default(true)       // 是否公开可见
+  
+  // 文件信息
+  filePath      String                         // 文件存储路径
+  fileSize      Int                            // 模型文件大小（字节）
+  texturesSize  Int       @default(0)          // 所有贴图的总大小（字节）
+  
+  // 统计信息
+  totalReviews  Int       @default(0)          // 评论总数
+  avgRating     Float?                         // 平均评分
+  
+  // 关系字段
+  userId        String                         // 创建者ID
+  user          User      @relation(fields: [userId], references: [id])
+  reviews       Review[]                       // 模型评价
+  animations    Animation[]                    // 相关动画
+  favorites     Favorite[]                     // 收藏记录
+  
+  // 时间戳
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  reviews       Review[]
-  animations    Animation[]
-  favorites     Favorite[]
-  totalReviews  Int       @default(0)
-  avgRating     Float?    
 
-  @@index([format, userId])
+  // 索引
+  @@index([format, userId], name: "model_format_userId_idx")
+  @@index([userId], name: "model_userId_idx")
+  @@index([isPublic, createdAt], name: "model_public_created_idx")
+  @@index([name], name: "model_name_idx")
 }
 
 model Favorite {
+  // 基础信息
   id        String   @id @default(cuid())
-  userId    String
-  modelId   String
-  createdAt DateTime @default(now())
+  
+  // 关系字段
+  userId    String                   // 收藏用户ID
   user      User     @relation(fields: [userId], references: [id])
+  modelId   String                   // 被收藏模型ID
   model     Model    @relation(fields: [modelId], references: [id])
+  
+  // 时间戳
+  createdAt DateTime @default(now()) // 收藏创建时间
 
-  @@unique([userId, modelId])
-  @@index([modelId])
-} 
+  // 索引
+  @@unique([userId, modelId], name: "favorite_user_model_unique")  // 确保用户不能重复收藏同一模型
+  @@index([modelId], name: "favorite_model_idx")                   // 优化查询特定模型的收藏数
+  @@index([userId, createdAt], name: "favorite_user_created_idx")  // 优化查询用户收藏列表并按时间排序
+}
 
 model CheckIn {
-  id        String   @id @default(cuid())
-  userId    String
+  // 基础信息
+  id        String   @id @default(cuid())  // 唯一标识
+  points    Int                            // 本次签到获得的积分
+  
+  // 关系字段
+  userId    String                         // 签到用户ID
   user      User     @relation(fields: [userId], references: [id])
-  points    Int      // 本次签到获得的积分
-  createdAt DateTime @default(now())
+  
+  // 时间戳
+  createdAt DateTime @default(now())       // 签到时间
 
-  @@index([userId])
-  // 确保用户每天只签到一次
-  @@unique([userId, createdAt])
+  // 索引和约束
+  @@index([userId], name: "checkin_user_idx")                  // 优化查询用户签到记录
+  @@unique([userId, createdAt], name: "checkin_daily_unique")  // 确保用户每天只签到一次
 }
 
-// 评价表
 model Review {
-  id        String   @id @default(cuid())
-  content   String   // 评价内容
-  rating    Int      // 评分 1-5
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 关联用户
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // 基础信息
+  id        String   @id @default(cuid())  // 唯一标识
+  content   String                         // 评价内容
+  rating    Int                            // 评分 1-5
+  likes     Int      @default(0)           // 点赞数
   
-  // 关联模型
-  modelId   String
+  // 关系字段
+  userId    String                         // 评价作者ID
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modelId   String                         // 被评价模型ID
   model     Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
-
-  // 点赞数
-  likes     Int      @default(0)
+  replies   Reply[]                        // 评价回复
+  likedBy   ReviewLike[]                   // 点赞记录
   
-  // 评价的回复
-  replies   Reply[]
+  // 时间戳
+  createdAt DateTime @default(now())       // 创建时间
+  updatedAt DateTime @updatedAt            // 更新时间
 
-  // 点赞记录
-  likedBy   ReviewLike[]
-
-  @@index([userId])
-  @@index([modelId])
+  // 索引
+  @@index([userId], name: "review_user_idx")     // 优化查询用户的评价
+  @@index([modelId], name: "review_model_idx")   // 优化查询模型的评价
+  @@index([rating], name: "review_rating_idx")   // 优化按评分查询
 }
 
-// 评价回复表
 model Reply {
-  id        String   @id @default(cuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 关联用户
-  userId    String
+  // 基础信息
+  id        String   @id @default(cuid())  // 唯一标识
+  content   String                         // 回复内容
+  
+  // 关系字段
+  userId    String                         // 回复作者ID
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // 关联评价
-  reviewId  String
+  reviewId  String                         // 关联的评价ID
   review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([reviewId])
+  // 时间戳
+  createdAt DateTime @default(now())       // 创建时间
+  updatedAt DateTime @updatedAt            // 更新时间
+
+  // 索引
+  @@index([userId], name: "reply_user_idx")       // 优化查询用户的回复
+  @@index([reviewId], name: "reply_review_idx")   // 优化查询评价的回复
 }
 
-// 评价点赞记录表
 model ReviewLike {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  // 关联用户
-  userId    String
+  // 基础信息
+  id        String   @id @default(cuid())  // 唯一标识
+  
+  // 关系字段
+  userId    String                         // 点赞用户ID
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // 关联评价
-  reviewId  String
+  reviewId  String                         // 被点赞评价ID
   review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, reviewId])
-  @@index([userId])
-  @@index([reviewId])
+  // 时间戳
+  createdAt DateTime @default(now())       // 点赞时间
+
+  // 索引和约束
+  @@unique([userId, reviewId], name: "review_like_unique")  // 确保用户不能重复点赞同一评价
+  @@index([userId], name: "review_like_user_idx")          // 优化查询用户的点赞记录
+  @@index([reviewId], name: "review_like_review_idx")      // 优化查询评价的点赞记录
 }
 
 // 添加动画模型
 model Animation {
-  id        String   @id @default(cuid())
-  name      String
-  filePath  String
-  fileSize  Int
-  modelId   String
+  // 基础信息
+  id        String   @id @default(cuid())  // 唯一标识
+  name      String                         // 动画名称
+  
+  // 文件信息
+  filePath  String                         // 文件存储路径
+  fileSize  Int                            // 文件大小(字节)
+  
+  // 关系字段
+  modelId   String                         // 所属模型ID
   model     Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  
+  // 时间戳
+  createdAt DateTime @default(now())       // 创建时间
+  updatedAt DateTime @updatedAt            // 更新时间
 
-  @@index([modelId])
+  // 索引
+  @@index([modelId], name: "animation_model_idx")  // 优化查询模型的动画
 }
 
 // 聊天消息表
 model ChatMessage {
-  id        String   @id @default(cuid())
-  content   String   @db.Text  // 消息内容
-  type      String   @default("text") // 消息类型：text/image
-  userId    String   // 发送者ID
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  // 基础信息
+  id        String   @id @default(cuid())  // 唯一标识
+  content   String   @db.Text              // 消息内容
+  type      String   @default("text")      // 消息类型：text/image
   
-  // 图片关联
-  image     Image?   @relation("MessageImage")
+  // 关系字段
+  userId    String                         // 发送者ID
+  user      User     @relation(fields: [userId], references: [id])
+  image     Image?   @relation("MessageImage") // 关联的图片(可选)
+  
+  // 时间戳
+  createdAt DateTime @default(now())       // 发送时间
 
-  @@index([createdAt])
-  @@index([userId])
+  // 索引
+  @@index([createdAt], name: "chat_created_at_idx")  // 优化按时间查询消息
+  @@index([userId], name: "chat_user_idx")           // 优化查询用户的消息
+  @@index([type], name: "chat_type_idx")             // 优化按类型查询消息
 }
 
 // 添加图片表
 model Image {
-  id        String   @id @default(cuid())
-  name      String   // 原始文件名
-  url       String   // OSS URL
-  size      Int     // 文件大小(字节)
-  type      String  // 图片类型: avatar/chat/other
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // 基础信息
+  id        String   @id @default(cuid())  // 唯一标识
+  name      String                         // 原始文件名
+  url       String                         // OSS URL
+  size      Int                            // 文件大小(字节)
+  type      String                         // 图片类型: avatar/chat/other
   
-  // 关联上传者
-  userId    String   // 上传者ID
+  // 关系字段
+  userId    String                         // 上传者ID
   user      User     @relation("UserImages", fields: [userId], references: [id])
-  
-  // 头像关联(可选)
-  avatarUser User?   @relation("UserAvatar")
-  
-  // 聊天消息关联(可选)
-  chatMessageId String? @unique
+  avatarUser User?   @relation("UserAvatar")                    // 作为用户头像(可选)
+  chatMessageId String? @unique                                 // 关联聊天消息ID(可选)
   chatMessage   ChatMessage? @relation("MessageImage", fields: [chatMessageId], references: [id])
+  
+  // 时间戳
+  createdAt DateTime @default(now())       // 创建时间
+  updatedAt DateTime @updatedAt            // 更新时间
 
-  @@index([userId])
-  @@index([type])
+  // 索引
+  @@index([userId], name: "image_user_idx")    // 优化查询用户的图片
+  @@index([type], name: "image_type_idx")      // 优化按类型查询图片
 }
