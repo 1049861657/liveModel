@@ -31,8 +31,8 @@ model User {
   images       Image[]       @relation("UserImages")
   
   // 索引
-  @@index([email], name: "email_idx")
-  @@index([createdAt], name: "user_created_at_idx")
+  @@index([email])
+  @@index([createdAt])
 }
 
 model Model {
@@ -73,21 +73,21 @@ model Model {
 
 model Favorite {
   // 基础信息
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid())  // 唯一标识
   
   // 关系字段
-  userId    String                   // 收藏用户ID
+  userId    String                         // 收藏用户ID
   user      User     @relation(fields: [userId], references: [id])
-  modelId   String                   // 被收藏模型ID
+  modelId   String                         // 被收藏模型ID
   model     Model    @relation(fields: [modelId], references: [id])
   
   // 时间戳
-  createdAt DateTime @default(now()) // 收藏创建时间
+  createdAt DateTime @default(now())       // 收藏创建时间
 
-  // 索引
-  @@unique([userId, modelId], name: "favorite_user_model_unique")  // 确保用户不能重复收藏同一模型
-  @@index([modelId], name: "favorite_model_idx")                   // 优化查询特定模型的收藏数
-  @@index([userId, createdAt], name: "favorite_user_created_idx")  // 优化查询用户收藏列表并按时间排序
+  // 唯一约束和索引
+  @@unique([userId, modelId])                                // 确保用户不能重复收藏同一模型
+  @@index([modelId])             // 优化查询特定模型的收藏数
+  @@index([userId, createdAt])  // 优化查询用户收藏列表并按时间排序
 }
 
 model CheckIn {
@@ -103,8 +103,8 @@ model CheckIn {
   createdAt DateTime @default(now())       // 签到时间
 
   // 索引和约束
-  @@index([userId], name: "checkin_user_idx")                  // 优化查询用户签到记录
-  @@unique([userId, createdAt], name: "checkin_daily_unique")  // 确保用户每天只签到一次
+  @@index([userId])                  // 优化查询用户签到记录
+  @@unique([userId, createdAt])  // 确保用户每天只签到一次
 }
 
 model Review {
@@ -127,9 +127,9 @@ model Review {
   updatedAt DateTime @updatedAt            // 更新时间
 
   // 索引
-  @@index([userId], name: "review_user_idx")     // 优化查询用户的评价
-  @@index([modelId], name: "review_model_idx")   // 优化查询模型的评价
-  @@index([rating], name: "review_rating_idx")   // 优化按评分查询
+  @@index([userId])     // 优化查询用户的评价
+  @@index([modelId])   // 优化查询模型的评价
+  @@index([rating])   // 优化按评分查询
 }
 
 model Reply {
@@ -148,8 +148,8 @@ model Reply {
   updatedAt DateTime @updatedAt            // 更新时间
 
   // 索引
-  @@index([userId], name: "reply_user_idx")       // 优化查询用户的回复
-  @@index([reviewId], name: "reply_review_idx")   // 优化查询评价的回复
+  @@index([userId])       // 优化查询用户的回复
+  @@index([reviewId])   // 优化查询评价的回复
 }
 
 model ReviewLike {
@@ -166,9 +166,9 @@ model ReviewLike {
   createdAt DateTime @default(now())       // 点赞时间
 
   // 索引和约束
-  @@unique([userId, reviewId], name: "review_like_unique")  // 确保用户不能重复点赞同一评价
-  @@index([userId], name: "review_like_user_idx")          // 优化查询用户的点赞记录
-  @@index([reviewId], name: "review_like_review_idx")      // 优化查询评价的点赞记录
+  @@unique([userId, reviewId])  // 确保用户不能重复点赞同一评价
+  @@index([userId])          // 优化查询用户的点赞记录
+  @@index([reviewId])      // 优化查询评价的点赞记录
 }
 
 // 添加动画模型
@@ -190,7 +190,7 @@ model Animation {
   updatedAt DateTime @updatedAt            // 更新时间
 
   // 索引
-  @@index([modelId], name: "animation_model_idx")  // 优化查询模型的动画
+  @@index([modelId])  // 优化查询模型的动画
 }
 
 // 聊天消息表
@@ -209,9 +209,9 @@ model ChatMessage {
   createdAt DateTime @default(now())       // 发送时间
 
   // 索引
-  @@index([createdAt], name: "chat_created_at_idx")  // 优化按时间查询消息
-  @@index([userId], name: "chat_user_idx")           // 优化查询用户的消息
-  @@index([type], name: "chat_type_idx")             // 优化按类型查询消息
+  @@index([createdAt])  // 优化按时间查询消息
+  @@index([userId])           // 优化查询用户的消息
+  @@index([type])             // 优化按类型查询消息
 }
 
 // 添加图片表
@@ -235,6 +235,6 @@ model Image {
   updatedAt DateTime @updatedAt            // 更新时间
 
   // 索引
-  @@index([userId], name: "image_user_idx")    // 优化查询用户的图片
-  @@index([type], name: "image_type_idx")      // 优化按类型查询图片
+  @@index([userId])    // 优化查询用户的图片
+  @@index([type])      // 优化按类型查询图片
 }
