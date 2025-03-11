@@ -488,6 +488,7 @@
       "close": "閉じる",
       "selectAnimation": "アニメーションを選択",
       "clickToUpload": "クリックしてアップロード",
+      "dropToUpload": "ドロップでアップロード",
       "supportFormat": "SMD形式に対応",
       "selectedFiles": "{count}個のファイルが選択されました",
       "animationName": "アニメーション名を入力",
@@ -500,7 +501,8 @@
       "invalidFormat": "ファイル{name}はSMD形式ではありません",
       "uploadSuccess": "すべてのアニメーションのアップロードに成功しました",
       "uploadError": "アップロードエラー",
-      "uploadFailed": "{name}のアップロードに失敗しました"
+      "uploadFailed": "{name}のアップロードに失敗しました",
+      "loginRequired": "まずログインしてください"
     },
     "TextureUploadModal": {
       "title": "テクスチャをアップロード",
@@ -509,7 +511,7 @@
       "selectModelPlaceholder": "モデルを選択してください",
       "close": "閉じる",
       "selectTexture": "テクスチャを選択",
-      "clickToUpload": "クリックまたはファイルをドラッグしてアップロード",
+      "clickToUpload": "クリックまたはドラッグでアップロード",
       "supportFormat": "PNG、JPG形式に対応",
       "selectedFiles": "{count}個のファイルが選択されました",
       "removeFile": "ファイルを削除",
@@ -521,7 +523,8 @@
       "invalidFormat": "PNG、JPG形式のみ対応しています",
       "uploadSuccess": "テクスチャのアップロードに成功しました",
       "uploadError": "アップロードエラー",
-      "uploadFailed": "アップロードに失敗しました"
+      "uploadFailed": "アップロードに失敗しました",
+      "loginRequired": "まずログインしてください"
     },
     "PreviewGltfScene": {
       "loadFailed": "モデルの読み込みに失敗しました",

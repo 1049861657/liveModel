@@ -488,6 +488,7 @@
       "close": "关闭",
       "selectAnimation": "选择动画",
       "clickToUpload": "点击上传",
+      "dropToUpload": "拖拽以上传",
       "supportFormat": "支持 SMD 格式",
       "selectedFiles": "已选择 {count} 个文件",
       "animationName": "输入动画名称",
@@ -500,7 +501,8 @@
       "invalidFormat": "文件 {name} 不是SMD格式",
       "uploadSuccess": "所有动画上传成功",
       "uploadError": "上传错误",
-      "uploadFailed": "上传 {name} 失败"
+      "uploadFailed": "上传 {name} 失败",
+      "loginRequired": "请先登录"
     },
     "TextureUploadModal": {
       "title": "上传贴图",
@@ -521,7 +523,8 @@
       "invalidFormat": "只支持 PNG、JPG 格式的图片",
       "uploadSuccess": "贴图上传成功",
       "uploadError": "上传错误",
-      "uploadFailed": "上传失败"
+      "uploadFailed": "上传失败",
+      "loginRequired": "请先登录"
     },
     "PreviewGltfScene": {
       "loadFailed": "模型加载失败",

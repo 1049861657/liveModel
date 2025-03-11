@@ -11,6 +11,7 @@ import { toast } from 'react-hot-toast'
 import { Link } from '@/i18n/routing';
 import { type ExtendedModel } from '@/types/model'
 import { useTranslations } from 'next-intl'
+import { useSession } from 'next-auth/react'
 
 interface Part {
   name: string
@@ -31,6 +32,8 @@ function formatTime(seconds: number) {
 
 function ModelScene({ initialModel }: PreviewDaeSceneProps) {
   const t = useTranslations('PreviewDaeScene')
+  const { data: session } = useSession()
+  const isOwner = session?.user?.id === initialModel.userId
   const sceneRef = useRef<THREE.Group>(null)
   const originalMaterials = useRef<Map<string, THREE.Material | THREE.Material[]>>(new Map())
   const controlsRef = useRef<any>(null)
@@ -745,7 +748,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
                                 setAnimationToDelete(anim)
                                 setShowDeleteDialog(true)
                               }}
-                              className="p-1 text-gray-400 hover:text-red-500 transition-colors relative group"
+                              className={`p-1 text-gray-400 hover:text-red-500 transition-colors relative group ${!isOwner ? 'hidden' : ''}`}
                               title={t('deleteAnimation')}
                               disabled={isDeleting}
                             >

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useReducer, useMemo, useEffect } from 'react'
+import { useCallback, useReducer, useMemo, useEffect, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Select from '@radix-ui/react-select'
 import { toast } from 'react-hot-toast'
@@ -10,6 +10,7 @@ import { useLocale } from 'next-intl'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'motion/react'
 import { Cross2Icon, ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons'
+import { useSession } from 'next-auth/react'
 
 interface Model {
   id: string
@@ -108,17 +109,30 @@ export default function AnimationUploadModal({
   const t = useTranslations('AnimationUploadModal')
   const locale = useLocale()
   const [state, dispatch] = useReducer(uploadReducer, initialState)
+  const [isDragging, setIsDragging] = useState(false);
+  const { data: session } = useSession();
+
+  // 检查用户是否已登录
+  useEffect(() => {
+    if (isOpen && !session?.user) {
+      toast.error(t('loginRequired'));
+      onClose();
+    }
+  }, [isOpen, session, t, onClose]);
 
   // 使用 react-query 获取模型列表
   const { data, isLoading, isError } = useQuery<DaeModelsQueryResult>({
-    queryKey: ['daeModels'],
+    queryKey: ['daeModels', session?.user?.id],
     queryFn: async () => {
-      const response = await fetch('/api/models?format=dae&own=true')
+      if (!session?.user?.id) {
+        throw new Error(t('loginRequired'));
+      }
+      const response = await fetch('/api/models?format=dae&owner=mine')
       if (!response.ok) throw new Error(t('fetchError'))
       const data = await response.json()
       return data
     },
-    enabled: isOpen,
+    enabled: isOpen && !!session?.user,
     retry: false
   })
 
@@ -195,6 +209,37 @@ export default function AnimationUploadModal({
       dispatch({ type: 'ADD_SELECTED_FILES', payload: newAnimationFiles })
     }
   }, [validateFile])
+
+  // 处理拖拽相关事件
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files) {
+      const files = Array.from(e.dataTransfer.files);
+      const validFiles = files.filter(validateFile);
+      
+      const newAnimationFiles = validFiles.map(file => ({
+        file,
+        name: file.name.replace('.smd', '')
+      }));
+      
+      dispatch({ type: 'ADD_SELECTED_FILES', payload: newAnimationFiles });
+    }
+  }, [validateFile]);
 
   const handleRemoveFile = useCallback((fileToRemove: AnimationFile) => {
     dispatch({ type: 'REMOVE_FILE', payload: fileToRemove })
@@ -368,7 +413,10 @@ export default function AnimationUploadModal({
                         />
                         <label
                           htmlFor="animation-file-input"
-                          className="block w-full border-2 border-dashed rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
+                          className={`block w-full border-2 border-dashed rounded-lg p-8 text-center ${isDragging ? 'border-blue-500 bg-blue-50' : 'hover:border-blue-500'} transition-colors cursor-pointer`}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
                         >
                           <div className="space-y-2">
                             <motion.svg 
@@ -384,7 +432,7 @@ export default function AnimationUploadModal({
                               <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </motion.svg>
                             <div className="text-gray-600">
-                              {t('clickToUpload')}
+                              {isDragging ? t('dropToUpload') : t('clickToUpload')}
                             </div>
                             <p className="text-sm text-gray-500">
                               {t('supportFormat')}

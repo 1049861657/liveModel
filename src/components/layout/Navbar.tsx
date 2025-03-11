@@ -158,11 +158,11 @@ export default function Navbar() {
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95, y: -10 }}
                           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                          className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-xl border border-gray-100 py-2 origin-top"
+                          className="absolute right-0 mt-2 w-36 rounded-xl bg-white shadow-xl border border-gray-100 py-1.5 origin-top overflow-hidden"
                         >
-                          <UserMenuItem href="/profile" icon="user">{t('profile')}</UserMenuItem>
-                          <UserMenuItem href="/models?owner=mine" icon="folder">{t('myModels')}</UserMenuItem>
-                          <UserMenuItem href="/checkin" icon="calendar">{t('checkin')}</UserMenuItem>
+                          <UserMenuItem href="/profile" icon="user" onClick={() => setShowDropdown(false)}>{t('profile')}</UserMenuItem>
+                          <UserMenuItem href="/models?owner=mine" icon="folder" onClick={() => setShowDropdown(false)}>{t('myModels')}</UserMenuItem>
+                          <UserMenuItem href="/checkin" icon="calendar" onClick={() => setShowDropdown(false)}>{t('checkin')}</UserMenuItem>
                           <div className="border-t border-gray-100 mt-1">
                             <button
                               onClick={() => {
@@ -307,11 +307,12 @@ function NavLink({ href, children, isScrolled }: { href: string; children: React
 }
 
 // 用户菜单项组件
-function UserMenuItem({ href, icon, children }: { href: string; icon: string; children: React.ReactNode }) {
+function UserMenuItem({ href, icon, children, onClick }: { href: string; icon: string; children: React.ReactNode; onClick?: () => void }) {
   return (
     <Link
       href={href}
-      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+      className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+      onClick={onClick}
     >
       <motion.div
         className="flex items-center space-x-2"

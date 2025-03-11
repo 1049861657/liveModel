@@ -488,6 +488,7 @@
       "close": "Close",
       "selectAnimation": "Select Animation",
       "clickToUpload": "Click to Upload",
+      "dropToUpload": "Drop to Upload",
       "supportFormat": "Supports SMD format",
       "selectedFiles": "{count} files selected",
       "animationName": "Enter animation name",
@@ -500,7 +501,8 @@
       "invalidFormat": "File {name} is not in SMD format",
       "uploadSuccess": "All animations uploaded successfully",
       "uploadError": "Upload error",
-      "uploadFailed": "Failed to upload {name}"
+      "uploadFailed": "Failed to upload {name}",
+      "loginRequired": "Please log in"
     },
     "TextureUploadModal": {
       "title": "Upload Texture",
@@ -521,7 +523,8 @@
       "invalidFormat": "Only PNG and JPG formats are supported",
       "uploadSuccess": "Textures uploaded successfully",
       "uploadError": "Upload error",
-      "uploadFailed": "Upload failed"
+      "uploadFailed": "Upload failed",
+      "loginRequired": "Please log in"
     },
     "PreviewGltfScene": {
       "loadFailed": "Model Loading Failed",
