@@ -345,11 +345,13 @@
       "onlineUsers": "{count} 人在线",
       "welcome": {
         "title": "欢迎来到世界聊天室",
-        "description": "欢迎来到世界聊天室！这里是一个开放的交流空间，您可以与其他用户分享想法、讨论技术，结交志同道合的朋友。"
+        "description": "欢迎来到世界聊天室！这里是一个开放的交流空间，您可以与其他用户分享想法、讨论技术，结交志同道合的朋友。",
+        "dismiss": "关闭提示"
       },
       "input": {
         "placeholder": "输入消息...",
-        "send": "发送"
+        "send": "发送",
+        "sending": "发送中..."
       },
       "login": {
         "title": "欢迎来到世界聊天室",
@@ -360,7 +362,18 @@
         "fetchFailed": "获取消息失败",
         "sendFailed": "发送失败"
       },
-      "defaultUsername": "用户"
+      "defaultUsername": "用户",
+      "connection": {
+        "reconnect": "重新连接",
+        "reconnecting": "正在尝试重新连接...",
+        "reconnected": "连接恢复",
+        "reconnectFailed": "连接失败，消息将稍后发送",
+        "status": {
+          "connected": "已连接",
+          "connecting": "连接中",
+          "disconnected": "已断开"
+        }
+      }
     },
     "AboutPage": {
       "title": "关于我们",

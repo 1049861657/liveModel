@@ -345,11 +345,13 @@
       "onlineUsers": "{count} Online",
       "welcome": {
         "title": "Welcome to World Chat Room",
-        "description": "Welcome to the World Chat Room! This is an open space where you can share ideas, discuss technology, and make friends with like-minded people."
+        "description": "Welcome to the World Chat Room! This is an open space where you can share ideas, discuss technology, and make friends with like-minded people.",
+        "dismiss": "Close Tip"
       },
       "input": {
         "placeholder": "Type a message...",
-        "send": "Send"
+        "send": "Send",
+        "sending": "Sending..."
       },
       "login": {
         "title": "Welcome to World Chat Room",
@@ -360,7 +362,18 @@
         "fetchFailed": "Failed to fetch messages",
         "sendFailed": "Failed to send"
       },
-      "defaultUsername": "User"
+      "defaultUsername": "User",
+      "connection": {
+        "reconnect": "Reconnect",
+        "reconnecting": "Attempting to reconnect...",
+        "reconnected": "Connection restored",
+        "reconnectFailed": "Connection failed, messages will be sent later",
+        "status": {
+          "connected": "Connected",
+          "connecting": "Connecting",
+          "disconnected": "Disconnected"
+        }
+      }
     },
     "AboutPage": {
       "title": "About Us",
