@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { motion } from 'motion/react'
-import { useTranslations } from 'next-intl'
 
 // 自定义hooks
 import { useChatMessages, useSendMessage, useChatConnection, useMessageGroups } from '@/hooks/useChat'
@@ -18,7 +17,6 @@ import { LoginPrompt } from '@/components/chat/LoginPrompt'
 
 export default function ChatPage() {
   const { data: session } = useSession()
-  const t = useTranslations('ChatPage')
   const [showWelcome, setShowWelcome] = useState(true)
   const [newMessage, setNewMessage] = useState('')
   
