@@ -340,38 +340,38 @@
       "gltfUploadError": "GLTF形式の場合は、「GLTFフォルダを選択」ボタンをクリックして完全なフォルダをアップロードしてください"
     },
     "ChatPage": {
-      "title": "ワールドチャットルーム",
-      "subtitle": "オンラインユーザーディスカッション",
-      "onlineUsers": "{count}人オンライン",
+      "title": "グローバルチャットルーム",
+      "subtitle": "オンラインユーザーとの交流",
+      "onlineUsers": "{count} 人オンライン",
       "welcome": {
-        "title": "ワールドチャットルームへようこそ",
-        "description": "ワールドチャットルームへようこそ！ここはアイデアを共有し、技術について議論し、同じ志を持つ仲間と友達になれるオープンスペースです。",
-        "dismiss": "閉じる"
+        "title": "グローバルチャットルームへようこそ",
+        "description": "グローバルチャットルームへようこそ！ここはアイデアを共有し、技術について議論し、同じ考えを持つ友達を作ることができるオープンスペースです。",
+        "dismiss": "ヒントを閉じる"
       },
       "input": {
         "placeholder": "メッセージを入力...",
-        "send": "送信",
-        "sending": "送信中..."
+        "send": "送信"
       },
       "login": {
-        "title": "ワールドチャットルームへようこそ",
-        "description": "ログインして他のクリエイターとチャットし、あなたの考えや作品を共有しましょう",
-        "button": "今すぐログイン"
+        "title": "グローバルチャットルームへようこそ",
+        "description": "ログインして他のユーザーとチャットし、アイデアや作品を共有しましょう",
+        "button": "ログイン"
       },
       "errors": {
         "fetchFailed": "メッセージの取得に失敗しました",
         "sendFailed": "送信に失敗しました"
       },
       "defaultUsername": "ユーザー",
+      "emoji": {},
       "connection": {
         "reconnect": "再接続",
         "reconnecting": "再接続を試みています...",
-        "reconnected": "接続が復旧しました",
+        "reconnected": "接続が復元されました",
         "reconnectFailed": "接続に失敗しました、メッセージは後で送信されます",
         "status": {
           "connected": "接続済み",
           "connecting": "接続中",
-          "disconnected": "切断済み"
+          "disconnected": "切断"
         }
       }
     },

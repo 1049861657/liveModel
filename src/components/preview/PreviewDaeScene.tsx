@@ -1445,7 +1445,7 @@ function ModelScene({ initialModel }: PreviewDaeSceneProps) {
         }}
         onConfirm={handleDeleteAnimation}
         title={t('deleteAnimation')}
-        message={t('deleteAnimationConfirm', { name: animationToDelete?.name })}
+        message={t('deleteAnimationConfirm', { name: animationToDelete?.name || '' })}
         confirmText={isDeleting ? t('deleting') : t('delete')}
         cancelText={t('cancel')}
         type="danger"

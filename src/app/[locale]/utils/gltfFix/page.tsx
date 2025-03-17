@@ -321,38 +321,6 @@ export default function GltfFixPage() {
           </div>
         </div>
       </div>
-
-      {/* 添加自定义动画样式和滚动条样式 */}
-      <style jsx global>{`
-        @keyframes spin-slow {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        @keyframes spin-slow-reverse {
-          to {
-            transform: rotate(-360deg);
-          }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
-        }
-        .animate-spin-slow-reverse {
-          animation: spin-slow-reverse 6s linear infinite;
-        }
-        
-        /* 自定义滚动条样式 */
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 6px;
-        }
-        .scrollbar-thumb-gray-700::-webkit-scrollbar-thumb {
-          background-color: #4B5563;
-          border-radius: 3px;
-        }
-        .scrollbar-track-gray-900::-webkit-scrollbar-track {
-          background-color: #111827;
-        }
-      `}</style>
     </div>
   );
 } 

@@ -165,7 +165,7 @@ function RecentUploads() {
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleConfirmDelete}
         title={t('deleteDialog.title')}
-        message={t('deleteDialog.message', { name: modelToDelete?.name })}
+        message={t('deleteDialog.message', { name: modelToDelete?.name || '' })}
         confirmText={t('deleteDialog.confirm')}
         type="danger"
       />

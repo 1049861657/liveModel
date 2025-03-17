@@ -9,7 +9,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import AuthProvider from '@/components/providers/AuthProvider'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages, getTranslations } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { QueryProvider } from '@/components/providers/QueryProvider'
@@ -42,8 +42,6 @@ export default async function RootLayout({
   // Validate that the incoming `locale` parameter is valid
   if (!routing.locales.includes(locale as any)) notFound()
 
-  // Get messages for the current locale
-  const messages = await getMessages()
 
   return (
     <html lang={locale}>
@@ -51,7 +49,7 @@ export default async function RootLayout({
         <meta name="msvalidate.01" content="5058D208486CE0B008F765C9475DC9C2" />
       </head>
       <body className={inter.className}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale}>
           <AuthProvider session={session}>
             <QueryProvider>
               <div className="min-h-screen flex flex-col">

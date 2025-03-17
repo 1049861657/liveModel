@@ -350,8 +350,7 @@
       },
       "input": {
         "placeholder": "输入消息...",
-        "send": "发送",
-        "sending": "发送中..."
+        "send": "发送"
       },
       "login": {
         "title": "欢迎来到世界聊天室",
@@ -363,6 +362,7 @@
         "sendFailed": "发送失败"
       },
       "defaultUsername": "用户",
+      "emoji": {},
       "connection": {
         "reconnect": "重新连接",
         "reconnecting": "正在尝试重新连接...",

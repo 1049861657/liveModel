@@ -30,11 +30,45 @@ export function useChatMessages() {
       return [...filtered, newMessage];
     });
   }, [queryClient]);
+
+  // 重新发送消息
+  const resendMessage = useCallback((failedMessageId: string, content: string) => {
+    // 先更新消息状态为加载中
+    queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (oldData = []) => {
+      return oldData.map(msg => 
+        msg.id === failedMessageId
+          ? { ...msg, isLoading: true, isFailed: false }
+          : msg
+      );
+    });
+
+    // 发送消息
+    chatService.sendMessage(content)
+      .then(() => {
+        // 发送成功后移除失败消息
+        queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (oldData = []) => {
+          return oldData.filter(msg => msg.id !== failedMessageId);
+        });
+      })
+      .catch(error => {
+        // 发送失败，恢复失败状态
+        console.error('[重发消息失败]:', error);
+        queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (oldData = []) => {
+          return oldData.map(msg => 
+            msg.id === failedMessageId
+              ? { ...msg, isLoading: false, isFailed: true }
+              : msg
+          );
+        });
+        toast.error('重发消息失败，请稍后再试');
+      });
+  }, [queryClient]);
   
   return {
     messages,
     isLoading,
-    addMessage
+    addMessage,
+    resendMessage
   };
 }
 
@@ -64,7 +98,8 @@ export function useSendMessage(user: any) {
           email: user.email ?? '',
           avatar: user.avatar // 使用真实头像
         },
-        isLoading: true
+        isLoading: true,
+        isFailed: false
       };
       
       // 乐观更新
@@ -72,12 +107,16 @@ export function useSendMessage(user: any) {
       
       return { tempMessage };
     },
-    onError: (_error, _, context) => {
+    onError: (_error, _content, context) => {
       if (!context?.tempMessage) return;
       
-      // 出错时移除临时消息
+      // 出错时将消息状态更新为失败，而不是移除
       queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (old = []) => 
-        old?.filter(message => message.id !== context.tempMessage.id) || []
+        old?.map(message => 
+          message.id === context.tempMessage.id
+            ? { ...message, isLoading: false, isFailed: true }
+            : message
+        ) || []
       );
       
       // 显示错误提示

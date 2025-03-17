@@ -21,7 +21,7 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState('')
   
   // 使用React Query处理消息数据
-  const { messages, isLoading: messagesLoading } = useChatMessages()
+  const { messages, isLoading: messagesLoading, resendMessage } = useChatMessages()
   const { sendMessage, isSending } = useSendMessage(session?.user)
   const { onlineUsers, connectionStatus } = useChatConnection(session?.user)
   
@@ -49,6 +49,15 @@ export default function ChatPage() {
       setAutoScroll(true)
       setTimeout(scrollToBottom, 100) // 延迟确保DOM已更新
     }
+  }
+  
+  // 处理消息重发
+  const handleResendMessage = (messageId: string, content: string) => {
+    resendMessage(messageId, content)
+    
+    // 确保重发后自动滚动到底部
+    setAutoScroll(true)
+    setTimeout(scrollToBottom, 100)
   }
   
   return (
@@ -98,6 +107,7 @@ export default function ChatPage() {
                 messagesEndRef={messagesEndRef}
                 onScroll={checkShouldAutoScroll}
                 isLoading={messagesLoading}
+                onResend={handleResendMessage}
               />
 
               {/* 输入框 */}

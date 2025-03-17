@@ -17,6 +17,7 @@ export interface ChatMessage {
   createdAt: Date;
   user: ChatUser;
   isLoading?: boolean;
+  isFailed?: boolean;
 }
 
 type MessageCallback = (message: ChatMessage) => void;
