@@ -54,11 +54,11 @@ function Avatar({ user, size = 'md', className }: AvatarProps) {
           alt={user?.name || '用户头像'}
           width={64}
           height={64}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           priority={true}
           className={cn(
-            "w-full h-full object-cover",
-            imageLoaded ? 'opacity-100' : 'opacity-0',
-            "transition-opacity duration-300"
+            "transition-opacity duration-300",
+            imageLoaded ? 'opacity-100' : 'opacity-0'
           )}
           onLoad={() => setImageLoaded(true)}
         />

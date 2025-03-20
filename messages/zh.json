@@ -362,7 +362,12 @@
         "sendFailed": "发送失败"
       },
       "defaultUsername": "用户",
-      "emoji": {},
+      "emoji": {
+        "categories": {
+          "face": "表情",
+          "meme": "梗图"
+        }
+      },
       "connection": {
         "reconnect": "重新连接",
         "reconnecting": "正在尝试重新连接...",

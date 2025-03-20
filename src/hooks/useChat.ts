@@ -129,6 +129,68 @@ export function useSendMessage(user: any) {
 }
 
 /**
+ * 上传并发送图片的Hook
+ */
+export function useUploadImage(user: any) {
+  const queryClient = useQueryClient();
+  
+  const { mutate: uploadImage, isPending: isUploading } = useMutation({
+    mutationFn: (file: File) => chatService.uploadChatImage(file),
+    onMutate: async (_) => {
+      // 取消任何传出的重新获取
+      await queryClient.cancelQueries({ queryKey: [MESSAGES_QUERY_KEY] });
+      
+      if (!user?.id) return;
+      
+      // 创建临时图片消息
+      const tempMessage: ChatMessage = {
+        id: `temp-${Date.now()}`,
+        content: '📤 Uploading Image...',
+        type: 'text', // 先作为文本消息，成功后会替换为图片
+        createdAt: new Date(),
+        user: {
+          id: user.id,
+          name: user.name ?? user.id,
+          email: user.email ?? '',
+          avatar: user.avatar
+        },
+        isLoading: true,
+        isFailed: false
+      };
+      
+      // 乐观更新
+      queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (old = []) => [...old, tempMessage]);
+      
+      return { tempMessage };
+    },
+    onError: (_error, _file, context) => {
+      if (!context?.tempMessage) return;
+      
+      // 更新为失败状态
+      queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (old = []) => 
+        old?.map(message => 
+          message.id === context.tempMessage.id
+            ? { ...message, content: '❌ Upload failed', isLoading: false, isFailed: true }
+            : message
+        ) || []
+      );
+      
+      toast.error('图片上传失败，请重试');
+    },
+    onSuccess: (_data, _file, context) => {
+      if (!context?.tempMessage) return;
+      
+      // 图片上传成功后，移除临时消息，实际消息会通过WebSocket回调添加
+      queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (old = []) => 
+        old?.filter(message => message.id !== context.tempMessage.id) || []
+      );
+    }
+  });
+  
+  return { uploadImage, isUploading };
+}
+
+/**
  * 管理聊天连接的Hook
  */
 export function useChatConnection(user: any) {

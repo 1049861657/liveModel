@@ -5,6 +5,14 @@ import { useTranslations } from 'next-intl'
 import Avatar from '@/components/ui/Avatar'
 import { formatMessageTime } from '@/lib/date'
 import type { ChatMessage } from '@/services/ChatService'
+import Image from 'next/image'
+import { useMemo, useState } from 'react'
+import { emojiCategories } from '@/config/emojis'
+import { ImageViewer } from './ImageViewer'
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+
+// 解析梗图标记的正则表达式
+const MEME_REGEX = /\{\{meme:(.*?)\}\}/g;
 
 interface TimeGroup {
   id: string;
@@ -20,6 +28,129 @@ interface MessageListProps {
   onScroll: () => void;
   isLoading?: boolean;
   onResend?: (messageId: string, content: string) => void;
+}
+
+// 渲染消息内容，解析梗图标记
+function MessageContent({ content, type = 'text' }: { content: string; type?: string }) {
+  const [isHovering, setIsHovering] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  
+  // 如果是图片消息，直接显示图片
+  if (type === 'image') {
+    return (
+      <div className="relative">
+        <div
+          className="relative"
+          onMouseEnter={() => setIsHovering(true)} 
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          <Image 
+            src={content} 
+            alt="图片消息"
+            width={240}
+            height={180}
+            style={{ width: 'auto', height: 'auto', maxWidth: '100%' }}
+            className="rounded-lg cursor-pointer"
+            onClick={() => setIsViewerOpen(true)}
+          />
+          
+          {isHovering && (
+            <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center">
+              <button
+                onClick={() => setIsViewerOpen(true)}
+                className="p-2 bg-white/20 rounded-full backdrop-blur-sm hover:bg-white/40 transition-colors"
+              >
+                <MagnifyingGlassIcon className="w-6 h-6 text-white" />
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {/* 图片查看器 */}
+        <ImageViewer 
+          imageUrl={content}
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      </div>
+    );
+  }
+  
+  // 使用useMemo缓存解析结果
+  const parsedContent = useMemo(() => {
+    // 检查消息是否包含梗图标记
+    if (!content.includes('{{meme:')) {
+      return <p className="text-sm whitespace-pre-wrap break-words">{content}</p>;
+    }
+
+    // 解析消息内容，提取梗图标记
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    // 重置正则表达式
+    MEME_REGEX.lastIndex = 0;
+    
+    // 查找所有梗图标记
+    while ((match = MEME_REGEX.exec(content)) !== null) {
+      // 添加梗图标记前的文本
+      if (match.index > lastIndex) {
+        parts.push(
+          <span key={`text-${lastIndex}`}>
+            {content.substring(lastIndex, match.index)}
+          </span>
+        );
+      }
+
+      // 提取梗图名称
+      const memeName = match[1];
+      
+      // 从emoji配置中查找对应的URL
+      const memeEmoji = emojiCategories
+        .find((cat) => cat.key === "meme")
+        ?.emojis.find((e) => e.emoji === `{{meme:${memeName}}}`);
+      
+      if (memeEmoji?.url) {
+        // 添加梗图
+        parts.push(
+          <span key={`image-${match.index}`} className="inline-block align-bottom mx-1">
+            <div className="relative w-16 h-auto rounded-lg">
+              <Image 
+                src={memeEmoji.url} 
+                alt={memeName}
+                width={64}
+                height={64}
+                style={{ width: 'auto', height: 'auto' }}
+                className="rounded-lg"
+              />
+            </div>
+          </span>
+        );
+      } else {
+        // 如果找不到对应的梗图，显示原文本
+        parts.push(
+          <span key={`unknown-${match.index}`}>
+            {match[0]}
+          </span>
+        );
+      }
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // 添加最后一部分文本
+    if (lastIndex < content.length) {
+      parts.push(
+        <span key={`text-${lastIndex}`}>
+          {content.substring(lastIndex)}
+        </span>
+      );
+    }
+
+    return <div className="text-sm whitespace-pre-wrap break-words flex items-end flex-wrap">{parts}</div>;
+  }, [content]);
+
+  return parsedContent;
 }
 
 export function MessageList({ 
@@ -87,9 +218,7 @@ export function MessageList({
                           ? 'bg-gradient-to-br from-indigo-400 to-purple-400 text-white' 
                           : 'bg-gray-100 text-gray-800'
                       } rounded-2xl px-4 py-2 shadow-sm`}>
-                        <p className="text-sm whitespace-pre-wrap break-words">
-                          {message.content}
-                        </p>
+                        <MessageContent content={message.content} type={message.type} />
                       </div>
                       
                       {/* 发送状态指示器 - 仅对当前用户的消息显示，放在气泡左边 */}

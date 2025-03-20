@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { content, type = 'text' } = await request.json()
+    const { content, type = 'text', imageId } = await request.json()
 
     if (!content?.trim()) {
       return NextResponse.json(
@@ -63,6 +63,25 @@ export async function POST(request: Request) {
       )
     }
 
+    // 如果是图片消息且提供了imageId，验证图片
+    if (type === 'image' && imageId) {
+      // 检查图片是否存在且属于当前用户
+      const image = await prisma.image.findFirst({
+        where: {
+          id: imageId,
+          userId: session.user.id
+        }
+      });
+      
+      if (!image) {
+        return NextResponse.json(
+          { error: '图片不存在或无权限使用' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 首先创建消息
     const message = await prisma.chatMessage.create({
       data: {
         content: content.trim(),
@@ -79,7 +98,20 @@ export async function POST(request: Request) {
           }
         }
       }
-    })
+    });
+
+    // 如果是图片消息，创建成功后更新图片记录关联到该消息
+    if (type === 'image' && imageId && message.id) {
+      try {
+        await prisma.image.update({
+          where: { id: imageId },
+          data: { chatMessageId: message.id }
+        });
+      } catch (updateError) {
+        console.error('更新图片关联失败:', updateError);
+        // 即使更新失败，我们仍然返回创建的消息
+      }
+    }
 
     return NextResponse.json(message)
   } catch (error) {

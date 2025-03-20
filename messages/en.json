@@ -340,29 +340,34 @@
       "gltfUploadError": "For GLTF format, please click \"Select GLTF Folder\" button to upload the complete folder"
     },
     "ChatPage": {
-      "title": "Global Chat Room",
-      "subtitle": "Connect with users online",
-      "onlineUsers": "{count} Online",
+      "title": "Chat Room",
+      "subtitle": "Online user communication",
+      "onlineUsers": "{count} online",
       "welcome": {
-        "title": "Welcome to the Global Chat Room",
-        "description": "Welcome to the Global Chat Room! This is an open space where you can share ideas, discuss technology, and make friends with like-minded people.",
-        "dismiss": "Close Tip"
+        "title": "Welcome to the Chat Room",
+        "description": "Welcome to the chat room! This is an open communication space where you can share ideas, discuss technology, and make like-minded friends.",
+        "dismiss": "Close Hint"
       },
       "input": {
         "placeholder": "Type a message...",
         "send": "Send"
       },
       "login": {
-        "title": "Welcome to the Global Chat Room",
-        "description": "Log in to chat with other users, share your ideas and work",
-        "button": "Log In"
+        "title": "Welcome to the Chat Room",
+        "description": "Login to chat with other users and share your ideas and creations",
+        "button": "Login Now"
       },
       "errors": {
-        "fetchFailed": "Failed to get messages",
+        "fetchFailed": "Failed to fetch messages",
         "sendFailed": "Send failed"
       },
       "defaultUsername": "User",
-      "emoji": {},
+      "emoji": {
+        "categories": {
+          "face": "Emoji",
+          "meme": "Meme"
+        }
+      },
       "connection": {
         "reconnect": "Reconnect",
         "reconnecting": "Trying to reconnect...",

@@ -8,20 +8,25 @@ interface MessageInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
+  onImageUpload?: (file: File) => void;
   isSending?: boolean;
   disabled?: boolean;
+  isUploading?: boolean;
 }
 
 export function MessageInput({ 
   value, 
   onChange, 
   onSubmit, 
+  onImageUpload,
   isSending = false,
-  disabled = false
+  disabled = false,
+  isUploading = false
 }: MessageInputProps) {
   const t = useTranslations('ChatPage');
   const canSend = !disabled && !isSending && value.trim().length > 0;
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 插入表情到当前光标位置
   const handleEmojiSelect = (emoji: string) => {
@@ -53,6 +58,21 @@ export function MessageInput({
     }
   };
 
+  // 处理图片选择
+  const handleImageSelect = () => {
+    fileInputRef.current?.click();
+  };
+  
+  // 处理文件变更
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0 && onImageUpload) {
+      onImageUpload(files[0]);
+      // 清除选择的文件，允许重复选择同一文件
+      e.target.value = '';
+    }
+  };
+
   return (
     <form onSubmit={onSubmit} className="p-4 border-t bg-white overflow-hidden w-full">
       {/* 输入区域容器 */}
@@ -61,8 +81,34 @@ export function MessageInput({
         <div className="flex items-center px-1 mb-2 gap-1">
           <div className="flex items-center space-x-1">
             <EmojiPicker onSelectEmoji={handleEmojiSelect} />
-            {/* 未来可添加其他功能按钮 */}
-            <div className="w-6 h-6"></div>
+            
+            {/* 图片上传按钮 */}
+            <button
+              type="button"
+              onClick={handleImageSelect}
+              disabled={disabled || isUploading}
+              className="relative p-1.5 hover:bg-purple-100 rounded-full transition-colors focus:outline-none group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-600 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {isUploading && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></span>
+                </span>
+              )}
+            </button>
+            
+            {/* 隐藏的文件输入 */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+              disabled={disabled || isUploading}
+            />
+            
             <div className="w-6 h-6"></div>
           </div>
         </div>

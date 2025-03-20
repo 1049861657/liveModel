@@ -25,10 +25,10 @@ export function useScrollManagement(messages: ChatMessage[]) {
     
     // 使用延时确保DOM已更新
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'end'
-      });
+      // 使用容器滚动而不是scrollIntoView
+      if (messageContainerRef.current) {
+        messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+      }
     }, 50);
   }, [autoScroll]);
   

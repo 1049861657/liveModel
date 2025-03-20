@@ -311,6 +311,81 @@ class ChatService {
       throw error;
     }
   }
+
+  /**
+   * 上传并发送图片消息
+   * @param file 图片文件
+   * @returns 成功发送的消息
+   */
+  public async uploadChatImage(file: File): Promise<ChatMessage | null> {
+    try {
+      // 创建 FormData 对象上传图片
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'chat');
+      
+      // 上传图片到服务器
+      const uploadResponse = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('图片上传失败');
+      }
+      
+      const uploadResult = await uploadResponse.json();
+      
+      // 创建图片消息
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          content: uploadResult.url, 
+          type: 'image',
+          imageId: uploadResult.id
+        })
+      });
+
+      if (!response.ok) throw new Error('发送失败');
+      
+      const savedMessage = await response.json();
+      
+      // 先触发本地UI更新，确保发送者立即看到自己的消息
+      this.notifyMessageCallbacks(savedMessage);
+      
+      try {
+        // 确保连接状态正常
+        const isConnected = await this.ensureConnected();
+        
+        // 尝试通过GoEasy发布消息
+        if (isConnected && goEasy.getConnectionStatus() === 'connected') {
+          // 准备发布的消息对象 - 确保格式正确
+          const messageToPublish = JSON.stringify({
+            ...savedMessage,
+            // 添加额外的元数据，帮助接收方判断
+            _publishedAt: new Date().toISOString(),
+            _publisher: this.currentUser?.id
+          });
+          
+          try {
+            // 发布消息到频道
+            await goEasy.publish('chat_room', messageToPublish);
+          } catch (pubError) {
+            console.error('[ChatService] GoEasy发布图片消息失败:', pubError);
+          }
+        }
+      } catch (wsError) {
+        console.error('[ChatService] 处理WebSocket发送图片时出错:', wsError);
+      }
+      
+      return savedMessage;
+    } catch (error) {
+      console.error('[ChatService] 发送图片消息失败:', error);
+      toast.error('图片发送失败，请稍后再试');
+      throw error;
+    }
+  }
   
   /**
    * 确保已连接

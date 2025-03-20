@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { motion } from 'motion/react'
 
 // 自定义hooks
-import { useChatMessages, useSendMessage, useChatConnection, useMessageGroups } from '@/hooks/useChat'
+import { useChatMessages, useSendMessage, useChatConnection, useMessageGroups, useUploadImage } from '@/hooks/useChat'
 import { useScrollManagement } from '@/hooks/useScrollManagement'
 
 // 组件
@@ -23,6 +23,7 @@ export default function ChatPage() {
   // 使用React Query处理消息数据
   const { messages, isLoading: messagesLoading, resendMessage } = useChatMessages()
   const { sendMessage, isSending } = useSendMessage(session?.user)
+  const { uploadImage, isUploading } = useUploadImage(session?.user)
   const { onlineUsers, connectionStatus } = useChatConnection(session?.user)
   
   // 消息分组
@@ -30,13 +31,31 @@ export default function ChatPage() {
   
   // 滚动管理
   const { 
-    autoScroll: _autoScroll, 
     messagesEndRef, 
     messageContainerRef, 
     checkShouldAutoScroll,
     scrollToBottom,
     setAutoScroll
   } = useScrollManagement(messages)
+  
+  // 确保初始加载后直接定位到底部
+  useEffect(() => {
+    // 只在消息加载完成后执行一次
+    if (messages.length > 0 && !messagesLoading) {
+      // 确保DOM完全渲染后执行滚动
+      const timer = setTimeout(() => {
+        // 只设置消息容器的scrollTop，不使用scrollIntoView
+        if (messageContainerRef.current) {
+          messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+        }
+        
+        setAutoScroll(true);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+    return () => {};
+  }, [messagesLoading, messages, messageContainerRef, setAutoScroll]);
   
   // 处理消息发送
   const handleSendMessage = (e: React.FormEvent) => {
@@ -49,6 +68,17 @@ export default function ChatPage() {
       setAutoScroll(true)
       setTimeout(scrollToBottom, 100) // 延迟确保DOM已更新
     }
+  }
+  
+  // 处理图片上传
+  const handleImageUpload = (file: File) => {
+    if (!session?.user) return
+
+    uploadImage(file)
+    
+    // 确保上传后自动滚动到底部
+    setAutoScroll(true)
+    setTimeout(scrollToBottom, 100)
   }
   
   // 处理消息重发
@@ -115,7 +145,9 @@ export default function ChatPage() {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onSubmit={handleSendMessage}
+                onImageUpload={handleImageUpload}
                 isSending={isSending}
+                isUploading={isUploading}
               />
             </div>
           ) : (
