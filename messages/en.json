@@ -359,7 +359,12 @@
       },
       "errors": {
         "fetchFailed": "Failed to fetch messages",
-        "sendFailed": "Send failed"
+        "sendFailed": "Failed to send"
+      },
+      "image": {
+        "uploading": "📤 Uploading Image...",
+        "uploadFailed": "❌ Upload failed",
+        "uploadError": "Image upload failed, please try again"
       },
       "defaultUsername": "User",
       "emoji": {

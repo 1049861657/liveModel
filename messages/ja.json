@@ -361,6 +361,11 @@
         "fetchFailed": "メッセージの取得に失敗しました",
         "sendFailed": "送信に失敗しました"
       },
+      "image": {
+        "uploading": "📤 画像をアップロード中...",
+        "uploadFailed": "❌ アップロード失敗",
+        "uploadError": "画像のアップロードに失敗しました、再試行してください"
+      },
       "defaultUsername": "ユーザー",
       "emoji": {
         "categories": {

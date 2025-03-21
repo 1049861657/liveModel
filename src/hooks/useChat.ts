@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import chatService, { type ChatMessage } from '@/services/ChatService';
+import { useTranslations } from 'next-intl';
 
 // 消息查询键
 const MESSAGES_QUERY_KEY = 'chat-messages';
@@ -11,6 +12,7 @@ const MESSAGES_QUERY_KEY = 'chat-messages';
  */
 export function useChatMessages() {
   const queryClient = useQueryClient();
+  const t = useTranslations('ChatPage');
   
   // 获取消息
   const { data: messages = [], isLoading, error: _error } = useQuery({
@@ -60,9 +62,9 @@ export function useChatMessages() {
               : msg
           );
         });
-        toast.error('重发消息失败，请稍后再试');
+        toast.error(t('errors.sendFailed'));
       });
-  }, [queryClient]);
+  }, [queryClient, t]);
   
   return {
     messages,
@@ -77,6 +79,7 @@ export function useChatMessages() {
  */
 export function useSendMessage(user: any) {
   const queryClient = useQueryClient();
+  const t = useTranslations('ChatPage');
   
   const { mutate: sendMessage, isPending: isSending } = useMutation({
     mutationFn: (content: string) => chatService.sendMessage(content),
@@ -120,7 +123,7 @@ export function useSendMessage(user: any) {
       );
       
       // 显示错误提示
-      toast.error('发送失败，请重试');
+      toast.error(t('errors.sendFailed'));
     },
     // 我们不需要onSuccess处理器，因为消息会通过WebSocket返回
   });
@@ -133,10 +136,11 @@ export function useSendMessage(user: any) {
  */
 export function useUploadImage(user: any) {
   const queryClient = useQueryClient();
+  const t = useTranslations('ChatPage');
   
   const { mutate: uploadImage, isPending: isUploading } = useMutation({
     mutationFn: (file: File) => chatService.uploadChatImage(file),
-    onMutate: async (_) => {
+    onMutate: async (file) => {
       // 取消任何传出的重新获取
       await queryClient.cancelQueries({ queryKey: [MESSAGES_QUERY_KEY] });
       
@@ -145,7 +149,7 @@ export function useUploadImage(user: any) {
       // 创建临时图片消息
       const tempMessage: ChatMessage = {
         id: `temp-${Date.now()}`,
-        content: '📤 Uploading Image...',
+        content: t('image.uploading'),
         type: 'text', // 先作为文本消息，成功后会替换为图片
         createdAt: new Date(),
         user: {
@@ -155,7 +159,8 @@ export function useUploadImage(user: any) {
           avatar: user.avatar
         },
         isLoading: true,
-        isFailed: false
+        isFailed: false,
+        originalFile: file // 保存原始文件引用
       };
       
       // 乐观更新
@@ -163,19 +168,25 @@ export function useUploadImage(user: any) {
       
       return { tempMessage };
     },
-    onError: (_error, _file, context) => {
+    onError: (_error, file, context) => {
       if (!context?.tempMessage) return;
       
-      // 更新为失败状态
+      // 更新为失败状态，保留原始文件引用以便重试
       queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], (old = []) => 
         old?.map(message => 
           message.id === context.tempMessage.id
-            ? { ...message, content: '❌ Upload failed', isLoading: false, isFailed: true }
+            ? { 
+                ...message, 
+                content: t('image.uploadFailed'), 
+                isLoading: false, 
+                isFailed: true,
+                originalFile: file // 保留原始文件引用
+              }
             : message
         ) || []
       );
       
-      toast.error('图片上传失败，请重试');
+      toast.error(t('image.uploadError'));
     },
     onSuccess: (_data, _file, context) => {
       if (!context?.tempMessage) return;

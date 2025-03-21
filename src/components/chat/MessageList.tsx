@@ -28,6 +28,7 @@ interface MessageListProps {
   onScroll: () => void;
   isLoading?: boolean;
   onResend?: (messageId: string, content: string) => void;
+  onRetryUpload?: (messageId: string, file: File) => void;
 }
 
 // 渲染消息内容，解析梗图标记
@@ -160,7 +161,8 @@ export function MessageList({
   messagesEndRef,
   onScroll,
   isLoading = false,
-  onResend
+  onResend,
+  onRetryUpload
 }: MessageListProps) {
   const t = useTranslations('ChatPage');
 
@@ -230,14 +232,27 @@ export function MessageList({
                         </div>
                       )}
                       
-                      {/* 重发按钮 - 仅对当前用户的失败消息显示 */}
-                      {message.user.id === currentUserId && message.isFailed && (
+                      {/* 重发按钮 - 仅对当前用户的失败消息显示，且不是图片上传失败的消息 */}
+                      {message.user.id === currentUserId && message.isFailed && !message.originalFile && (
                         <button 
                           onClick={() => onResend?.(message.id, message.content)}
                           className="flex-shrink-0 w-5 h-5 bg-red-500/80 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
                             <path fillRule="evenodd" d="M10 4.5c1.215 0 2.417.055 3.604.162a.68.68 0 01.615.597c.124 1.038.208 2.088.25 3.15l-1.689-1.69a.75.75 0 00-1.06 1.061l2.999 3a.75.75 0 001.06 0l3.001-3a.75.75 0 10-1.06-1.06l-1.748 1.747a41.31 41.31 0 00-.258-3.386 2.18 2.18 0 00-1.97-1.913A41.512 41.512 0 0010 3a.75.75 0 000 1.5zm-4.5 9.5a3 3 0 100-6 3 3 0 000 6zm9 0a3 3 0 100-6 3 3 0 000 6zm-9 1.5a4.5 4.5 0 110-9 4.5 4.5 0 010 9zm9 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      )}
+                      
+                      {/* 图片重新上传按钮 - 仅对当前用户的图片上传失败消息显示 */}
+                      {message.user.id === currentUserId && message.isFailed && message.originalFile && (
+                        <button 
+                          onClick={() => onRetryUpload?.(message.id, message.originalFile)}
+                          className="flex-shrink-0 w-5 h-5 bg-red-500/80 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                            <path d="M9.25 13.25a.75.75 0 001.5 0V4.636l2.955 3.129a.75.75 0 001.09-1.03l-4.25-4.5a.75.75 0 00-1.09 0l-4.25 4.5a.75.75 0 101.09 1.03L9.25 4.636v8.614z" />
+                            <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
                           </svg>
                         </button>
                       )}

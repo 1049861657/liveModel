@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { motion } from 'motion/react'
+import { useQueryClient } from '@tanstack/react-query'
 
 // 自定义hooks
 import { useChatMessages, useSendMessage, useChatConnection, useMessageGroups, useUploadImage } from '@/hooks/useChat'
 import { useScrollManagement } from '@/hooks/useScrollManagement'
+import type { ChatMessage } from '@/services/ChatService'
 
 // 组件
 import { MessageList } from '@/components/chat/MessageList'
@@ -15,8 +17,12 @@ import { ChatHeader } from '@/components/chat/ChatHeader'
 import { WelcomeMessage } from '@/components/chat/WelcomeMessage'
 import { LoginPrompt } from '@/components/chat/LoginPrompt'
 
+// 消息查询键，从useChat.ts导入常量
+const MESSAGES_QUERY_KEY = 'chat-messages'
+
 export default function ChatPage() {
   const { data: session } = useSession()
+  const queryClient = useQueryClient()
   const [showWelcome, setShowWelcome] = useState(true)
   const [newMessage, setNewMessage] = useState('')
   
@@ -90,6 +96,23 @@ export default function ChatPage() {
     setTimeout(scrollToBottom, 100)
   }
   
+  // 处理图片重新上传
+  const handleRetryImageUpload = (messageId: string, file: File) => {
+    if (!session?.user) return
+    
+    // 先移除旧的失败消息
+    queryClient.setQueryData<ChatMessage[]>([MESSAGES_QUERY_KEY], 
+      (messages = []) => messages.filter(msg => msg.id !== messageId)
+    )
+    
+    // 重新上传图片
+    uploadImage(file)
+    
+    // 确保上传后自动滚动到底部
+    setAutoScroll(true)
+    setTimeout(scrollToBottom, 100)
+  }
+  
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
       {/* 背景装饰 */}
@@ -138,6 +161,7 @@ export default function ChatPage() {
                 onScroll={checkShouldAutoScroll}
                 isLoading={messagesLoading}
                 onResend={handleResendMessage}
+                onRetryUpload={handleRetryImageUpload}
               />
 
               {/* 输入框 */}

@@ -18,6 +18,7 @@ export interface ChatMessage {
   user: ChatUser;
   isLoading?: boolean;
   isFailed?: boolean;
+  originalFile?: any; // 用于存储原始文件引用，便于重新上传
 }
 
 type MessageCallback = (message: ChatMessage) => void;
@@ -307,7 +308,6 @@ class ChatService {
       return savedMessage;
     } catch (error) {
       console.error('[ChatService] 发送消息失败:', error);
-      toast.error('发送消息失败，请稍后再试');
       throw error;
     }
   }
@@ -382,7 +382,6 @@ class ChatService {
       return savedMessage;
     } catch (error) {
       console.error('[ChatService] 发送图片消息失败:', error);
-      toast.error('图片发送失败，请稍后再试');
       throw error;
     }
   }

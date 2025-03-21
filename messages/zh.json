@@ -361,6 +361,11 @@
         "fetchFailed": "获取消息失败",
         "sendFailed": "发送失败"
       },
+      "image": {
+        "uploading": "📤 正在上传图片...",
+        "uploadFailed": "❌ 图片上传失败",
+        "uploadError": "图片上传失败，请重试"
+      },
       "defaultUsername": "用户",
       "emoji": {
         "categories": {
