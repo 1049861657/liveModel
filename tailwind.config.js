@@ -13,6 +13,9 @@ module.exports = {
       animation: {
         'gradient-x': 'gradient-x 15s ease infinite',
         'blob': "blob 7s infinite",
+        'fadeIn': 'fadeIn 0.2s ease-out forwards',
+        'spin-slow': 'spin-slow 8s linear infinite',
+        'spin-slow-reverse': 'spin-slow-reverse 12s linear infinite'
       },
       keyframes: {
         'gradient-x': {
@@ -39,6 +42,22 @@ module.exports = {
             transform: "translate(0px, 0px) scale(1)",
           },
         },
+        'fadeIn': {
+          'from': {
+            opacity: '0',
+            transform: 'translateY(5px)'
+          },
+          'to': {
+            opacity: '1',
+            transform: 'translateY(0)'
+          }
+        },
+        'spin-slow': {
+          'to': { transform: 'rotate(360deg)' }
+        },
+        'spin-slow-reverse': {
+          'to': { transform: 'rotate(-360deg)' }
+        }
       },
     },
   },

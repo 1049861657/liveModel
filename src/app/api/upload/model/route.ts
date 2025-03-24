@@ -114,7 +114,7 @@ async function handleTextureUpload(
   textureFiles: UploadedFile[],
   context: UploadContext
 ): Promise<TextureInfo[]> {
-  const texturePromises = textureFiles.map(async (file) => {
+  const uploadPromises = textureFiles.map(async (file) => {
     const timestamp = Date.now()
     const filename = `${timestamp}_${file.originalName}`
     const ossPath = `${CONFIG.STORAGE_BASE_PATH}/${context.format.slice(1)}/${context.componentName}/textures/${filename}`
@@ -132,7 +132,7 @@ async function handleTextureUpload(
     }
   })
 
-  return Promise.all(texturePromises)
+  return Promise.all(uploadPromises)
 }
 
 // 处理 GLTF 相关文件上传
@@ -141,23 +141,23 @@ async function handleGltfFilesUpload(
   context: UploadContext,
   mainFileName: string
 ): Promise<void> {
-  for (const file of gltfFiles) {
-    if (file.originalName.toLowerCase() === mainFileName.toLowerCase()) {
-      continue
-    }
+  const uploadPromises = gltfFiles
+    .filter(file => file.originalName.toLowerCase() !== mainFileName.toLowerCase())
+    .map(async (file) => {
+      const pathParts = file.originalName.split(/[\/\\]/)
+      pathParts.shift()
+      const targetPath = pathParts.join('/')
+      const ossPath = `${CONFIG.STORAGE_BASE_PATH}/gltf/${context.componentName}/${targetPath}`
 
-    const pathParts = file.originalName.split(/[\/\\]/)
-    pathParts.shift()
-    const targetPath = pathParts.join('/')
-    const ossPath = `${CONFIG.STORAGE_BASE_PATH}/gltf/${context.componentName}/${targetPath}`
+      try {
+        return await storageClient.put(ossPath, file.buffer)
+      } catch (error) {
+        console.error('上传 GLTF 相关文件失败:', error)
+        throw new UploadError('上传 GLTF 相关文件失败', 500)
+      }
+    });
 
-    try {
-      await storageClient.put(ossPath, file.buffer)
-    } catch (error) {
-      console.error('上传 GLTF 相关文件失败:', error)
-      throw new UploadError('上传 GLTF 相关文件失败', 500)
-    }
-  }
+  await Promise.all(uploadPromises)
 }
 
 // 清理已上传的文件
@@ -168,19 +168,26 @@ async function cleanupUploadedFiles(
   context: UploadContext
 ) {
   try {
-    await storageClient.delete(modelPath)
+    const deletePromises: Promise<any>[] = []
 
+    // 删除主模型文件
+    deletePromises.push(storageClient.delete(modelPath))
+
+    // 删除GLTF相关文件
     if (context.format === '.gltf') {
-      for (const file of gltfFiles) {
+      gltfFiles.forEach(file => {
         const filePath = `${CONFIG.STORAGE_BASE_PATH}/gltf/${context.componentName}/${file.originalName}`
-        await storageClient.delete(filePath)
-      }
+        deletePromises.push(storageClient.delete(filePath))
+      })
     }
 
-    for (const texture of textures) {
+    // 删除贴图文件
+    textures.forEach(texture => {
       const texturePath = new URL(texture.filePath).pathname
-      await storageClient.delete(texturePath.slice(1))
-    }
+      deletePromises.push(storageClient.delete(texturePath.slice(1)))
+    })
+
+    await Promise.all(deletePromises)
   } catch (error) {
     console.error('清理文件失败:', error)
   }
@@ -228,12 +235,18 @@ export async function POST(request: Request) {
       userId: session.user.id
     }
 
-    // 上传模型文件
-    const modelUrl = await handleModelUpload(uploadedFile, context)
-    modelPath = new URL(modelUrl).pathname.slice(1)
-
-    // 收集并处理贴图文件
+    // 收集并处理贴图文件或GLTF相关文件
     const textureFiles: UploadedFile[] = []
+    const uploadPromises: Promise<any>[] = []
+    
+    // 上传模型文件的Promise
+    const modelUploadPromise = handleModelUpload(uploadedFile, context).then(modelUrl => {
+      modelPath = new URL(modelUrl).pathname.slice(1)
+      return modelUrl
+    })
+    uploadPromises.push(modelUploadPromise)
+
+    // 处理贴图文件
     if (format !== '.gltf') {
       for (const [key, value] of formData.entries()) {
         if (key.startsWith('texture_') && value instanceof Blob) {
@@ -244,7 +257,13 @@ export async function POST(request: Request) {
           })
         }
       }
-      uploadedTextures = await handleTextureUpload(textureFiles, context)
+      if (textureFiles.length > 0) {
+        const texturesPromise = handleTextureUpload(textureFiles, context).then(textures => {
+          uploadedTextures = textures
+          return textures
+        })
+        uploadPromises.push(texturesPromise)
+      }
     }
 
     // 处理 GLTF 相关文件
@@ -258,8 +277,16 @@ export async function POST(request: Request) {
           })
         }
       }
-      await handleGltfFilesUpload(gltfFiles, context, uploadedFile.originalName)
+      if (gltfFiles.length > 0) {
+        const gltfUploadPromise = handleGltfFilesUpload(gltfFiles, context, uploadedFile.originalName)
+        uploadPromises.push(gltfUploadPromise)
+      }
     }
+
+    // 等待所有上传完成
+    await Promise.all(uploadPromises)
+
+    const modelUrl = await modelUploadPromise
 
     // 如果是 DAE 文件且有贴图，更新贴图引用
     if (format === '.dae' && uploadedTextures.length > 0) {

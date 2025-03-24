@@ -24,7 +24,7 @@ export default function Home() {
                   {t('title')}
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 max-w-5xl mx-auto leading-relaxed overflow-hidden">
+              <p className="text-xl text-gray-600 max-w-5xl mx-auto leading-relaxed overflow-hidden text-balance content-visibility-auto">
                 {t('description')}
               </p>
               <div className="flex justify-center gap-4 mb-16 mt-12">
@@ -44,15 +44,15 @@ export default function Home() {
 
               {/* Stats Section */}
               <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
-                <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100/30">
+                <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-indigo-100/30">
                   <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-600 mb-2">10+</div>
                   <div className="text-gray-600">{t('stats.models')}</div>
                 </div>
-                <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100/30">
+                <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-indigo-100/30">
                   <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-600 mb-2">1+</div>
                   <div className="text-gray-600">{t('stats.users')}</div>
                 </div>
-                <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100/30">
+                <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-indigo-100/30">
                   <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-600 mb-2">99.9%</div>
                   <div className="text-gray-600">{t('stats.uptime')}</div>
                 </div>
@@ -71,8 +71,8 @@ export default function Home() {
               <p className="text-gray-600 mt-4">{t('features.subtitle')}</p>
             </div>
             <div className="grid md:grid-cols-3 gap-12">
-              <div className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100/30 hover:scale-105">
-                <div className="bg-gradient-to-br from-indigo-100 to-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-indigo-100/30 group">
+                <div className="bg-gradient-to-br from-indigo-100 to-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:scale-105 transition-transform duration-300 will-change-transform">
                   <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
@@ -80,8 +80,8 @@ export default function Home() {
                 <h3 className="text-xl font-semibold mb-4 text-center text-gray-800">{t('features.preview.title')}</h3>
                 <p className="text-gray-600 text-center">{t('features.preview.description')}</p>
               </div>
-              <div className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100/30 hover:scale-105">
-                <div className="bg-gradient-to-br from-indigo-100 to-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-indigo-100/30 group">
+                <div className="bg-gradient-to-br from-indigo-100 to-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:scale-105 transition-transform duration-300 will-change-transform">
                   <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
@@ -89,8 +89,8 @@ export default function Home() {
                 <h3 className="text-xl font-semibold mb-4 text-center text-gray-800">{t('features.upload.title')}</h3>
                 <p className="text-gray-600 text-center">{t('features.upload.description')}</p>
               </div>
-              <div className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100/30 hover:scale-105">
-                <div className="bg-gradient-to-br from-indigo-100 to-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <div className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-indigo-100/30 group">
+                <div className="bg-gradient-to-br from-indigo-100 to-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:scale-105 transition-transform duration-300 will-change-transform">
                   <svg className="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>

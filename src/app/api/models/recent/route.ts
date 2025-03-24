@@ -20,18 +20,47 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc'
       },
-      select: {
-        id: true,
-        name: true,
-        isPublic: true,
-        createdAt: true,
-        filePath: true,
-        format: true,
-        userId: true
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: {
+              select: {
+                url: true
+              }
+            }
+          }
+        },
+        _count: {
+          select: {
+            favorites: true,
+            reviews: true
+          }
+        },
+        favorites: {
+          where: { userId: session.user.id },
+          select: { id: true }
+        }
       }
     })
 
-    return NextResponse.json(recentModels)
+    // 处理返回的模型数据
+    const processedModels = recentModels.map(model => {
+      // 解构避免返回不必要的favorites数组
+      const { favorites, ...rest } = model;
+      return {
+        ...rest,
+        isFavorited: favorites?.length > 0,
+        _count: {
+          favorites: model._count?.favorites || 0,
+          reviews: model._count?.reviews || 0
+        }
+      }
+    })
+
+    return NextResponse.json(processedModels)
   } catch (error) {
     console.error('获取最近上传失败:', error)
     return NextResponse.json(

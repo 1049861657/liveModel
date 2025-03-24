@@ -68,9 +68,25 @@ export function formatLocalTime(utcDate: Date): string {
  */
 export function formatMessageTime(utcDate: Date): string {
   const now = new Date()
-  const diffDays = Math.floor(
-    (now.getTime() - utcDate.getTime()) / (1000 * 60 * 60 * 24)
-  )
+  
+  // 获取本地化时区的日期部分，用于判断是否同一天
+  const nowLocal = new Date(now.toLocaleString('en-US', { timeZone: getTimeZone() }))
+  const dateLocal = new Date(utcDate.toLocaleString('en-US', { timeZone: getTimeZone() }))
+  
+  const isToday = 
+    nowLocal.getFullYear() === dateLocal.getFullYear() &&
+    nowLocal.getMonth() === dateLocal.getMonth() &&
+    nowLocal.getDate() === dateLocal.getDate()
+    
+  const isYesterday = 
+    nowLocal.getFullYear() === dateLocal.getFullYear() &&
+    nowLocal.getMonth() === dateLocal.getMonth() &&
+    nowLocal.getDate() === dateLocal.getDate() + 1
+    
+  const isDayBeforeYesterday = 
+    nowLocal.getFullYear() === dateLocal.getFullYear() &&
+    nowLocal.getMonth() === dateLocal.getMonth() &&
+    nowLocal.getDate() === dateLocal.getDate() + 2
   
   const timeStr = new Intl.DateTimeFormat(undefined, {
     hour: '2-digit',
@@ -84,11 +100,11 @@ export function formatMessageTime(utcDate: Date): string {
     numeric: 'auto'
   })
 
-  if (diffDays === 0) {
+  if (isToday) {
     return timeStr
-  } else if (diffDays === 1) {
+  } else if (isYesterday) {
     return `${relativeTimeFormat.format(-1, 'day')} ${timeStr}`
-  } else if (diffDays === 2) {
+  } else if (isDayBeforeYesterday) {
     return `${relativeTimeFormat.format(-2, 'day')} ${timeStr}`
   } else {
     return new Intl.DateTimeFormat(undefined, {
